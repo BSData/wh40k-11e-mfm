@@ -1,0 +1,338 @@
+name: Drukhari
+slug: drukhari
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Covenite Coterie
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Master Artisan, points: 20 }
+      - { name: Master Nemesine, points: 5 }
+      - { name: Master Regenesist, points: 25 }
+      - { name: Master Repugnomancer, points: 15 }
+  - name: Exhibition Of Slaughter
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Hyperstimm Trafficker, points: 20 }
+      - { name: Periapt of Torments, points: 20 }
+  - name: Kabalite Agonysts
+    dp: 1
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Contempt for Rivals, points: 20 }
+      - { name: Towering Arrogance, points: 15 }
+  - name: Kabalite Cartel
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Informant Network, points: 30 }
+      - { name: Leechbite Plate, points: 5 }
+      - { name: Towering Arrogance, points: 20 }
+      - { name: Webway Awl, points: 25 }
+  - name: Realspace Raiders
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Crucible of Malediction, points: 15 }
+      - { name: Dark Vitality, points: 20 }
+      - { name: Eye of Spite, points: 15 }
+      - { name: Labyrinthine Cunning, points: 25 }
+  - name: Reaper’S Wager
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Archraider, points: 15 }
+      - { name: Conductor of Torment, points: 20 }
+      - { name: Reaper’s Cowl, points: 25 }
+      - { name: Webway Walker, points: 15 }
+  - name: Skysplinter Assault
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Nightmare Shroud, points: 20 }
+      - { name: Phantasmal Smoke, points: 15 }
+      - { name: Sadistic Fulcrum, points: 15 }
+      - { name: Spiteful Raider, points: 10 }
+  - name: Spectacle Of Spite
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Chronoshard, points: 15 }
+      - { name: MORGHENNA’S CURSE, points: 20 }
+      - { name: Periapt of Torments, points: 25 }
+      - { name: Pharmacophex, points: 15 }
+  - name: Tools Of Torment
+    dp: 1
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Elixir of the Corpse Courts (Upgrade), points: 15 }
+      - { name: Gnarlskin Experimentor, points: 20 }
+units:
+  - name: Archon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Court Of The Archon
+      - Hand Of The Archon
+      - Incubi
+      - Kabalite Warriors
+  - name: Beastmaster
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 7, points: 135 }
+    legends: true
+  - name: Court Of The Archon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 4, points: 95 }
+    legends: true
+  - name: Cronos
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+          - { models: 2, points: 100 }
+  - name: Drazhar
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Incubi
+  - name: Grotesques
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 170 }
+    legends: true
+  - name: Haemonculus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Wracks
+  - name: Hand Of The Archon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 115 }
+  - name: Hellions
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 190 }
+  - name: Incubi
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 190 }
+  - name: Kabalite Warriors
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 110 }
+  - name: Lady Malys
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Hand Of The Archon
+      - Incubi
+      - Kabalite Warriors
+  - name: Lelith Hesperax
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Wyches
+  - name: Mandrakes
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 170 }
+  - name: Raider
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Ravager
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 100 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+    wargear:
+      - { item: Dark lance, points: 5 }
+  - name: Raven Strike Fighter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+    legends: true
+  - name: Razorwing Jetfighter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+  - name: Reaper
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    legends: true
+  - name: Reavers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 75 }
+          - { models: 6, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 85 }
+          - { models: 6, points: 160 }
+  - name: Scourges With Heavy Weapons
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 110 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 120 }
+    wargear:
+      - { item: Haywire blaster, points: 5 }
+      - { item: Dark lance, points: 5 }
+  - name: Scourges With Shardcarbines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 75 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+  - name: Succubus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Wyches
+  - name: Talos
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 75 }
+          - { models: 2, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+          - { models: 2, points: 160 }
+    wargear:
+      - { item: Twin haywire blaster, points: 5 }
+  - name: Tantalus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 230 }
+    legends: true
+  - name: Urien Rakarth
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Wracks
+    legends: true
+  - name: Venom
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Voidraven Bomber
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 245 }
+  - name: Wracks
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 60 }
+          - { models: 8, points: 100 }
+          - { models: 10, points: 120 }
+  - name: Wyches
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 90 }

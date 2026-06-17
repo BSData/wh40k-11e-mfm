@@ -1,0 +1,425 @@
+name: Death Guard
+slug: death-guard
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Champions Of Contagion
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Cornucophagus, points: 35 }
+      - { name: Final Ingredient, points: 20 }
+      - { name: Needle of Nurgle, points: 25 }
+      - { name: Visions of Virulence, points: 15 }
+  - name: Contagion Engines
+    dp: 1
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Lancet of the Worldsore (Upgrade), points: 15 }
+      - { name: Parasitic Woe‑reaper (Upgrade), points: 15 }
+  - name: Death Lord’S Chosen
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Face of Death, points: 10 }
+      - { name: Helm of The Fly King, points: 20 }
+      - { name: Vile Vigour, points: 15 }
+      - { name: Warprot Talisman, points: 30 }
+  - name: Flyblown Host
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Insectile Murmuration (Upgrade), points: 15 }
+      - { name: Plagueveil (Upgrade), points: 15 }
+  - name: Mortarion’S Hammer
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Bilemaw Blight, points: 10 }
+      - { name: Eye of Affliction, points: 20 }
+      - { name: Shriekworm Familiar, points: 15 }
+      - { name: Tendrilous Emissions, points: 30 }
+  - name: Paragons Of Putrescence
+    dp: 1
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Host of the Hybridised Pox, points: 40 }
+      - { name: Rejuvenating Swarm, points: 20 }
+  - name: Shamblerot Vectorium
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Lord of the Walking Pox, points: 15 }
+      - { name: Sorrowsyphon, points: 10 }
+      - { name: Talisman of Burgeoning, points: 25 }
+      - { name: Witherbone Pipes, points: 25 }
+  - name: Tallyband Summoners
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Beckoning Blight, points: 20 }
+      - { name: Entropic Knell, points: 15 }
+      - { name: Fell Harvester, points: 10 }
+      - { name: Tome of Bounteous Blessings, points: 20 }
+  - name: Virulent Vectorium
+    dp: 3
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Arch Contaminator, points: 25 }
+      - { name: Daemon Weapon of Nurgle, points: 10 }
+      - { name: Furnace of Plagues, points: 25 }
+      - { name: Revolting Regeneration, points: 30 }
+units:
+  - name: Beasts Of Nurgle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+          - { models: 2, points: 140 }
+  - name: Biologus Putrifier
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Plague Marines
+  - name: Blightlord Terminators
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 115 }
+          - { models: 5, points: 185 }
+          - { models: 10, points: 370 }
+  - name: Chaos Land Raider
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 220 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 240 }
+  - name: Chaos Predator Annihilator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 135 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 145 }
+  - name: Chaos Predator Destructor
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 145 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 155 }
+  - name: Chaos Rhino
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Chaos Spawn
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 80 }
+  - name: Daemon Prince Of Nurgle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 195 }
+  - name: Daemon Prince Of Nurgle With Wings
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+  - name: Death Guard Chaos Lord
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Plague Marines
+    legends: true
+  - name: Death Guard Chaos Lord In Terminator Armour
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Blightlord Terminators
+      - Deathshroud Terminators
+    legends: true
+  - name: Death Guard Cultists
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 50 }
+          - { models: 20, points: 100 }
+    legends: true
+  - name: Death Guard Possessed
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 155 }
+          - { models: 10, points: 310 }
+    legends: true
+  - name: Death Guard Sorcerer In Terminator Armour
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Blightlord Terminators
+      - Deathshroud Terminators
+    legends: true
+  - name: Deathshroud Terminators
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 160 }
+          - { models: 6, points: 320 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 170 }
+          - { models: 6, points: 330 }
+  - name: Defiler
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 290 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 320 }
+    wargear:
+      - { item: Heavy reaper autocannon, points: 10 }
+      - { item: Hades lascannon, points: 10 }
+  - name: Foetid Bloat-Drone
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 100 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+  - name: Foetid Bloat-Drone With Heavy Blight Launcher
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 125 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+  - name: Foul Blightspawn
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Plague Marines
+  - name: Great Unclean One
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 265 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 280 }
+  - name: Helbrute
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+  - name: Icon Bearer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    role: leader
+    attachTo:
+      - Plague Marines
+  - name: Lord Of Contagion
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+    role: leader
+    attachTo:
+      - Blightlord Terminators
+      - Deathshroud Terminators
+  - name: Lord Of Poxes
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Plague Marines
+  - name: Lord Of Virulence
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Blightlord Terminators
+      - Deathshroud Terminators
+  - name: Malignant Plaguecaster
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Plague Marines
+      - Poxwalkers
+  - name: Miasmic Malignifier
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+  - name: Mortarion
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 400 }
+  - name: Myphitic Blight-Haulers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+          - { models: 2, points: 200 }
+  - name: Noxious Blightbringer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Plague Marines
+      - Poxwalkers
+  - name: Nurglings
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 45 }
+          - { models: 6, points: 90 }
+  - name: Plague Drones
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 110 }
+          - { models: 6, points: 220 }
+  - name: Plague Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 7, points: 125 }
+          - { models: 10, points: 190 }
+  - name: Plague Surgeon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Plague Marines
+  - name: Plaguebearers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 115 }
+  - name: Plagueburst Crawler
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 185 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 210 }
+  - name: Poxwalkers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 65 }
+          - { models: 20, points: 130 }
+  - name: Rotigus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 280 }
+  - name: Tallyman
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Plague Marines
+  - name: Typhus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Blightlord Terminators
+      - Deathshroud Terminators
+      - Poxwalkers

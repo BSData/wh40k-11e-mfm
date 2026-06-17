@@ -1,0 +1,550 @@
+name: Tyranids
+slug: tyranids
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Ambush Predators
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Cryptophotaic Camouflage (Upgrade), points: 15 }
+      - { name: Encircling Horrors (Upgrade), points: 20 }
+  - name: Assimilation Swarm
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Biophagic Flow, points: 10 }
+      - { name: Instinctive Defence, points: 15 }
+      - { name: Parasitic Biomorphology, points: 25 }
+      - { name: Regenerating Monstrosity, points: 20 }
+  - name: Crusher Stampede
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Enraged Reserves, points: 20 }
+      - { name: Monstrous Nemesis, points: 25 }
+      - { name: Null Nodules, points: 10 }
+      - { name: Ominous Presence, points: 15 }
+  - name: Invasion Fleet
+    dp: 3
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Adaptive Biology, points: 25 }
+      - { name: Alien Cunning, points: 30 }
+      - { name: Perfectly Adapted, points: 15 }
+      - { name: Synaptic Linchpin, points: 20 }
+  - name: Subterranean Assault
+    dp: 3
+    objective: DISRUPTION
+    enhancements:
+      - { name: Synaptic Strategy, points: 15 }
+      - { name: Tremor Senses, points: 20 }
+      - { name: Trygon Prime, points: 20 }
+      - { name: Vanguard Intellect, points: 15 }
+  - name: Synaptic Nexus
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Power of the Hive Mind, points: 10 }
+      - { name: Psychostatic Disruption, points: 30 }
+      - { name: Synaptic Control, points: 20 }
+      - { name: The Dirgeheart of Kharis, points: 15 }
+  - name: Talons Of The Norn Queen
+    dp: 1
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Destabilising Predation (Upgrade), points: 20 }
+      - { name: Synaptoprescience (Upgrade), points: 25 }
+  - name: Unending Swarm
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Adrenalised Onslaught, points: 15 }
+      - { name: Naturalised Camouflage, points: 30 }
+      - { name: Piercing Talons, points: 25 }
+      - { name: Relentless Hunger, points: 20 }
+  - name: Vanguard Onslaught
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Chameleonic, points: 15 }
+      - { name: Hunting Grounds, points: 20 }
+      - { name: Neuronode, points: 20 }
+      - { name: Stalker, points: 10 }
+  - name: Warrior Bioform Onslaught
+    dp: 1
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Elevated Might, points: 30 }
+      - { name: Ocular Adaptation, points: 20 }
+units:
+  - name: Barbed Hierodule
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 340 }
+    legends: true
+  - name: Barbgaunts
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 55 }
+          - { models: 10, points: 110 }
+  - name: Biovores
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+          - { models: 2, points: 100 }
+          - { models: 3, points: 140 }
+  - name: Broodlord
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Genestealers
+  - name: Carnifexes
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+          - { models: 2, points: 180 }
+  - name: Deathleaper
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+  - name: Dimachaeron
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 200 }
+    legends: true
+  - name: Exocrine
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Gargoyles
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 80 }
+          - { models: 20, points: 155 }
+  - name: Genestealers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 150 }
+  - name: Harpy
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 185 }
+  - name: Harridan
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 610 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 660 }
+  - name: Haruspex
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 125 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+  - name: Hierophant
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 810 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 910 }
+  - name: Hive Crone
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+  - name: Hive Guard
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 170 }
+  - name: Hive Tyrant
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 195 }
+    role: leader
+    attachTo:
+      - Tyrant Guard
+  - name: Hormagaunts
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 70 }
+          - { models: 20, points: 120 }
+  - name: Hyperadapted Raveners
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 165 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 175 }
+    role: leader
+    attachTo:
+      - Raveners
+  - name: Lictor
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+  - name: Malanthrope
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Venomthropes
+    legends: true
+  - name: Maleceptor
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 190 }
+  - name: Mawloc
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+  - name: Mucolid Spores
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 30 }
+          - { models: 2, points: 60 }
+  - name: Neurogaunts
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 45 }
+          - { models: 22, points: 90 }
+  - name: Neurolictor
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 80 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+  - name: Neurotyrant
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    role: leader
+    attachTo:
+      - Neurogaunts
+      - Tyrant Guard
+      - Zoanthropes
+  - name: Norn Assimilator
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 250 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 270 }
+  - name: Norn Emissary
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 250 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 270 }
+  - name: Old One Eye
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+    role: leader
+    attachTo:
+      - Carnifexes
+  - name: Parasite Of Mortrex
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Psychophage
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+  - name: Pyrovores
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 45 }
+          - { models: 2, points: 65 }
+          - { models: 3, points: 95 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+          - { models: 2, points: 75 }
+          - { models: 3, points: 105 }
+  - name: Raveners
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 125 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 135 }
+  - name: Ripper Swarms
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 30 }
+          - { models: 2, points: 40 }
+          - { models: 3, points: 50 }
+  - name: Screamer-Killer
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 125 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+  - name: Scythed Hierodule
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 330 }
+    legends: true
+  - name: Sky-Slasher Swarms
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 60 }
+    legends: true
+  - name: Spore Mines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 55 }
+          - { models: 6, points: 110 }
+  - name: Sporocyst
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 145 }
+  - name: Termagants
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 60 }
+          - { models: 20, points: 110 }
+  - name: Tervigon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: The Red Terror
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+  - name: The Swarmlord
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 210 }
+    role: leader
+    attachTo:
+      - Tyrant Guard
+  - name: Toxicrene
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+  - name: Trygon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+  - name: Tyranid Prime With Lash Whip
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Hormagaunts
+      - Termagants
+      - Tyranid Warriors With Melee Bio-Weapons
+      - Tyranid Warriors With Ranged Bio-Weapons
+  - name: Tyranid Warriors With Melee Bio-Weapons
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 75 }
+          - { models: 6, points: 150 }
+  - name: Tyranid Warriors With Ranged Bio-Weapons
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 60 }
+          - { models: 6, points: 120 }
+  - name: Tyrannocyte
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+  - name: Tyrannofex
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 190 }
+    wargear:
+      - { item: Acid spray, points: 10 }
+      - { item: Rupture cannon, points: 20 }
+  - name: Tyrant Guard
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 160 }
+  - name: Venomthropes
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 55 }
+          - { models: 6, points: 110 }
+  - name: Von Ryan’S Leapers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 60 }
+          - { models: 6, points: 120 }
+  - name: Winged Hive Tyrant
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 185 }
+  - name: Winged Tyranid Prime
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Gargoyles
+      - Tyranid Warriors With Melee Bio-Weapons
+      - Tyranid Warriors With Ranged Bio-Weapons
+  - name: Zoanthropes
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 100 }
+          - { models: 6, points: 200 }

@@ -1,0 +1,273 @@
+name: Leagues of Votann
+slug: leagues-of-votann
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Armoured Trailblazers
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Optimised Attack Lines (Upgrade), points: 15 }
+      - { name: Saturation Rounds (Upgrade), points: 10 }
+  - name: Brandfast Oathband
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Precursive Judgement, points: 15 }
+      - { name: Signature Restoration, points: 5 }
+      - { name: Tactical Alchemy, points: 10 }
+      - { name: Trivärg Cyber Implant, points: 40 }
+  - name: Dêlve Assault Shift
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Dêlvewerke Navigator, points: 25 }
+      - { name: Multiwave System Jammer, points: 10 }
+      - { name: Piledriver, points: 15 }
+      - { name: Quake Supervisor, points: 20 }
+  - name: Farseekers
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Pan-spectral Lockons (Upgrade), points: 10 }
+      - { name: Shroudwërke Talismans (Upgrade), points: 15 }
+  - name: Hearthband
+    dp: 3
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Bastion Shield, points: 25 }
+      - { name: High Kâhl, points: 30 }
+      - { name: Ironskein, points: 10 }
+      - { name: Quake Multigenerator, points: 15 }
+  - name: Hearthfyre Arsenal
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Calculated Tenacity, points: 15 }
+      - { name: Fârstrydr Node, points: 20 }
+      - { name: Graviton Vault, points: 5 }
+      - { name: Mantle of Elders, points: 10 }
+  - name: Hearthguard Covenant
+    dp: 1
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: High Kâhl, points: 30 }
+      - { name: Ironskein, points: 10 }
+  - name: Mercenary Oathband
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Asset Manipulator, points: 25 }
+      - { name: Etacarn SB9 Targeting Implant, points: 15 }
+      - { name: Mercenary Prospector, points: 20 }
+      - { name: Metaphysical Brokerage, points: 20 }
+  - name: Needgaârd Oathband
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Ancestral Crest, points: 15 }
+      - { name: Dead Reckoning, points: 10 }
+      - { name: Iron Ambassador, points: 5 }
+      - { name: Oathbound Speculator, points: 30 }
+  - name: Persecution Prospect
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Eye for Weakness, points: 25 }
+      - { name: Nomad Strategist, points: 20 }
+      - { name: Surgical Saboteur, points: 10 }
+      - { name: Writ of Acquisition, points: 10 }
+units:
+  - name: Arkanyst Evaluator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Berehk Stornbröw
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Cthonian Beserks
+  - name: Brôkhyr Iron-Master
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 75 }
+    role: leader
+    attachTo:
+      - Brôkhyr Thunderkyn
+      - Hearthkyn Warriors
+  - name: Brôkhyr Thunderkyn
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 170 }
+  - name: Buri Aegnirssen
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+  - name: Cthonian Beserks
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 200 }
+  - name: Cthonian Earthshakers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 110 }
+  - name: Einhyr Champion
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Einhyr Hearthguard
+  - name: Einhyr Hearthguard
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 130 }
+          - { models: 10, points: 270 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 140 }
+          - { models: 10, points: 280 }
+  - name: Grimnyr
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 65 }
+    role: leader
+    attachTo:
+      - Hearthkyn Warriors
+  - name: Hearthkyn Warriors
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 100 }
+  - name: Hekaton Land Fortress
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 250 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 265 }
+  - name: Hernkyn Pioneers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 170 }
+  - name: Hernkyn Yaegirs
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 90 }
+  - name: Ironkin Steeljacks With Heavy Volkanite Disintegrators
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 170 }
+  - name: Ironkin Steeljacks With Melee Weapons
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 170 }
+  - name: Kâhl
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Einhyr Hearthguard
+      - Hearthkyn Warriors
+  - name: Kapricus Carrier
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+  - name: Kapricus Defenders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+          - { models: 2, points: 130 }
+  - name: Memnyr Strategist
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    role: leader
+    attachTo:
+      - Ironkin Steeljacks With Heavy Volkanite Disintegrators
+      - Ironkin Steeljacks With Melee Weapons
+  - name: Sagitaur
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: ûthar The Destined
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Einhyr Hearthguard
+      - Hearthkyn Warriors

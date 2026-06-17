@@ -1,0 +1,249 @@
+name: Chaos Knights
+slug: chaos-knights
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Bastions Of Tyranny
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Hate-filled Dominion, points: 20 }
+      - { name: Pterrorshade Rookery, points: 20 }
+  - name: Helhunt Lance
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Aspect of the Beast, points: 30 }
+      - { name: Hunter’s Helm, points: 15 }
+      - { name: Octagram of Conjuration, points: 40 }
+      - { name: Throne Tyrannicus, points: 25 }
+  - name: Houndpack Lance
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Final Howl, points: 20 }
+      - { name: Loping Predator, points: 10 }
+      - { name: Panoply of the Cursed Knights, points: 15 }
+      - { name: Preyslayer’s Mantle, points: 15 }
+  - name: Hunting Warpack
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Snarling Rivalry (Upgrade), points: 10 }
+      - { name: Soul-spoor Auspicator (Upgrade), points: 15 }
+  - name: Iconoclast Fiefdom
+    dp: 1
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Cruel Lashmaster (Aura), points: 25 }
+      - { name: Iconoclast Idol (Aura), points: 20 }
+  - name: Infernal Lance
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Bestial Aspect, points: 30 }
+      - { name: Blasphemous Engine, points: 35 }
+      - { name: Fleshmetal Fusion, points: 35 }
+      - { name: Knight Diabolus, points: 25 }
+  - name: Lords Of Dread
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Blade of Celerity, points: 35 }
+      - { name: Blessing of the Dark Master, points: 20 }
+      - { name: Mirror of Fates, points: 30 }
+      - { name: Putrid Carapace, points: 30 }
+      - { name: Throne Mechanicum of Skulls, points: 25 }
+      - { name: Warp-borne Stalker, points: 25 }
+  - name: Traitoris Lance
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Malevolent Heraldry, points: 30 }
+      - { name: Nightmare’s Master, points: 20 }
+      - { name: Tyrant’s Shadow, points: 25 }
+      - { name: Veil of Medrengard, points: 35 }
+units:
+  - name: Chaos Acastus Knight Asterius
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 785 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 860 }
+  - name: Chaos Acastus Knight Porphyrion
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 725 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 800 }
+  - name: Chaos Cerastus Knight Acheron
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 370 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 385 }
+  - name: Chaos Cerastus Knight Atrapos
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 395 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+  - name: Chaos Cerastus Knight Castigator
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 370 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 385 }
+  - name: Chaos Cerastus Knight Lancer
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 395 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+  - name: Chaos Questoris Knight Magaera
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 375 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 390 }
+  - name: Chaos Questoris Knight Styrix
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 365 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 380 }
+  - name: Knight Abominant
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 355 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 370 }
+  - name: Knight Desecrator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 355 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 370 }
+  - name: Knight Despoiler
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 380 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 400 }
+    wargear:
+      - { item: Despoiler gatling cannon, points: 25 }
+      - { item: Despoiler battle cannon, points: 15 }
+  - name: Knight Rampager
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 365 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 380 }
+  - name: Knight Ruinator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 340 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 355 }
+  - name: Knight Tyrant
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 400 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 420 }
+  - name: War Dog Brigand
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+  - name: War Dog Executioner
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+  - name: War Dog Huntsman
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+  - name: War Dog Karnivore
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 155 }
+  - name: War Dog Moirax
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: War Dog Stalker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }

@@ -1,0 +1,1211 @@
+name: Astra Militarum
+slug: astra-militarum
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Abhuman Auxiliaries
+    dp: 1
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Exemplar of Duty (Upgrade), points: 10 }
+      - { name: Sharp Eyes (Upgrade), points: 10 }
+  - name: Armoured Infantry
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Exemplary Officer, points: 20 }
+      - { name: Grand Strategist, points: 25 }
+      - { name: Master Manoeuvrist, points: 15 }
+      - { name: Omnissian Unguents, points: 35 }
+  - name: Bridgehead Strike
+    dp: 1
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Bombast-class Vox-array, points: 15 }
+      - { name: Priority Drop Beacon, points: 25 }
+  - name: Combined Arms
+    dp: 3
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Death Mask of Ollanius, points: 10 }
+      - { name: Drill Commander, points: 20 }
+      - { name: Grand Strategist, points: 15 }
+      - { name: Reactive Command, points: 15 }
+  - name: Designation Force
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Long-range Scout (Upgrade), points: 10 }
+      - { name: Recon Star (Upgrade), points: 10 }
+  - name: Grizzled Company
+    dp: 3
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Abhuman Detail, points: 20 }
+      - { name: Aquilan Eye, points: 20 }
+      - { name: Laud Hailer, points: 10 }
+      - { name: Spec Ops Veteran, points: 15 }
+  - name: Hammer Of The Emperor
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Calm Under Fire, points: 15 }
+      - { name: Indomitable Steed, points: 15 }
+      - { name: Regimental Banner, points: 20 }
+      - { name: Veteran Crew, points: 20 }
+  - name: Mechanised Assault
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Bold Leadership, points: 25 }
+      - { name: Sacred Unguents, points: 10 }
+      - { name: Smoke Grenades, points: 10 }
+      - { name: Vanguard Honours, points: 15 }
+  - name: Recon Element
+    dp: 3
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Guerrilla Honours, points: 25 }
+      - { name: Scare Gas Grenades, points: 5 }
+      - { name: Survival Gear, points: 5 }
+      - { name: Tripwires, points: 20 }
+  - name: Siege Regiment
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Eager Advance, points: 20 }
+      - { name: Flash Grenades, points: 20 }
+      - { name: Legacy Sidearm, points: 10 }
+      - { name: Stalwart’s Honours, points: 15 }
+  - name: Steel Hammer
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Assault Hatches, points: 25 }
+      - { name: Battalion Commander, points: 30 }
+      - { name: Engine Speaker, points: 15 }
+      - { name: Titan Killer, points: 20 }
+units:
+  - name: ‘iron Hand’ Straken
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: leader
+    attachTo:
+      - Catachan Jungle Fighters
+    legends: true
+  - name: Aegis Defence Line
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 145 }
+  - name: Aquila Lander
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+    legends: true
+  - name: Arkurian Stormhammer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 480 }
+    legends: true
+  - name: Armageddon-Pattern Medusa
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+    legends: true
+  - name: Armoured Sentinels
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+          - { models: 2, points: 120 }
+  - name: Artillery Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+  - name: Arvus Lighter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    legends: true
+  - name: Atlas Recovery Vehicle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    legends: true
+  - name: Attilan Rough Riders
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 60 }
+          - { models: 10, points: 120 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 65 }
+          - { models: 10, points: 125 }
+  - name: Avenger Strike Fighter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+  - name: Baneblade
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 450 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 470 }
+  - name: Banehammer
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 420 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 440 }
+  - name: Banesword
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 450 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 470 }
+  - name: Basilisk
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+  - name: Bullgryn Squad
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 200 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 3, points: 105 }
+          - { models: 6, points: 215 }
+  - name: Cadian Castellan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: leader
+    attachTo:
+      - Cadian Shock Troops
+      - Kasrkin
+  - name: Cadian Command Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 65 }
+    role: leader
+    attachTo:
+      - Cadian Shock Troops
+  - name: Cadian Heavy Weapons Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 65 }
+  - name: Cadian Recon Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 80 }
+  - name: Cadian Shock Troops
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 75 }
+          - { models: 20, points: 145 }
+  - name: Carnodon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+    legends: true
+  - name: Catachan Command Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 60 }
+    role: leader
+    attachTo:
+      - Catachan Jungle Fighters
+  - name: Catachan Heavy Weapons Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 65 }
+  - name: Catachan Jungle Fighters
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 75 }
+          - { models: 20, points: 145 }
+  - name: Centaur Light Carrier
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    legends: true
+  - name: Centaur Rsv
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+  - name: Chimera
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Colossus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+    legends: true
+  - name: Commissar
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 30 }
+    role: leader
+    attachTo:
+      - Cadian Shock Troops
+      - Catachan Jungle Fighters
+      - Death Korps Grenadier Squad
+      - Death Korps Of Krieg
+      - Kasrkin
+      - Krieg Combat Engineers
+      - Tempestus Scions
+  - name: Commissar Graves
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+  - name: Commissar Graves On Foot
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Cadian Shock Troops
+      - Catachan Jungle Fighters
+      - Death Korps Grenadier Squad
+      - Death Korps Of Krieg
+      - Kasrkin
+      - Krieg Combat Engineers
+      - Tempestus Scions
+  - name: Commissar Yarrick
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+    role: leader
+    attachTo:
+      - Cadian Shock Troops
+      - Catachan Jungle Fighters
+      - Death Korps Grenadier Squad
+      - Death Korps Of Krieg
+      - Kasrkin
+      - Krieg Combat Engineers
+      - Tempestus Scions
+  - name: Crassus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+    legends: true
+  - name: Cyclops Demolition Vehicle
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 40 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+  - name: Death Korps Grenadier Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 110 }
+    legends: true
+  - name: Death Korps Of Krieg
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 75 }
+          - { models: 20, points: 145 }
+  - name: Death Rider Commissar
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 35 }
+    role: leader
+    attachTo:
+      - Death Riders
+    legends: true
+  - name: Death Riders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 60 }
+          - { models: 10, points: 110 }
+  - name: Deathstrike
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+  - name: Dominus Armoured Siege Bombard
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 325 }
+    legends: true
+  - name: Doomhammer
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 435 }
+  - name: Earthshaker Carriage Battery
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+    legends: true
+  - name: Earthshaker Platform
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+    legends: true
+  - name: Elysian Drop Sentinel
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    legends: true
+  - name: Elysian Sniper Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 65 }
+    legends: true
+  - name: Field Ordnance Battery
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 90 }
+    wargear:
+      - { item: Bombast field gun, points: 10 }
+  - name: Gaunt’S Ghosts
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 6, points: 95 }
+  - name: Gorgon Heavy Transport
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 275 }
+    legends: true
+  - name: Griffon Mortar Carrier
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    legends: true
+  - name: Hades Breaching Drill
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+    legends: true
+  - name: Heavy Mortar Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    legends: true
+  - name: Heavy Quad Launcher Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    legends: true
+  - name: Hell'S Last
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 80 }
+    role: leader
+    attachTo:
+      - Cadian Shock Troops
+    legends: true
+  - name: Hellhammer
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 420 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 440 }
+  - name: Hellhound
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 125 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+  - name: Hippogriff Afv
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+          - { models: 2, points: 140 }
+  - name: Hydra
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+  - name: Hydra Platform
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    legends: true
+  - name: Kasrkin
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 10, points: 115 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 10, points: 125 }
+  - name: Krieg Combat Engineers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 65 }
+          - { models: 10, points: 95 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 105 }
+  - name: Krieg Command Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 6, points: 65 }
+    role: leader
+    attachTo:
+      - Death Korps Grenadier Squad
+      - Death Korps Of Krieg
+      - Krieg Combat Engineers
+  - name: Krieg Heavy Weapons Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 4, points: 60 }
+    wargear:
+      - { item: Krieg heavy flamer, points: 5 }
+  - name: Leman Russ Battle Tank
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 185 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 195 }
+  - name: Leman Russ Commander
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 235 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 250 }
+  - name: Leman Russ Demolisher
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 190 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 200 }
+  - name: Leman Russ Eradicator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 170 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+  - name: Leman Russ Executioner
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 170 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+  - name: Leman Russ Exterminator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 190 }
+  - name: Leman Russ Punisher
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: Leman Russ Vanquisher
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: Lord Marshal Dreir
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Death Riders
+  - name: Lord Solar Leontus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+    role: leader
+    attachTo:
+      - Attilan Rough Riders
+      - Cadian Shock Troops
+      - Catachan Jungle Fighters
+      - Death Korps Grenadier Squad
+      - Death Korps Of Krieg
+      - Death Riders
+      - Kasrkin
+      - Krieg Combat Engineers
+  - name: Macharius
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 310 }
+    legends: true
+  - name: Macharius Omega
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 310 }
+    legends: true
+  - name: Macharius Vanquisher
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 285 }
+    legends: true
+  - name: Macharius Vulcan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 310 }
+    legends: true
+  - name: Malcador
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 250 }
+    legends: true
+  - name: Malcador Annihilator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 270 }
+    legends: true
+  - name: Malcador Defender
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 310 }
+    legends: true
+  - name: Malcador Infernus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 235 }
+    legends: true
+  - name: Manticore
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+  - name: Manticore Platform
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    legends: true
+  - name: Marauder Bomber
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 345 }
+    legends: true
+  - name: Marauder Destroyer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 375 }
+    legends: true
+  - name: Medusa Carriage Battery
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+    legends: true
+  - name: Militarum Tempestus Command Squad
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 5, points: 95 }
+    role: leader
+    attachTo:
+      - Tempestus Scions
+  - name: Ministorum Priest
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 35 }
+    role: leader
+    attachTo:
+      - Cadian Shock Troops
+      - Catachan Jungle Fighters
+      - Death Korps Grenadier Squad
+      - Death Korps Of Krieg
+      - Kasrkin
+      - Krieg Combat Engineers
+      - Tempestus Scions
+  - name: Minotaur
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 225 }
+    legends: true
+  - name: Mukaali Riders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 110 }
+    legends: true
+  - name: Munitorum Servitors
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 4, points: 35 }
+    legends: true
+  - name: Nork Deddog
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+  - name: Ogryn Bodyguard
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+  - name: Ogryn Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 60 }
+          - { models: 6, points: 120 }
+  - name: Praetor
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 275 }
+    legends: true
+  - name: Primaris Psyker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Cadian Shock Troops
+      - Catachan Jungle Fighters
+      - Death Korps Grenadier Squad
+      - Death Korps Of Krieg
+      - Kasrkin
+      - Krieg Combat Engineers
+      - Tempestus Scions
+  - name: Provisionally Prepared
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    role: leader
+    attachTo:
+      - Ratlings
+    legends: true
+  - name: Quartermaster Cadre Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 45 }
+    role: leader
+    attachTo:
+      - Death Korps Grenadier Squad
+      - Death Korps Of Krieg
+      - Krieg Combat Engineers
+    legends: true
+  - name: Rapier Laser Destroyer Battery
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 35 }
+          - { models: 2, points: 70 }
+          - { models: 3, points: 105 }
+    legends: true
+  - name: Ratlings
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 60 }
+          - { models: 10, points: 100 }
+  - name: Regimental Attachés
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 40 }
+    legends: true
+  - name: Rein And Raus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 50 }
+    legends: true
+  - name: Rogal Dorn Battle Tank
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 260 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 275 }
+  - name: Rogal Dorn Commander
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 290 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 305 }
+  - name: Sabre Weapons Battery
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+          - { models: 2, points: 90 }
+    legends: true
+  - name: Salamander Command Vehicle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    legends: true
+  - name: Salamander Scout Vehicle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    legends: true
+  - name: Scout Sentinels
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+          - { models: 2, points: 100 }
+  - name: Sentinel Powerlifter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    legends: true
+  - name: Sergeant Harker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    role: leader
+    attachTo:
+      - Catachan Jungle Fighters
+    legends: true
+  - name: Shadowsword
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 410 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 430 }
+  - name: Sly Marbo
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+  - name: Storm Chimera
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    legends: true
+  - name: Stormblade
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+    legends: true
+  - name: Stormlord
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 430 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 450 }
+  - name: Stormsword
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 465 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 485 }
+  - name: Stygies Destroyer Tank Hunter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+    legends: true
+  - name: Tarantula Battery
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+          - { models: 2, points: 80 }
+          - { models: 3, points: 120 }
+    legends: true
+  - name: Tauros Assault Vehicle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    legends: true
+  - name: Tauros Venator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    legends: true
+  - name: Taurox
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+  - name: Taurox Prime
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Tech-Priest Enginseer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    role: leader
+    attachTo:
+      - Cadian Shock Troops
+      - Catachan Jungle Fighters
+      - Death Korps Of Krieg
+      - Kasrkin
+      - Krieg Combat Engineers
+  - name: Tempestus Aquilons
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 100 }
+  - name: Tempestus Scions
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 155 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 165 }
+  - name: Trojan Support Vehicle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    legends: true
+  - name: Ursula Creed
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Cadian Shock Troops
+      - Kasrkin
+  - name: Valdor
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 285 }
+    legends: true
+  - name: Valkyrie
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 170 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+  - name: Valkyrie Sky Talon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 185 }
+    legends: true
+  - name: Vendetta Gunship
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 255 }
+    legends: true
+  - name: Voss-Pattern Lightning
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+    legends: true
+  - name: Vulture Gunship
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 225 }
+    legends: true
+  - name: Wyvern
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 115 }

@@ -1,0 +1,445 @@
+name: Adepta Sororitas
+slug: adepta-sororitas
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Army Of Faith
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Blade of Saint Ellynor, points: 15 }
+      - { name: Divine Aspect, points: 5 }
+      - { name: Litanies of Faith, points: 10 }
+      - { name: Triptych of the Macharian Crusade, points: 20 }
+  - name: Bringers Of Flame
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Fire and Fury, points: 30 }
+      - { name: Iron Surplice of Saint Istalela, points: 10 }
+      - { name: Manual of Saint Griselda, points: 20 }
+      - { name: Righteous Rage, points: 15 }
+  - name: Champions Of Faith
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Eyes of the Oracle, points: 10 }
+      - { name: Mark of Devotion, points: 30 }
+      - { name: Sanctified Amulet, points: 25 }
+      - { name: Triptych of Judgement, points: 15 }
+  - name: Chorus Of Condemnation
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Clarion of Urgency, points: 15 }
+      - { name: Symphonic Payload (Upgrade), points: 10 }
+  - name: Hallowed Martyrs
+    dp: 3
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Chaplet of Sacrifice, points: 25 }
+      - { name: Mantle of Ophelia, points: 20 }
+      - { name: Saintly Example, points: 10 }
+      - { name: "Through Suffering, Strength", points: 25 }
+  - name: Penitent Host
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Catechism of Divine Penitence, points: 20 }
+      - { name: Psalm of Righteous Judgement, points: 30 }
+      - { name: Refrain of Enduring Faith, points: 25 }
+      - { name: Verse of Holy Piety, points: 15 }
+  - name: Sacred Champions
+    dp: 1
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Perfervid Haste, points: 10 }
+      - { name: Writ of Compunction (Upgrade), points: 20 }
+  - name: Sanctified Orators
+    dp: 1
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Hagiomnifex (Upgrade), points: 25 }
+units:
+  - name: Aestred Thurga And Agathae Dolan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 80 }
+    role: leader
+    attachTo:
+      - Battle Sisters Squad
+      - Celestian Insidiants
+      - Celestian Sacresants
+      - Crusaders
+      - Dominion Squad
+      - Retributor Squad
+      - Sisters Novitiate Squad
+  - name: Arco-Flagellants
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 50 }
+          - { models: 10, points: 140 }
+  - name: Battle Sanctum
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+    legends: true
+  - name: Battle Sisters Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 100 }
+  - name: Canoness
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Battle Sisters Squad
+      - Celestian Insidiants
+      - Celestian Sacresants
+      - Crusaders
+      - Dominion Squad
+      - Retributor Squad
+      - Sisters Novitiate Squad
+  - name: Canoness With Jump Pack
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Seraphim Squad
+      - Zephyrim Squad
+  - name: Castigator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 165 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 175 }
+  - name: Celestian Insidiants
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 120 }
+  - name: Celestian Sacresant Aveline
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    legends: true
+  - name: Celestian Sacresants
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 150 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 165 }
+  - name: Crusaders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 40 }
+          - { models: 4, points: 80 }
+    legends: true
+  - name: Daemonifuge
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 85 }
+  - name: Death Cult Assassins
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 55 }
+          - { models: 4, points: 110 }
+    legends: true
+  - name: Dialogus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    role: support
+    attachTo:
+      - Battle Sisters Squad
+      - Celestian Insidiants
+      - Celestian Sacresants
+      - Crusaders
+      - Dominion Squad
+      - Retributor Squad
+      - Sisters Novitiate Squad
+  - name: Dogmata
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    role: support
+    attachTo:
+      - Battle Sisters Squad
+      - Celestian Insidiants
+      - Celestian Sacresants
+      - Crusaders
+      - Dominion Squad
+      - Retributor Squad
+  - name: Dominion Squad
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 10, points: 100 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 10, points: 110 }
+    wargear:
+      - { item: Meltagun, points: 5 }
+  - name: Exorcist
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 220 }
+  - name: Hospitaller
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: support
+    attachTo:
+      - Battle Sisters Squad
+      - Celestian Insidiants
+      - Celestian Sacresants
+      - Crusaders
+      - Dominion Squad
+      - Retributor Squad
+      - Sisters Novitiate Squad
+  - name: Imagifier
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: support
+    attachTo:
+      - Battle Sisters Squad
+      - Celestian Insidiants
+      - Celestian Sacresants
+      - Crusaders
+      - Dominion Squad
+      - Retributor Squad
+  - name: Immolator
+    pricing:
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 110 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+    wargear:
+      - { item: Twin multi-melta, points: 15 }
+  - name: Intranzia Fraye
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Junith Eruita
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    role: leader
+    attachTo:
+      - Battle Sisters Squad
+      - Celestian Insidiants
+      - Celestian Sacresants
+      - Crusaders
+      - Dominion Squad
+      - Retributor Squad
+      - Sisters Novitiate Squad
+  - name: Ministorum Priest
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Arco-Flagellants
+      - Battle Sisters Squad
+      - Celestian Insidiants
+      - Crusaders
+      - Dominion Squad
+      - Sanctifiers
+      - Sisters Novitiate Squad
+  - name: Mortifiers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+          - { models: 2, points: 130 }
+  - name: Morvenn Vahl
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 185 }
+    role: leader
+    attachTo:
+      - Paragon Warsuits
+  - name: Palatine
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Battle Sisters Squad
+      - Celestian Insidiants
+      - Celestian Sacresants
+      - Crusaders
+      - Dominion Squad
+      - Retributor Squad
+      - Sisters Novitiate Squad
+  - name: Paragon Warsuits
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 190 }
+    wargear:
+      - { item: Multi-melta, points: 10 }
+  - name: Penitent Engines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+          - { models: 2, points: 140 }
+  - name: Repentia Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 160 }
+  - name: Repressor
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+    legends: true
+  - name: Retributor Squad
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 105 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 115 }
+    wargear:
+      - { item: Multi-melta, points: 5 }
+  - name: Saint Celestine
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 150 }
+    role: leader
+    attachTo:
+      - Seraphim Squad
+      - Zephyrim Squad
+  - name: Sanctifiers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 9, points: 110 }
+  - name: Seraphim Squad
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 95 }
+          - { models: 10, points: 170 }
+  - name: Sisters Novitiate Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 100 }
+  - name: Sororitas Rhino
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+  - name: Triumph Of Saint Katherine
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 245 }
+    role: leader
+    attachTo:
+      - Battle Sisters Squad
+      - Crusaders
+  - name: Zephyrim Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 160 }

@@ -1,0 +1,927 @@
+name: Chaos Space Marines
+slug: chaos-space-marines
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Cabal Of Chaos
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Conduit of Chaos, points: 20 }
+      - { name: Touched by the Warp, points: 10 }
+  - name: Chaos Cult
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Amulet of Tainted Vigour, points: 20 }
+      - { name: Cultist’s Brand, points: 30 }
+      - { name: Incendiary Goad, points: 25 }
+      - { name: Warped Foresight, points: 10 }
+  - name: Creations Of Bile
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Helm of All-Seeing, points: 25 }
+      - { name: Living Carapace, points: 15 }
+      - { name: Prime Test Subject, points: 35 }
+      - { name: Surgical Precision, points: 10 }
+  - name: Cult Of The Arkifane
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Crown of Worms, points: 15 }
+      - { name: Cybinfernal Font, points: 20 }
+      - { name: Mark of the Soul Forges, points: 20 }
+      - { name: Wyredjinn, points: 25 }
+  - name: Deceptors
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Cursed Fang, points: 10 }
+      - { name: Falsehood, points: 10 }
+      - { name: Shroud of Obfuscation, points: 15 }
+      - { name: Soul Link, points: 5 }
+  - name: Devotees Of Destruction
+    dp: 1
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Eye of Oblivion, points: 20 }
+      - { name: Pact of Destruction, points: 15 }
+  - name: Dread Talons
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Eater of Dread, points: 15 }
+      - { name: Night’s Shroud, points: 10 }
+      - { name: Warp-Fuelled Thrusters, points: 20 }
+      - { name: Willbreaker, points: 10 }
+  - name: Fellhammer Siege-Host
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Bastion Plate, points: 10 }
+      - { name: Iron Artifice, points: 10 }
+      - { name: Ironbound Enmity, points: 15 }
+      - { name: Warp Tracer, points: 20 }
+  - name: Huron’S Marauders
+    dp: 3
+    objective: DISRUPTION
+    enhancements:
+      - { name: Dread Reputation, points: 25 }
+      - { name: Eager for Bloodshed, points: 30 }
+      - { name: Raid Leader, points: 20 }
+      - { name: Voice of the Tyrant, points: 25 }
+  - name: Murdertalon Raiders
+    dp: 1
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Pact of Cursed Pinions, points: 20 }
+      - { name: Shadowcowl Talisman, points: 20 }
+  - name: Nightmare Hunt
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Greyveil Hex, points: 25 }
+      - { name: Sorrowscent Vulture, points: 35 }
+      - { name: Terrorglut Parasite, points: 20 }
+      - { name: Warp-Fuelled Thrusters, points: 20 }
+  - name: Pactbound Zealots
+    dp: 3
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Eye of Tzeentch, points: 15 }
+      - { name: Intoxicating Elixir, points: 15 }
+      - { name: Orbs of Unlife, points: 15 }
+      - { name: Talisman of Burning Blood, points: 15 }
+  - name: Renegade Raiders
+    dp: 3
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Despot’s Claim, points: 15 }
+      - { name: Dread Reaver, points: 15 }
+      - { name: Mark of the Hound, points: 25 }
+      - { name: Tyrant’s Lash, points: 20 }
+  - name: Renegade Warband
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Empyric Symbiote, points: 15 }
+      - { name: Eyes of the Hunter, points: 15 }
+      - { name: Fratricidal Trophies, points: 5 }
+      - { name: Weaponised Hatred, points: 35 }
+  - name: Soulforged Warpack
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Forge’s Blessing, points: 20 }
+      - { name: Invigorated Mechatendrils, points: 15 }
+      - { name: Soul Harvester, points: 15 }
+      - { name: Tempting Addendum, points: 25 }
+  - name: Veterans Of The Long War
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Eager for Vengeance, points: 20 }
+      - { name: Eye of Abaddon, points: 15 }
+      - { name: Mark of Legend, points: 10 }
+      - { name: Warmaster’s Gift, points: 15 }
+  - name: Warpstrike Champions
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Akshur’s Binding Runes, points: 20 }
+      - { name: Eye of the Warp, points: 15 }
+      - { name: Infernal Fulgurite, points: 20 }
+      - { name: Tzagulla, points: 25 }
+units:
+  - name: Abaddon The Despoiler
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 285 }
+    role: leader
+    attachTo:
+      - Chaos Terminator Squad
+      - Chosen
+  - name: Accursed Cultists
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 8, points: 90 }
+          - { models: 16, points: 195 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 8, points: 110 }
+          - { models: 16, points: 215 }
+  - name: Blood Slaughterer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+    legends: true
+  - name: Chaos Bikers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 70 }
+          - { models: 6, points: 130 }
+  - name: Chaos Deimos Predator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    legends: true
+  - name: Chaos Land Raider
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 220 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 240 }
+  - name: Chaos Lord
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Chosen
+      - Legionaries
+      - Nemesis Claw
+      - Red Corsairs Raiders
+  - name: Chaos Lord In Terminator Armour
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Chaos Terminator Squad
+  - name: Chaos Lord On Bike
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Chaos Bikers
+    legends: true
+  - name: Chaos Lord On Disc Of Tzeentch
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Chosen
+      - Legionaries
+    legends: true
+  - name: Chaos Lord On Juggernaut
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    role: leader
+    attachTo:
+      - Chaos Bikers
+    legends: true
+  - name: Chaos Lord On Palanquin Of Nurgle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Chosen
+      - Legionaries
+    legends: true
+  - name: Chaos Lord On Steed Of Slaanesh
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Chaos Bikers
+    legends: true
+  - name: Chaos Lord With Jump Pack
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Raptors
+  - name: Chaos Predator Annihilator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 135 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 145 }
+  - name: Chaos Predator Destructor
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Chaos Rhino
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+  - name: Chaos Spawn
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 60 }
+  - name: Chaos Terminator Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 180 }
+          - { models: 10, points: 360 }
+  - name: Chaos Thunderhawk
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 840 }
+    legends: true
+  - name: Chaos Vindicator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 185 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 195 }
+  - name: Chosen
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 5, points: 125 }
+          - { models: 10, points: 250 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 5, points: 135 }
+          - { models: 10, points: 260 }
+  - name: Cultist Firebrand
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 45 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Accursed Cultists
+      - Cultist Mob
+      - Cultist Mob With Firearms
+      - Negavolt Cultists
+  - name: Cultist Mob
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 50 }
+          - { models: 20, points: 90 }
+  - name: Cultist Mob With Firearms
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 50 }
+          - { models: 20, points: 100 }
+    legends: true
+  - name: Cypher
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+  - name: Dark Apostle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 65 }
+    role: leader
+    attachTo:
+      - Accursed Cultists
+      - Chosen
+      - Cultist Mob
+      - Cultist Mob With Firearms
+      - Legionaries
+      - Negavolt Cultists
+      - Nemesis Claw
+      - Red Corsairs Raiders
+  - name: Dark Commune
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+    role: leader
+    attachTo:
+      - Accursed Cultists
+      - Cultist Mob
+      - Cultist Mob With Firearms
+      - Negavolt Cultists
+  - name: Decimator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 165 }
+    legends: true
+  - name: Defiler
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 300 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 330 }
+    wargear:
+      - { item: Heavy reaper autocannon, points: 10 }
+      - { item: Hades lascannon, points: 10 }
+  - name: Dreadclaw Drop Pod
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    legends: true
+  - name: Exalted Champion
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: support
+    attachTo:
+      - Chosen
+      - Legionaries
+    legends: true
+  - name: Fabius Bile
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 100 }
+    role: leader
+    attachTo:
+      - Accursed Cultists
+      - Chosen
+      - Cultist Mob
+      - Cultist Mob With Firearms
+      - Legionaries
+      - Negavolt Cultists
+      - Red Corsairs Raiders
+  - name: Fellgor Beastmen
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 60 }
+  - name: Forgefiend
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+    wargear:
+      - { item: Ectoplasma cannon, points: 5 }
+  - name: Gellerpox Infected
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 7, points: 125 }
+    legends: true
+  - name: Greater Blight Drone
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+    legends: true
+  - name: Greater Brass Scorpion
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 500 }
+    legends: true
+  - name: Haarken Worldclaimer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Raptors
+  - name: Havocs
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 125 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 135 }
+  - name: Helbrute
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+  - name: Heldrake
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 175 }
+  - name: Hell Blade
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    legends: true
+  - name: Hell Talon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+    legends: true
+  - name: Heretic Astartes Daemon Prince
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 165 }
+  - name: Heretic Astartes Daemon Prince With Wings
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+  - name: Huron Blackheart
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+    role: leader
+    attachTo:
+      - Chaos Terminator Squad
+      - Chosen
+      - Legionaries
+      - Masters Of The Maelstrom
+      - Red Corsairs Raiders
+  - name: Kharybdis Assault Claw
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 300 }
+    legends: true
+  - name: Khorne Lord Of Skulls
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 450 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 475 }
+  - name: Kravek Morne
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+    role: leader
+    attachTo:
+      - Chaos Terminator Squad
+      - Mutilators
+      - Obliterators
+  - name: Kytan Ravager
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 400 }
+    legends: true
+  - name: Legionaries
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 170 }
+  - name: Lord Discordant On Helstalker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: Master Of Executions
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: support
+    attachTo:
+      - Chosen
+      - Legionaries
+      - Nemesis Claw
+      - Red Corsairs Raiders
+  - name: Master Of Possession
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Chosen
+      - Legionaries
+      - Nemesis Claw
+      - Possessed
+      - Red Corsairs Raiders
+  - name: Masters Of The Maelstrom
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 135 }
+    role: support
+    attachTo:
+      - Chosen
+      - Legionaries
+      - Red Corsairs Raiders
+  - name: Maulerfiend
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+  - name: Mutilators
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 190 }
+  - name: Mutoid Vermin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 16, points: 85 }
+    legends: true
+  - name: Negavolt Cultists
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 4, points: 55 }
+    legends: true
+  - name: Nemesis Claw
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 110 }
+          - { models: 10, points: 190 }
+  - name: Noctilith Crown
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+  - name: Obliterators
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 2, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 2, points: 170 }
+  - name: Possessed
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 120 }
+          - { models: 10, points: 250 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 130 }
+          - { models: 10, points: 260 }
+  - name: Raptors
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 110 }
+          - { models: 10, points: 210 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 120 }
+          - { models: 10, points: 220 }
+  - name: Red Corsairs Raiders
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 110 }
+          - { models: 10, points: 210 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 120 }
+          - { models: 10, points: 220 }
+  - name: Red Corsairs Reave-Captain
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Chosen
+      - Legionaries
+      - Nemesis Claw
+      - Red Corsairs Raiders
+  - name: Renegade Enforcer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Renegade Heavy Weapons Squad
+      - Traitor Guardsmen Squad
+    legends: true
+  - name: Renegade Heavy Weapons Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 75 }
+    legends: true
+  - name: Renegade Ogryn Beast Handler
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 4, points: 40 }
+          - { models: 7, points: 70 }
+    legends: true
+  - name: Renegade Ogryn Brutes
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 95 }
+    legends: true
+  - name: Renegade Plague Ogryns
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 95 }
+    legends: true
+  - name: Rogue Psyker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Accursed Cultists
+      - Cultist Mob
+      - Cultist Mob With Firearms
+      - Negavolt Cultists
+    legends: true
+  - name: Sorcerer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Chosen
+      - Legionaries
+      - Nemesis Claw
+      - Red Corsairs Raiders
+  - name: Sorcerer In Terminator Armour
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Chaos Terminator Squad
+  - name: Sorcerer On Bike
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Chaos Bikers
+    legends: true
+  - name: Sorcerer On Disc Of Tzeentch
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Chosen
+      - Legionaries
+    legends: true
+  - name: Sorcerer On Palanquin Of Nurgle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Chosen
+      - Legionaries
+    legends: true
+  - name: Sorcerer On Steed Of Slaanesh
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Chaos Bikers
+    legends: true
+  - name: Traitor Enforcer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 70 }
+    role: leader
+    attachTo:
+      - Traitor Guardsmen Squad
+  - name: Traitor Guardsmen Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 70 }
+  - name: Vashtorr The Arkifane
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 205 }
+  - name: Venomcrawler
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 110 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+  - name: Warp Talons
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 125 }
+          - { models: 10, points: 280 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 135 }
+          - { models: 10, points: 290 }
+  - name: Warpsmith
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Chosen
+      - Havocs
+      - Legionaries
+      - Nemesis Claw
+      - Red Corsairs Raiders

@@ -1,0 +1,274 @@
+name: Emperor’s Children
+slug: emperors-children
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Carnival Of Excess
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Dark Blessings, points: 10 }
+      - { name: Empyric Suffusion, points: 15 }
+      - { name: Possessed Blade, points: 25 }
+      - { name: Warp Walker, points: 30 }
+  - name: Coterie Of The Conceited
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Pledge of Dark Glory, points: 25 }
+      - { name: Pledge of Eternal Servitude, points: 25 }
+      - { name: Pledge of Mortal Pain, points: 15 }
+      - { name: Pledge of Unholy Fortune, points: 30 }
+  - name: Court Of The Phoenician
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Exalted Patron, points: 15 }
+      - { name: Soulstain Made Manifest, points: 15 }
+      - { name: Spiritsliver, points: 20 }
+      - { name: Tears of the Phoenix, points: 25 }
+  - name: Elegant Brutes
+    dp: 1
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Cacophonic Accompaniment, points: 20 }
+      - { name: Frenzied Ferocity (Upgrade), points: 15 }
+  - name: Frenzied Host
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Euphoric Crown, points: 20 }
+      - { name: Howling Plate, points: 20 }
+  - name: Mercurial Host
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Intoxicating Musk, points: 20 }
+      - { name: Loathsome Dexterity, points: 10 }
+      - { name: Steeped in Suffering, points: 20 }
+      - { name: Tactical Perfection, points: 15 }
+  - name: Peerless Bladesmen
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Blinding Speed, points: 25 }
+      - { name: Distortion, points: 25 }
+      - { name: Faultless Opportunist, points: 15 }
+      - { name: Rise to the Challenge, points: 30 }
+  - name: Rapid Evisceration
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Accomplished Tactician, points: 35 }
+      - { name: Heretek Adept, points: 35 }
+      - { name: Spearhead Striker, points: 20 }
+      - { name: Sublime Prescience, points: 25 }
+  - name: Slaanesh’S Chosen
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Eager to Prove, points: 15 }
+      - { name: Proud and Vainglorious, points: 20 }
+      - { name: Repulsed by Weakness, points: 25 }
+      - { name: Slayer of Champions, points: 15 }
+  - name: Spectacle Of Slaughter
+    dp: 1
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Beguiling Grotesquerie (Upgrade), points: 15 }
+      - { name: Eager Patrons (Upgrade), points: 20 }
+units:
+  - name: Chaos Land Raider
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 220 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 240 }
+  - name: Chaos Rhino
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+  - name: Chaos Spawn
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 70 }
+  - name: Chaos Terminators
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 145 }
+  - name: Daemon Prince Of Slaanesh
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 185 }
+  - name: Daemon Prince Of Slaanesh With Wings
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 205 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 235 }
+  - name: Daemonettes
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 90 }
+  - name: Defiler
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 290 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 320 }
+    wargear:
+      - { item: Heavy reaper autocannon, points: 10 }
+      - { item: Hades lascannon, points: 10 }
+  - name: Fiends
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 180 }
+  - name: Flawless Blades
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 95 }
+          - { models: 6, points: 190 }
+  - name: Fulgrim
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 350 }
+  - name: Heldrake
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 175 }
+  - name: Infractors
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 160 }
+  - name: Keeper Of Secrets
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 255 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 270 }
+  - name: Lord Exultant
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 80 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Infractors
+      - Tormentors
+  - name: Lord Kakophonist
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Chaos Terminators
+      - Noise Marines
+  - name: Lucius The Eternal
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+    role: leader
+    attachTo:
+      - Flawless Blades
+  - name: Maulerfiend
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 130 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+  - name: Noise Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 6, points: 145 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 6, points: 160 }
+  - name: Seekers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 155 }
+  - name: Shalaxi Helbane
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 340 }
+  - name: Sorcerer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Infractors
+      - Noise Marines
+      - Tormentors
+  - name: Tormentors
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 160 }

@@ -1,0 +1,391 @@
+name: Grey Knights
+slug: grey-knights
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Argent Assault
+    dp: 1
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Psychic Celerity, points: 15 }
+      - { name: Vigilance of Titan, points: 20 }
+  - name: Augurium Task Force
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Doomseer’s Amulet, points: 25 }
+      - { name: Grimoire of Conjunctions, points: 10 }
+      - { name: One Foot in the Future, points: 15 }
+      - { name: Shield of Prophecy, points: 20 }
+  - name: Banishers
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Ephemeral Tome, points: 15 }
+      - { name: Pyresoul, points: 20 }
+      - { name: Sigil of the Hunt, points: 10 }
+      - { name: Sixty-sixth Seal, points: 25 }
+  - name: Brotherhood Strike
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Banishing Wave, points: 20 }
+      - { name: Blinding Aura, points: 10 }
+      - { name: Purity of Purpose, points: 15 }
+      - { name: Tome of Forbidden Ways, points: 25 }
+  - name: Fires Of Purgation
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Boons of Deimos (Upgrade), points: 20 }
+      - { name: Precognicient Volleys (Upgrade), points: 10 }
+  - name: Hallowed Conclave
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Eye of the Augurium, points: 25 }
+      - { name: Inescapable Judgement, points: 20 }
+      - { name: Nemesis Rounds, points: 10 }
+      - { name: Sanctic Reaper, points: 15 }
+  - name: Immaterial Interdiction
+    dp: 1
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Astral Overlap (Upgrade), points: 10 }
+      - { name: Predestined Coordinates (Upgrade), points: 10 }
+  - name: Sanctic Spearhead
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Driven by Duty, points: 10 }
+      - { name: Quickening Foci, points: 15 }
+      - { name: Sigil of Exigence, points: 30 }
+      - { name: Spiritus Machina, points: 25 }
+  - name: Warpbane Task Force
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Mandulian Reliquary, points: 20 }
+      - { name: Paragon of Sanctity, points: 10 }
+      - { name: Phial of the Abyss, points: 15 }
+      - { name: Radiant Champion, points: 15 }
+units:
+  - name: Brother-Captain
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Brotherhood Terminator Squad
+      - Paladin Squad
+  - name: Brother-Captain Stern
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Brotherhood Terminator Squad
+      - Paladin Squad
+    legends: true
+  - name: Brotherhood Champion
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Purgation Squad
+      - Strike Squad
+  - name: Brotherhood Chaplain
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Brotherhood Terminator Squad
+      - Paladin Squad
+  - name: Brotherhood Librarian
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Brotherhood Terminator Squad
+      - Paladin Squad
+  - name: Brotherhood Techmarine
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Purgation Squad
+      - Purifier Squad
+      - Strike Squad
+  - name: Brotherhood Terminator Squad
+    pricing:
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 4, points: 140 }
+          - { models: 5, points: 175 }
+          - { models: 8, points: 300 }
+          - { models: 10, points: 375 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
+        costs:
+          - { models: 4, points: 150 }
+          - { models: 5, points: 185 }
+          - { models: 8, points: 310 }
+          - { models: 10, points: 385 }
+    wargear:
+      - { item: Psycannon, points: 5 }
+  - name: Castellan Crowe
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Purifier Squad
+  - name: Grand Master
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Brotherhood Terminator Squad
+      - Paladin Squad
+  - name: Grand Master In Nemesis Dreadknight
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 200 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 215 }
+    wargear:
+      - { item: Sublimator, points: 15 }
+      - { item: Heavy psycannon, points: 15 }
+  - name: Grand Master Voldus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+    role: leader
+    attachTo:
+      - Brotherhood Terminator Squad
+      - Paladin Squad
+  - name: Grey Knights Dreadnought
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+    legends: true
+  - name: Grey Knights Relic Razorback
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    legends: true
+  - name: Grey Knights Thunderhawk Gunship
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 805 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 855 }
+  - name: Interceptor Squad
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 125 }
+          - { models: 10, points: 250 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 135 }
+          - { models: 10, points: 260 }
+  - name: Kaldor Draigo
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+    role: leader
+    attachTo:
+      - Brotherhood Terminator Squad
+      - Paladin Squad
+    legends: true
+  - name: Land Raider
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 220 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 240 }
+  - name: Land Raider Crusader
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 220 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 240 }
+  - name: Land Raider Redeemer
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 250 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 270 }
+  - name: Nemesis Dreadknight
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 195 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 210 }
+    wargear:
+      - { item: Heavy psycannon, points: 15 }
+  - name: Paladin Squad
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 4, points: 170 }
+          - { models: 5, points: 215 }
+          - { models: 8, points: 360 }
+          - { models: 10, points: 450 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 4, points: 185 }
+          - { models: 5, points: 230 }
+          - { models: 8, points: 375 }
+          - { models: 10, points: 465 }
+    wargear:
+      - { item: Psycannon, points: 5 }
+  - name: Purgation Squad
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 110 }
+          - { models: 10, points: 220 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 120 }
+          - { models: 10, points: 230 }
+    wargear:
+      - { item: Psycannon, points: 5 }
+  - name: Purifier Squad
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 130 }
+          - { models: 10, points: 260 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 140 }
+          - { models: 10, points: 270 }
+    wargear:
+      - { item: Psycannon, points: 5 }
+  - name: Razorback
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Rhino
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+  - name: Servitors
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 4, points: 60 }
+    legends: true
+  - name: Stormhawk Interceptor
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: Stormraven Gunship
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 280 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 300 }
+  - name: Stormtalon Gunship
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+  - name: Strike Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 120 }
+          - { models: 10, points: 240 }
+  - name: Venerable Dreadnought
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 130 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 140 }

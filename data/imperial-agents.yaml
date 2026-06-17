@@ -1,0 +1,733 @@
+name: Imperial Agents
+slug: imperial-agents
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Imperialis Fleet
+    dp: 3
+    objective: DISRUPTION
+    enhancements:
+      - { name: Clandestine Operation, points: 15 }
+      - { name: Combat Landers, points: 10 }
+      - { name: Digital Weapons, points: 10 }
+      - { name: Fleetmaster, points: 20 }
+  - name: Ordo Hereticus, Purgation Force
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Ignis Judicium, points: 10 }
+      - { name: Liber Heresius, points: 10 }
+      - { name: No Escape, points: 25 }
+      - { name: Witch Hunter, points: 15 }
+  - name: Ordo Malleus, Daemon Hunters
+    dp: 3
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Daemon Slayer, points: 10 }
+      - { name: Formidable Resolve, points: 5 }
+      - { name: Gift of the Prescient, points: 20 }
+      - { name: Grimoire of True Names, points: 10 }
+  - name: Ordo Xenos, Alien Hunters
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Amulet of Auto-chastisement, points: 25 }
+      - { name: Beacon Angelis, points: 30 }
+      - { name: Blackweave Shroud, points: 15 }
+      - { name: Universal Anathema, points: 10 }
+  - name: Veiled Blade Elimination Force
+    dp: 3
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Decoy Targets, points: 40 }
+      - { name: Esoteric Explosives, points: 40 }
+      - { name: Introneural Biotech, points: 35 }
+      - { name: Micromelta Rounds, points: 45 }
+units:
+  - name: Aquila Kill Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 200 }
+  - name: Aquila Kill Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 200 }
+  - name: Callidus Assassin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+  - name: Callidus Assassin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+  - name: Corvus Blackstar
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+  - name: Corvus Blackstar
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+  - name: Culexus Assassin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Culexus Assassin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Daemonhost
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+          - { models: 2, points: 80 }
+    legends: true
+  - name: Damned Legionnaires
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 180 }
+    legends: true
+  - name: Deathwatch Kill Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 190 }
+  - name: Deathwatch Kill Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 200 }
+  - name: Deathwatch Terminator Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 210 }
+          - { models: 10, points: 420 }
+    legends: true
+  - name: Eversor Assassin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+  - name: Eversor Assassin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+  - name: Exaction Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 90 }
+  - name: Exaction Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 85 }
+  - name: Fortis Kill Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 200 }
+    legends: true
+  - name: Grey Knights Terminator Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 190 }
+    wargear:
+      - { item: Psycannon, points: 5 }
+  - name: Grey Knights Terminator Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 210 }
+    wargear:
+      - { item: Psycannon, points: 5 }
+  - name: Imperial Navy Breachers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 90 }
+  - name: Imperial Navy Breachers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 90 }
+  - name: Imperial Rhino
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+  - name: Imperial Rhino
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+  - name: Indomitor Kill Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 120 }
+          - { models: 10, points: 240 }
+    legends: true
+  - name: Inquisitor
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: leader
+    attachTo:
+      - Aquila Kill Team
+      - Battleline Imperium Infantry
+      - Exaction Squad
+      - Grey Knights Terminator Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Sanctifiers
+      - Sisters Of Battle Squad
+      - Subductor Squad
+      - Vigilant Squad
+  - name: Inquisitor
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Aquila Kill Team
+      - Battleline Imperium Infantry
+      - Exaction Squad
+      - Grey Knights Terminator Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Sanctifiers
+      - Sisters Of Battle Squad
+      - Subductor Squad
+      - Vigilant Squad
+  - name: Inquisitor Coteaz
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Battleline Imperium Infantry
+      - Exaction Squad
+      - Grey Knights Terminator Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Subductor Squad
+      - Vigilant Squad
+  - name: Inquisitor Coteaz
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Battleline Imperium Infantry
+      - Exaction Squad
+      - Grey Knights Terminator Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Subductor Squad
+      - Vigilant Squad
+  - name: Inquisitor Draxus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Aquila Kill Team
+      - Battleline Imperium Infantry
+      - Exaction Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Subductor Squad
+      - Vigilant Squad
+  - name: Inquisitor Draxus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+    role: leader
+    attachTo:
+      - Aquila Kill Team
+      - Battleline Imperium Infantry
+      - Exaction Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Subductor Squad
+      - Vigilant Squad
+  - name: Inquisitor Eisenhorn
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Daemonhost
+      - Deathwatch Kill Team
+      - Deathwatch Terminator Squad
+      - Exaction Squad
+      - Fortis Kill Team
+      - Imperial Navy Breachers
+      - Indomitor Kill Team
+      - Inquisitorial Agents
+      - Proteus Kill Team
+      - Spectrus Kill Team
+      - Subductor Squad
+      - Vigilant Squad
+    legends: true
+  - name: Inquisitor Greyfax
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Battleline Imperium Infantry
+      - Exaction Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Sanctifiers
+      - Sisters Of Battle Squad
+      - Subductor Squad
+      - Vigilant Squad
+  - name: Inquisitor Greyfax
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Battleline Imperium Infantry
+      - Exaction Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Sanctifiers
+      - Sisters Of Battle Squad
+      - Subductor Squad
+      - Vigilant Squad
+  - name: Inquisitor In Terminator Armour
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Deathwatch Kill Team
+      - Deathwatch Terminator Squad
+      - Exaction Squad
+      - Fortis Kill Team
+      - Grey Knights Terminator Squad
+      - Imperial Navy Breachers
+      - Indomitor Kill Team
+      - Inquisitorial Agents
+      - Proteus Kill Team
+      - Sisters Of Battle Squad
+      - Spectrus Kill Team
+      - Subductor Squad
+      - Vigilant Squad
+    legends: true
+  - name: Inquisitor Karamazov
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+    legends: true
+  - name: Inquisitor Kroyle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+  - name: Inquisitor Kroyle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+  - name: Inquisitor Ostromandeus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 65 }
+    role: leader
+    attachTo:
+      - Exaction Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Sisters Of Battle Squad
+      - Subductor Squad
+      - Vigilant Squad
+    legends: true
+  - name: Inquisitorial Agents
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 6, points: 50 }
+          - { models: 12, points: 100 }
+  - name: Inquisitorial Agents
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 6, points: 60 }
+          - { models: 12, points: 120 }
+  - name: Inquisitorial Chimera
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Inquisitorial Chimera
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Janus Draik
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    role: leader
+    attachTo:
+      - Imperial Navy Breachers
+      - Voidsmen-At-Arms
+    legends: true
+  - name: Jokaero Weaponsmith
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 30 }
+    role: leader
+    attachTo:
+      - Inquisitorial Agents
+    legends: true
+  - name: Kill Team Cassius
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 220 }
+    legends: true
+  - name: Ministorum Priest
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    role: support
+    attachTo:
+      - Exaction Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Sanctifiers
+      - Sisters Of Battle Squad
+      - Subductor Squad
+      - Vigilant Squad
+  - name: Ministorum Priest
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    role: support
+    attachTo:
+      - Exaction Squad
+      - Imperial Navy Breachers
+      - Inquisitorial Agents
+      - Sanctifiers
+      - Sisters Of Battle Squad
+      - Subductor Squad
+      - Vigilant Squad
+  - name: Navigator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Imperial Navy Breachers
+      - Voidsmen-At-Arms
+  - name: Navigator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Imperial Navy Breachers
+      - Voidsmen-At-Arms
+  - name: Neyam Shai Murad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    role: leader
+    attachTo:
+      - Imperial Navy Breachers
+      - Voidsmen-At-Arms
+    legends: true
+  - name: Proteus Kill Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 160 }
+          - { models: 10, points: 320 }
+    legends: true
+  - name: Rogue Trader Entourage
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 4, points: 75 }
+    role: leader
+    attachTo:
+      - Imperial Navy Breachers
+      - Voidsmen-At-Arms
+  - name: Rogue Trader Entourage
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 4, points: 105 }
+    role: leader
+    attachTo:
+      - Imperial Navy Breachers
+      - Voidsmen-At-Arms
+  - name: Sanctifiers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 9, points: 100 }
+  - name: Sanctifiers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 9, points: 100 }
+  - name: Sisters Of Battle Immolator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    wargear:
+      - { item: Twin multi-melta, points: 15 }
+  - name: Sisters Of Battle Immolator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    wargear:
+      - { item: Twin multi-melta, points: 15 }
+  - name: Sisters Of Battle Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 100 }
+  - name: Sisters Of Battle Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 115 }
+  - name: Spectrus Kill Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 180 }
+    legends: true
+  - name: Subductor Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 85 }
+  - name: Subductor Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 100 }
+  - name: Ur-025
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    legends: true
+  - name: Veteran Bike Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 70 }
+          - { models: 6, points: 140 }
+    legends: true
+  - name: Vigilant Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 85 }
+  - name: Vigilant Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 85 }
+  - name: Vindicare Assassin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+  - name: Vindicare Assassin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+  - name: Voidsmen-At-Arms
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 6, points: 50 }
+  - name: Voidsmen-At-Arms
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 6, points: 70 }
+  - name: Watch Captain Artemis
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Aquila Kill Team
+      - Deathwatch Kill Team
+      - Deathwatch Terminator Squad
+      - Fortis Kill Team
+      - Indomitor Kill Team
+      - Proteus Kill Team
+      - Spectrus Kill Team
+  - name: Watch Captain Artemis
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Aquila Kill Team
+      - Deathwatch Kill Team
+      - Deathwatch Terminator Squad
+      - Fortis Kill Team
+      - Indomitor Kill Team
+      - Proteus Kill Team
+      - Spectrus Kill Team
+  - name: Watch Master
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Aquila Kill Team
+      - Deathwatch Kill Team
+      - Deathwatch Terminator Squad
+      - Fortis Kill Team
+      - Indomitor Kill Team
+      - Proteus Kill Team
+      - Spectrus Kill Team
+  - name: Watch Master
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+    role: leader
+    attachTo:
+      - Aquila Kill Team
+      - Deathwatch Kill Team
+      - Deathwatch Terminator Squad
+      - Fortis Kill Team
+      - Indomitor Kill Team
+      - Proteus Kill Team
+      - Spectrus Kill Team

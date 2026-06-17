@@ -1,0 +1,560 @@
+name: Chaos Daemons
+slug: chaos-daemons
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Blood Legion
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Brazenmaw, points: 15 }
+      - { name: Fury’s Cage, points: 20 }
+      - { name: Gateway Unto Damnation, points: 10 }
+      - { name: Slaughterthirst, points: 25 }
+  - name: Cavalcade Of Chaos
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Apocalyptic Steeds (Upgrade), points: 10 }
+      - { name: Soul-shattering Charge (Upgrade), points: 10 }
+  - name: Daemonic Incursion
+    dp: 3
+    objective: DISRUPTION
+    enhancements:
+      - { name: "A’rgath, The King of Blades", points: 20 }
+      - { name: Soulstealer, points: 15 }
+      - { name: The Endless Gift, points: 30 }
+      - { name: The Everstave, points: 25 }
+  - name: Legion Of Excess
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Avatar of Perfection, points: 15 }
+      - { name: Dreaming Crown, points: 30 }
+      - { name: False Majesty, points: 30 }
+      - { name: Soul Glutton, points: 10 }
+  - name: Lords Of The Warp
+    dp: 1
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Swollen with Power (Upgrade), points: 10 }
+  - name: Plague Legion
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Cankerblight, points: 15 }
+      - { name: Droning Shroud, points: 35 }
+      - { name: Font of Spores, points: 20 }
+      - { name: Maggot Maws, points: 15 }
+  - name: Scintillating Legion
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Improbable Shield, points: 30 }
+      - { name: Inescapable Eye, points: 10 }
+      - { name: Infernal Puppeteer, points: 25 }
+      - { name: Neverblade, points: 20 }
+  - name: Shadow Legion
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Fade to Darkness, points: 30 }
+      - { name: Leaping Shadows, points: 25 }
+      - { name: Malice Made Manifest, points: 25 }
+      - { name: Mantle of Gloom, points: 20 }
+  - name: Warptide
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Bane-forged Weapons (Upgrade), points: 15 }
+      - { name: Soul-hungry Slaughterers (Upgrade), points: 10 }
+units:
+  - name: Aetaos’Rau’Keres
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 315 }
+    legends: true
+  - name: An’Ggrath The Unbound
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+    legends: true
+  - name: Be’Lakor
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 390 }
+  - name: Beasts Of Nurgle
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+          - { models: 2, points: 140 }
+  - name: Bloodcrushers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 95 }
+          - { models: 6, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 105 }
+          - { models: 6, points: 190 }
+  - name: Bloodletters
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 110 }
+  - name: Bloodmaster
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Bloodletters
+  - name: Bloodthirster
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 320 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 335 }
+  - name: Blue Horrors
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 125 }
+  - name: Burning Chariot
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+  - name: Changecaster
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Blue Horrors
+      - Pink Horrors
+  - name: Contorted Epitome
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Daemonettes
+  - name: Daemon Prince Of Chaos
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 165 }
+  - name: Daemon Prince Of Chaos With Wings
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 190 }
+  - name: Daemonettes
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 90 }
+  - name: Epidemius
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Plaguebearers
+  - name: Exalted Flamer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Flamers
+  - name: Fateskimmer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Screamers
+  - name: Feculent Gnarlmaw
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+  - name: Fiends
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 180 }
+  - name: Flamers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 65 }
+          - { models: 6, points: 130 }
+  - name: Flesh Hounds
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 150 }
+  - name: Fluxmaster
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Blue Horrors
+      - Pink Horrors
+  - name: Furies
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 40 }
+          - { models: 10, points: 80 }
+    legends: true
+  - name: Giant Chaos Spawn
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+    legends: true
+  - name: Great Unclean One
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 265 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 280 }
+  - name: Hellflayers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+          - { models: 2, points: 160 }
+  - name: Herald Of Slaanesh On Steed Of Slaanesh
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Seekers
+    legends: true
+  - name: Horticulous Slimux
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+    role: leader
+    attachTo:
+      - Beasts Of Nurgle
+      - Plague Toads
+      - Pox Riders
+  - name: Infernal Enrapturess
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Daemonettes
+  - name: Kairos Fateweaver
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 295 }
+  - name: Karanak
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Flesh Hounds
+  - name: Keeper Of Secrets
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 255 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 270 }
+  - name: Lord Of Change
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 300 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 315 }
+  - name: Nurglings
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 45 }
+          - { models: 6, points: 90 }
+  - name: Pink Horrors
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 150 }
+  - name: Plague Drones
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 110 }
+          - { models: 6, points: 220 }
+  - name: Plague Toads
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 120 }
+    legends: true
+  - name: Plaguebearers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 115 }
+  - name: Pox Riders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 160 }
+    legends: true
+  - name: Poxbringer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: leader
+    attachTo:
+      - Plaguebearers
+  - name: Rendmaster On Blood Throne
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+  - name: Rotigus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 280 }
+  - name: Scabeiathrax The Bloated
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 275 }
+    legends: true
+  - name: Screamers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 160 }
+  - name: Seekers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 155 }
+  - name: Shalaxi Helbane
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 340 }
+  - name: Skarbrand
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 315 }
+  - name: Skull Altar
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+  - name: Skull Cannon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+  - name: Skullmaster
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Bloodcrushers
+  - name: Skulltaker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Bloodletters
+  - name: Sloppity Bilepiper
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: leader
+    attachTo:
+      - Plaguebearers
+  - name: Soul Grinder
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 195 }
+  - name: Spined Chaos Beast
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 145 }
+    legends: true
+  - name: Spoilpox Scrivener
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Plaguebearers
+  - name: Syll’Esske
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+    role: leader
+    attachTo:
+      - Daemonettes
+  - name: The Blue Scribes
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+  - name: The Changeling
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+  - name: The Masque Of Slaanesh
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+  - name: Tormentbringer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+    role: leader
+    attachTo:
+      - Hellflayers
+  - name: Tranceweaver
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Daemonettes
+  - name: Zarakynel
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 320 }
+    legends: true

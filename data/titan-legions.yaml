@@ -1,0 +1,30 @@
+name: Titan Legions
+slug: titan-legions
+version: "1.0"
+firstSeen: 2026-06-17
+detachments: []
+units:
+  - name: Reaver Titan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 2200 }
+  - name: Warbringer Nemesis Titan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 2600 }
+  - name: Warhound Titan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 1100 }
+  - name: Warlord Titan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 3500 }

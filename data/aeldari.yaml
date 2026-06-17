@@ -1,0 +1,904 @@
+name: Aeldari
+slug: aeldari
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Armoured Warhost
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Guiding Presence, points: 25 }
+      - { name: Spirit Stone of Raelyth, points: 20 }
+  - name: Aspect Host
+    dp: 3
+    objective: DISRUPTION
+    enhancements:
+      - { name: Aspect of Murder, points: 15 }
+      - { name: Mantle of Wisdom, points: 20 }
+      - { name: Shimmerstone, points: 10 }
+      - { name: Strategic Savant, points: 10 }
+  - name: Corsair Coterie
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Archraider, points: 35 }
+      - { name: Infamy, points: 25 }
+      - { name: Voidstone, points: 15 }
+      - { name: Webway Pathstone, points: 25 }
+  - name: Devoted Of Ynnead
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Borrowed Vigour, points: 10 }
+      - { name: Gaze of Ynnead, points: 15 }
+      - { name: Morbid Might, points: 15 }
+      - { name: Storm of Whispers, points: 10 }
+  - name: Eldritch Raiders
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Adrenal Infusions, points: 20 }
+      - { name: Alacritous Assault, points: 20 }
+      - { name: Exotic Munitions, points: 15 }
+      - { name: Pirate Prince, points: 15 }
+  - name: Fateful Performance
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: A Foot in the Future, points: 15 }
+      - { name: Mistweave, points: 20 }
+  - name: Ghosts Of The Webway
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Cegorach’s Coil, points: 25 }
+      - { name: Mask of Secrets, points: 15 }
+      - { name: Mistweave, points: 15 }
+      - { name: Murder’s Jest, points: 20 }
+  - name: Guardian Battlehost
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Breath of Vaul, points: 10 }
+      - { name: Craftworld’s Champion, points: 25 }
+      - { name: Ethereal Pathway, points: 30 }
+      - { name: Protector of the Paths, points: 20 }
+  - name: Path Of The Outcast
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Assassins' Eye (Upgrade), points: 15 }
+      - { name: Camouflaged Snipers (Upgrade), points: 10 }
+  - name: Seer Council
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Lucid Eye, points: 30 }
+      - { name: Runes of Warding, points: 25 }
+      - { name: Stone of Eldritch Fury, points: 15 }
+      - { name: Torc of Morai-Heg, points: 20 }
+  - name: Serpent’S Brood
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Fanged Leer, points: 10 }
+      - { name: Key of Ghosts, points: 20 }
+      - { name: Shedskin Raiment, points: 25 }
+      - { name: Weavers' Wail, points: 20 }
+  - name: Spirit Conclave
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Higher Duty, points: 25 }
+      - { name: Light of Clarity, points: 30 }
+      - { name: Rune of Mists, points: 10 }
+      - { name: Stave of Kurnous, points: 15 }
+  - name: Twilight Flickers
+    dp: 1
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Prelude Performer, points: 20 }
+      - { name: Shadowfall Masks (Upgrade), points: 15 }
+  - name: Warhost
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Gift of Foresight, points: 15 }
+      - { name: Phoenix Gem, points: 35 }
+      - { name: Psychic Destroyer, points: 30 }
+      - { name: Timeless Strategist, points: 15 }
+  - name: Windrider Host
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Echoes of Ulthanesh, points: 20 }
+      - { name: Firstdrawn Blade, points: 10 }
+      - { name: Mirage Field, points: 25 }
+      - { name: Seersight Strike, points: 15 }
+units:
+  - name: Amallyn Shadowguide
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    legends: true
+  - name: Asurmen
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+    role: leader
+    attachTo:
+      - Dire Avengers
+  - name: Autarch
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Dark Reapers
+      - Dire Avengers
+      - Fire Dragons
+      - Guardian Defenders
+      - Howling Banshees
+      - Storm Guardians
+      - Striking Scorpions
+  - name: Autarch Skyrunner
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Corsair Cloud Dancer Band
+      - Windriders
+    legends: true
+  - name: Autarch Wayleaper
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Swooping Hawks
+      - Warp Spiders
+  - name: Avatar Of Khaine
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 265 }
+  - name: Baharroth
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+    role: leader
+    attachTo:
+      - Swooping Hawks
+  - name: Bonesinger
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    role: leader
+    attachTo:
+      - Wraithblades
+      - Wraithguard
+      - Wraithlord
+    legends: true
+  - name: Cobra
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+    legends: true
+  - name: Corsair Cloud Dancer Band
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 125 }
+          - { models: 4, points: 150 }
+          - { models: 6, points: 210 }
+          - { models: 7, points: 245 }
+    legends: true
+  - name: Corsair Reaver Band
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 125 }
+          - { models: 6, points: 150 }
+          - { models: 10, points: 250 }
+          - { models: 11, points: 275 }
+    legends: true
+  - name: Corsair Skyreavers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 160 }
+  - name: Corsair Voidreavers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 65 }
+          - { models: 10, points: 110 }
+  - name: Corsair Voidscarred
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 160 }
+  - name: Crimson Hunter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: D-Cannon Platform
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+  - name: Dark Reapers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 210 }
+  - name: Death Jester
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+  - name: Dire Avengers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 150 }
+  - name: Eldrad Ulthran
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+    role: leader
+    attachTo:
+      - Guardian Defenders
+      - Storm Guardians
+      - Warlock Conclave
+  - name: Falcon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+  - name: Farseer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Guardian Defenders
+      - Storm Guardians
+      - Warlock Conclave
+  - name: Farseer Skyrunner
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Warlock Skyrunners
+      - Windriders
+  - name: Fire Dragons
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 120 }
+          - { models: 10, points: 240 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 130 }
+          - { models: 10, points: 250 }
+  - name: Fire Prism
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Firestorm
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    legends: true
+  - name: Fuegan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+    role: leader
+    attachTo:
+      - Fire Dragons
+  - name: Guardian Defenders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 90 }
+  - name: Hemlock Wraithfighter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 155 }
+  - name: Hornet
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    legends: true
+  - name: Howling Banshees
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 165 }
+  - name: Illic Nightspear
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Rangers
+    legends: true
+  - name: Irillyth
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+    role: leader
+    attachTo:
+      - Shadow Spectres
+    legends: true
+  - name: Jain Zar
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+    role: leader
+    attachTo:
+      - Howling Banshees
+  - name: Karandras
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Striking Scorpions
+    legends: true
+  - name: Kharseth
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Corsair Reaver Band
+      - Corsair Voidreavers
+      - Corsair Voidscarred
+  - name: Lhykhis
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+    role: leader
+    attachTo:
+      - Warp Spiders
+  - name: Lynx
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+    legends: true
+  - name: Maugan Ra
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Dark Reapers
+  - name: Night Spinner
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 190 }
+  - name: Nightwing
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+    legends: true
+  - name: Phantom Titan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 2100 }
+  - name: Phoenix
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 175 }
+    legends: true
+  - name: Prince Yriel
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Corsair Reaver Band
+      - Corsair Voidreavers
+      - Corsair Voidscarred
+  - name: Rangers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 60 }
+          - { models: 10, points: 110 }
+  - name: Revenant Titan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 1100 }
+  - name: Scorpion
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 410 }
+    legends: true
+  - name: Shadow Spectres
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 30 }
+          - { models: 5, points: 115 }
+          - { models: 10, points: 230 }
+    legends: true
+  - name: Shadow Weaver Platform
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+  - name: Shadowseer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Troupe
+  - name: Shining Spears
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 105 }
+          - { models: 6, points: 210 }
+  - name: Shroud Runners
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 95 }
+          - { models: 6, points: 175 }
+  - name: Skathach Wraithknight
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 490 }
+    legends: true
+  - name: Skyweavers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 105 }
+          - { models: 4, points: 210 }
+  - name: Solitaire
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+  - name: Spiritseer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+  - name: Starfangs
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+          - { models: 2, points: 140 }
+  - name: Starweaver
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+  - name: Storm Guardians
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 110 }
+  - name: Striking Scorpions
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 145 }
+  - name: Swooping Hawks
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 190 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 115 }
+          - { models: 10, points: 205 }
+  - name: The Visarch
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Corsair Reaver Band
+      - Corsair Voidreavers
+      - Corsair Voidscarred
+      - Guardian Defenders
+      - Storm Guardians
+      - Ynnari Incubi
+      - Ynnari Kabalite Warriors
+      - Ynnari Wyches
+  - name: The Yncarne
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 245 }
+  - name: Troupe
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 6, points: 100 }
+          - { models: 11, points: 190 }
+          - { models: 12, points: 205 }
+  - name: Troupe Master
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Troupe
+  - name: Vampire Hunter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 460 }
+    legends: true
+  - name: Vampire Raider
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 430 }
+    legends: true
+  - name: Vibro Cannon Platform
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+  - name: Voidweaver
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+  - name: Vyper
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+          - { models: 2, points: 140 }
+  - name: War Walkers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+          - { models: 2, points: 170 }
+  - name: Warlock
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    role: support
+    attachTo:
+      - Guardian Defenders
+      - Storm Guardians
+  - name: Warlock Conclave
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 55 }
+          - { models: 4, points: 120 }
+    role: leader
+    attachTo:
+      - Guardian Defenders
+      - Storm Guardians
+  - name: Warlock Skyrunners
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+          - { models: 2, points: 90 }
+    role: leader
+    attachTo:
+      - Windriders
+  - name: Warp Hunter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 145 }
+    legends: true
+  - name: Warp Spiders
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 115 }
+          - { models: 10, points: 200 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 130 }
+          - { models: 10, points: 215 }
+  - name: Wasp Assault Walker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    legends: true
+  - name: Wave Serpent
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+  - name: Webway Gate
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 105 }
+    legends: true
+  - name: Windriders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 160 }
+  - name: Wraithblades
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 140 }
+  - name: Wraithguard
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 145 }
+  - name: Wraithknight
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 435 }
+    wargear:
+      - { item: Heavy wraithcannon, points: 10 }
+  - name: Wraithknight With Ghostglaive
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 405 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 425 }
+  - name: Wraithlord
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+  - name: Wraithseer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+    legends: true
+  - name: Ynnari Archon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Ynnari Incubi
+      - Ynnari Kabalite Warriors
+  - name: Ynnari Incubi
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 170 }
+  - name: Ynnari Kabalite Warriors
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 110 }
+  - name: Ynnari Raider
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+  - name: Ynnari Reavers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 65 }
+          - { models: 6, points: 120 }
+  - name: Ynnari Succubus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    role: leader
+    attachTo:
+      - Ynnari Wyches
+  - name: Ynnari Venom
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Ynnari Wyches
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 90 }
+  - name: Yvraine
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Corsair Reaver Band
+      - Corsair Voidreavers
+      - Corsair Voidscarred
+      - Guardian Defenders
+      - Storm Guardians
+      - Ynnari Incubi
+      - Ynnari Kabalite Warriors
+      - Ynnari Wyches

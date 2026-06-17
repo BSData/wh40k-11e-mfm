@@ -1,0 +1,595 @@
+name: T’au Empire
+slug: tau-empire
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Advanced Acquisition Cadre
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Negation Emitters (Upgrade), points: 15 }
+      - { name: Unmasking Suite (Upgrade), points: 15 }
+  - name: Auxiliary Cadre
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Admired Leader, points: 20 }
+      - { name: Student of Kauyon, points: 20 }
+  - name: Experimental Prototype Cadre
+    dp: 1
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Plasma Accelerator Rifle, points: 20 }
+      - { name: Supernova Launcher, points: 15 }
+      - { name: Thermoneutronic Projector, points: 15 }
+  - name: Kauyon
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Exemplar of the Kauyon, points: 20 }
+      - { name: Precision of the Patient Hunter, points: 15 }
+      - { name: Solid-image Projection Unit, points: 20 }
+      - { name: "Through Unity, Devastation", points: 30 }
+  - name: Kroot Hunting Pack
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Borthrod Gland, points: 15 }
+      - { name: Kroothawk Flock, points: 10 }
+      - { name: Nomadic Hunter, points: 20 }
+      - { name: Root-carved Weapons, points: 10 }
+  - name: Mont’Ka
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Coordinated Exploitation, points: 30 }
+      - { name: Exemplar of the Mont’ka, points: 10 }
+      - { name: Strategic Conqueror, points: 15 }
+      - { name: Strike Swiftly, points: 35 }
+  - name: Retaliation Cadre
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Internal Grenade Racks, points: 20 }
+      - { name: Prototype Weapon System, points: 15 }
+      - { name: Puretide Engram Neurochip, points: 15 }
+      - { name: Starflare Ignition System, points: 20 }
+units:
+  - name: Aun’Shi
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Breacher Team
+      - Kroot Carnivores
+      - Kroot Farstalkers
+      - Strike Team
+    legends: true
+  - name: Aun’Va
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 65 }
+    legends: true
+  - name: Ax-1-0 Tiger Shark
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 315 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 375 }
+  - name: Barracuda
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 220 }
+    legends: true
+  - name: Breacher Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 90 }
+  - name: Broadside Battlesuits
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 75 }
+          - { models: 2, points: 150 }
+          - { models: 3, points: 240 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+          - { models: 2, points: 170 }
+          - { models: 3, points: 260 }
+    wargear:
+      - { item: High-yield missile pods, points: 5 }
+  - name: Cadre Fireblade
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Breacher Team
+      - Strike Team
+  - name: Commander Farsight
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Crisis Battlesuits
+      - Crisis Fireknife Battlesuits
+      - Crisis Starscythe Battlesuits
+      - Crisis Sunforge Battlesuits
+  - name: Commander In Coldstar Battlesuit
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Crisis Battlesuits
+      - Crisis Fireknife Battlesuits
+      - Crisis Starscythe Battlesuits
+      - Crisis Sunforge Battlesuits
+  - name: Commander In Crisis Battlesuit
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Crisis Battlesuits
+      - Crisis Fireknife Battlesuits
+      - Crisis Starscythe Battlesuits
+      - Crisis Sunforge Battlesuits
+    legends: true
+  - name: Commander In Enforcer Battlesuit
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Crisis Battlesuits
+      - Crisis Fireknife Battlesuits
+      - Crisis Starscythe Battlesuits
+      - Crisis Sunforge Battlesuits
+  - name: Commander Shadowsun
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+  - name: Crisis Battlesuits
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 200 }
+          - { models: 6, points: 400 }
+    legends: true
+  - name: Crisis Fireknife Battlesuits
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 100 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 110 }
+    wargear:
+      - { item: Missile pod, points: 5 }
+  - name: Crisis Starscythe Battlesuits
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 90 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 100 }
+    wargear:
+      - { item: T'au flamer, points: 5 }
+  - name: Crisis Sunforge Battlesuits
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 125 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 135 }
+  - name: Darkstrider
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Pathfinder Team
+  - name: Devilfish
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Drone Sentry Turret
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    legends: true
+  - name: Ethereal
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Breacher Team
+      - Strike Team
+  - name: Firesight Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+  - name: Ghostkeel Battlesuit
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+    wargear:
+      - { item: Cyclic Ion Raker, points: 10 }
+  - name: Great Knarloc
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    legends: true
+  - name: Hammerhead Gunship
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Heavy Gun Drones
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 45 }
+    legends: true
+  - name: Knarloc Riders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 110 }
+    legends: true
+  - name: Kroot Carnivores
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 65 }
+          - { models: 20, points: 130 }
+  - name: Kroot Farstalkers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 12, points: 75 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 12, points: 85 }
+  - name: Kroot Flesh Shaper
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    role: leader
+    attachTo:
+      - Kroot Carnivores
+      - Kroot Farstalkers
+  - name: Kroot Hounds
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 45 }
+          - { models: 10, points: 65 }
+  - name: Kroot Lone-Spear
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+  - name: Kroot Trail Shaper
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Kroot Carnivores
+      - Kroot Farstalkers
+  - name: Kroot War Shaper
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Kroot Carnivores
+      - Kroot Farstalkers
+  - name: Krootox Rampagers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 85 }
+          - { models: 6, points: 170 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 95 }
+          - { models: 6, points: 180 }
+  - name: Krootox Riders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+          - { models: 2, points: 60 }
+          - { models: 3, points: 90 }
+  - name: Longstrike
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+    legends: true
+  - name: Manta
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 2100 }
+  - name: Orca Dropship
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 275 }
+    legends: true
+  - name: Pathfinder Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 80 }
+    wargear:
+      - { item: Ion rifle, points: 5 }
+  - name: Piranhas
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 65 }
+          - { models: 2, points: 110 }
+          - { models: 3, points: 165 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+          - { models: 2, points: 120 }
+          - { models: 3, points: 175 }
+  - name: R’Varna Battlesuit
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 200 }
+    legends: true
+  - name: Razorshark Strike Fighter
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: Remora Stealth Drones
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 160 }
+    legends: true
+  - name: Remote Sensor Tower
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    legends: true
+  - name: Riptide Battlesuit
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 210 }
+    wargear:
+      - { item: Ion accelerator, points: 20 }
+  - name: Shas’O R’Alai
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Xv9 Hazard Battlesuits
+    legends: true
+  - name: Sky Ray Gunship
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+  - name: Stealth Battlesuits
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 100 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 110 }
+  - name: Stormsurge
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 360 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 385 }
+  - name: Strike Team
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 70 }
+  - name: Sun Shark Bomber
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Ta’Unar Supremacy Armour
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 790 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 890 }
+  - name: Tetras
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 80 }
+          - { models: 4, points: 160 }
+    legends: true
+  - name: The Twin Lance
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 205 }
+  - name: Tidewall Droneport
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Tidewall Gunrig
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+  - name: Tidewall Shieldline
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+          - { models: 1, points: 20, desc: Tidewall Defence Platform, addon: true }
+  - name: Tiger Shark
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 325 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 375 }
+  - name: Tx42 Piranha
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    legends: true
+  - name: Vespid Stingwings
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 70 }
+          - { models: 10, points: 115 }
+  - name: Xv9 Hazard Battlesuits
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+          - { models: 2, points: 110 }
+    legends: true
+  - name: Y’Vahra Battlesuit
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 210 }
+    legends: true

@@ -1,0 +1,434 @@
+name: Adeptus Mechanicus
+slug: adeptus-mechanicus
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Cohort Acquisitus
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Explorator Dispensation, points: 20 }
+      - { name: Stealth-screened Cybercanids (Upgrade), points: 15 }
+  - name: Cohort Cybernetica
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Arch-negator, points: 5 }
+      - { name: Emotionless Clarity, points: 10 }
+      - { name: Lord of Machines, points: 15 }
+      - { name: Necromechanic, points: 20 }
+  - name: Data-Psalm Conclave
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Data-blessed Autosermon, points: 15 }
+      - { name: Mantle of the Gnosticarch, points: 10 }
+      - { name: Mechanicus Locum, points: 5 }
+      - { name: Temporcopia, points: 20 }
+  - name: Eradication Cohort
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Belicosa-class Capacitor Vanes, points: 25 }
+      - { name: Martial Signatum Amplificator, points: 15 }
+      - { name: Omnicogitator, points: 25 }
+      - { name: Omnissiah’s Fury, points: 10 }
+  - name: Explorator Maniple
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Artisan, points: 10 }
+      - { name: Genetor, points: 20 }
+      - { name: Logis, points: 15 }
+      - { name: Magos, points: 10 }
+  - name: Haloscreed Battle Clade
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Cognitive Reinforcement, points: 30 }
+      - { name: Inloaded Lethality, points: 15 }
+      - { name: Sanctified Ordnance, points: 10 }
+      - { name: Transoracular Dyad Wafers, points: 15 }
+  - name: Lords Of The Forge
+    dp: 1
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: TL-4ø9, points: 30 }
+      - { name: Vingh’s Wafers of Dynamism, points: 25 }
+  - name: Luminen Auto-Choir
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Electromiasmic Brazier, points: 10 }
+      - { name: Voltagheist Reliquary, points: 15 }
+  - name: Rad-Zone Corps
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Autoclavic Denunciation, points: 15 }
+      - { name: Malphonic Susurrus, points: 20 }
+      - { name: Peerless Eradicator, points: 20 }
+      - { name: Radial Suffusion, points: 25 }
+  - name: Skitarii Hunter Cohort
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Battle-sphere Uplink, points: 25 }
+      - { name: Cantic Thrallnet, points: 25 }
+      - { name: Clandestine Infiltrator, points: 15 }
+      - { name: Veiled Hunter, points: 10 }
+units:
+  - name: Archaeopter Fusilave
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: Archaeopter Stratoraptor
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 185 }
+  - name: Archaeopter Transvector
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 145 }
+  - name: Belisarius Cawl
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 220 }
+  - name: Corpuscarii Electro-Priests
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 65 }
+          - { models: 10, points: 130 }
+  - name: Cybernetica Datasmith
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 25 }
+    role: support
+    attachTo:
+      - Kastelan Robots
+  - name: Fulgurite Electro-Priests
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 70 }
+          - { models: 10, points: 140 }
+  - name: Hastarii Exterminators
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 115 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 130 }
+  - name: Hastarii Fusiliers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 115 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 130 }
+  - name: Ironstrider Ballistarii
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 80 }
+          - { models: 2, points: 160 }
+          - { models: 3, points: 240 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+          - { models: 2, points: 175 }
+          - { models: 3, points: 255 }
+    wargear:
+      - { item: Twin cognis lascannon, points: 10 }
+  - name: Kastelan Robots
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 2, points: 160 }
+          - { models: 4, points: 320 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 2, points: 180 }
+          - { models: 4, points: 340 }
+  - name: Kataphron Breachers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 150 }
+          - { models: 6, points: 320 }
+  - name: Kataphron Destroyers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 100 }
+          - { models: 6, points: 210 }
+  - name: Onager Dunecrawler
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 155 }
+  - name: Pteraxii Skystalkers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 160 }
+  - name: Pteraxii Sterylizors
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 170 }
+  - name: Secutarii Hoplites
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 65 }
+          - { models: 10, points: 130 }
+    legends: true
+  - name: Secutarii Peltasts
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 50 }
+          - { models: 10, points: 100 }
+    legends: true
+  - name: Serberys Raiders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 60 }
+          - { models: 6, points: 120 }
+  - name: Serberys Sulphurhounds
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 55 }
+          - { models: 6, points: 110 }
+  - name: Servitor Battleclade
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 9, points: 65 }
+  - name: Sicarian Infiltrators
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 155 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 165 }
+  - name: Sicarian Ruststalkers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 170 }
+  - name: Skitarii Marshal
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 35 }
+    role: support
+    attachTo:
+      - Hastarii Exterminators
+      - Hastarii Fusiliers
+      - Secutarii Hoplites
+      - Secutarii Peltasts
+      - Skitarii Rangers
+      - Skitarii Vanguard
+  - name: Skitarii Rangers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 85 }
+  - name: Skitarii Vanguard
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 90 }
+  - name: Skorpius Disintegrator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+    wargear:
+      - { item: Ferrumite cannon, points: 10 }
+  - name: Skorpius Dunerider
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Sydonian Dragoons With Radium Jezzails
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+          - { models: 2, points: 100 }
+          - { models: 3, points: 150 }
+  - name: Sydonian Dragoons With Taser Lances
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+          - { models: 2, points: 120 }
+          - { models: 3, points: 170 }
+  - name: Sydonian Skatros
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+  - name: Tech-Priest Dominus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Corpuscarii Electro-Priests
+      - Fulgurite Electro-Priests
+      - Hastarii Exterminators
+      - Hastarii Fusiliers
+      - Kataphron Breachers
+      - Kataphron Destroyers
+      - Secutarii Hoplites
+      - Secutarii Peltasts
+      - Servitor Battleclade
+      - Skitarii Rangers
+      - Skitarii Vanguard
+  - name: Tech-Priest Enginseer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: leader
+    attachTo:
+      - Corpuscarii Electro-Priests
+      - Fulgurite Electro-Priests
+      - Kataphron Breachers
+      - Kataphron Destroyers
+      - Secutarii Hoplites
+      - Secutarii Peltasts
+      - Skitarii Rangers
+      - Skitarii Vanguard
+  - name: Tech-Priest Manipulus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Corpuscarii Electro-Priests
+      - Fulgurite Electro-Priests
+      - Hastarii Exterminators
+      - Hastarii Fusiliers
+      - Kataphron Breachers
+      - Kataphron Destroyers
+      - Secutarii Hoplites
+      - Secutarii Peltasts
+      - Servitor Battleclade
+      - Skitarii Rangers
+      - Skitarii Vanguard
+  - name: Technoarcheologist
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    role: support
+    attachTo:
+      - Corpuscarii Electro-Priests
+      - Fulgurite Electro-Priests
+      - Hastarii Exterminators
+      - Hastarii Fusiliers
+      - Kataphron Breachers
+      - Kataphron Destroyers
+      - Secutarii Hoplites
+      - Secutarii Peltasts
+      - Servitor Battleclade
+      - Skitarii Rangers
+      - Skitarii Vanguard
+  - name: Terrax-Pattern Termite
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 200 }
+    legends: true
+  - name: Thulia Ghuld
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+  - name: X-101
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    legends: true

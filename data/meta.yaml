@@ -1,0 +1,53 @@
+version: "1.0"
+lastUpdated: 2026-06-17
+notes: |-
+  To muster a Warhammer 40,000 army, you will need the points values for your chosen units and enhancements, and the Detachment Points (DP) for your chosen detachments. A guide to mustering an army can be found in the Warhammer 40,000 app. Points values that were raised or lowered in the most recent update are marked with red or green, with the change shown in brackets.
+
+  UNITS
+
+  A unit’s points cost can vary as follows:
+
+  Starting Strength: The number of models a unit contains can affect its points cost. This may change per model (e.g. 1 model, 2 models, 3 models, etc.) or it may be presented with a lower and upper limit to starting strength (e.g. one cost for 5 models, another cost for 10 models). In the latter case, your units can contain a number of models in between these limits, but you must still pay the maximum points cost for a unit that contains more than its minimum number of models.
+  Requisition Thresholds: If you include the same unit (at any size) in your army more than a stated number of times, the points costs of those additional units may vary (e.g. if a unit has an entry stating ‘Your 3rd+ Units Cost’, you could select that unit twice at the normal cost, then subsequent selections would cost that higher amount).
+  Wargear: Some units have a points cost associated with a wargear item they can take. In all cases, these costs are per item taken, and are applied on top of the unit's main points cost.
+
+  If a unit has the Leader/Support ability, the units it can be attached to are listed after its points values.
+
+  DETACHMENTS
+
+  Each detachment entry features the following information:
+  Detachment Points (DP): The number of DP you can spend on detachments depends on the battle size (see the Warhammer 40,000 app).
+  Force Disposition: Each detachment grants your army a Force Disposition, which can affect the missions you will play.
+  Enhancements: The points costs for each enhancement featured in that detachment.
+  Unique Tag: Some detachments are tagged with a ‘Unique’ word or phrase. You cannot select more than one detachment that has the same one of these tags.
+factions:
+  - adepta-sororitas
+  - adeptus-custodes
+  - adeptus-mechanicus
+  - aeldari
+  - astra-militarum
+  - black-templars
+  - blood-angels
+  - chaos-daemons
+  - chaos-knights
+  - chaos-space-marines
+  - chaos-titan-legions
+  - dark-angels
+  - death-guard
+  - deathwatch
+  - drukhari
+  - emperors-children
+  - genestealer-cults
+  - grey-knights
+  - imperial-agents
+  - imperial-knights
+  - leagues-of-votann
+  - necrons
+  - orks
+  - space-marines
+  - space-wolves
+  - tau-empire
+  - thousand-sons
+  - titan-legions
+  - tyranids
+  - world-eaters

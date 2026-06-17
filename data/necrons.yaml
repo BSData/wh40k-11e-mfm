@@ -1,0 +1,661 @@
+name: Necrons
+slug: necrons
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Annihilation Legion
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Eldritch Nightmare, points: 10 }
+      - { name: Eternal Madness, points: 20 }
+      - { name: Ingrained Superiority, points: 5 }
+      - { name: Soulless Reaper, points: 15 }
+  - name: Awakened Dynasty
+    dp: 3
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Enaegic Dermal Bond, points: 30 }
+      - { name: Nether-realm Casket, points: 20 }
+      - { name: Phasal Subjugator, points: 35 }
+      - { name: Veil of Darkness, points: 20 }
+  - name: Canoptek Court
+    dp: 3
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Autodivinator, points: 15 }
+      - { name: Dimensional Sanctum, points: 20 }
+      - { name: Hyperphasic Fulcrum, points: 15 }
+      - { name: Metalodermal Tesla Weave, points: 10 }
+  - name: Cryptek Conclave
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Atomic Disintegrators, points: 10 }
+      - { name: Gauntlet of Compression, points: 20 }
+      - { name: Gravitic Bolas, points: 15 }
+      - { name: Quantum Abacus, points: 15 }
+  - name: Cursed Legion
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Cursed Circlet, points: 25 }
+      - { name: Destroyer Ankh, points: 20 }
+      - { name: Mark of the Nekrosor, points: 20 }
+      - { name: Murdermind, points: 15 }
+  - name: Hand Of The Dynasty
+    dp: 1
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Enlivened Sentinels (Upgrade), points: 20 }
+      - { name: Tools of Dominion (Upgrade), points: 15 }
+  - name: Hypercrypt Legion
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Arisen Tyrant, points: 25 }
+      - { name: Dimensional Overseer, points: 25 }
+      - { name: Hyperspatial Transfer Node, points: 15 }
+      - { name: Osteoclave Fulcrum, points: 20 }
+  - name: Obeisance Phalanx
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Eternal Conqueror, points: 25 }
+      - { name: Honourable Combatant, points: 10 }
+      - { name: Unflinching Will, points: 20 }
+      - { name: Warrior Noble, points: 15 }
+  - name: Pantheon Of Woe
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Animus Damper, points: 35 }
+      - { name: Quantum Goad, points: 45 }
+      - { name: Reletavistic Tether, points: 40 }
+      - { name: Singularity Matrix, points: 45 }
+  - name: Skyshroud Spearhead
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Deepening Madness (Upgrade), points: 20 }
+      - { name: Recursive Reanimation (Upgrade), points: 5 }
+  - name: Starshatter Arsenal
+    dp: 3
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Chrono-impedance Fields, points: 25 }
+      - { name: Demanding Leader, points: 10 }
+      - { name: Dread Majesty, points: 30 }
+      - { name: Miniaturised Nebuloscope, points: 15 }
+  - name: The Phaeron'S Armoury
+    dp: 1
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Mortality Shroud (Aura) (Upgrade), points: 10 }
+      - { name: Prelocational Optimiser, points: 25 }
+units:
+  - name: Annihilation Barge
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+  - name: Anrakyr The Traveller
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Immortals
+    legends: true
+  - name: C’Tan Shard Of The Deceiver
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 330 }
+  - name: C’Tan Shard Of The Nightbringer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 360 }
+  - name: C’Tan Shard Of The Void Dragon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 345 }
+  - name: Canoptek Acanthrites
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 85 }
+          - { models: 6, points: 170 }
+    legends: true
+  - name: Canoptek Doomstalker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+  - name: Canoptek Macrocytes
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 70 }
+  - name: Canoptek Reanimator
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Canoptek Scarab Swarms
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 40 }
+          - { models: 6, points: 80 }
+  - name: Canoptek Spyders
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+          - { models: 2, points: 110 }
+  - name: Canoptek Tomb Crawlers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 50 }
+  - name: Canoptek Tomb Sentinel
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    legends: true
+  - name: Canoptek Tomb Stalker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+    legends: true
+  - name: Canoptek Wraiths
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 3, points: 95 }
+          - { models: 6, points: 220 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 3, points: 115 }
+          - { models: 6, points: 240 }
+  - name: Catacomb Command Barge
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+  - name: Chronomancer
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: support
+    attachTo:
+      - Immortals
+      - Necron Warriors
+  - name: Convergence Of Dominion
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+          - { models: 2, points: 120 }
+          - { models: 3, points: 180 }
+  - name: Cryptothralls
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 60 }
+  - name: Deathmarks
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 60 }
+          - { models: 10, points: 120 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 70 }
+          - { models: 10, points: 130 }
+  - name: Doom Scythe
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 200 }
+  - name: Doomsday Ark
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 200 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 220 }
+  - name: Flayed Ones
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 55 }
+          - { models: 10, points: 100 }
+  - name: Gauss Pylon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 210 }
+    legends: true
+  - name: Geomancer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: support
+    attachTo:
+      - Canoptek Macrocytes
+      - Immortals
+      - Necron Warriors
+  - name: Ghost Ark
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+  - name: Hexmark Destroyer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+  - name: Illuminor Szeras
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 175 }
+  - name: Immortals
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 70 }
+          - { models: 10, points: 140 }
+  - name: Imotekh The Stormlord
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    role: leader
+    attachTo:
+      - Immortals
+      - Lychguard
+      - Necron Warriors
+  - name: Lokhust Destroyers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 40 }
+          - { models: 2, points: 55 }
+          - { models: 3, points: 80 }
+          - { models: 6, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+          - { models: 2, points: 65 }
+          - { models: 3, points: 90 }
+          - { models: 6, points: 170 }
+  - name: Lokhust Heavy Destroyers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 50 }
+          - { models: 2, points: 100 }
+          - { models: 3, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+          - { models: 2, points: 110 }
+          - { models: 3, points: 160 }
+  - name: Lokhust Lord
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Lokhust Destroyers
+      - Lokhust Heavy Destroyers
+  - name: Lord
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Immortals
+      - Lychguard
+      - Necron Warriors
+    legends: true
+  - name: Lychguard
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 160 }
+  - name: Monolith
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 420 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 440 }
+  - name: Necron Warriors
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 80 }
+          - { models: 20, points: 190 }
+  - name: Nekrosor Ammentar
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 175 }
+  - name: Nemesor Zahndrekh
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Immortals
+      - Lychguard
+      - Necron Warriors
+    legends: true
+  - name: Night Scythe
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+  - name: Night Shroud
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+    legends: true
+  - name: Obelisk
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 280 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 310 }
+  - name: Ophydian Destroyers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 145 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 155 }
+  - name: Orikan The Diviner
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: support
+    attachTo:
+      - Immortals
+      - Necron Warriors
+  - name: Overlord
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Immortals
+      - Lychguard
+      - Necron Warriors
+  - name: Overlord With Translocation Shroud
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Immortals
+      - Lychguard
+      - Necron Warriors
+  - name: Plasmancer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: support
+    attachTo:
+      - Immortals
+      - Necron Warriors
+  - name: Psychomancer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: support
+    attachTo:
+      - Immortals
+      - Necron Warriors
+  - name: Royal Warden
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Immortals
+      - Necron Warriors
+  - name: Sentry Pylons
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+    legends: true
+  - name: Seraptek Heavy Construct
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 540 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 570 }
+  - name: Skorpekh Destroyers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 85 }
+          - { models: 6, points: 170 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 95 }
+          - { models: 6, points: 180 }
+  - name: Skorpekh Lord
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Skorpekh Destroyers
+  - name: Technomancer
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: support
+    attachTo:
+      - Canoptek Wraiths
+      - Immortals
+      - Necron Warriors
+  - name: Tesseract Ark
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+    legends: true
+  - name: Tesseract Vault
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 445 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 465 }
+  - name: The Silent King
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 400 }
+  - name: Tomb Blades
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 70 }
+          - { models: 6, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 150 }
+  - name: Tomb Citadel Walls
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+    legends: true
+  - name: Transcendent C’Tan
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 340 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 360 }
+  - name: Trazyn The Infinite
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Immortals
+      - Lychguard
+      - Necron Warriors
+  - name: Triarch Praetorians
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 160 }
+  - name: Triarch Stalker
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 110 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+  - name: Vargard Obyron
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Immortals
+      - Lychguard
+      - Necron Warriors
+    legends: true

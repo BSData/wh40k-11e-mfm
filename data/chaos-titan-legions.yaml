@@ -1,0 +1,30 @@
+name: Chaos Titan Legions
+slug: chaos-titan-legions
+version: "1.0"
+firstSeen: 2026-06-17
+detachments: []
+units:
+  - name: Chaos Reaver Titan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 2200 }
+  - name: Chaos Warbringer Nemesis Titan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 2600 }
+  - name: Chaos Warhound Titan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 1100 }
+  - name: Chaos Warlord Titan
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 3500 }

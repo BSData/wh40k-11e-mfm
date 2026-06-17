@@ -1,0 +1,884 @@
+name: Orks
+slug: orks
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Blitz Brigade
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Blitzkaptin, points: 25 }
+      - { name: Runnin’ Boots, points: 10 }
+      - { name: Supercharged Squig Oil, points: 10 }
+      - { name: Tuff Git, points: 5 }
+  - name: Bully Boyz
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: ’Eadstompa, points: 10 }
+      - { name: Big Gob, points: 20 }
+      - { name: Da Biggest Boss, points: 15 }
+      - { name: Tellyporta, points: 25 }
+  - name: Da Big Hunt
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Glory Hog, points: 30 }
+      - { name: Proper Killy, points: 15 }
+      - { name: Skrag Every Stash!, points: 25 }
+      - { name: Surly as a Squiggoth, points: 20 }
+  - name: Dread Mob
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Gitfinder Gogglez, points: 10 }
+      - { name: Press It Fasta!, points: 35 }
+      - { name: Smoky Gubbinz, points: 15 }
+      - { name: Supa-glowy Fing, points: 20 }
+  - name: Freebooter Krew
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Bionik Workshop, points: 15 }
+      - { name: Da Kaptin, points: 10 }
+      - { name: Git-Spotter Squig, points: 20 }
+      - { name: Razgit’s Magik Map, points: 25 }
+  - name: Green Tide
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Bloodthirsty Belligerence, points: 15 }
+      - { name: Brutal But Kunnin’, points: 25 }
+      - { name: Ferocious Show Off, points: 10 }
+      - { name: Raucous Warcaller, points: 20 }
+  - name: Kult Of Speed
+    dp: 2
+    objective: DISRUPTION
+    enhancements:
+      - { name: Fasta Than Yooz, points: 35 }
+      - { name: Speed Makes Right, points: 25 }
+      - { name: Squig-hide Tyres, points: 15 }
+      - { name: Wazblasta, points: 10 }
+  - name: More Dakka!
+    dp: 1
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Da Gobshot Thunderbuss, points: 15 }
+      - { name: Dead Shiny Shootas (Upgrade), points: 15 }
+  - name: Rollin' Deff
+    dp: 1
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Boarding Ramps (Upgrade), points: 10 }
+      - { name: Targetin’ Gizmos (Upgrade), points: 15 }
+  - name: Speedwaaagh!
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Dakkamek, points: 25 }
+      - { name: Kustom Shokk Box, points: 10 }
+      - { name: Master Meknologist, points: 20 }
+      - { name: Supa-Burny Fuel, points: 15 }
+  - name: Taktikal Brigade
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Mork’s Kunnin’, points: 20 }
+      - { name: Slippery Git, points: 15 }
+  - name: War Horde
+    dp: 3
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Follow Me Ladz, points: 25 }
+      - { name: Headwoppa’s Killchoppa, points: 20 }
+      - { name: Kunnin’ But Brutal, points: 15 }
+      - { name: Supa-Cybork Body, points: 15 }
+units:
+  - name: Attack Fighta
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    legends: true
+  - name: Bannernob
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: support
+    attachTo:
+      - Boyz
+      - Breaka Boyz
+      - Burna Boyz
+      - Flash Gitz
+      - Lootas
+      - Nobz
+      - Tankbustas
+  - name: Battlewagon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 145 }
+    wargear:
+      - { item: ard case, points: 15 }
+  - name: Beast Snagga Boyz
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 90 }
+          - { models: 20, points: 170 }
+  - name: Beastboss
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Beast Snagga Boyz
+  - name: Beastboss On Squigosaur
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Squighog Boyz
+  - name: Big Gunz
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 20 }
+          - { models: 2, points: 40 }
+    legends: true
+  - name: Big Mek
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Boyz
+      - Breaka Boyz
+      - Lootas
+      - Mek Gunz
+      - Nobz
+      - Tankbustas
+  - name: Big Mek Dakkarig
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 100 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+  - name: Big Mek In Mega Armour
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Meganobz
+  - name: Big Mek On Warbike
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+    role: leader
+    attachTo:
+      - Nobz On Warbikes
+      - Skorchas
+      - Warbikers
+      - Warbuggies
+    legends: true
+  - name: Big Mek With Kustom Force Field
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: leader
+    attachTo:
+      - Boyz
+      - Burna Boyz
+      - Lootas
+      - Nobz
+      - Tankbustas
+    legends: true
+  - name: Big Mek With Shokk Attack Gun
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 70 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Boyz
+      - Breaka Boyz
+      - Lootas
+      - Mek Gunz
+      - Nobz
+      - Tankbustas
+  - name: Big Trakk
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    legends: true
+  - name: Big’Ed Bossbunka
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+  - name: Bigboss
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: leader
+    attachTo:
+      - Boyz
+      - Breaka Boyz
+      - Nobz
+  - name: Blitza-Bommer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+  - name: Boomdakka Snazzwagon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Boss Snikrot
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Kommandos
+  - name: Boss Zagstruk
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    role: leader
+    attachTo:
+      - Stormboyz
+    legends: true
+  - name: Boyz
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 75 }
+          - { models: 20, points: 150 }
+  - name: Breaka Boyz
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 6, points: 125 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 6, points: 135 }
+  - name: Burna Boyz
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 60 }
+          - { models: 10, points: 120 }
+  - name: Burna-Bommer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+  - name: Chinork Warkopta
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+    legends: true
+  - name: Da Red Gobbo
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    role: leader
+    attachTo:
+      - Gretchin
+    legends: true
+  - name: Dakkajet
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+  - name: Deff Dread
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 110 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+  - name: Deff Rolla Battle Fortress
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 250 }
+    legends: true
+  - name: Deffkilla Wartrike
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Nobz On Warbikes
+      - Skorchas
+      - Warbikers
+      - Warbuggies
+  - name: Deffkoptas
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 75 }
+          - { models: 6, points: 140 }
+  - name: Deffkoptas With Big Shootas
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 130 }
+    legends: true
+  - name: Fighta-Bommer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    legends: true
+  - name: Flash Gitz
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 160 }
+  - name: Gargantuan Squiggoth
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 440 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 490 }
+  - name: Ghazghkull Thraka
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 2, points: 235 }
+    role: leader
+    attachTo:
+      - Boyz
+      - Breaka Boyz
+      - Meganobz
+      - Nobz
+  - name: Gorkanaut
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 255 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 275 }
+  - name: Gretchin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 11, points: 45 }
+          - { models: 22, points: 80 }
+  - name: Grot Bomm Launcha
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    legends: true
+  - name: Grot Mega-Tank
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+    legends: true
+  - name: Grot Tanks
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 4, points: 155 }
+          - { models: 8, points: 310 }
+    legends: true
+  - name: Hunta Rig
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+  - name: Kannonwagon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 115 }
+    legends: true
+  - name: Kaptin Badrukk
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Flash Gitz
+    legends: true
+  - name: Kill Krusha
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 230 }
+    legends: true
+  - name: Kill Rig
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 145 }
+  - name: Kill Tank
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 295 }
+    legends: true
+  - name: Killa Kans
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 120 }
+          - { models: 6, points: 240 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 130 }
+          - { models: 6, points: 250 }
+  - name: Kommandos
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 120 }
+  - name: Kustom Boosta-Blasta
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Lifta Wagon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+    legends: true
+  - name: Lootas
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 50 }
+          - { models: 10, points: 100 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 60 }
+          - { models: 10, points: 110 }
+  - name: Mad Dok Grotsnik
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Boyz
+      - Burna Boyz
+      - Lootas
+      - Nobz
+      - Tankbustas
+    legends: true
+  - name: Mega Dread
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 225 }
+    legends: true
+  - name: Meganobz
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 2, points: 60 }
+          - { models: 3, points: 90 }
+          - { models: 5, points: 150 }
+          - { models: 6, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 2, points: 80 }
+          - { models: 3, points: 110 }
+          - { models: 5, points: 170 }
+          - { models: 6, points: 200 }
+  - name: Megatrakk Scrapjet
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+  - name: Mek
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+    role: leader
+    attachTo:
+      - Boyz
+      - Lootas
+      - Mek Gunz
+      - Nobz
+      - Tankbustas
+  - name: Mek Gunz
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 45 }
+          - { models: 2, points: 90 }
+          - { models: 3, points: 135 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+          - { models: 2, points: 100 }
+          - { models: 3, points: 145 }
+  - name: Meka-Dread
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 210 }
+    legends: true
+  - name: Mekboy Workshop
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    legends: true
+  - name: Morkanaut
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 270 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 290 }
+  - name: Mozrog Skragbad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+    role: leader
+    attachTo:
+      - Squighog Boyz
+  - name: Nobz
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 105 }
+          - { models: 10, points: 210 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 115 }
+          - { models: 10, points: 220 }
+  - name: Nobz On Warbikes
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 125 }
+    legends: true
+  - name: Painboss
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Beast Snagga Boyz
+  - name: Painboy
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: support
+    attachTo:
+      - Boyz
+      - Breaka Boyz
+      - Burna Boyz
+      - Lootas
+      - Nobz
+      - Tankbustas
+  - name: Painboy On Warbike
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    role: leader
+    attachTo:
+      - Nobz On Warbikes
+      - Skorchas
+      - Warbikers
+      - Warbuggies
+    legends: true
+  - name: Rukkatrukk Squigbuggy
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Shokkjump Dragsta
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Skorchas
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 45 }
+          - { models: 2, points: 90 }
+    legends: true
+  - name: Squiggoth
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+    legends: true
+  - name: Squighog Boyz
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 4, points: 140 }
+          - { models: 8, points: 270 }
+  - name: Stompa
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 600 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 700 }
+  - name: Stormboyz
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 65 }
+          - { models: 10, points: 130 }
+  - name: Tankbustas
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 6, points: 125 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 6, points: 135 }
+  - name: Trukk
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+  - name: Ufthak Blackhawk
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Boyz
+      - Nobz
+    legends: true
+  - name: Warbikers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 60 }
+          - { models: 6, points: 120 }
+  - name: Warboss
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Boyz
+      - Breaka Boyz
+      - Nobz
+  - name: Warboss In Mega Armour
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Meganobz
+  - name: Warboss On Warbike
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Nobz On Warbikes
+      - Skorchas
+      - Warbikers
+      - Warbuggies
+    legends: true
+  - name: Warbuggies
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+          - { models: 2, points: 80 }
+    legends: true
+  - name: Wartrakk
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+  - name: Wazbom Blastajet
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 165 }
+  - name: Wazdakka Gutsmek
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 175 }
+  - name: Weirdboy
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    role: leader
+    attachTo:
+      - Boyz
+      - Breaka Boyz
+  - name: Wurrboy
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: leader
+    attachTo:
+      - Beast Snagga Boyz
+  - name: Zodgrod Wortsnagga
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Gretchin

@@ -1,0 +1,324 @@
+name: Genestealer Cults
+slug: genestealer-cults
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Biosanctic Broodsurge
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Alien Majesty, points: 15 }
+      - { name: Biomorph Adaptation, points: 25 }
+      - { name: Mutagenic Regeneration, points: 10 }
+      - { name: Predatory Instincts, points: 20 }
+  - name: Brood Brothers Auxilia
+    dp: 2
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Adaptive Reprisal, points: 15 }
+      - { name: Fire-point Commander, points: 10 }
+      - { name: Martial Espionage, points: 25 }
+      - { name: The Hero Returned, points: 20 }
+  - name: Final Day
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Enraptured Damnation, points: 10 }
+      - { name: Inhuman Integration, points: 20 }
+      - { name: Synaptic Auger, points: 15 }
+      - { name: Vanguard Tyrant, points: 25 }
+  - name: Heroes Of The Uprising
+    dp: 1
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Contraband Munitions, points: 20 }
+      - { name: Gene-tailored Toxins, points: 35 }
+  - name: Host Of Ascension
+    dp: 3
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: A Chink In Their Armour, points: 20 }
+      - { name: Assassination Edict, points: 15 }
+      - { name: Our Time is Nigh, points: 20 }
+      - { name: Prowling Agitant, points: 15 }
+  - name: Outlander Claw
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Assault Commando, points: 15 }
+      - { name: Cartographic Data-leech, points: 10 }
+      - { name: Serpentine Tactics, points: 10 }
+      - { name: Starfall Shells, points: 10 }
+  - name: Purestrain Broodswarm
+    dp: 1
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Mark of the Star Children (Upgrade), points: 30 }
+      - { name: Talons of the Sire, points: 15 }
+  - name: Xenocreed Congregation
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Deeds that Speak to the Masses, points: 25 }
+      - { name: Denunciator of Tyrants, points: 25 }
+      - { name: Gene-sire’s Reliquant, points: 5 }
+      - { name: Incendiary Inspiration, points: 15 }
+  - name: Xenocult Masses
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Devious Disguises (Upgrade), points: 15 }
+      - { name: Inspired to Greatness, points: 15 }
+units:
+  - name: Aberrants
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 150 }
+          - { models: 10, points: 300 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 160 }
+          - { models: 10, points: 310 }
+  - name: Abominant
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 85 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    role: leader
+    attachTo:
+      - Aberrants
+  - name: Achilles Ridgerunners
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 95 }
+          - { models: 2, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+          - { models: 2, points: 170 }
+    wargear:
+      - { item: Heavy mining laser, points: 10 }
+  - name: Acolyte Hybrids With Autopistols
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 70 }
+          - { models: 10, points: 130 }
+  - name: Acolyte Hybrids With Hand Flamers
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 150 }
+  - name: Acolyte Iconward
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Acolyte Hybrids With Autopistols
+      - Acolyte Hybrids With Hand Flamers
+      - Hybrid Metamorphs
+      - Neophyte Hybrids
+  - name: Atalan Jackals
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 170 }
+  - name: Benefictus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    role: leader
+    attachTo:
+      - Acolyte Hybrids With Autopistols
+      - Acolyte Hybrids With Hand Flamers
+      - Hybrid Metamorphs
+      - Neophyte Hybrids
+  - name: Biophagus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: support
+    attachTo:
+      - Aberrants
+      - Acolyte Hybrids With Autopistols
+      - Acolyte Hybrids With Hand Flamers
+      - Hybrid Metamorphs
+      - Neophyte Hybrids
+  - name: Clamavus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: support
+    attachTo:
+      - Acolyte Hybrids With Autopistols
+      - Acolyte Hybrids With Hand Flamers
+      - Hybrid Metamorphs
+      - Neophyte Hybrids
+  - name: Goliath Rockgrinder
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 120 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 130 }
+  - name: Goliath Truck
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Hybrid Metamorphs
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 75 }
+          - { models: 10, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 160 }
+  - name: Jackal Alphus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    role: leader
+    attachTo:
+      - Atalan Jackals
+  - name: Kelermorph
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+  - name: Locus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 35 }
+    role: support
+    attachTo:
+      - Acolyte Hybrids With Autopistols
+      - Acolyte Hybrids With Hand Flamers
+      - Hybrid Metamorphs
+      - Neophyte Hybrids
+  - name: Magus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    role: leader
+    attachTo:
+      - Acolyte Hybrids With Autopistols
+      - Acolyte Hybrids With Hand Flamers
+      - Hybrid Metamorphs
+      - Neophyte Hybrids
+  - name: Neophyte Hybrids
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 70 }
+          - { models: 20, points: 145 }
+  - name: Nexos
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: support
+    attachTo:
+      - Acolyte Hybrids With Autopistols
+      - Acolyte Hybrids With Hand Flamers
+      - Hybrid Metamorphs
+      - Neophyte Hybrids
+  - name: Patriarch
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    role: leader
+    attachTo:
+      - Purestrain Genestealers
+  - name: Primus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Acolyte Hybrids With Autopistols
+      - Acolyte Hybrids With Hand Flamers
+      - Hybrid Metamorphs
+      - Neophyte Hybrids
+  - name: Purestrain Genestealers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 80 }
+          - { models: 10, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 150 }
+  - name: Reductus Saboteur
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Sanctus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+  - name: Tectonic Fragdrill
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 125 }
+    legends: true

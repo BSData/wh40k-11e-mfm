@@ -1,0 +1,274 @@
+name: Imperial Knights
+slug: imperial-knights
+version: "1.0"
+firstSeen: 2026-06-17
+detachments:
+  - name: Dominus Foebreakers
+    dp: 1
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Archeotech Autoloaders, points: 25 }
+      - { name: Blessed Plate, points: 30 }
+  - name: Freeblade Company
+    dp: 3
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Bringer of Justice, points: 30 }
+      - { name: Hunter’s Eye, points: 25 }
+      - { name: Mysterious Guardian, points: 35 }
+      - { name: Sanctuary, points: 20 }
+  - name: Gate Warden Lance
+    dp: 2
+    objective: PRIORITY ASSETS
+    enhancements:
+      - { name: Acquisitor-at-Arms, points: 15 }
+      - { name: Augury Halo, points: 20 }
+      - { name: Purgation’s Hand, points: 20 }
+      - { name: Vengeful Tread, points: 15 }
+  - name: Questor Forgepact
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Knight of the Opus Machina (Aura), points: 15 }
+      - { name: Magos Questoris, points: 20 }
+  - name: Questoris Companions
+    dp: 3
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Crushing Condemnation, points: 10 }
+      - { name: Herald of Triumph, points: 15 }
+      - { name: Pennant of Silvered Fury, points: 15 }
+      - { name: Wyrmslayer Divination, points: 10 }
+  - name: Spearhead-At-Arms
+    dp: 2
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Fables of Nightmare, points: 10 }
+      - { name: Martial Tuition, points: 15 }
+      - { name: Mentor’s Pride, points: 20 }
+      - { name: Tales of Heroism, points: 10 }
+  - name: Throne-Bonded Outriders
+    dp: 1
+    objective: RECONNAISSANCE
+    enhancements:
+      - { name: Ancestral Overbleed (Upgrade), points: 10 }
+      - { name: Gyro-optimised Actuators (Upgrade), points: 15 }
+  - name: Valourstrike Lance
+    dp: 2
+    objective: PURGE THE FOE
+    enhancements:
+      - { name: Bearer of the Evanescent Ion, points: 15 }
+      - { name: Bearer of the Iron Chalice, points: 20 }
+      - { name: Bearer of the Judicant’s Helm, points: 25 }
+      - { name: Bearer of the Lancer’s Sigil, points: 25 }
+units:
+  - name: Acastus Knight Asterius
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 785 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 860 }
+  - name: Acastus Knight Porphyrion
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 725 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 800 }
+  - name: Armiger Helverin
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+  - name: Armiger Moirax
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: Armiger Warglaive
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+  - name: Canis Rex
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+  - name: Cerastus Knight Acheron
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 380 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 395 }
+  - name: Cerastus Knight Atrapos
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 405 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 425 }
+  - name: Cerastus Knight Castigator
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 380 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 395 }
+  - name: Cerastus Knight Lancer
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 435 }
+  - name: Knight Castellan
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 400 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 420 }
+  - name: Knight Crusader
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 395 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+    wargear:
+      - { item: Rapid-fire battle cannon, points: 15 }
+  - name: Knight Defender
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 400 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 420 }
+  - name: Knight Destrier
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 265 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 280 }
+  - name: Knight Errant
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 355 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 370 }
+  - name: Knight Gallant
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 355 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 370 }
+  - name: Knight Paladin
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 375 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 390 }
+  - name: Knight Preceptor
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 365 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 380 }
+  - name: Knight Valiant
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 400 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 415 }
+  - name: Knight Warden
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 375 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 390 }
+  - name: Questoris Knight Magaera
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 385 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 400 }
+  - name: Questoris Knight Styrix
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 375 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 390 }
