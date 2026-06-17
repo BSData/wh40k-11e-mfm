@@ -1,0 +1,30 @@
+version: 2
+updates:
+  # npm / pnpm dependencies (reads pnpm-lock.yaml)
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+    groups:
+      # Roll routine minor/patch bumps into a single PR; majors stay separate.
+      npm-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # GitHub Actions used in .github/workflows
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+    groups:
+      github-actions:
+        patterns:
+          - "*"
