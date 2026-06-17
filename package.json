@@ -24,7 +24,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.5.0",
     "@types/node": "^22.10.5",
     "lefthook": "^1.10.1",
     "tsx": "^4.19.2",
