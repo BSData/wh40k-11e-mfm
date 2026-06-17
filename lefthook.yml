@@ -1,0 +1,16 @@
+# Portable git hooks (https://lefthook.dev). Installed via `pnpm install` (postinstall).
+# Keeps commits green regardless of editor/agent. CI re-runs the same checks.
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome
+      glob: '*.{ts,js,json}'
+      run: pnpm exec biome check {staged_files}
+
+pre-push:
+  jobs:
+    - name: typecheck
+      run: pnpm typecheck
+    - name: test
+      run: pnpm test

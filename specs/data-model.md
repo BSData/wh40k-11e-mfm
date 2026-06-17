@@ -1,0 +1,113 @@
+# Spec: Data model
+
+The runtime contract lives in [`src/model.ts`](../src/model.ts) as zod schemas.
+This document is the prose source of truth — change it first, then the schema.
+
+## Faction file (`data/<slug>.yaml`)
+
+```yaml
+name: Necrons          # clean display name (from the index page)
+slug: necrons          # URL slug; the filename stem
+version: "1.0"         # site version stamp, always a quoted string
+firstSeen: 2026-06-17  # date this exact content was first observed (see below)
+detachments:           # sorted by name
+  - name: Annihilation Legion
+    dp: 2              # detachment's "detachment points" cost (integer) or null
+    objective: PURGE THE FOE   # objective banner text, or null
+    enhancements:      # sorted by name
+      - name: Eldritch Nightmare
+        points: 10
+units:                 # sorted by name
+  - name: Necron Warriors
+    pricing:           # tier order preserved (meaningful for per-instance pricing)
+      - range: "[1,)"            # interval of unit copies this tier prices (core)
+        label: Your Unit Costs   # site heading, kept for reference (secondary)
+        costs:                   # source order preserved; not re-sorted
+          - { models: 10, points: 80 }
+          - { models: 20, points: 190 }
+  - name: Technomancer
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs: [{ models: 1, points: 80 }]
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs: [{ models: 1, points: 90 }]
+    role: support              # leader | support, if the unit has that ability
+    attachTo: [Immortals, Necron Warriors]   # units it can be attached to
+  - name: Redemptor Dreadnought
+    pricing: [...]
+    wargear:                   # per-item costs added on top of the unit's cost
+      - { item: Macro plasma incinerator, points: 10 }
+```
+
+### `range` — which copies of a repeated unit the tier prices
+Interval notation parsed from the tier `label`. `[a,b]` is closed; `[a,)` is unbounded.
+| label | range |
+|---|---|
+| `Your Unit Costs` | `[1,)` |
+| `Your 1st Unit Costs` | `[1,1]` |
+| `Your 2nd + Unit Costs` | `[2,)` |
+| `Your 1st To 2nd Units Cost` | `[1,2]` |
+| `Your 3rd + Unit Costs` | `[3,)` |
+
+### `models` / `points` / `desc` — one cost option
+`models` is the total model count (sum of quantities in the source row) and `points` the
+cost — these are the core values. `desc` is added **only** when the row isn't a plain
+"N models" line, so simple rows stay terse and same-count rows stay distinguishable.
+`addon: true` marks "+"-prefixed extras (the leading "+ N " is stripped from `desc`).
+```yaml
+costs:
+  - { models: 10, points: 80 }                                              # plain — no desc
+  - { models: 3, points: 85, desc: 3 Wolf Guard Headtakers }                # named
+  - { models: 6, points: 115, desc: "3 Wolf Guard Headtakers, 3 Hunting Wolves" }  # composite (3+3)
+  - { models: 1, points: 60, desc: Invader ATV, addon: true }              # "+ 1 Invader ATV"
+  - { models: 1, points: 3500 }                                            # "3,500 pts" (thousands comma)
+```
+
+### `role` / `attachTo` / `wargear` — optional unit extras
+- `role` (`leader`/`support`) + `attachTo`: present when the unit has the Leader/Support
+  ability; `attachTo` lists the units it can join (from the role block's icon + list).
+- `wargear`: per-item point costs from the unit's "Wargear Options" block (`per` stripped).
+- `legends: true`: marks Legends (deprecated) units — see specs/scraping.md.
+
+### `firstSeen` — when this content took effect
+The date the file's *current content* was first observed. The scraper keeps it **stable
+across no-op scrapes** and only advances it (to the run date) when the rest of the content
+actually changes — so it records when each set of values came into effect, and an
+unchanged scrape produces no git diff. Implemented in `src/cli.ts` (`resolveFirstSeen`)
+via the content fingerprint `contentKey()` in `src/emit.ts`, which ignores `firstSeen`.
+
+### Rules & rationale
+- **One file per faction** — minimal, reviewable diffs; git is the change history.
+- **Deterministic ordering** (see `orderContent()` in `src/emit.ts`): entities sorted by
+  name, top-level keys in a fixed order, leaf cost/wargear/enhancement maps rendered in
+  flow style. A points change touches exactly one line.
+- **`pricing` is always a list of tiers.** Most units have one tier; units with
+  per-instance pricing have several. `range` is the core machine-readable interval;
+  `label` is the verbatim site heading kept for humans.
+- **`costs` preserve source order** (ascending size). The core is `models`/`points`;
+  `desc` is kept only where it adds information (named/composite/add-on rows).
+- **Names** (`unit.name`, `detachment.name`, `objective`) are Title-Cased deterministically
+  from the source's ALL-CAPS. Enhancement names are kept verbatim (already mixed case).
+- **Faithful characters** — the source's typographic apostrophe `’` (U+2019) is preserved
+  (e.g. `T’au Empire`), not normalised to `'`.
+
+## Meta file (`data/meta.yaml`)
+
+```yaml
+version: "1.0"            # site version at last full scrape
+lastUpdated: 2026-06-17   # most recent firstSeen across factions (stable on no-op)
+notes: |-                 # the expandable "Welcome…" help text (browser-captured)
+  To muster a Warhammer 40,000 army, you will need the points values for your...
+factions:                 # slugs successfully scraped, sorted
+  - adepta-sororitas
+  - ...
+```
+`lastUpdated` deliberately avoids a per-run timestamp so an unchanged scrape leaves
+`meta.yaml` byte-identical (no spurious PR). `notes` is present only on browser runs
+(omitted with `--no-legends`).
+
+## Index (in-memory only, not written)
+`SiteIndex` = `{ version, factions: [{ slug, name }] }`, parsed from the landing page
+to drive the scrape and supply clean display names.
