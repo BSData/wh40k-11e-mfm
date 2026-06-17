@@ -7,13 +7,15 @@ especially if a parse has started failing.
 ## Source
 - Landing page: `https://mfm.warhammer-community.com/en`
 - Faction page: `https://mfm.warhammer-community.com/en/<slug>`
-- The site is **Next.js (App Router), server-rendered**. All data is present in the
-  initial HTML — **no headless browser / JS execution is required.** A plain GET suffices.
+- The site is **Next.js (App Router), server-rendered**. The **base** data is present in
+  the initial HTML, so a plain GET covers it — no JS execution required. (Legends units
+  and the "Welcome…" notes are client-only and need a headless browser — see below.)
 
 ## Fetch policy
 - Native `fetch` with a descriptive User-Agent.
 - Retry transient failures (network error, HTTP 429, HTTP 5xx) with exponential backoff;
-  fail fast on other 4xx. ~750 ms courtesy delay between faction pages.
+  fail fast on other 4xx. Pacing between pages comes from the CLI's concurrency pool, not
+  a fixed delay.
 
 ## The streaming detail (most important)
 The page is assembled from **React Suspense** chunks. Pieces of a card — the name, the
@@ -28,9 +30,9 @@ further templates), and an entire unit card can be streamed.
 stable, then removes the consumed hidden blocks. After hydration the DOM matches the
 fully-rendered page, so the rest of the parser reads plain inline text. Within a cost row
 the trailing `NN pts` is the points (commas are thousands separators — `2,200 pts` →
-`2200`) and everything before it is the `size`; `models` is the sum of integers in the
-size, and the tier `label` parses into a `unitRange`. Enhancement points are inline and
-need no special handling.
+`2200`) and everything before it is the size text; `models` is the sum of integers in that
+text (with a `desc` kept when it isn't a plain "N models"), and the tier `label` parses
+into the interval `range`. Enhancement points are inline and need no special handling.
 
 ## Selectors (the drift-prone surface)
 | Datum | Selector |

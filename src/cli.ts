@@ -39,7 +39,7 @@ interface Args {
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { out: 'data', concurrency: 3, legends: true };
+  const args: Args = { out: 'data', concurrency: 4, legends: true };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--faction') args.faction = argv[++i];

@@ -1,7 +1,9 @@
 /**
- * Minimal, polite HTTP fetching. The MFM is fully server-rendered, so a plain
- * GET is all we need — no headless browser. Adds a descriptive User-Agent,
- * retry-with-backoff on transient failures, and a courtesy delay between pages.
+ * Minimal, polite HTTP fetching. The MFM's base data is server-rendered, so a
+ * plain GET covers it (Legends units and the "Welcome…" notes need a browser —
+ * see src/browser.ts). Adds a descriptive User-Agent and retry-with-backoff on
+ * transient failures. Pacing between pages is the caller's job (the CLI's
+ * concurrency pool; `sleep` here is only the inter-retry backoff).
  */
 
 export const BASE_URL = 'https://mfm.warhammer-community.com/en';

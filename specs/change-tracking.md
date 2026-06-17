@@ -1,7 +1,7 @@
 # Spec: Change tracking
 
 Goal: surface what changed whenever Games Workshop updates the MFM, with a clean
-audit trail. Implemented by [`src/diff.ts`](../src/diff.js) plus git itself.
+audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
 
 ## How it works
 1. The committed `data/*.yaml` is the **previous** snapshot.
