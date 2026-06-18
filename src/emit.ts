@@ -102,9 +102,12 @@ export type SiteMeta = {
 
 /** Metadata index. `lastUpdated` is stable on no-op scrapes (max of firstSeen). */
 export function metaToYaml(meta: SiteMeta): string {
-  const doc: Record<string, unknown> = { version: meta.version, lastUpdated: meta.lastUpdated };
-  if (meta.notes) doc.notes = meta.notes;
-  doc.factions = [...meta.factions].sort();
+  const doc = {
+    version: meta.version,
+    lastUpdated: meta.lastUpdated,
+    ...(meta.notes ? { notes: meta.notes } : {}),
+    factions: [...meta.factions].sort(),
+  };
   return stringify(doc, STRINGIFY_OPTS);
 }
 

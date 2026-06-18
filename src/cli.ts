@@ -42,8 +42,10 @@ function parseArgs(argv: string[]): Args {
   const args: Args = { out: 'data', concurrency: 4, legends: true };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--faction') args.faction = argv[++i];
-    else if (a === '--out') args.out = argv[++i] ?? args.out;
+    if (a === '--faction') {
+      const v = argv[++i];
+      if (v !== undefined) args.faction = v;
+    } else if (a === '--out') args.out = argv[++i] ?? args.out;
     else if (a === '--concurrency') args.concurrency = Number(argv[++i]) || args.concurrency;
     else if (a === '--no-legends') args.legends = false;
   }

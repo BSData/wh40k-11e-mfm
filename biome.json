@@ -6,9 +6,15 @@
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
+    "domains": { "project": "all" },
     "rules": {
       "preset": "recommended",
-      "suspicious": { "noConsole": { "level": "off", "options": { "allow": ["log"] } } }
+      "correctness": { "useImportExtensions": "off" },
+      "suspicious": { "noConsole": { "level": "off", "options": { "allow": ["log"] } } },
+      "style": {
+        "noNonNullAssertion": "error",
+        "useThrowOnlyError": "error"
+      }
     }
   },
   "javascript": { "formatter": { "quoteStyle": "single", "semicolons": "always" } }
