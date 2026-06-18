@@ -78,7 +78,7 @@ function parseCostRow(unitName: string, text: string): CostOption {
 }
 
 /** Parse a Leader/Support role block (icon + comma-separated attach list), if present. */
-function parseRole($: CheerioAPI, card: ReturnType<CheerioAPI>): Pick<Unit, 'role' | 'attachTo'> {
+function parseRole(card: ReturnType<CheerioAPI>): Pick<Unit, 'role' | 'attachTo'> {
   const imgs = card.find('img[src$="leader.svg"], img[src$="support.svg"]');
   if (imgs.length === 0) return {};
   if (imgs.length > 1) throw new Error('Unexpected multiple role blocks on one unit');
@@ -169,7 +169,7 @@ function parseUnit($: CheerioAPI, nameDiv: ReturnType<CheerioAPI>): Unit {
   return {
     name,
     pricing,
-    ...parseRole($, card),
+    ...parseRole(card),
     ...(wargear.length > 0 ? { wargear } : {}),
   };
 }

@@ -1,4 +1,4 @@
-import { type Browser, type BrowserContext, type Page, chromium } from 'playwright';
+import { type Browser, type BrowserContext, chromium, type Page } from 'playwright';
 
 /**
  * Headless-browser access for the bits that aren't in the server HTML:
