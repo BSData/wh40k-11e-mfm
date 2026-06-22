@@ -1,7 +1,7 @@
 name: Black Templars
 slug: black-templars
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-22
 detachments:
   - name: Anvil Siege Force
     dp: 2
@@ -201,7 +201,6 @@ units:
     role: support
     attachTo:
       - Assault Intercessor Squad
-      - Bladeguard Veteran Squad
       - Crusader Squad
       - Deathwatch Veterans
       - Decimus Kill Team
@@ -311,7 +310,6 @@ units:
       - Crusader Squad
       - Deathwatch Veterans
       - Decimus Kill Team
-      - Desolation Squad
       - Fortis Kill Team
       - Hellblaster Squad
       - Infernus Squad
