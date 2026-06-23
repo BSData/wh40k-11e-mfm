@@ -1,7 +1,7 @@
 name: Adepta Sororitas
 slug: adepta-sororitas
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Army Of Faith
     dp: 2
@@ -22,6 +22,7 @@ detachments:
   - name: Champions Of Faith
     dp: 2
     objective: DISRUPTION
+    unique: Reverend
     enhancements:
       - { name: Eyes of the Oracle, points: 10 }
       - { name: Mark of Devotion, points: 30 }
@@ -45,13 +46,14 @@ detachments:
     dp: 2
     objective: TAKE AND HOLD
     enhancements:
-      - { name: Catechism of Divine Penitence, points: 20 }
+      - { name: Catechism of Divine Penitence, points: 20, leaderTo: [ Repentia Squad ] }
       - { name: Psalm of Righteous Judgement, points: 30 }
       - { name: Refrain of Enduring Faith, points: 25 }
       - { name: Verse of Holy Piety, points: 15 }
   - name: Sacred Champions
     dp: 1
     objective: TAKE AND HOLD
+    unique: Reverend
     enhancements:
       - { name: Perfervid Haste, points: 10 }
       - { name: Writ of Compunction (Upgrade), points: 20 }

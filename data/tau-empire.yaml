@@ -1,7 +1,7 @@
 name: T’au Empire
 slug: tau-empire
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Advanced Acquisition Cadre
     dp: 1
@@ -12,12 +12,14 @@ detachments:
   - name: Auxiliary Cadre
     dp: 1
     objective: DISRUPTION
+    unique: Auxiliary
     enhancements:
       - { name: Admired Leader, points: 20 }
       - { name: Student of Kauyon, points: 20 }
   - name: Experimental Prototype Cadre
     dp: 1
     objective: PRIORITY ASSETS
+    unique: Battlesuit
     enhancements:
       - { name: Plasma Accelerator Rifle, points: 20 }
       - { name: Supernova Launcher, points: 15 }
@@ -33,6 +35,7 @@ detachments:
   - name: Kroot Hunting Pack
     dp: 2
     objective: TAKE AND HOLD
+    unique: Auxiliary
     enhancements:
       - { name: Borthrod Gland, points: 15 }
       - { name: Kroothawk Flock, points: 10 }
@@ -49,6 +52,7 @@ detachments:
   - name: Retaliation Cadre
     dp: 2
     objective: PURGE THE FOE
+    unique: Battlesuit
     enhancements:
       - { name: Internal Grenade Racks, points: 20 }
       - { name: Prototype Weapon System, points: 15 }

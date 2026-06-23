@@ -1,11 +1,12 @@
 name: Genestealer Cults
 slug: genestealer-cults
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Biosanctic Broodsurge
     dp: 2
     objective: TAKE AND HOLD
+    unique: Purestrain
     enhancements:
       - { name: Alien Majesty, points: 15 }
       - { name: Biomorph Adaptation, points: 25 }
@@ -36,6 +37,7 @@ detachments:
   - name: Host Of Ascension
     dp: 3
     objective: TAKE AND HOLD
+    unique: Hosts
     enhancements:
       - { name: A Chink In Their Armour, points: 20 }
       - { name: Assassination Edict, points: 15 }
@@ -52,6 +54,7 @@ detachments:
   - name: Purestrain Broodswarm
     dp: 1
     objective: PRIORITY ASSETS
+    unique: Purestrain
     enhancements:
       - { name: Mark of the Star Children (Upgrade), points: 30 }
       - { name: Talons of the Sire, points: 15 }
@@ -66,6 +69,7 @@ detachments:
   - name: Xenocult Masses
     dp: 1
     objective: DISRUPTION
+    unique: Hosts
     enhancements:
       - { name: Devious Disguises (Upgrade), points: 15 }
       - { name: Inspired to Greatness, points: 15 }

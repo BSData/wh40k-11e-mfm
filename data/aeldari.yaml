@@ -1,7 +1,7 @@
 name: Aeldari
 slug: aeldari
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Armoured Warhost
     dp: 1
@@ -44,12 +44,14 @@ detachments:
   - name: Fateful Performance
     dp: 1
     objective: DISRUPTION
+    unique: Acrobatic
     enhancements:
       - { name: A Foot in the Future, points: 15 }
       - { name: Mistweave, points: 20 }
   - name: Ghosts Of The Webway
     dp: 2
     objective: DISRUPTION
+    unique: Acrobatic
     enhancements:
       - { name: Cegorach’s Coil, points: 25 }
       - { name: Mask of Secrets, points: 15 }
@@ -80,6 +82,7 @@ detachments:
   - name: Serpent’S Brood
     dp: 2
     objective: PURGE THE FOE
+    unique: Acrobatic
     enhancements:
       - { name: Fanged Leer, points: 10 }
       - { name: Key of Ghosts, points: 20 }
@@ -96,6 +99,7 @@ detachments:
   - name: Twilight Flickers
     dp: 1
     objective: TAKE AND HOLD
+    unique: Acrobatic
     enhancements:
       - { name: Prelude Performer, points: 20 }
       - { name: Shadowfall Masks (Upgrade), points: 15 }
@@ -272,6 +276,7 @@ units:
           - { models: 5, points: 100 }
           - { models: 10, points: 210 }
   - name: Death Jester
+    groupTitle: Harlequins
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -534,6 +539,7 @@ units:
         costs:
           - { models: 1, points: 60 }
   - name: Shadowseer
+    groupTitle: Harlequins
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -564,6 +570,7 @@ units:
           - { models: 1, points: 490 }
     legends: true
   - name: Skyweavers
+    groupTitle: Harlequins
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -571,6 +578,7 @@ units:
           - { models: 2, points: 105 }
           - { models: 4, points: 210 }
   - name: Solitaire
+    groupTitle: Harlequins
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -590,6 +598,7 @@ units:
           - { models: 1, points: 70 }
           - { models: 2, points: 140 }
   - name: Starweaver
+    groupTitle: Harlequins
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -621,6 +630,7 @@ units:
           - { models: 5, points: 115 }
           - { models: 10, points: 205 }
   - name: The Visarch
+    groupTitle: Ynnari
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -637,12 +647,14 @@ units:
       - Ynnari Kabalite Warriors
       - Ynnari Wyches
   - name: The Yncarne
+    groupTitle: Ynnari
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 245 }
   - name: Troupe
+    groupTitle: Harlequins
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -652,6 +664,7 @@ units:
           - { models: 11, points: 190 }
           - { models: 12, points: 205 }
   - name: Troupe Master
+    groupTitle: Harlequins
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -681,6 +694,7 @@ units:
         costs:
           - { models: 1, points: 60 }
   - name: Voidweaver
+    groupTitle: Harlequins
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -825,6 +839,7 @@ units:
           - { models: 1, points: 160 }
     legends: true
   - name: Ynnari Archon
+    groupTitle: Ynnari
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -835,6 +850,7 @@ units:
       - Ynnari Incubi
       - Ynnari Kabalite Warriors
   - name: Ynnari Incubi
+    groupTitle: Ynnari
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -847,18 +863,21 @@ units:
           - { models: 5, points: 90 }
           - { models: 10, points: 170 }
   - name: Ynnari Kabalite Warriors
+    groupTitle: Ynnari
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 10, points: 110 }
   - name: Ynnari Raider
+    groupTitle: Ynnari
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
   - name: Ynnari Reavers
+    groupTitle: Ynnari
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -866,6 +885,7 @@ units:
           - { models: 3, points: 65 }
           - { models: 6, points: 120 }
   - name: Ynnari Succubus
+    groupTitle: Ynnari
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -875,18 +895,21 @@ units:
     attachTo:
       - Ynnari Wyches
   - name: Ynnari Venom
+    groupTitle: Ynnari
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
   - name: Ynnari Wyches
+    groupTitle: Ynnari
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 10, points: 90 }
   - name: Yvraine
+    groupTitle: Ynnari
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

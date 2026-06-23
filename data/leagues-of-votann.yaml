@@ -1,7 +1,7 @@
 name: Leagues of Votann
 slug: leagues-of-votann
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Armoured Trailblazers
     dp: 1
@@ -34,6 +34,7 @@ detachments:
   - name: Hearthband
     dp: 3
     objective: PRIORITY ASSETS
+    unique: Hearthband
     enhancements:
       - { name: Bastion Shield, points: 25 }
       - { name: High Kâhl, points: 30 }
@@ -50,6 +51,7 @@ detachments:
   - name: Hearthguard Covenant
     dp: 1
     objective: PRIORITY ASSETS
+    unique: Hearthband
     enhancements:
       - { name: High Kâhl, points: 30 }
       - { name: Ironskein, points: 10 }

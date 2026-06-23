@@ -1,7 +1,7 @@
 name: Adeptus Custodes
 slug: adeptus-custodes
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Auric Champions
     dp: 2
@@ -14,6 +14,7 @@ detachments:
   - name: Lions Of The Emperor
     dp: 2
     objective: DISRUPTION
+    unique: Lions
     enhancements:
       - { name: Admonimortis, points: 20 }
       - { name: Fierce Conqueror, points: 15 }
@@ -22,6 +23,7 @@ detachments:
   - name: Might Of The Moritoi
     dp: 1
     objective: PURGE THE FOE
+    unique: Armoury
     enhancements:
       - { name: Auramite Sarcophagus (Upgrade), points: 15 }
       - { name: Interred Expertise (Upgrade), points: 25 }
@@ -50,6 +52,7 @@ detachments:
   - name: Solar Spearhead
     dp: 2
     objective: TAKE AND HOLD
+    unique: Armoury
     enhancements:
       - { name: Adamantine Talisman, points: 25 }
       - { name: Augury Uplink, points: 35 }
@@ -66,6 +69,7 @@ detachments:
   - name: Tharanatoi Hammerblow
     dp: 1
     objective: PRIORITY ASSETS
+    unique: Lions
     enhancements:
       - { name: Efficient Aggression, points: 25 }
       - { name: Mnemo-locked Shrine Cipher, points: 25 }

@@ -1,7 +1,7 @@
 name: Adeptus Mechanicus
 slug: adeptus-mechanicus
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Cohort Acquisitus
     dp: 1
@@ -20,6 +20,7 @@ detachments:
   - name: Data-Psalm Conclave
     dp: 2
     objective: DISRUPTION
+    unique: Data-Psalm
     enhancements:
       - { name: Data-blessed Autosermon, points: 15 }
       - { name: Mantle of the Gnosticarch, points: 10 }
@@ -58,6 +59,7 @@ detachments:
   - name: Luminen Auto-Choir
     dp: 1
     objective: DISRUPTION
+    unique: Data-Psalm
     enhancements:
       - { name: Electromiasmic Brazier, points: 10 }
       - { name: Voltagheist Reliquary, points: 15 }

@@ -1,7 +1,7 @@
 name: Emperor’s Children
 slug: emperors-children
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Carnival Of Excess
     dp: 2
@@ -23,7 +23,7 @@ detachments:
     dp: 2
     objective: PURGE THE FOE
     enhancements:
-      - { name: Exalted Patron, points: 15 }
+      - { name: Exalted Patron, points: 15, leaderTo: [ Flawless Blades ] }
       - { name: Soulstain Made Manifest, points: 15 }
       - { name: Spiritsliver, points: 20 }
       - { name: Tears of the Phoenix, points: 25 }
@@ -127,6 +127,7 @@ units:
         costs:
           - { models: 1, points: 235 }
   - name: Daemonettes
+    groupTitle: Legions Of Excess
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -146,6 +147,7 @@ units:
       - { item: Heavy reaper autocannon, points: 10 }
       - { item: Hades lascannon, points: 10 }
   - name: Fiends
+    groupTitle: Legions Of Excess
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -179,6 +181,7 @@ units:
           - { models: 5, points: 85 }
           - { models: 10, points: 160 }
   - name: Keeper Of Secrets
+    groupTitle: Legions Of Excess
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -242,6 +245,7 @@ units:
         costs:
           - { models: 6, points: 160 }
   - name: Seekers
+    groupTitle: Legions Of Excess
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -249,6 +253,7 @@ units:
           - { models: 5, points: 80 }
           - { models: 10, points: 155 }
   - name: Shalaxi Helbane
+    groupTitle: Legions Of Excess
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

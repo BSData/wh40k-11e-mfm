@@ -1,7 +1,8 @@
 name: Black Templars
 slug: black-templars
 version: "1.0"
-firstSeen: 2026-06-22
+firstSeen: 2026-06-23
+parent: Space Marines
 detachments:
   - name: Anvil Siege Force
     dp: 2
@@ -146,6 +147,7 @@ detachments:
       - { name: Benediction of Fury, points: 15 }
 units:
   - name: Aggressor Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -158,6 +160,7 @@ units:
           - { models: 3, points: 100 }
           - { models: 6, points: 190 }
   - name: Ancient
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -180,6 +183,7 @@ units:
       - Sword Brethren Squad
       - Tactical Squad
   - name: Ancient In Terminator Armour
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -193,6 +197,7 @@ units:
       - Terminator Assault Squad
       - Terminator Squad
   - name: Apothecary
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -215,6 +220,7 @@ units:
       - Sword Brethren Squad
       - Tactical Squad
   - name: Apothecary Biologis
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -227,6 +233,7 @@ units:
       - Heavy Intercessor Squad
       - Indomitor Kill Team
   - name: Assault Intercessor Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -234,6 +241,7 @@ units:
           - { models: 5, points: 75 }
           - { models: 10, points: 150 }
   - name: Assault Intercessors With Jump Packs
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -246,6 +254,7 @@ units:
           - { models: 5, points: 95 }
           - { models: 10, points: 170 }
   - name: Astraeus
+    groupTitle: Space Marines
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -256,6 +265,7 @@ units:
         costs:
           - { models: 1, points: 575 }
   - name: Ballistus Dreadnought
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -266,6 +276,7 @@ units:
         costs:
           - { models: 1, points: 160 }
   - name: Bladeguard Ancient
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -275,6 +286,7 @@ units:
     attachTo:
       - Bladeguard Veteran Squad
   - name: Bladeguard Veteran Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -287,6 +299,7 @@ units:
           - { models: 3, points: 90 }
           - { models: 6, points: 170 }
   - name: Brutalis Dreadnought
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -297,6 +310,7 @@ units:
         costs:
           - { models: 1, points: 160 }
   - name: Captain
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -320,6 +334,7 @@ units:
       - Tactical Squad
       - Victrix Honour Guard
   - name: Captain In Gravis Armour
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -332,6 +347,7 @@ units:
       - Heavy Intercessor Squad
       - Indomitor Kill Team
   - name: Captain In Phobos Armour
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -346,6 +362,7 @@ units:
       - Scout Squad
       - Spectrus Kill Team
   - name: Captain In Terminator Armour
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -359,6 +376,7 @@ units:
       - Terminator Assault Squad
       - Terminator Squad
   - name: Captain With Jump Pack
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -385,6 +403,7 @@ units:
       - Sternguard Veteran Squad
       - Sword Brethren Squad
   - name: Centurion Assault Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -392,6 +411,7 @@ units:
           - { models: 3, points: 150 }
           - { models: 6, points: 300 }
   - name: Centurion Devastator Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -399,6 +419,7 @@ units:
           - { models: 3, points: 175 }
           - { models: 6, points: 350 }
   - name: Chaplain
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -435,6 +456,7 @@ units:
       - Intercessor Squad
       - Sword Brethren Squad
   - name: Chaplain In Terminator Armour
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -448,6 +470,7 @@ units:
       - Terminator Assault Squad
       - Terminator Squad
   - name: Chaplain On Bike
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -458,6 +481,7 @@ units:
       - Outrider Squad
       - Ravenwing Black Knights
   - name: Chaplain With Jump Pack
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -470,6 +494,7 @@ units:
       - Talonstrike Kill Team
       - Vanguard Veteran Squad With Jump Packs
   - name: Company Heroes
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -493,6 +518,7 @@ units:
           - { models: 10, points: 150, desc: "1 Sword Brother, 4 Neophytes, 5 Initiates" }
           - { models: 20, points: 290, desc: "1 Sword Brother, 8 Neophytes, 11 Initiates" }
   - name: Desolation Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -503,6 +529,7 @@ units:
         costs:
           - { models: 5, points: 210 }
   - name: Devastator Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -510,18 +537,21 @@ units:
           - { models: 5, points: 120 }
           - { models: 10, points: 200 }
   - name: Dreadnought
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 135 }
   - name: Drop Pod
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
   - name: Eliminator Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -541,6 +571,7 @@ units:
       - Sternguard Veteran Squad
       - Sword Brethren Squad
   - name: Eradicator Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -553,6 +584,7 @@ units:
           - { models: 3, points: 100 }
           - { models: 6, points: 190 }
   - name: Eradicator Squad With Heavy Bolters
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -573,6 +605,7 @@ units:
       - Crusader Squad
       - Sword Brethren Squad
   - name: Firestrike Servo-Turrets
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -610,12 +643,14 @@ units:
         costs:
           - { models: 1, points: 160 }
   - name: Hammerfall Bunker
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 175 }
   - name: Heavy Intercessor Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -623,6 +658,7 @@ units:
           - { models: 5, points: 100 }
           - { models: 10, points: 200 }
   - name: Hellblaster Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -648,6 +684,7 @@ units:
         costs:
           - { models: 1, points: 85 }
   - name: Inceptor Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -660,6 +697,7 @@ units:
           - { models: 3, points: 135 }
           - { models: 6, points: 255 }
   - name: Incursor Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -672,6 +710,7 @@ units:
           - { models: 5, points: 95 }
           - { models: 10, points: 160 }
   - name: Infernus Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -679,6 +718,7 @@ units:
           - { models: 5, points: 85 }
           - { models: 10, points: 170 }
   - name: Infiltrator Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -691,6 +731,7 @@ units:
           - { models: 5, points: 120 }
           - { models: 10, points: 190 }
   - name: Intercessor Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -698,18 +739,21 @@ units:
           - { models: 5, points: 80 }
           - { models: 10, points: 150 }
   - name: Invader Atv
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
   - name: Invictor Tactical Warsuit
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 125 }
   - name: Judiciar
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -730,6 +774,7 @@ units:
       - Sword Brethren Squad
       - Tactical Squad
   - name: Land Raider
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -750,6 +795,7 @@ units:
         costs:
           - { models: 1, points: 240 }
   - name: Land Raider Redeemer
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -760,6 +806,7 @@ units:
         costs:
           - { models: 1, points: 270 }
   - name: Land Speeder
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -770,6 +817,7 @@ units:
         costs:
           - { models: 1, points: 105 }
   - name: Lieutenant
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -792,6 +840,7 @@ units:
       - Sword Brethren Squad
       - Tactical Squad
   - name: Lieutenant In Phobos Armour
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -804,6 +853,7 @@ units:
       - Reiver Squad
       - Spectrus Kill Team
   - name: Lieutenant In Reiver Armour
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -813,6 +863,7 @@ units:
     attachTo:
       - Reiver Squad
   - name: Lieutenant With Combi-Weapon
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -837,6 +888,7 @@ units:
       - Sternguard Veteran Squad
       - Sword Brethren Squad
   - name: Outrider Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -845,6 +897,7 @@ units:
           - { models: 6, points: 140 }
           - { models: 1, points: 60, desc: Invader ATV, addon: true }
   - name: Predator Annihilator
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -855,6 +908,7 @@ units:
         costs:
           - { models: 1, points: 145 }
   - name: Predator Destructor
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -865,12 +919,14 @@ units:
         costs:
           - { models: 1, points: 150 }
   - name: Razorback
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
   - name: Redemptor Dreadnought
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -883,6 +939,7 @@ units:
     wargear:
       - { item: Macro plasma incinerator, points: 10 }
   - name: Reiver Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -910,12 +967,14 @@ units:
         costs:
           - { models: 1, points: 265 }
   - name: Rhino
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
   - name: Scout Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -935,6 +994,7 @@ units:
           - { models: 5, points: 85 }
           - { models: 10, points: 160 }
   - name: Storm Speeder Hailstrike
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -945,6 +1005,7 @@ units:
         costs:
           - { models: 1, points: 115 }
   - name: Storm Speeder Hammerstrike
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -955,6 +1016,7 @@ units:
         costs:
           - { models: 1, points: 140 }
   - name: Storm Speeder Thunderstrike
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -965,12 +1027,14 @@ units:
         costs:
           - { models: 1, points: 145 }
   - name: Stormhawk Interceptor
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 155 }
   - name: Stormraven Gunship
+    groupTitle: Space Marines
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -981,12 +1045,14 @@ units:
         costs:
           - { models: 1, points: 300 }
   - name: Stormtalon Gunship
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 165 }
   - name: Suppressor Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1009,12 +1075,14 @@ units:
           - { models: 9, points: 250 }
           - { models: 10, points: 275 }
   - name: Tactical Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 10, points: 140 }
   - name: Techmarine
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1032,6 +1100,7 @@ units:
       - Sword Brethren Squad
       - Tactical Squad
   - name: Terminator Assault Squad
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1048,12 +1117,14 @@ units:
           - { models: 5, points: 160 }
           - { models: 10, points: 320 }
   - name: Thunderhawk Gunship
+    groupTitle: Space Marines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 840 }
   - name: Vanguard Veteran Squad With Jump Packs
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -1066,6 +1137,7 @@ units:
           - { models: 5, points: 110 }
           - { models: 10, points: 210 }
   - name: Vindicator
+    groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -1076,6 +1148,7 @@ units:
         costs:
           - { models: 1, points: 200 }
   - name: Whirlwind
+    groupTitle: Space Marines
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs

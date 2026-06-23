@@ -1,7 +1,7 @@
 name: World Eaters
 slug: world-eaters
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Berzerker Warband
     dp: 3
@@ -14,6 +14,7 @@ detachments:
   - name: Brazen Engines
     dp: 1
     objective: PURGE THE FOE
+    unique: Onslaught
     enhancements:
       - { name: Murder-forged Entity (Upgrade), points: 15 }
       - { name: Talons of Butchery (Upgrade), points: 20 }
@@ -28,12 +29,13 @@ detachments:
     objective: PRIORITY ASSETS
     enhancements:
       - { name: Brazen Form, points: 25 }
-      - { name: Butcher Lord, points: 10 }
+      - { name: Butcher Lord, points: 10, leaderTo: [ Jakhals, Goremongers ] }
       - { name: Chosen of the Blood God, points: 15 }
       - { name: Strategic Slaughter, points: 20 }
   - name: Goretrack Onslaught
     dp: 2
     objective: TAKE AND HOLD
+    unique: Onslaught
     enhancements:
       - { name: Aggressive Deployment, points: 20 }
       - { name: Infernal Infusion, points: 25 }
@@ -45,7 +47,7 @@ detachments:
     enhancements:
       - { name: Blade of Endless Bloodshed, points: 30 }
       - { name: Blood-Forged Armour, points: 20 }
-      - { name: Disciple of Khorne, points: 15 }
+      - { name: Disciple of Khorne, points: 15, leaderTo: [ Flesh Hounds, Bloodcrushers ] }
       - { name: Icon of War, points: 25 }
   - name: Possessed Slaughterband
     dp: 2
@@ -69,6 +71,7 @@ units:
         costs:
           - { models: 1, points: 350 }
   - name: Bloodcrushers
+    groupTitle: Blood Legions
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -81,12 +84,14 @@ units:
           - { models: 3, points: 105 }
           - { models: 6, points: 190 }
   - name: Bloodletters
+    groupTitle: Blood Legions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 10, points: 90 }
   - name: Bloodthirster
+    groupTitle: Blood Legions
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -200,6 +205,7 @@ units:
           - { models: 3, points: 150 }
           - { models: 6, points: 290 }
   - name: Flesh Hounds
+    groupTitle: Blood Legions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -309,6 +315,7 @@ units:
         costs:
           - { models: 1, points: 155 }
   - name: Skarbrand
+    groupTitle: Blood Legions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

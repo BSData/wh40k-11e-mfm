@@ -1,7 +1,7 @@
 name: Necrons
 slug: necrons
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Annihilation Legion
     dp: 2
@@ -14,6 +14,7 @@ detachments:
   - name: Awakened Dynasty
     dp: 3
     objective: TAKE AND HOLD
+    unique: Dynasty
     enhancements:
       - { name: Enaegic Dermal Bond, points: 30 }
       - { name: Nether-realm Casket, points: 20 }
@@ -42,16 +43,18 @@ detachments:
       - { name: Cursed Circlet, points: 25 }
       - { name: Destroyer Ankh, points: 20 }
       - { name: Mark of the Nekrosor, points: 20 }
-      - { name: Murdermind, points: 15 }
+      - { name: Murdermind, points: 15, leaderTo: [ Skorpekh Destroyers, Lokhust Destroyers, Ophydian Destroyers, Lokhust Heavy Destroyers ] }
   - name: Hand Of The Dynasty
     dp: 1
     objective: TAKE AND HOLD
+    unique: Dynasty
     enhancements:
       - { name: Enlivened Sentinels (Upgrade), points: 20 }
       - { name: Tools of Dominion (Upgrade), points: 15 }
   - name: Hypercrypt Legion
     dp: 2
     objective: RECONNAISSANCE
+    unique: Hypercrypt
     enhancements:
       - { name: Arisen Tyrant, points: 25 }
       - { name: Dimensional Overseer, points: 25 }
@@ -90,6 +93,7 @@ detachments:
   - name: The Phaeron'S Armoury
     dp: 1
     objective: PRIORITY ASSETS
+    unique: Hypercrypt
     enhancements:
       - { name: Mortality Shroud (Aura) (Upgrade), points: 10 }
       - { name: Prelocational Optimiser, points: 25 }

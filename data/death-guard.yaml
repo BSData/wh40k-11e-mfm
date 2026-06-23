@@ -1,11 +1,12 @@
 name: Death Guard
 slug: death-guard
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Champions Of Contagion
     dp: 2
     objective: TAKE AND HOLD
+    unique: Flyblown
     enhancements:
       - { name: Cornucophagus, points: 35 }
       - { name: Final Ingredient, points: 20 }
@@ -14,6 +15,7 @@ detachments:
   - name: Contagion Engines
     dp: 1
     objective: PURGE THE FOE
+    unique: Engines
     enhancements:
       - { name: Lancet of the Worldsore (Upgrade), points: 15 }
       - { name: Parasitic Woe‑reaper (Upgrade), points: 15 }
@@ -28,12 +30,14 @@ detachments:
   - name: Flyblown Host
     dp: 1
     objective: RECONNAISSANCE
+    unique: Flyblown
     enhancements:
       - { name: Insectile Murmuration (Upgrade), points: 15 }
       - { name: Plagueveil (Upgrade), points: 15 }
   - name: Mortarion’S Hammer
     dp: 2
     objective: PURGE THE FOE
+    unique: Engines
     enhancements:
       - { name: Bilemaw Blight, points: 10 }
       - { name: Eye of Affliction, points: 20 }
@@ -71,6 +75,7 @@ detachments:
       - { name: Revolting Regeneration, points: 30 }
 units:
   - name: Beasts Of Nurgle
+    groupTitle: Plague Legions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -251,6 +256,7 @@ units:
     attachTo:
       - Plague Marines
   - name: Great Unclean One
+    groupTitle: Plague Legions
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -344,6 +350,7 @@ units:
       - Plague Marines
       - Poxwalkers
   - name: Nurglings
+    groupTitle: Plague Legions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -351,6 +358,7 @@ units:
           - { models: 3, points: 45 }
           - { models: 6, points: 90 }
   - name: Plague Drones
+    groupTitle: Plague Legions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -375,6 +383,7 @@ units:
     attachTo:
       - Plague Marines
   - name: Plaguebearers
+    groupTitle: Plague Legions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -398,6 +407,7 @@ units:
           - { models: 10, points: 65 }
           - { models: 20, points: 130 }
   - name: Rotigus
+    groupTitle: Plague Legions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
