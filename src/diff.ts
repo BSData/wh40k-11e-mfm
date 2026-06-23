@@ -44,6 +44,10 @@ function diffFaction(before: FactionContent, after: FactionContent): string[] {
     lines.push(`- Version: ${before.version} → ${after.version}`);
   }
 
+  if (before.parent !== after.parent) {
+    lines.push(`- Parent faction: ${before.parent ?? '—'} → ${after.parent ?? '—'}`);
+  }
+
   const oldUnits = unitNames(before);
   const newUnits = unitNames(after);
   for (const u of newUnits) if (!oldUnits.has(u)) lines.push(`- ➕ New unit: ${u}`);
@@ -53,6 +57,25 @@ function diffFaction(before: FactionContent, after: FactionContent): string[] {
   const newDet = detNames(after);
   for (const d of newDet) if (!oldDet.has(d)) lines.push(`- ➕ New detachment: ${d}`);
   for (const d of oldDet) if (!newDet.has(d)) lines.push(`- ➖ Removed detachment: ${d}`);
+
+  // Detachment attribute changes (for detachments present in both snapshots).
+  const beforeDet = new Map(before.detachments.map((d) => [d.name, d]));
+  for (const d of after.detachments) {
+    const prev = beforeDet.get(d.name);
+    if (!prev) continue; // a brand-new detachment is already reported above
+    if (prev.unique !== d.unique) {
+      lines.push(`- ${d.name} — unique: ${prev.unique ?? '—'} → ${d.unique ?? '—'}`);
+    }
+    // Per-enhancement Leader grants (the "LEADER:" list attached to an enhancement).
+    const prevEnh = new Map(prev.enhancements.map((e) => [e.name, e]));
+    for (const e of d.enhancements) {
+      const pe = prevEnh.get(e.name);
+      if (!pe) continue; // a new enhancement is covered by the points diff below
+      const pl = (pe.leaderTo ?? []).join(', ');
+      const nl = (e.leaderTo ?? []).join(', ');
+      if (pl !== nl) lines.push(`- ${d.name} · ${e.name} — leaderTo: [${pl}] → [${nl}]`);
+    }
+  }
 
   const oldPrices = priceMap(before);
   const newPrices = priceMap(after);

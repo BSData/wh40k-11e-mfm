@@ -64,6 +64,11 @@ export type Unit = z.infer<typeof Unit>;
 export const Enhancement = z.object({
   name: z.string().min(1),
   points: z.number().int().nonnegative(),
+  /**
+   * Units this enhancement unlocks the Leader ability for (the "LEADER:" list shown
+   * beside it): buying the enhancement grants its bearer the ability to lead these.
+   */
+  leaderTo: z.array(z.string().min(1)).optional(),
 });
 export type Enhancement = z.infer<typeof Enhancement>;
 
@@ -72,6 +77,8 @@ export const Detachment = z.object({
   /** The detachment's "detachment points" cost (e.g. `2DP` → 2), or null if absent. */
   dp: z.number().int().nonnegative().nullable(),
   objective: z.string().nullable(),
+  /** Sub-faction keyword this detachment is restricted to (the "UNIQUE: X" banner). */
+  unique: z.string().min(1).optional(),
   enhancements: z.array(Enhancement),
 });
 export type Detachment = z.infer<typeof Detachment>;
@@ -81,6 +88,11 @@ export const FactionContent = z.object({
   slug: z.string().min(1),
   name: z.string().min(1),
   version: z.string().min(1),
+  /**
+   * Parent army a sub-faction belongs to (e.g. "Space Marines" for Black Templars),
+   * from the page's army-group title. Absent for top-level factions.
+   */
+  parent: z.string().min(1).optional(),
   detachments: z.array(Detachment),
   units: z.array(Unit).min(1),
 });

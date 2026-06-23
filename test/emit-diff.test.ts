@@ -73,4 +73,20 @@ describe('changelog (ignores firstSeen)', () => {
   it('reports a brand new faction', () => {
     expect(changelog([], [necronsContent()])).toContain('➕ New faction');
   });
+
+  it('reports a detachment unique change and an enhancement leaderTo change', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const dyn = after.detachments.find((d) => d.name === 'Awakened Dynasty');
+    if (dyn) dyn.unique = 'Hypercrypt';
+    const murdermind = after.detachments
+      .find((d) => d.name === 'Cursed Legion')
+      ?.enhancements.find((e) => e.name === 'Murdermind');
+    if (murdermind) murdermind.leaderTo = ['Lokhust Destroyers'];
+    const log = changelog([before], [after]);
+    expect(log).toContain('Awakened Dynasty — unique: Dynasty → Hypercrypt');
+    expect(log).toContain(
+      'Cursed Legion · Murdermind — leaderTo: [Lokhust Destroyers, Skorpekh Destroyers, Lokhust Heavy Destroyers, Ophydian Destroyers] → [Lokhust Destroyers]',
+    );
+  });
 });

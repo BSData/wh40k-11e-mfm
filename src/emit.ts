@@ -26,13 +26,24 @@ function orderCost(c: CostOption): CostOption {
   return cost;
 }
 
-function orderDetachments(ds: Detachment[]) {
-  return [...ds].sort(byName).map((d) => ({
-    name: d.name,
-    dp: d.dp,
-    objective: d.objective,
-    enhancements: [...d.enhancements].sort(byName),
-  }));
+function orderDetachments(ds: Detachment[]): Detachment[] {
+  return [...ds].sort(byName).map((d) => {
+    // Build with a fixed key order: name, dp, objective, [unique], enhancements.
+    const head: Pick<Detachment, 'name' | 'dp' | 'objective'> = {
+      name: d.name,
+      dp: d.dp,
+      objective: d.objective,
+    };
+    return {
+      ...head,
+      ...(d.unique !== undefined ? { unique: d.unique } : {}),
+      enhancements: [...d.enhancements].sort(byName).map((e) => ({
+        name: e.name,
+        points: e.points,
+        ...(e.leaderTo !== undefined ? { leaderTo: e.leaderTo } : {}),
+      })),
+    };
+  });
 }
 
 function orderUnits(us: Unit[]): Unit[] {
@@ -59,6 +70,7 @@ function orderContent(c: FactionContent): FactionContent {
     name: c.name,
     slug: c.slug,
     version: c.version,
+    ...(c.parent !== undefined ? { parent: c.parent } : {}),
     detachments: orderDetachments(c.detachments),
     units: orderUnits(c.units),
   };
@@ -75,8 +87,16 @@ export function contentKey(c: FactionContent): string {
 
 /** Serialize a faction to canonical YAML. `firstSeen` sits just under `version`. */
 export function factionToYaml(f: Faction): string {
-  const { name, slug, version, detachments, units } = orderContent(f);
-  const doc = new Document({ name, slug, version, firstSeen: f.firstSeen, detachments, units });
+  const { name, slug, version, parent, detachments, units } = orderContent(f);
+  const doc = new Document({
+    name,
+    slug,
+    version,
+    firstSeen: f.firstSeen,
+    ...(parent !== undefined ? { parent } : {}),
+    detachments,
+    units,
+  });
   // Compact leaf maps (cost options, wargear, enhancements) onto one line.
   visit(doc, {
     Map(_, node) {

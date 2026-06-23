@@ -39,6 +39,7 @@ into the interval `range`. Enhancement points are inline and need no special han
 |---|---|
 | Site version | first `vX.Y` match in body text |
 | Faction links | `a[href]` matching `^/en/<slug>$`; link text = display name |
+| Faction `parent` | `h3.font-header:not([class*="break-after"])` (army-group title; the UNITS/DETACHMENTS section headings are `h3.font-header` *with* the break-after class) |
 | Unit card name | `div.bg-slate-500.text-xl` (text = unit name) |
 | Unit pricing tier | `div.bg-slate-200` label + following `ul.leaders` (label → `range`) |
 | Unit cost row | `ul.leaders > li` (post-hydration): trailing `NN pts` = points, rest → `models`/`desc` |
@@ -47,13 +48,36 @@ into the interval `range`. Enhancement points are inline and need no special han
 | Detachment name | `span.text-xl.break-all` |
 | Detachment DP badge | last `span` in the header div (e.g. `2DP`) |
 | Detachment objective | `div[style]` (styled banner) under the header |
+| Detachment `unique` | direct-child `div.bg-slate-200` (`UNIQUE: X` banner; prefix stripped) |
 | Enhancement | `ul.leaders li`: last `div`'s two spans = name, points |
+| Enhancement `leaderTo` | sibling of the enhancement's `<li>` in its wrapper: span `LEADER:` + next span (comma-separated unit list) |
 
 ## Validation (fail loud)
 Every faction is checked against the `Faction` zod schema before writing. The parser also
 throws on structural surprises (no units found, unreadable model count, unresolved points).
 A failure should be loud and located, never silent bad data — see
 [`.agents/playbooks/diagnose-parse.md`](../.agents/playbooks/diagnose-parse.md).
+
+## Completeness coverage (don't silently drop new content)
+The parser is a *pull* parser — it reads the selectors above and ignores everything else —
+so a new section, field, badge, or row that GW adds would otherwise vanish with no error and
+no diff. `assertFactionCovered()` (run last in `parseFaction`, after units/detachments are
+built) closes that gap by **accounting for every visible string on the page**:
+- **Per unit card** — the name + every pricing tier (label + rows) + role + wargear must add
+  up to the whole card's text. Any leftover throws.
+- **Per detachment card** — name + DP + objective + `unique` + enhancements (each with its
+  optional `leaderTo` grant) must add up to the whole card, give or take the `ENHANCEMENTS`
+  heading.
+- **Page level** — after dropping the parsed cards, the site chrome (`header`/`nav`, the
+  OneTrust cookie dialog on browser renders, the `Welcome…` notes block captured into
+  `meta.notes`), the army-group title (`parent`), and the known content-area headings
+  (`UNITS`/`DETACHMENTS`/`LEGENDS`), *nothing* may remain.
+
+The allowlists (`UNIT_BOILERPLATE`, `DETACHMENT_BOILERPLATE`, `PAGE_BOILERPLATE` in
+`src/parse.ts`) are the **deliberate-change surface**: when GW adds genuinely-new chrome you
+add the exact string there in a reviewed commit; when they add new *data* you teach the
+parser to capture it. Either way the change is forced through human review rather than lost.
+Keep the allowlists tight — a too-broad entry is how a real addition gets swallowed.
 
 ## Legends & the "Welcome…" notes (browser-only)
 Two things are **not** in any HTTP response — they're rendered client-side:
@@ -71,9 +95,12 @@ button and the rendered DOM — no dependence on the request/response shape:
   so this wait is exact and deterministic under concurrency. `markLegends()` then diffs the
   HTTP base against the rendered full DOM — units present only with Legends on get
   `legends: true`.
-- `extractNotes()` expands "Welcome to the Munitorum Field Manual" and returns the tightest
-  element containing the stable anchor phrases ("To muster a Warhammer 40,000 army" +
-  "Leader/Support"). Identical across pages, grabbed once → `meta.notes`.
+- `extractNotes()` expands "Welcome to the Munitorum Field Manual", waits for the stable
+  anchor ("Leader/Support") to appear, then hands the rendered HTML to the pure
+  `extractNotesMarkdown()` in `src/parse.ts`. That finds the notes block (tightest element
+  carrying "To muster a Warhammer 40,000 army"; innermost on ties) and converts it to
+  **Markdown** — `<b>` → `**bold**`, all-caps labels → `##` headings, `<ul>/<li>` → bullets —
+  preserving its structure. Identical across pages, grabbed once → `meta.notes`.
 
 `pnpm scrape` renders Legends factions in the browser at `--concurrency` (default 4) in
 parallel; `--no-legends` skips the browser entirely. CI installs Chromium via

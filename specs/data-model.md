@@ -10,13 +10,19 @@ name: Necrons          # clean display name (from the index page)
 slug: necrons          # URL slug; the filename stem
 version: "1.0"         # site version stamp, always a quoted string
 firstSeen: 2026-06-17  # date this exact content was first observed (see below)
+parent: Space Marines  # optional: parent army (sub-factions only; Necrons itself has none — shown for illustration)
 detachments:           # sorted by name
   - name: Annihilation Legion
     dp: 2              # detachment's "detachment points" cost (integer) or null
     objective: PURGE THE FOE   # objective banner text, or null
+    unique: Dynasty   # optional: sub-faction the detachment is restricted to ("UNIQUE: X")
     enhancements:      # sorted by name
       - name: Eldritch Nightmare
         points: 10
+      - name: Murdermind
+        points: 15
+        leaderTo:      # optional: units this enhancement unlocks the Leader ability for
+          - Lokhust Destroyers
 units:                 # sorted by name
   - name: Necron Warriors
     pricing:           # tier order preserved (meaningful for per-instance pricing)
@@ -71,6 +77,22 @@ costs:
 - `wargear`: per-item point costs from the unit's "Wargear Options" block (`per` stripped).
 - `legends: true`: marks Legends (deprecated) units — see specs/scraping.md.
 
+### `parent` — parent army (faction-level, optional)
+The army group a sub-faction belongs to (e.g. `Space Marines` for Black Templars), Title-Cased
+from the page's army-group title. Omitted for top-level factions, which have no such title.
+
+### `unique` (detachment) / `leaderTo` (enhancement) — optional extras
+- `unique`: the sub-faction keyword a detachment is restricted to, from its `UNIQUE: X`
+  banner (the `UNIQUE:` prefix stripped, Title-Cased). Omitted when absent.
+- `leaderTo`: lives on the **enhancement**, not the detachment — the units that enhancement
+  unlocks the Leader ability for, from the `LEADER:` list shown beside it (source order
+  preserved). Buying the enhancement is what grants the association, so it is modelled per
+  enhancement. Omitted when absent.
+
+`parent`, `unique`, and `leaderTo` were all surfaced by the completeness coverage check in
+`src/parse.ts` (see specs/scraping.md) — they were being silently dropped before it forced
+them into the model.
+
 ### `firstSeen` — when this content took effect
 The date the file's *current content* was first observed. The scraper keeps it **stable
 across no-op scrapes** and only advances it (to the run date) when the rest of the content
@@ -98,15 +120,23 @@ via the content fingerprint `contentKey()` in `src/emit.ts`, which ignores `firs
 ```yaml
 version: "1.0"            # site version at last full scrape
 lastUpdated: 2026-06-17   # most recent firstSeen across factions (stable on no-op)
-notes: |-                 # the expandable "Welcome…" help text (browser-captured)
-  To muster a Warhammer 40,000 army, you will need the points values for your...
+notes: |-                 # the expandable "Welcome…" help text (browser-captured), as Markdown
+  To muster a Warhammer 40,000 army, you will need the points values for your chosen
+  units and **enhancements**, and the Detachment Points (DP) for your chosen **detachments**...
+
+  ## UNITS
+
+  - **Starting Strength**: The number of models a unit contains can affect its points cost...
 factions:                 # slugs successfully scraped, sorted
   - adepta-sororitas
   - ...
 ```
 `lastUpdated` deliberately avoids a per-run timestamp so an unchanged scrape leaves
 `meta.yaml` byte-identical (no spurious PR). `notes` is present only on browser runs
-(omitted with `--no-legends`).
+(omitted with `--no-legends`). It is **Markdown**: `extractNotesMarkdown` in `src/parse.ts`
+converts the rendered notes block — `<b>` → `**bold**`, all-caps section labels → `##`
+headings, `<ul>/<li>` → bullet lists — so the help text keeps its structure. `src/browser.ts`
+only drives the page (expand + wait) and hands the rendered HTML to that pure function.
 
 ## Index (in-memory only, not written)
 `SiteIndex` = `{ version, factions: [{ slug, name }] }`, parsed from the landing page
