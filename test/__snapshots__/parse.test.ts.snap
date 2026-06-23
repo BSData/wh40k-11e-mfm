@@ -48,6 +48,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
       "name": "Awakened Dynasty",
       "objective": "TAKE AND HOLD",
+      "unique": "Dynasty",
     },
     {
       "dp": 3,
@@ -111,6 +112,12 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "points": 20,
         },
         {
+          "leaderTo": [
+            "Lokhust Destroyers",
+            "Skorpekh Destroyers",
+            "Lokhust Heavy Destroyers",
+            "Ophydian Destroyers",
+          ],
           "name": "Murdermind",
           "points": 15,
         },
@@ -132,6 +139,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
       "name": "Hand Of The Dynasty",
       "objective": "TAKE AND HOLD",
+      "unique": "Dynasty",
     },
     {
       "dp": 2,
@@ -155,6 +163,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
       "name": "Hypercrypt Legion",
       "objective": "RECONNAISSANCE",
+      "unique": "Hypercrypt",
     },
     {
       "dp": 2,
@@ -254,6 +263,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
       "name": "The Phaeron'S Armoury",
       "objective": "PRIORITY ASSETS",
+      "unique": "Hypercrypt",
     },
   ],
   "name": "Necrons",

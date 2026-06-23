@@ -34,16 +34,21 @@ jobs:
           cp -r data/. /tmp/old-data/ 2>/dev/null || true
 
       - name: Scrape
-        run: pnpm scrape
+        run: pnpm scrape --report /tmp/failures.md
 
       - name: Generate changelog
         run: |
           {
-            echo "Automated Munitorum Field Manual scrape."
+            echo "# MFM data update — $(date -u +%Y-%m-%d)"
+            echo
+            echo "_Automated Munitorum Field Manual scrape. The YAML diff is canonical; this is the readable summary._"
             echo
             pnpm exec tsx src/diff.ts /tmp/old-data data
           } > /tmp/changelog.md
           cat /tmp/changelog.md
+
+      - name: Update DATA-CHANGELOG.md
+        run: pnpm exec tsx scripts/update-data-changelog.ts /tmp/old-data data "$(date -u +%Y-%m-%d)"
 
       - name: Open pull request on change
         uses: peter-evans/create-pull-request@v8
@@ -61,17 +66,24 @@ jobs:
         uses: actions/github-script@v9
         with:
           script: |
+            const fs = require('fs');
             const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            let details = '';
+            try { details = fs.readFileSync('/tmp/failures.md', 'utf8').trim(); } catch {}
+            const body = [
+              'The scheduled MFM scrape failed — the source site markup may have drifted, or a faction stopped parsing.',
+              '',
+              `**Run log:** ${run}`,
+              '',
+              details || '_No per-faction detail was captured — the run likely failed before parsing (network, browser launch, or the index page itself). Check the run log._',
+              '',
+              '---',
+              'To fix, follow `.agents/playbooks/diagnose-parse.md`. Each block above is the located parser error (including any unconsumed-content report from the completeness check).',
+            ].join('\n');
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Scrape failed (${new Date().toISOString().slice(0, 10)})`,
               labels: ['scrape-failure'],
-              body: [
-                'The scheduled MFM scrape failed — the source site markup may have drifted.',
-                '',
-                `Run log: ${run}`,
-                '',
-                'To fix, follow `.agents/playbooks/diagnose-parse.md`.',
-              ].join('\n'),
+              body,
             });

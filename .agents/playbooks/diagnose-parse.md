@@ -44,6 +44,17 @@ pnpm scrape --faction necrons --out /tmp/check   # eyeball the YAML
 pnpm check && pnpm typecheck
 ```
 
+## "Unconsumed content" errors (the completeness coverage check)
+A parse that throws `Unconsumed content on "<slug>": …` means the page now has visible
+text that no selector captured — the coverage check in `assertFactionCovered()` (see the
+**Completeness coverage** section of `specs/scraping.md`) caught GW adding something. The
+error lists exactly what and where (`unit "…"`, `detachment "…"`, or `page-level`). Decide:
+- **It's new data** (a field/section/row worth keeping) → teach the parser to capture it
+  (selector + `src/model.ts` + `specs/data-model.md`), the way `unique`/`leaderTo` were added.
+- **It's new chrome** (a heading, banner, nav text) → add the exact string to the relevant
+  allowlist (`UNIT_BOILERPLATE` / `DETACHMENT_BOILERPLATE` / `PAGE_BOILERPLATE`) in
+  `src/parse.ts`. Keep it tight and specific — a broad entry silently swallows future data.
+
 ## Browser path (Legends / notes)
 If the failure is in `src/browser.ts` (Legends or the "Welcome…" notes), the site's
 *interactive* bits drifted, not the markup. Re-check these landmarks against the live page:

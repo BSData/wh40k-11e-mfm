@@ -37,6 +37,9 @@ function leadingInt(s: string): number | null {
 
 const ORDINAL_RE = /(\d+)(?:st|nd|rd|th)/gi;
 
+/** Strips the literal "UNIQUE:" prefix off a detachment restriction banner. */
+const UNIQUE_RE = /^\s*unique:\s*/i;
+
 /**
  * Parse a tier label into the interval of unit copies it prices, in mathematical
  * notation. `[a,b]` is closed; `[a,)` is unbounded ("and beyond").
@@ -181,6 +184,11 @@ function parseDetachment($: CheerioAPI, nameSpan: ReturnType<CheerioAPI>): Detac
   const dp = leadingInt(clean(header.find('span').last().text()));
   // Objective is the styled banner div directly under the header.
   const objText = clean(card.children('div[style]').first().text());
+  // "UNIQUE: X" restriction banner — a direct-child slate-200 div (same class units
+  // use for tier labels, here repurposed). Strip the literal "UNIQUE:" prefix.
+  const unique = titleCase(
+    clean(card.children('div.bg-slate-200').first().text()).replace(UNIQUE_RE, ''),
+  );
   const enhancements = card
     .find('ul.leaders li')
     .map((_i, li) => {
@@ -188,12 +196,181 @@ function parseDetachment($: CheerioAPI, nameSpan: ReturnType<CheerioAPI>): Detac
       const enhName = clean(spans.first().text());
       const points = leadingInt(clean(spans.last().text()));
       if (!enhName || points === null) return null;
-      return { name: enhName, points };
+      // A "LEADER:" block sits beside the enhancement it belongs to (a sibling of the
+      // <li> within the same wrapper): buying this enhancement unlocks those leaders.
+      const leaderTo = clean(
+        $(li)
+          .parent()
+          .find('span')
+          .filter((_j, s) => clean($(s).text()) === 'LEADER:')
+          .first()
+          .nextAll('span')
+          .first()
+          .text(),
+      )
+        .split(',')
+        .map((s) => titleCase(s))
+        .filter(Boolean);
+      return { name: enhName, points, ...(leaderTo.length > 0 ? { leaderTo } : {}) };
     })
     .get()
-    .filter((e): e is { name: string; points: number } => e !== null);
+    .filter((e): e is NonNullable<typeof e> => e !== null);
 
-  return { name, dp, objective: objText || null, enhancements };
+  return { name, dp, objective: objText || null, ...(unique ? { unique } : {}), enhancements };
+}
+
+/**
+ * Boilerplate the parser deliberately does not turn into data. These are the
+ * *only* strings allowed to go unconsumed; anything else surfacing in the
+ * coverage pass is treated as new content and fails the parse. Keep each list
+ * tight — a too-broad entry here is how a real addition gets silently swallowed.
+ */
+const UNIT_BOILERPLATE: readonly string[] = [];
+const DETACHMENT_BOILERPLATE: readonly string[] = ['ENHANCEMENTS'];
+// Page chrome is mostly removed by container (header/nav/cookie dialog/notes) in
+// the page-level pass; these are the few content-area headings that remain.
+const PAGE_BOILERPLATE: readonly string[] = [
+  'Welcome to the Munitorum Field Manual, containing the most up-to-date points values for every Warhammer 40,000 faction.',
+  'Show Legends', // the Legends toggle label (sits in the content area, not the nav)
+  'Hide Legends', // its toggled state, on browser (Legends) renders
+  'UNITS',
+  'DETACHMENTS',
+  'LEGENDS', // section heading shown on browser renders with Legends toggled on
+];
+/** Anchor identifying the expandable "Welcome…" notes block (captured into meta.notes). */
+const NOTES_ANCHOR = 'To muster a Warhammer 40,000 army';
+
+/**
+ * The "Welcome…" notes block: the tightest element carrying the anchor, and among
+ * equal-length ties the innermost (deepest) one — a thin wrapper and its real
+ * content div have identical text, so prefer the content. `null` if not present.
+ */
+function findNotesBlock($: CheerioAPI): ReturnType<CheerioAPI> | null {
+  const el = $('div, section')
+    .filter((_i, e) => $(e).text().includes(NOTES_ANCHOR))
+    .toArray()
+    .sort(
+      (a, b) =>
+        $(a).text().length - $(b).text().length || $(b).parents().length - $(a).parents().length,
+    )[0];
+  return el ? $(el) : null;
+}
+/** The army-group title (`parent`), distinct from the UNITS/DETACHMENTS section headings. */
+const PARENT_TITLE_SELECTOR = 'h3.font-header:not([class*="break-after"])';
+
+/**
+ * Subtract every `claimed` fragment from `text` (longest first, all occurrences)
+ * and return what is left. Used by the coverage check: if a card's whole text
+ * minus everything the parser read is empty, the parser consumed all of it.
+ */
+function residue(text: string, claimed: Iterable<string>): string {
+  let rest = clean(text);
+  for (const c of [...claimed].filter(Boolean).sort((a, b) => b.length - a.length)) {
+    rest = rest.split(c).join(' ');
+  }
+  return clean(rest);
+}
+
+/**
+ * Completeness guard. The parser is a *pull* parser — it reads specific selectors
+ * and ignores everything else — so a new section, field, badge, or row that Games
+ * Workshop adds would otherwise be dropped with no error and no diff. This pass
+ * inverts that: it re-reads every unit card, every detachment card, and the page
+ * chrome, subtracts everything the parser claimed, and throws if anything visible
+ * is left over (beyond the explicit boilerplate allowlists above). New content
+ * fails loudly and locatedly instead of vanishing. Mutates `$` (page-level pass
+ * strips parsed cards), so it must run last, after units/detachments are built.
+ */
+function assertFactionCovered($: CheerioAPI, slug: string, name: string, version: string): void {
+  const leftovers: string[] = [];
+
+  // (a) Unit cards: name + every pricing tier (label + rows) + role + wargear must
+  // account for the entire card.
+  $('div.bg-slate-500.text-xl').each((_i, el) => {
+    const nameDiv = $(el);
+    const card = nameDiv.parent();
+    const claimed = [...UNIT_BOILERPLATE, clean(nameDiv.text())];
+    card.find('div.bg-slate-200').each((_j, l) => {
+      claimed.push(clean($(l).text()));
+      $(l)
+        .nextAll('ul.leaders')
+        .first()
+        .find('li')
+        .each((_k, li) => {
+          claimed.push(clean($(li).text()));
+        });
+    });
+    const img = card.find('img[src$="leader.svg"], img[src$="support.svg"]').first();
+    if (img.length) claimed.push(clean(img.parent().nextAll('span').first().text()));
+    const cog = card.find('img[src$="cog.svg"]').first();
+    if (cog.length)
+      cog
+        .parent()
+        .parent()
+        .find('ul li')
+        .each((_j, li) => {
+          claimed.push(clean($(li).text()));
+        });
+    const left = residue(card.text(), claimed);
+    if (left) leftovers.push(`unit "${clean(nameDiv.text())}": ${JSON.stringify(left)}`);
+  });
+
+  // (b) Detachment cards: name + DP + objective + unique + leaderTo + enhancements.
+  $('span.text-xl.break-all').each((_i, el) => {
+    const span = $(el);
+    const card = span.parent().parent();
+    const claimed = [
+      ...DETACHMENT_BOILERPLATE,
+      clean(span.text()),
+      clean(span.parent().find('span').last().text()),
+      clean(card.children('div[style]').first().text()),
+      clean(card.children('div.bg-slate-200').first().text()),
+    ];
+    card
+      .find('span')
+      .filter((_j, s) => clean($(s).text()) === 'LEADER:')
+      .each((_j, s) => {
+        claimed.push('LEADER:', clean($(s).nextAll('span').first().text()));
+      });
+    card.find('ul.leaders li').each((_j, li) => {
+      const spans = $(li).find('div').last().find('span');
+      claimed.push(clean(spans.first().text()), clean(spans.last().text()));
+    });
+    const left = residue(card.text(), claimed);
+    if (left) leftovers.push(`detachment "${clean(span.text())}": ${JSON.stringify(left)}`);
+  });
+
+  // (c) Page level: drop the parsed cards, the site chrome (header/nav, the cookie
+  // dialog present on browser renders, the "Welcome…" notes captured into
+  // meta.notes), then assert only known content-area headings (plus the faction
+  // name, parent-army title and version) remain. Catches a brand-new top-level
+  // section that sits outside any card.
+  $('div.bg-slate-500.text-xl').each((_i, el) => {
+    $(el).parent().remove();
+  });
+  $('span.text-xl.break-all').each((_i, el) => {
+    $(el).parent().parent().remove();
+  });
+  $('header, nav, [id^="onetrust"], .onetrust-pc-dark-filter').remove();
+  $('script, style, noscript, svg, head, link').remove();
+  // The notes block (expanded only) is captured into meta.notes, not faction data.
+  findNotesBlock($)?.remove();
+  const pageLeft = residue($('body').text(), [
+    ...PAGE_BOILERPLATE,
+    name,
+    name.toUpperCase(),
+    `v${version}`,
+    clean($(PARENT_TITLE_SELECTOR).text()), // parent-army title on sub-faction pages
+  ]);
+  if (pageLeft) leftovers.push(`page-level: ${JSON.stringify(pageLeft)}`);
+
+  if (leftovers.length > 0) {
+    throw new Error(
+      `Unconsumed content on "${slug}": the page has data no selector captured. ` +
+        'Handle it in src/parse.ts (and specs/scraping.md), or add it to the relevant ' +
+        `boilerplate allowlist if it is chrome:\n  ${leftovers.join('\n  ')}`,
+    );
+  }
 }
 
 /** Parse a faction subpage. `name`/`slug` come from the index (clean display name). */
@@ -213,7 +390,84 @@ export function parseFaction(html: string, slug: string, name: string): FactionC
     .map((_i, el) => parseDetachment($, $(el)))
     .get();
 
-  return { slug, name, version, detachments, units };
+  // Parent army on sub-faction pages (e.g. "Space Marines" for Black Templars);
+  // absent on top-level factions. Read before the coverage pass mutates `$`. The
+  // `:not([class*="break-after"])` excludes the UNITS/DETACHMENTS section headings,
+  // which are also `h3.font-header` but carry a print break-after class the title lacks.
+  const parent = titleCase($(PARENT_TITLE_SELECTOR).first().text());
+
+  // Last: prove we left nothing on the page unread (mutates $).
+  assertFactionCovered($, slug, name, version);
+
+  return { slug, name, version, ...(parent ? { parent } : {}), detachments, units };
+}
+
+/** All-caps standalone label (e.g. "UNITS") promoted to a Markdown heading. */
+const NOTES_HEADING_RE = /^[A-Z][A-Z0-9 ()/'’-]+$/;
+
+/**
+ * Convert the rendered "Welcome…" notes block to Markdown, keeping its structure:
+ * `<b>` → `**bold**`, all-caps standalone labels → `## headings`, `<ul>/<li>` →
+ * bullet lists, `<br><br>` → paragraph breaks. `pageHtml` is a fully-rendered
+ * page's HTML (from the browser, where the notes are expanded); returns `''` if
+ * the notes block isn't present. Pure — used by `browser.ts`'s `extractNotes`.
+ */
+export function extractNotesMarkdown(pageHtml: string): string {
+  const $ = load(pageHtml);
+  const block = findNotesBlock($);
+  if (!block) return '';
+
+  // Inline run → Markdown (bold, soft breaks); used for list items and paragraphs.
+  const inline = (el: ReturnType<CheerioAPI>): string => {
+    let s = '';
+    el.contents().each((_i, n) => {
+      if (n.type === 'text') {
+        s += $(n).text();
+      } else if (n.type === 'tag') {
+        if (n.tagName === 'b' || n.tagName === 'strong') {
+          const t = clean($(n).text());
+          if (t) s += `**${t}**`;
+        } else if (n.tagName === 'br') {
+          s += '\n';
+        } else {
+          s += inline($(n));
+        }
+      }
+    });
+    return s;
+  };
+
+  let md = '';
+  block.contents().each((_i, n) => {
+    if (n.type === 'text') {
+      md += $(n).text();
+    } else if (n.type === 'tag') {
+      if (n.tagName === 'ul' || n.tagName === 'ol') {
+        md += '\n';
+        $(n)
+          .children('li')
+          .each((_j, li) => {
+            md += `\n- ${clean(inline($(li)))}`;
+          });
+        md += '\n\n';
+      } else if (n.tagName === 'b' || n.tagName === 'strong') {
+        const t = clean($(n).text());
+        if (NOTES_HEADING_RE.test(t)) md += `\n\n## ${t}\n\n`;
+        else if (t) md += `**${t}**`;
+      } else if (n.tagName === 'br') {
+        md += '\n';
+      } else {
+        md += inline($(n));
+      }
+    }
+  });
+
+  return md
+    .replace(/\r/g, '')
+    .replace(/[^\S\n]+/g, ' ') // collapse runs of spaces/tabs, keep newlines
+    .replace(/ *\n */g, '\n') // trim spaces around line breaks
+    .replace(/\n{3,}/g, '\n\n') // at most one blank line between blocks
+    .trim();
 }
 
 /**

@@ -1,4 +1,5 @@
 import { type Browser, type BrowserContext, chromium, type Page } from 'playwright';
+import { extractNotesMarkdown } from './parse.js';
 
 /**
  * Headless-browser access for the bits that aren't in the server HTML:
@@ -80,7 +81,12 @@ export async function renderWithLegends(ctx: BrowserContext, url: string): Promi
 /** True if a faction page ships the "Show Legends" toggle (i.e. it has Legends). */
 export const hasLegends = (html: string): boolean => html.includes('show-legends');
 
-/** Extract the expandable "Welcome…" help/notes text (identical across faction pages). */
+/**
+ * Extract the expandable "Welcome…" help/notes text as Markdown (identical across
+ * faction pages). We only drive the page here — expand the notes, wait for the
+ * deterministic content signal — then hand the rendered HTML to the pure
+ * `extractNotesMarkdown` parser, which preserves the block's structure.
+ */
 export async function extractNotes(ctx: BrowserContext, url: string): Promise<string> {
   const page = await ctx.newPage();
   try {
@@ -93,17 +99,7 @@ export async function extractNotes(ctx: BrowserContext, url: string): Promise<st
     await page.waitForFunction((a) => document.body.innerText.includes(a), NOTES_ANCHORS[1], {
       timeout: ACTION_TIMEOUT,
     });
-    // NOTE: keep this callback free of named inner functions — the tsx/esbuild
-    // transform wraps them with a `__name` helper that doesn't exist in-page.
-    return await page.evaluate((anchors) => {
-      // The tightest element containing both anchor phrases is the notes block.
-      const candidates = Array.from(document.querySelectorAll('div,section')).filter((el) =>
-        anchors.every((a) => (el.textContent ?? '').includes(a)),
-      );
-      candidates.sort((a, b) => (a.textContent?.length ?? 0) - (b.textContent?.length ?? 0));
-      const el = candidates[0] as HTMLElement | undefined;
-      return el ? el.innerText.replace(/\n{3,}/g, '\n\n').trim() : '';
-    }, NOTES_ANCHORS);
+    return extractNotesMarkdown(await page.content());
   } finally {
     await page.close();
   }

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { FactionContent, SiteIndex } from '../src/model.js';
-import { markLegends, parseFaction, parseIndex } from '../src/parse.js';
+import { extractNotesMarkdown, markLegends, parseFaction, parseIndex } from '../src/parse.js';
 
 const fixture = (name: string) =>
   readFileSync(fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url)), 'utf8');
@@ -37,6 +37,10 @@ describe('parseFaction (necrons)', () => {
     expect(faction.version).toBe('1.0');
     expect(faction.units).toHaveLength(52);
     expect(faction.detachments).toHaveLength(12);
+  });
+
+  it('has no parent army (top-level faction)', () => {
+    expect(faction.parent).toBeUndefined();
   });
 
   it('parses a simple single-option unit', () => {
@@ -85,6 +89,29 @@ describe('parseFaction (necrons)', () => {
     expect(det?.objective).toBe('PURGE THE FOE');
     expect(det?.enhancements).toContainEqual({ name: 'Eldritch Nightmare', points: 10 });
     expect(det?.enhancements).toHaveLength(4);
+    // a plain detachment has no UNIQUE banner, and none of its enhancements grant Leader
+    expect(det?.unique).toBeUndefined();
+    expect(det?.enhancements.every((e) => e.leaderTo === undefined)).toBe(true);
+  });
+
+  it('captures the UNIQUE restriction on detachments', () => {
+    expect(faction.detachments.find((d) => d.name === 'Awakened Dynasty')?.unique).toBe('Dynasty');
+    expect(faction.detachments.find((d) => d.name === 'Hypercrypt Legion')?.unique).toBe(
+      'Hypercrypt',
+    );
+  });
+
+  it('attaches a LEADER grant to the enhancement that unlocks it', () => {
+    const cursed = faction.detachments.find((d) => d.name === 'Cursed Legion');
+    const murdermind = cursed?.enhancements.find((e) => e.name === 'Murdermind');
+    expect(murdermind?.leaderTo).toEqual([
+      'Lokhust Destroyers',
+      'Skorpekh Destroyers',
+      'Lokhust Heavy Destroyers',
+      'Ophydian Destroyers',
+    ]);
+    // the other enhancements in the same detachment carry no grant
+    expect(cursed?.enhancements.find((e) => e.name === 'Destroyer Ankh')?.leaderTo).toBeUndefined();
   });
 
   it('matches the full snapshot', () => {
@@ -98,6 +125,10 @@ describe('parseFaction (black-templars) — streamed cards & composite sizes', (
   it('passes the schema and finds units', () => {
     expect(() => FactionContent.parse(faction)).not.toThrow();
     expect(faction.units.length).toBeGreaterThan(20);
+  });
+
+  it('captures the parent army for a sub-faction', () => {
+    expect(faction.parent).toBe('Space Marines');
   });
 
   it('keeps composite descriptions and sums their model counts', () => {
@@ -140,6 +171,52 @@ describe('markLegends (necrons base vs legends-on render)', () => {
   it('leaves current units unflagged', () => {
     const marked = markLegends(base, full);
     expect(marked.units.find((u) => u.name === 'Necron Warriors')?.legends).toBeUndefined();
+  });
+});
+
+describe('extractNotesMarkdown — the "Welcome…" notes as Markdown', () => {
+  const md = extractNotesMarkdown(fixture('necrons-legends.html'));
+
+  it('keeps the structure: headings, bullet lists and bold', () => {
+    expect(md.startsWith('To muster a Warhammer 40,000 army')).toBe(true);
+    expect(md).toContain('## UNITS');
+    expect(md).toContain('## DETACHMENTS');
+    expect(md).toContain('- **Starting Strength**: The number of models');
+    expect(md).toContain('- **Unique Tag**: Some **detachments** are tagged');
+    expect(md).toContain('the **Leader/Support** ability');
+  });
+
+  it('emits no raw HTML and no runs of blank lines', () => {
+    expect(md).not.toMatch(/<[a-z]/i);
+    expect(md).not.toMatch(/\n{3,}/);
+  });
+
+  it('returns empty string when no notes block is present (HTTP base render)', () => {
+    // On the plain HTTP page the notes live inside a <template>, so they are not
+    // reachable as a div/section — only the browser render exposes them.
+    expect(extractNotesMarkdown(fixture('necrons.html'))).toBe('');
+  });
+});
+
+describe('parseFaction coverage guard — nothing on the page goes unconsumed', () => {
+  it('accepts the real fixtures (everything is accounted for)', () => {
+    expect(() => parseFaction(fixture('necrons.html'), 'necrons', 'Necrons')).not.toThrow();
+    expect(() =>
+      parseFaction(fixture('black-templars.html'), 'black-templars', 'Black Templars'),
+    ).not.toThrow();
+    expect(() =>
+      parseFaction(fixture('titan-legions.html'), 'titan-legions', 'Titan Legions'),
+    ).not.toThrow();
+  });
+
+  it('throws, located, when the page has content no selector captured', () => {
+    const injected = fixture('necrons.html').replace(
+      '</body>',
+      '<div>SURPRISE NEW MFM SECTION</div></body>',
+    );
+    expect(injected).not.toBe(fixture('necrons.html')); // sanity: the marker was inserted
+    expect(() => parseFaction(injected, 'necrons', 'Necrons')).toThrow(/Unconsumed content/);
+    expect(() => parseFaction(injected, 'necrons', 'Necrons')).toThrow(/SURPRISE NEW MFM SECTION/);
   });
 });
 
