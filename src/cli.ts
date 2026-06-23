@@ -9,7 +9,7 @@ import {
   renderWithLegends,
 } from './browser.js';
 import { failuresReport } from './diff.js';
-import { contentKey, factionFromYaml, factionToYaml, metaToYaml } from './emit.js';
+import { contentKey, factionFromYaml, factionToYaml, metaToYaml, type OrderMode } from './emit.js';
 import { BASE_URL, factionUrl, fetchText } from './fetch.js';
 import { Faction, type FactionContent } from './model.js';
 import { markLegends, parseFaction, parseIndex } from './parse.js';
@@ -22,6 +22,7 @@ import { markLegends, parseFaction, parseIndex } from './parse.js';
  *   pnpm scrape --no-legends        # HTTP-only, skip Legends (fast; no browser)
  *   pnpm scrape --concurrency 6     # faction pages in flight at once (default 4)
  *   pnpm scrape --out /tmp/data     # custom output dir (default: data/)
+ *   pnpm scrape --order page        # entity order: 'name' (default, alphabetical) or 'page'
  *
  * Legends units and the "Welcome…" notes aren't in the server HTML, so capturing
  * them needs a headless browser (Playwright). Without `--no-legends`, each faction
@@ -37,11 +38,12 @@ interface Args {
   out: string;
   concurrency: number;
   legends: boolean;
+  order: OrderMode;
   report?: string;
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { out: 'data', concurrency: 4, legends: true };
+  const args: Args = { out: 'data', concurrency: 4, legends: true, order: 'name' };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--faction') {
@@ -50,7 +52,12 @@ function parseArgs(argv: string[]): Args {
     } else if (a === '--out') args.out = argv[++i] ?? args.out;
     else if (a === '--concurrency') args.concurrency = Number(argv[++i]) || args.concurrency;
     else if (a === '--no-legends') args.legends = false;
-    else if (a === '--report') {
+    else if (a === '--order') {
+      const v = argv[++i];
+      if (v !== 'name' && v !== 'page')
+        throw new Error(`--order must be "name" or "page", got: ${v ?? '(missing)'}`);
+      args.order = v;
+    } else if (a === '--report') {
       const v = argv[++i];
       if (v !== undefined) args.report = v;
     }
@@ -80,12 +87,17 @@ async function mapPool<T>(
  * scraped content is identical (so a no-op scrape produces no diff), otherwise
  * stamp `today`.
  */
-function resolveFirstSeen(content: FactionContent, outDir: string, today: string): string {
+function resolveFirstSeen(
+  content: FactionContent,
+  outDir: string,
+  today: string,
+  order: OrderMode,
+): string {
   const path = join(outDir, `${content.slug}.yaml`);
   if (existsSync(path)) {
     try {
       const existing = factionFromYaml(readFileSync(path, 'utf8'));
-      if (contentKey(existing) === contentKey(content)) return existing.firstSeen;
+      if (contentKey(existing, order) === contentKey(content, order)) return existing.firstSeen;
     } catch {
       // Unreadable/old-format file → treat as changed and re-stamp.
     }
@@ -101,17 +113,21 @@ function resolveFirstSeen(content: FactionContent, outDir: string, today: string
 async function scrapeFaction(
   f: { slug: string; name: string },
   ctx: BrowserContext | null,
+  knownFactions: ReadonlySet<string>,
 ): Promise<FactionContent> {
   const url = factionUrl(f.slug);
   const html = await fetchText(url);
-  const base = parseFaction(html, f.slug, f.name);
+  const base = parseFaction(html, f.slug, f.name, knownFactions);
   if (!ctx || !hasLegends(html)) return base;
 
   // Only Legends factions touch the browser. One retry clears transient nav flakiness.
   let lastError: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      return markLegends(base, parseFaction(await renderWithLegends(ctx, url), f.slug, f.name));
+      return markLegends(
+        base,
+        parseFaction(await renderWithLegends(ctx, url), f.slug, f.name, knownFactions),
+      );
     } catch (err) {
       lastError = err;
     }
@@ -132,6 +148,11 @@ async function main(): Promise<void> {
     if (targets.length === 0) throw new Error(`Unknown faction slug: ${args.faction}`);
   }
 
+  // All faction names (lower-cased) — lets the parser tell a genuine parent-army title
+  // (names another faction) from a same-shaped sub-army/army-rule heading. Built from the
+  // full index, not `targets`, so a single-faction run still recognizes its parent.
+  const knownFactions = new Set(index.factions.map((f) => f.name.toLowerCase()));
+
   mkdirSync(args.out, { recursive: true });
   const today = new Date().toISOString().slice(0, 10);
   const scraped: { slug: string; firstSeen: string }[] = [];
@@ -148,10 +169,10 @@ async function main(): Promise<void> {
 
     await mapPool(targets, args.concurrency, async (f) => {
       try {
-        const content = await scrapeFaction(f, ctx);
-        const firstSeen = resolveFirstSeen(content, args.out, today);
+        const content = await scrapeFaction(f, ctx, knownFactions);
+        const firstSeen = resolveFirstSeen(content, args.out, today, args.order);
         const faction = Faction.parse({ ...content, firstSeen });
-        writeFileSync(join(args.out, `${f.slug}.yaml`), factionToYaml(faction));
+        writeFileSync(join(args.out, `${f.slug}.yaml`), factionToYaml(faction, args.order));
         scraped.push({ slug: f.slug, firstSeen });
         const legends = faction.units.filter((u) => u.legends).length;
         const tags = `${legends > 0 ? `, ${legends} legends` : ''}${firstSeen === today ? '  (changed)' : ''}`;

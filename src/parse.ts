@@ -373,14 +373,46 @@ function assertFactionCovered($: CheerioAPI, slug: string, name: string, version
   }
 }
 
-/** Parse a faction subpage. `name`/`slug` come from the index (clean display name). */
-export function parseFaction(html: string, slug: string, name: string): FactionContent {
+/**
+ * Parse a faction subpage. `name`/`slug` come from the index (clean display name).
+ * `knownFactions` is the set of all faction display names (lower-cased) used to tell a
+ * genuine parent-army title from a same-shaped sub-army/army-rule heading.
+ */
+export function parseFaction(
+  html: string,
+  slug: string,
+  name: string,
+  knownFactions: ReadonlySet<string> = new Set(),
+): FactionContent {
   const $ = load(html);
   const version = parseVersion($);
   hydrate($);
 
+  // Units are partitioned into a base roster (directly under the UNITS section) plus
+  // named sub-groups introduced by army-group headers — `h3.font-header` *without* the
+  // section break-after class — e.g. "Harlequins"/"Ynnari" on Aeldari, a Chapter on
+  // Space Marines, the shared "Space Marines" roster on a successor chapter. Walk the
+  // headers and unit cards in document order so each unit picks up the sub-group it sits
+  // under; a section header (UNITS/DETACHMENTS) resets back to the base roster.
+  const unitGroups: (string | undefined)[] = [];
+  const groupTitles: string[] = [];
+  let currentGroup: string | undefined;
+  $('h3.font-header, div.bg-slate-500.text-xl').each((_i, el) => {
+    if ((el as { tagName?: string }).tagName === 'h3') {
+      const isSection = ($(el).attr('class') ?? '').includes('break-after');
+      currentGroup = isSection ? undefined : titleCase($(el).text());
+      if (currentGroup) groupTitles.push(currentGroup);
+    } else {
+      unitGroups.push(currentGroup);
+    }
+  });
+
   const units = $('div.bg-slate-500.text-xl')
-    .map((_i, el) => parseUnit($, $(el)))
+    .map((i, el) => {
+      const unit = parseUnit($, $(el));
+      const group = unitGroups[i];
+      return group ? { ...unit, groupTitle: group } : unit;
+    })
     .get();
   if (units.length === 0) {
     throw new Error(`No units found for "${slug}" — the unit-name selector may have drifted`);
@@ -390,11 +422,13 @@ export function parseFaction(html: string, slug: string, name: string): FactionC
     .map((_i, el) => parseDetachment($, $(el)))
     .get();
 
-  // Parent army on sub-faction pages (e.g. "Space Marines" for Black Templars);
-  // absent on top-level factions. Read before the coverage pass mutates `$`. The
-  // `:not([class*="break-after"])` excludes the UNITS/DETACHMENTS section headings,
-  // which are also `h3.font-header` but carry a print break-after class the title lacks.
-  const parent = titleCase($(PARENT_TITLE_SELECTOR).first().text());
+  // A sub-group header that names *another* known faction marks this as that faction's
+  // successor (e.g. "Space Marines" for Black Templars). Surfaced at the faction level as
+  // `parent`; the units in that group also carry it as their `groupTitle`. Non-faction
+  // sub-group headers (e.g. "Harlequins") live only on the units, not here.
+  const parent = groupTitles.find(
+    (t) => t.toLowerCase() !== name.toLowerCase() && knownFactions.has(t.toLowerCase()),
+  );
 
   // Last: prove we left nothing on the page unread (mutates $).
   assertFactionCovered($, slug, name, version);

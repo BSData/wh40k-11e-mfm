@@ -11,19 +11,19 @@ slug: necrons          # URL slug; the filename stem
 version: "1.0"         # site version stamp, always a quoted string
 firstSeen: 2026-06-17  # date this exact content was first observed (see below)
 parent: Space Marines  # optional: parent army (sub-factions only; Necrons itself has none — shown for illustration)
-detachments:           # sorted by name
+detachments:           # 'name' order by default; 'page' (--order page) preserves source order
   - name: Annihilation Legion
     dp: 2              # detachment's "detachment points" cost (integer) or null
     objective: PURGE THE FOE   # objective banner text, or null
     unique: Dynasty   # optional: sub-faction the detachment is restricted to ("UNIQUE: X")
-    enhancements:      # sorted by name
+    enhancements:      # 'name' order by default; 'page' preserves source order
       - name: Eldritch Nightmare
         points: 10
       - name: Murdermind
         points: 15
         leaderTo:      # optional: units this enhancement unlocks the Leader ability for
           - Lokhust Destroyers
-units:                 # sorted by name
+units:                 # 'name' order by default; 'page' preserves source order
   - name: Necron Warriors
     pricing:           # tier order preserved (meaningful for per-instance pricing)
       - range: "[1,)"            # interval of unit copies this tier prices (core)
@@ -42,6 +42,7 @@ units:                 # sorted by name
     role: support              # leader | support, if the unit has that ability
     attachTo: [Immortals, Necron Warriors]   # units it can be attached to
   - name: Redemptor Dreadnought
+    groupTitle: Space Marines  # sub-group header this unit sits under (illustrative; see below)
     pricing: [...]
     wargear:                   # per-item costs added on top of the unit's cost
       - { item: Macro plasma incinerator, points: 10 }
@@ -71,15 +72,23 @@ costs:
   - { models: 1, points: 3500 }                                            # "3,500 pts" (thousands comma)
 ```
 
-### `role` / `attachTo` / `wargear` — optional unit extras
+### `role` / `attachTo` / `wargear` / `groupTitle` — optional unit extras
 - `role` (`leader`/`support`) + `attachTo`: present when the unit has the Leader/Support
   ability; `attachTo` lists the units it can join (from the role block's icon + list).
 - `wargear`: per-item point costs from the unit's "Wargear Options" block (`per` stripped).
 - `legends: true`: marks Legends (deprecated) units — see specs/scraping.md.
+- `groupTitle`: the page sub-group the unit is listed under, Title-Cased from its army-group
+  header (`h3.font-header:not([class*="break-after"])`) — e.g. `Harlequins`/`Ynnari` on
+  Aeldari, a Chapter on Space Marines, `Space Marines` for a successor's shared roster.
+  Omitted for the base roster (units under the bare UNITS section, with no sub-group header).
 
 ### `parent` — parent army (faction-level, optional)
-The army group a sub-faction belongs to (e.g. `Space Marines` for Black Templars), Title-Cased
-from the page's army-group title. Omitted for top-level factions, which have no such title.
+Set when one of the page's unit sub-group headers names **another** known faction (e.g.
+`Space Marines` for Black Templars). The units in that group also carry it as their
+`groupTitle`; `parent` surfaces the same fact at the faction level. Omitted for top-level
+factions, and for non-faction sub-group headers (e.g. `Harlequins`), which live only on the
+units. A page can have several sub-groups (Aeldari has `Harlequins` and `Ynnari`); `parent`
+is the first that names a faction.
 
 ### `unique` (detachment) / `leaderTo` (enhancement) — optional extras
 - `unique`: the sub-faction keyword a detachment is restricted to, from its `UNIQUE: X`
@@ -102,9 +111,11 @@ via the content fingerprint `contentKey()` in `src/emit.ts`, which ignores `firs
 
 ### Rules & rationale
 - **One file per faction** — minimal, reviewable diffs; git is the change history.
-- **Deterministic ordering** (see `orderContent()` in `src/emit.ts`): entities sorted by
-  name, top-level keys in a fixed order, leaf cost/wargear/enhancement maps rendered in
-  flow style. A points change touches exactly one line.
+- **Deterministic ordering** (see `orderContent()` in `src/emit.ts`): top-level keys in a
+  fixed order, leaf cost/wargear/enhancement maps rendered in flow style. Entity order
+  (units, detachments, enhancements) is selectable via `--order`: `name` (default,
+  alphabetical — a points change touches exactly one line) or `page` (source page order,
+  faithful to the MFM layout but churns if the site reorders a page).
 - **`pricing` is always a list of tiers.** Most units have one tier; units with
   per-instance pricing have several. `range` is the core machine-readable interval;
   `label` is the verbatim site heading kept for humans.

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { parse as parseYaml } from 'yaml';
 import { changelog, changelogEntry, failuresReport } from '../src/diff.js';
 import { factionFromYaml, factionToYaml, metaFromYaml, metaToYaml } from '../src/emit.js';
 import type { Faction, FactionContent } from '../src/model.js';
@@ -25,6 +26,22 @@ describe('emit', () => {
 
   it('is deterministic — same input yields byte-identical YAML', () => {
     expect(factionToYaml(necrons())).toBe(factionToYaml(necrons()));
+  });
+
+  it('orders entities alphabetically by default and by source order with --order page', () => {
+    const sourceOrder = necronsContent().units.map((u) => u.name);
+    const unitNames = (yaml: string) =>
+      (parseYaml(yaml).units as { name: string }[]).map((u) => u.name);
+
+    // 'page' keeps the parsed (source) order; 'name' (default) sorts alphabetically.
+    expect(unitNames(factionToYaml(necrons(), 'page'))).toEqual(sourceOrder);
+    expect(unitNames(factionToYaml(necrons()))).toEqual(
+      [...sourceOrder].sort((a, b) => a.localeCompare(b)),
+    );
+    // The two modes genuinely differ for this faction (guards against a no-op test).
+    expect(unitNames(factionToYaml(necrons(), 'page'))).not.toEqual(
+      unitNames(factionToYaml(necrons(), 'name')),
+    );
   });
 
   it('quotes the version and includes firstSeen', () => {
