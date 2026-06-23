@@ -39,8 +39,9 @@ describe('parseFaction (necrons)', () => {
     expect(faction.detachments).toHaveLength(12);
   });
 
-  it('has no parent army (top-level faction)', () => {
+  it('has no parent or group title (top-level faction)', () => {
     expect(faction.parent).toBeUndefined();
+    expect(faction.groupTitle).toBeUndefined();
   });
 
   it('parses a simple single-option unit', () => {
@@ -120,15 +121,32 @@ describe('parseFaction (necrons)', () => {
 });
 
 describe('parseFaction (black-templars) — streamed cards & composite sizes', () => {
-  const faction = parseFaction(fixture('black-templars.html'), 'black-templars', 'Black Templars');
+  const faction = parseFaction(
+    fixture('black-templars.html'),
+    'black-templars',
+    'Black Templars',
+    new Set(['space marines']),
+  );
 
   it('passes the schema and finds units', () => {
     expect(() => FactionContent.parse(faction)).not.toThrow();
     expect(faction.units.length).toBeGreaterThan(20);
   });
 
-  it('captures the parent army for a sub-faction', () => {
+  it('captures the parent army when the title names a known faction', () => {
     expect(faction.parent).toBe('Space Marines');
+    expect(faction.groupTitle).toBeUndefined();
+  });
+
+  it('routes the army-group title to groupTitle when it is not a known faction', () => {
+    const orphan = parseFaction(
+      fixture('black-templars.html'),
+      'black-templars',
+      'Black Templars',
+      new Set(),
+    );
+    expect(orphan.parent).toBeUndefined();
+    expect(orphan.groupTitle).toBe('Space Marines');
   });
 
   it('keeps composite descriptions and sums their model counts', () => {

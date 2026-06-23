@@ -11,19 +11,19 @@ slug: necrons          # URL slug; the filename stem
 version: "1.0"         # site version stamp, always a quoted string
 firstSeen: 2026-06-17  # date this exact content was first observed (see below)
 parent: Space Marines  # optional: parent army (sub-factions only; Necrons itself has none — shown for illustration)
-detachments:           # sorted by name
+detachments:           # 'name' order by default; 'page' (--order page) preserves source order
   - name: Annihilation Legion
     dp: 2              # detachment's "detachment points" cost (integer) or null
     objective: PURGE THE FOE   # objective banner text, or null
     unique: Dynasty   # optional: sub-faction the detachment is restricted to ("UNIQUE: X")
-    enhancements:      # sorted by name
+    enhancements:      # 'name' order by default; 'page' preserves source order
       - name: Eldritch Nightmare
         points: 10
       - name: Murdermind
         points: 15
         leaderTo:      # optional: units this enhancement unlocks the Leader ability for
           - Lokhust Destroyers
-units:                 # sorted by name
+units:                 # 'name' order by default; 'page' preserves source order
   - name: Necron Warriors
     pricing:           # tier order preserved (meaningful for per-instance pricing)
       - range: "[1,)"            # interval of unit copies this tier prices (core)
@@ -77,9 +77,16 @@ costs:
 - `wargear`: per-item point costs from the unit's "Wargear Options" block (`per` stripped).
 - `legends: true`: marks Legends (deprecated) units — see specs/scraping.md.
 
-### `parent` — parent army (faction-level, optional)
-The army group a sub-faction belongs to (e.g. `Space Marines` for Black Templars), Title-Cased
-from the page's army-group title. Omitted for top-level factions, which have no such title.
+### `parent` / `groupTitle` — army-group title (faction-level, optional)
+Both come from the page's army-group title (`h3.font-header:not([class*="break-after"])`),
+Title-Cased. Where the title goes depends on whether it names another faction:
+- `parent`: the army a sub-faction belongs to (e.g. `Space Marines` for Black Templars) —
+  set only when the title matches another faction's name from the index.
+- `groupTitle`: the same title when it is *not* a faction — a sub-army or army-rule heading
+  (e.g. `Harlequins` on Aeldari, `Blood Legions` on World Eaters).
+
+The two are mutually exclusive, and both are omitted for top-level factions (e.g. Necrons)
+that have no such title.
 
 ### `unique` (detachment) / `leaderTo` (enhancement) — optional extras
 - `unique`: the sub-faction keyword a detachment is restricted to, from its `UNIQUE: X`
@@ -102,9 +109,11 @@ via the content fingerprint `contentKey()` in `src/emit.ts`, which ignores `firs
 
 ### Rules & rationale
 - **One file per faction** — minimal, reviewable diffs; git is the change history.
-- **Deterministic ordering** (see `orderContent()` in `src/emit.ts`): entities sorted by
-  name, top-level keys in a fixed order, leaf cost/wargear/enhancement maps rendered in
-  flow style. A points change touches exactly one line.
+- **Deterministic ordering** (see `orderContent()` in `src/emit.ts`): top-level keys in a
+  fixed order, leaf cost/wargear/enhancement maps rendered in flow style. Entity order
+  (units, detachments, enhancements) is selectable via `--order`: `name` (default,
+  alphabetical — a points change touches exactly one line) or `page` (source page order,
+  faithful to the MFM layout but churns if the site reorders a page).
 - **`pricing` is always a list of tiers.** Most units have one tier; units with
   per-instance pricing have several. `range` is the core machine-readable interval;
   `label` is the verbatim site heading kept for humans.

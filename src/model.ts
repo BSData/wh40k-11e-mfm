@@ -90,9 +90,17 @@ export const FactionContent = z.object({
   version: z.string().min(1),
   /**
    * Parent army a sub-faction belongs to (e.g. "Space Marines" for Black Templars),
-   * from the page's army-group title. Absent for top-level factions.
+   * from the page's army-group title — but only when that title names another known
+   * faction. Absent for top-level factions and for army-group titles that are not
+   * factions (those go to `groupTitle`).
    */
   parent: z.string().min(1).optional(),
+  /**
+   * The page's army-group title when it is *not* a parent faction — a sub-army or
+   * army-rule heading (e.g. "Harlequins" on Aeldari, "Blood Legions" on World Eaters).
+   * Mutually exclusive with `parent`. Absent when the page has no such title.
+   */
+  groupTitle: z.string().min(1).optional(),
   detachments: z.array(Detachment),
   units: z.array(Unit).min(1),
 });

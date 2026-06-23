@@ -373,8 +373,17 @@ function assertFactionCovered($: CheerioAPI, slug: string, name: string, version
   }
 }
 
-/** Parse a faction subpage. `name`/`slug` come from the index (clean display name). */
-export function parseFaction(html: string, slug: string, name: string): FactionContent {
+/**
+ * Parse a faction subpage. `name`/`slug` come from the index (clean display name).
+ * `knownFactions` is the set of all faction display names (lower-cased) used to tell a
+ * genuine parent-army title from a same-shaped sub-army/army-rule heading.
+ */
+export function parseFaction(
+  html: string,
+  slug: string,
+  name: string,
+  knownFactions: ReadonlySet<string> = new Set(),
+): FactionContent {
   const $ = load(html);
   const version = parseVersion($);
   hydrate($);
@@ -390,16 +399,28 @@ export function parseFaction(html: string, slug: string, name: string): FactionC
     .map((_i, el) => parseDetachment($, $(el)))
     .get();
 
-  // Parent army on sub-faction pages (e.g. "Space Marines" for Black Templars);
-  // absent on top-level factions. Read before the coverage pass mutates `$`. The
-  // `:not([class*="break-after"])` excludes the UNITS/DETACHMENTS section headings,
+  // Army-group title at the top of the page. Read before the coverage pass mutates `$`.
+  // The `:not([class*="break-after"])` excludes the UNITS/DETACHMENTS section headings,
   // which are also `h3.font-header` but carry a print break-after class the title lacks.
-  const parent = titleCase($(PARENT_TITLE_SELECTOR).first().text());
+  // It is a genuine `parent` only when it names *another* faction (e.g. "Space Marines"
+  // for Black Templars); otherwise it is a same-shaped sub-army / army-rule heading
+  // (e.g. "Harlequins" on Aeldari), which goes to `groupTitle`.
+  const title = titleCase($(PARENT_TITLE_SELECTOR).first().text());
+  const isParent =
+    !!title && title.toLowerCase() !== name.toLowerCase() && knownFactions.has(title.toLowerCase());
 
   // Last: prove we left nothing on the page unread (mutates $).
   assertFactionCovered($, slug, name, version);
 
-  return { slug, name, version, ...(parent ? { parent } : {}), detachments, units };
+  return {
+    slug,
+    name,
+    version,
+    ...(isParent ? { parent: title } : {}),
+    ...(title && !isParent ? { groupTitle: title } : {}),
+    detachments,
+    units,
+  };
 }
 
 /** All-caps standalone label (e.g. "UNITS") promoted to a Markdown heading. */
