@@ -1,7 +1,7 @@
 name: Dark Angels
 slug: dark-angels
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-22
 detachments:
   - name: 1st Company Task Force
     dp: 2
@@ -236,7 +236,6 @@ units:
     role: support
     attachTo:
       - Assault Intercessor Squad
-      - Bladeguard Veteran Squad
       - Crusader Squad
       - Deathwatch Veterans
       - Decimus Kill Team
@@ -342,7 +341,6 @@ units:
     role: leader
     attachTo:
       - Deathwing Command Squad
-      - Deathwing Command Squad
       - Deathwing Knights
       - Deathwing Terminator Squad
       - Terminator Assault Squad
@@ -392,7 +390,6 @@ units:
       - Crusader Squad
       - Deathwatch Veterans
       - Decimus Kill Team
-      - Desolation Squad
       - Fortis Kill Team
       - Hellblaster Squad
       - Infernus Squad
@@ -898,7 +895,6 @@ units:
       - Incursor Squad
       - Infiltrator Squad
       - Reiver Squad
-      - Scout Squad
       - Spectrus Kill Team
   - name: Librarian In Terminator Armour
     pricing:

@@ -1,7 +1,7 @@
 name: Space Marines
 slug: space-marines
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-22
 detachments:
   - name: 1st Company Task Force
     dp: 2
@@ -273,7 +273,6 @@ units:
     attachTo:
       - Assault Intercessor Squad
       - Assault Squad
-      - Bladeguard Veteran Squad
       - Crusader Squad
       - Deathwatch Veterans
       - Decimus Kill Team
@@ -457,7 +456,6 @@ units:
       - Crusader Squad
       - Deathwatch Veterans
       - Decimus Kill Team
-      - Desolation Squad
       - Fortis Kill Team
       - Hellblaster Squad
       - Infernus Squad
@@ -1235,7 +1233,6 @@ units:
       - Incursor Squad
       - Infiltrator Squad
       - Reiver Squad
-      - Scout Squad
       - Spectrus Kill Team
   - name: Librarian In Terminator Armour
     pricing:

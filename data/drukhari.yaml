@@ -1,7 +1,7 @@
 name: Drukhari
 slug: drukhari
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-22
 detachments:
   - name: Covenite Coterie
     dp: 2
@@ -60,7 +60,7 @@ detachments:
     objective: PURGE THE FOE
     enhancements:
       - { name: Chronoshard, points: 15 }
-      - { name: MORGHENNA’S CURSE, points: 20 }
+      - { name: Morghenna’s Curse, points: 20 }
       - { name: Periapt of Torments, points: 25 }
       - { name: Pharmacophex, points: 15 }
   - name: Tools Of Torment
