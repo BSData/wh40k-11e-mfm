@@ -1,7 +1,7 @@
 name: Chaos Space Marines
 slug: chaos-space-marines
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Cabal Of Chaos
     dp: 1
@@ -74,15 +74,17 @@ detachments:
   - name: Murdertalon Raiders
     dp: 1
     objective: PURGE THE FOE
+    unique: Nightmare
     enhancements:
-      - { name: Pact of Cursed Pinions, points: 20 }
+      - { name: Pact of Cursed Pinions, points: 20, leaderTo: [ Warp Talons ] }
       - { name: Shadowcowl Talisman, points: 20 }
   - name: Nightmare Hunt
     dp: 2
     objective: DISRUPTION
+    unique: Nightmare
     enhancements:
       - { name: Greyveil Hex, points: 25 }
-      - { name: Sorrowscent Vulture, points: 35 }
+      - { name: Sorrowscent Vulture, points: 35, leaderTo: [ Warp Talons ] }
       - { name: Terrorglut Parasite, points: 20 }
       - { name: Warp-Fuelled Thrusters, points: 20 }
   - name: Pactbound Zealots

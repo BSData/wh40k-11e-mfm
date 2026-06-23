@@ -1,7 +1,7 @@
 name: Imperial Knights
 slug: imperial-knights
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Dominus Foebreakers
     dp: 1
@@ -42,6 +42,7 @@ detachments:
   - name: Spearhead-At-Arms
     dp: 2
     objective: RECONNAISSANCE
+    unique: Armigers
     enhancements:
       - { name: Fables of Nightmare, points: 10 }
       - { name: Martial Tuition, points: 15 }
@@ -50,6 +51,7 @@ detachments:
   - name: Throne-Bonded Outriders
     dp: 1
     objective: RECONNAISSANCE
+    unique: Armigers
     enhancements:
       - { name: Ancestral Overbleed (Upgrade), points: 10 }
       - { name: Gyro-optimised Actuators (Upgrade), points: 15 }

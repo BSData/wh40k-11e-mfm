@@ -1,13 +1,14 @@
 name: Astra Militarum
 slug: astra-militarum
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Abhuman Auxiliaries
     dp: 1
     objective: TAKE AND HOLD
+    unique: Abhuman
     enhancements:
-      - { name: Exemplar of Duty (Upgrade), points: 10 }
+      - { name: Exemplar of Duty (Upgrade), points: 10, leaderTo: [ Bullgryn Squad, Ogryn Squad ] }
       - { name: Sharp Eyes (Upgrade), points: 10 }
   - name: Armoured Infantry
     dp: 2
@@ -34,14 +35,16 @@ detachments:
   - name: Designation Force
     dp: 1
     objective: RECONNAISSANCE
+    unique: Recon
     enhancements:
       - { name: Long-range Scout (Upgrade), points: 10 }
       - { name: Recon Star (Upgrade), points: 10 }
   - name: Grizzled Company
     dp: 3
     objective: PRIORITY ASSETS
+    unique: Abhuman
     enhancements:
-      - { name: Abhuman Detail, points: 20 }
+      - { name: Abhuman Detail, points: 20, leaderTo: [ Bullgryn Squad, Ogryn Squad ] }
       - { name: Aquilan Eye, points: 20 }
       - { name: Laud Hailer, points: 10 }
       - { name: Spec Ops Veteran, points: 15 }
@@ -64,6 +67,7 @@ detachments:
   - name: Recon Element
     dp: 3
     objective: RECONNAISSANCE
+    unique: Recon
     enhancements:
       - { name: Guerrilla Honours, points: 25 }
       - { name: Scare Gas Grenades, points: 5 }

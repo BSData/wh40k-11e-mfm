@@ -1,7 +1,7 @@
 name: Chaos Knights
 slug: chaos-knights
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Bastions Of Tyranny
     dp: 1
@@ -20,6 +20,7 @@ detachments:
   - name: Houndpack Lance
     dp: 2
     objective: RECONNAISSANCE
+    unique: War Dogs
     enhancements:
       - { name: Final Howl, points: 20 }
       - { name: Loping Predator, points: 10 }
@@ -28,6 +29,7 @@ detachments:
   - name: Hunting Warpack
     dp: 1
     objective: RECONNAISSANCE
+    unique: War Dogs
     enhancements:
       - { name: Snarling Rivalry (Upgrade), points: 10 }
       - { name: Soul-spoor Auspicator (Upgrade), points: 15 }

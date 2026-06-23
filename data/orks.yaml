@@ -1,11 +1,12 @@
 name: Orks
 slug: orks
 version: "1.0"
-firstSeen: 2026-06-17
+firstSeen: 2026-06-23
 detachments:
   - name: Blitz Brigade
     dp: 2
     objective: RECONNAISSANCE
+    unique: Wagons
     enhancements:
       - { name: Blitzkaptin, points: 25 }
       - { name: Runnin’ Boots, points: 10 }
@@ -68,6 +69,7 @@ detachments:
   - name: Rollin' Deff
     dp: 1
     objective: PRIORITY ASSETS
+    unique: Wagons
     enhancements:
       - { name: Boarding Ramps (Upgrade), points: 10 }
       - { name: Targetin’ Gizmos (Upgrade), points: 15 }
@@ -84,7 +86,7 @@ detachments:
     objective: DISRUPTION
     enhancements:
       - { name: Mork’s Kunnin’, points: 20 }
-      - { name: Slippery Git, points: 15 }
+      - { name: Slippery Git, points: 15, leaderTo: [ Kommandos ] }
   - name: War Horde
     dp: 3
     objective: TAKE AND HOLD

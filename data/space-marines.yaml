@@ -1,7 +1,7 @@
 name: Space Marines
 slug: space-marines
 version: "1.0"
-firstSeen: 2026-06-22
+firstSeen: 2026-06-23
 detachments:
   - name: 1st Company Task Force
     dp: 2
@@ -178,6 +178,7 @@ detachments:
       - { name: The Blade Driven Deep, points: 25 }
 units:
   - name: Adrax Agatone
+    groupTitle: Salamanders
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -196,6 +197,7 @@ units:
       - Tactical Squad
       - Vanguard Veteran Squad
   - name: Aethon Shaan
+    groupTitle: Raven Guard
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -423,6 +425,7 @@ units:
         costs:
           - { models: 1, points: 160 }
   - name: Caanok Var
+    groupTitle: Iron Hands
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -519,6 +522,7 @@ units:
       - Outrider Squad
     legends: true
   - name: Captain Titus
+    groupTitle: Ultramarines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -559,6 +563,7 @@ units:
           - { models: 1, points: 250 }
     legends: true
   - name: Cato Sicarius
+    groupTitle: Ultramarines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -675,6 +680,7 @@ units:
       - Talonstrike Kill Team
       - Vanguard Veteran Squad With Jump Packs
   - name: Chief Librarian Tigurius
+    groupTitle: Ultramarines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -725,6 +731,7 @@ units:
           - { models: 5, points: 275 }
     legends: true
   - name: Darnath Lysander
+    groupTitle: Imperial Fists
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1008,6 +1015,7 @@ units:
         costs:
           - { models: 1, points: 125 }
   - name: Iron Father Feirros
+    groupTitle: Iron Hands
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1055,6 +1063,7 @@ units:
       - Tactical Squad
       - Vanguard Veteran Squad
   - name: Kayvaan Shrike
+    groupTitle: Raven Guard
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1066,6 +1075,7 @@ units:
       - Assault Squad With Jump Packs
       - Vanguard Veteran Squad With Jump Packs
   - name: Kor’Sarro Khan
+    groupTitle: White Scars
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1324,6 +1334,7 @@ units:
         costs:
           - { models: 1, points: 85 }
   - name: Marneus Calgar In Armour Of Antilochus
+    groupTitle: Ultramarines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1371,6 +1382,7 @@ units:
           - { models: 6, points: 140 }
           - { models: 1, points: 60, desc: Invader ATV, addon: true }
   - name: Pedro Kantor
+    groupTitle: Imperial Fists
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1507,6 +1519,7 @@ units:
           - { models: 1, points: 95 }
     legends: true
   - name: Roboute Guilliman
+    groupTitle: Ultramarines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1681,6 +1694,7 @@ units:
         costs:
           - { models: 1, points: 165 }
   - name: Suboden Khan
+    groupTitle: White Scars
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1801,6 +1815,7 @@ units:
           - { models: 1, points: 495 }
     legends: true
   - name: Tor Garadon
+    groupTitle: Imperial Fists
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1826,6 +1841,7 @@ units:
           - { models: 5, points: 85 }
     legends: true
   - name: Uriel Ventris
+    groupTitle: Ultramarines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1870,6 +1886,7 @@ units:
           - { models: 1, points: 165 }
     legends: true
   - name: Victrix Honour Guard
+    groupTitle: Ultramarines
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -1902,6 +1919,7 @@ units:
           - { models: 1, points: 175 }
     legends: true
   - name: Vulkan He’Stan
+    groupTitle: Salamanders
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1917,6 +1935,7 @@ units:
       - Tactical Squad
       - Vanguard Veteran Squad
   - name: Wardens Of Ultramar
+    groupTitle: Ultramarines
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
