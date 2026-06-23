@@ -8,6 +8,7 @@ import {
   launchBrowser,
   renderWithLegends,
 } from './browser.js';
+import { failuresReport } from './diff.js';
 import { contentKey, factionFromYaml, factionToYaml, metaToYaml } from './emit.js';
 import { BASE_URL, factionUrl, fetchText } from './fetch.js';
 import { Faction, type FactionContent } from './model.js';
@@ -36,6 +37,7 @@ interface Args {
   out: string;
   concurrency: number;
   legends: boolean;
+  report?: string;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -48,6 +50,10 @@ function parseArgs(argv: string[]): Args {
     } else if (a === '--out') args.out = argv[++i] ?? args.out;
     else if (a === '--concurrency') args.concurrency = Number(argv[++i]) || args.concurrency;
     else if (a === '--no-legends') args.legends = false;
+    else if (a === '--report') {
+      const v = argv[++i];
+      if (v !== undefined) args.report = v;
+    }
   }
   return args;
 }
@@ -183,6 +189,9 @@ async function main(): Promise<void> {
   console.log(`\nDone: ${scraped.length} scraped, ${failures.length} failed.`);
   if (failures.length > 0) {
     console.error(`Failures: ${failures.map((x) => x.slug).join(', ')}`);
+    // Persist a located, per-faction report for the workflow's error issue. Written
+    // before exit so it survives the non-zero exit that triggers the issue step.
+    if (args.report) writeFileSync(args.report, failuresReport(failures));
     process.exitCode = 1;
   }
 }
