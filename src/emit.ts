@@ -61,6 +61,7 @@ function orderUnits(us: Unit[], order: OrderMode): Unit[] {
   return ordered(us, order).map((u) => {
     const unit: Unit = {
       name: u.name,
+      ...(u.groupTitle !== undefined ? { groupTitle: u.groupTitle } : {}),
       pricing: u.pricing.map((t) => ({
         range: t.range,
         label: t.label,
@@ -82,7 +83,6 @@ function orderContent(c: FactionContent, order: OrderMode = 'name'): FactionCont
     slug: c.slug,
     version: c.version,
     ...(c.parent !== undefined ? { parent: c.parent } : {}),
-    ...(c.groupTitle !== undefined ? { groupTitle: c.groupTitle } : {}),
     detachments: orderDetachments(c.detachments, order),
     units: orderUnits(c.units, order),
   };
@@ -100,14 +100,13 @@ export function contentKey(c: FactionContent, order: OrderMode = 'name'): string
 
 /** Serialize a faction to canonical YAML. `firstSeen` sits just under `version`. */
 export function factionToYaml(f: Faction, order: OrderMode = 'name'): string {
-  const { name, slug, version, parent, groupTitle, detachments, units } = orderContent(f, order);
+  const { name, slug, version, parent, detachments, units } = orderContent(f, order);
   const doc = new Document({
     name,
     slug,
     version,
     firstSeen: f.firstSeen,
     ...(parent !== undefined ? { parent } : {}),
-    ...(groupTitle !== undefined ? { groupTitle } : {}),
     detachments,
     units,
   });

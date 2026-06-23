@@ -50,6 +50,13 @@ export type Wargear = z.infer<typeof Wargear>;
 
 export const Unit = z.object({
   name: z.string().min(1),
+  /**
+   * The page sub-group this unit is listed under, from its army-group header
+   * (e.g. "Harlequins"/"Ynnari" on Aeldari, a Chapter on Space Marines, "Space
+   * Marines" for a successor's shared roster). Absent for the base roster (units
+   * listed directly under UNITS, with no sub-group header).
+   */
+  groupTitle: z.string().min(1).optional(),
   pricing: z.array(PricingTier).min(1),
   /** "leader" or "support" if the unit has that ability (lists `attachTo`). */
   role: z.enum(['leader', 'support']).optional(),
@@ -89,18 +96,12 @@ export const FactionContent = z.object({
   name: z.string().min(1),
   version: z.string().min(1),
   /**
-   * Parent army a sub-faction belongs to (e.g. "Space Marines" for Black Templars),
-   * from the page's army-group title — but only when that title names another known
-   * faction. Absent for top-level factions and for army-group titles that are not
-   * factions (those go to `groupTitle`).
+   * Parent army a sub-faction belongs to (e.g. "Space Marines" for Black Templars).
+   * Set when one of the page's unit sub-group headers names another known faction;
+   * the units in that group also carry it as their `groupTitle`. Absent for top-level
+   * factions and for sub-group headers that are not factions (which live only on units).
    */
   parent: z.string().min(1).optional(),
-  /**
-   * The page's army-group title when it is *not* a parent faction — a sub-army or
-   * army-rule heading (e.g. "Harlequins" on Aeldari, "Blood Legions" on World Eaters).
-   * Mutually exclusive with `parent`. Absent when the page has no such title.
-   */
-  groupTitle: z.string().min(1).optional(),
   detachments: z.array(Detachment),
   units: z.array(Unit).min(1),
 });

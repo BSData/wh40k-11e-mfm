@@ -39,7 +39,7 @@ into the interval `range`. Enhancement points are inline and need no special han
 |---|---|
 | Site version | first `vX.Y` match in body text |
 | Faction links | `a[href]` matching `^/en/<slug>$`; link text = display name |
-| Faction `parent` / `groupTitle` | `h3.font-header:not([class*="break-after"])` (army-group title; the UNITS/DETACHMENTS section headings are `h3.font-header` *with* the break-after class). The title is `parent` when it names another faction from the index, else `groupTitle` (a sub-army or army-rule heading) |
+| Unit `groupTitle` / faction `parent` | `h3.font-header:not([class*="break-after"])` sub-group headers (the UNITS/DETACHMENTS section headings are `h3.font-header` *with* the break-after class). Walking headers + unit cards in document order, each unit takes the sub-group header it sits under as `groupTitle`; a section header resets to the base roster. A sub-group header that names another faction from the index is also surfaced as the faction-level `parent` |
 | Unit card name | `div.bg-slate-500.text-xl` (text = unit name) |
 | Unit pricing tier | `div.bg-slate-200` label + following `ul.leaders` (label → `range`) |
 | Unit cost row | `ul.leaders > li` (post-hydration): trailing `NN pts` = points, rest → `models`/`desc` |

@@ -39,9 +39,9 @@ describe('parseFaction (necrons)', () => {
     expect(faction.detachments).toHaveLength(12);
   });
 
-  it('has no parent or group title (top-level faction)', () => {
+  it('has no parent and no unit sub-groups (top-level faction)', () => {
     expect(faction.parent).toBeUndefined();
-    expect(faction.groupTitle).toBeUndefined();
+    expect(faction.units.every((u) => u.groupTitle === undefined)).toBe(true);
   });
 
   it('parses a simple single-option unit', () => {
@@ -133,12 +133,18 @@ describe('parseFaction (black-templars) — streamed cards & composite sizes', (
     expect(faction.units.length).toBeGreaterThan(20);
   });
 
-  it('captures the parent army when the title names a known faction', () => {
+  it('tags units with their sub-group and surfaces a faction parent when it names a faction', () => {
+    // The shared roster sits under a "Space Marines" sub-group header; the chapter's own
+    // units (under the bare UNITS section) have no group.
+    expect(faction.units.find((u) => u.name === 'Aggressor Squad')?.groupTitle).toBe(
+      'Space Marines',
+    );
+    expect(faction.units.find((u) => u.name === 'Crusader Squad')?.groupTitle).toBeUndefined();
+    // "Space Marines" names another faction, so it is also surfaced at the faction level.
     expect(faction.parent).toBe('Space Marines');
-    expect(faction.groupTitle).toBeUndefined();
   });
 
-  it('routes the army-group title to groupTitle when it is not a known faction', () => {
+  it('keeps unit groupTitle but drops faction parent when the group is not a known faction', () => {
     const orphan = parseFaction(
       fixture('black-templars.html'),
       'black-templars',
@@ -146,7 +152,10 @@ describe('parseFaction (black-templars) — streamed cards & composite sizes', (
       new Set(),
     );
     expect(orphan.parent).toBeUndefined();
-    expect(orphan.groupTitle).toBe('Space Marines');
+    // The per-unit grouping does not depend on the faction list.
+    expect(orphan.units.find((u) => u.name === 'Aggressor Squad')?.groupTitle).toBe(
+      'Space Marines',
+    );
   });
 
   it('keeps composite descriptions and sums their model counts', () => {

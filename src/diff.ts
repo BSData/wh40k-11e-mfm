@@ -150,8 +150,6 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
   if (before.version !== after.version) head.push(`v${before.version} → v${after.version}`);
   if (before.parent !== after.parent)
     head.push(`parent ${before.parent ?? '—'} → ${after.parent ?? '—'}`);
-  if (before.groupTitle !== after.groupTitle)
-    head.push(`groupTitle ${before.groupTitle ?? '—'} → ${after.groupTitle ?? '—'}`);
 
   const ou = unitNames(before);
   const nu = unitNames(after);

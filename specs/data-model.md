@@ -42,6 +42,7 @@ units:                 # 'name' order by default; 'page' preserves source order
     role: support              # leader | support, if the unit has that ability
     attachTo: [Immortals, Necron Warriors]   # units it can be attached to
   - name: Redemptor Dreadnought
+    groupTitle: Space Marines  # sub-group header this unit sits under (illustrative; see below)
     pricing: [...]
     wargear:                   # per-item costs added on top of the unit's cost
       - { item: Macro plasma incinerator, points: 10 }
@@ -71,22 +72,23 @@ costs:
   - { models: 1, points: 3500 }                                            # "3,500 pts" (thousands comma)
 ```
 
-### `role` / `attachTo` / `wargear` — optional unit extras
+### `role` / `attachTo` / `wargear` / `groupTitle` — optional unit extras
 - `role` (`leader`/`support`) + `attachTo`: present when the unit has the Leader/Support
   ability; `attachTo` lists the units it can join (from the role block's icon + list).
 - `wargear`: per-item point costs from the unit's "Wargear Options" block (`per` stripped).
 - `legends: true`: marks Legends (deprecated) units — see specs/scraping.md.
+- `groupTitle`: the page sub-group the unit is listed under, Title-Cased from its army-group
+  header (`h3.font-header:not([class*="break-after"])`) — e.g. `Harlequins`/`Ynnari` on
+  Aeldari, a Chapter on Space Marines, `Space Marines` for a successor's shared roster.
+  Omitted for the base roster (units under the bare UNITS section, with no sub-group header).
 
-### `parent` / `groupTitle` — army-group title (faction-level, optional)
-Both come from the page's army-group title (`h3.font-header:not([class*="break-after"])`),
-Title-Cased. Where the title goes depends on whether it names another faction:
-- `parent`: the army a sub-faction belongs to (e.g. `Space Marines` for Black Templars) —
-  set only when the title matches another faction's name from the index.
-- `groupTitle`: the same title when it is *not* a faction — a sub-army or army-rule heading
-  (e.g. `Harlequins` on Aeldari, `Blood Legions` on World Eaters).
-
-The two are mutually exclusive, and both are omitted for top-level factions (e.g. Necrons)
-that have no such title.
+### `parent` — parent army (faction-level, optional)
+Set when one of the page's unit sub-group headers names **another** known faction (e.g.
+`Space Marines` for Black Templars). The units in that group also carry it as their
+`groupTitle`; `parent` surfaces the same fact at the faction level. Omitted for top-level
+factions, and for non-faction sub-group headers (e.g. `Harlequins`), which live only on the
+units. A page can have several sub-groups (Aeldari has `Harlequins` and `Ynnari`); `parent`
+is the first that names a faction.
 
 ### `unique` (detachment) / `leaderTo` (enhancement) — optional extras
 - `unique`: the sub-faction keyword a detachment is restricted to, from its `UNIQUE: X`
