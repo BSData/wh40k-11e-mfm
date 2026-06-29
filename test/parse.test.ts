@@ -211,6 +211,7 @@ describe('parseFaction (detachment enhancement leader grant variants)', () => {
       'Adeptus Custodes',
     );
     const shieldHost = faction.detachments.find((d) => d.name === 'Shield Host');
+    expect(shieldHost).toBeDefined();
     expect(shieldHost?.enhancements.find((e) => e.name === 'Auric Mantle')?.leaderTo).toEqual([
       'Custodian Guard',
       'Custodian Wardens',

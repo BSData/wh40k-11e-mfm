@@ -230,16 +230,15 @@ function parseDetachment($: CheerioAPI, nameSpan: ReturnType<CheerioAPI>): Detac
       // Keep the search local so a grant on one row does not bleed into neighbors.
       const row = $(li);
       const leaderScopes: ReturnType<CheerioAPI>[] = [row];
-      row.nextAll().each((_j, s) => {
-        if ((s as { tagName?: string }).tagName === 'li') return false;
+      for (const s of row.nextAll().toArray()) {
+        if ($(s).is('li')) break;
         leaderScopes.push($(s));
-        return undefined;
-      });
+      }
       const parent = row.parent();
       if (parent.children('li').length <= 1) leaderScopes.push(parent);
 
       const leaderTo =
-        leaderScopes.map((scope) => extractLeaderTo($, scope)).find((v) => v.length > 0) ?? [];
+        leaderScopes.map((scope) => extractLeaderTo($, scope)).find((v) => v.length > 0) || [];
       return { name: enhName, points, ...(leaderTo.length > 0 ? { leaderTo } : {}) };
     })
     .get()
