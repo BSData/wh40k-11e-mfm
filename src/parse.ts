@@ -177,6 +177,36 @@ function parseUnit($: CheerioAPI, nameDiv: ReturnType<CheerioAPI>): Unit {
   };
 }
 
+function parseLeaderTo(raw: string): string[] {
+  return clean(raw)
+    .split(',')
+    .map((s) => titleCase(s))
+    .filter(Boolean);
+}
+
+function extractLeaderTo($: CheerioAPI, scope: ReturnType<CheerioAPI>): string[] {
+  const splitSpan = clean(
+    scope
+      .find('span')
+      .filter((_i, s) => /^LEADER:$/i.test(clean($(s).text())))
+      .first()
+      .nextAll('span')
+      .first()
+      .text(),
+  );
+  if (splitSpan) return parseLeaderTo(splitSpan);
+
+  const inlineSpan = scope
+    .find('span')
+    .map((_i, s) => clean($(s).text()).match(/^LEADER:\s*(.+)$/i)?.[1] ?? '')
+    .get()
+    .find(Boolean);
+  if (inlineSpan) return parseLeaderTo(inlineSpan);
+
+  const inlineText = clean(scope.text()).match(/\bLEADER:\s*(.+)$/i)?.[1] ?? '';
+  return inlineText ? parseLeaderTo(inlineText) : [];
+}
+
 function parseDetachment($: CheerioAPI, nameSpan: ReturnType<CheerioAPI>): Detachment {
   const name = titleCase(nameSpan.text());
   const header = nameSpan.parent();
@@ -196,21 +226,20 @@ function parseDetachment($: CheerioAPI, nameSpan: ReturnType<CheerioAPI>): Detac
       const enhName = clean(spans.first().text());
       const points = leadingInt(clean(spans.last().text()));
       if (!enhName || points === null) return null;
-      // A "LEADER:" block sits beside the enhancement it belongs to (a sibling of the
-      // <li> within the same wrapper): buying this enhancement unlocks those leaders.
-      const leaderTo = clean(
-        $(li)
-          .parent()
-          .find('span')
-          .filter((_j, s) => clean($(s).text()) === 'LEADER:')
-          .first()
-          .nextAll('span')
-          .first()
-          .text(),
-      )
-        .split(',')
-        .map((s) => titleCase(s))
-        .filter(Boolean);
+      // A "LEADER:" block sits with (or immediately after) the enhancement row.
+      // Keep the search local so a grant on one row does not bleed into neighbors.
+      const row = $(li);
+      const leaderScopes: ReturnType<CheerioAPI>[] = [row];
+      row.nextAll().each((_j, s) => {
+        if ((s as { tagName?: string }).tagName === 'li') return false;
+        leaderScopes.push($(s));
+        return undefined;
+      });
+      const parent = row.parent();
+      if (parent.children('li').length <= 1) leaderScopes.push(parent);
+
+      const leaderTo =
+        leaderScopes.map((scope) => extractLeaderTo($, scope)).find((v) => v.length > 0) ?? [];
       return { name: enhName, points, ...(leaderTo.length > 0 ? { leaderTo } : {}) };
     })
     .get()
@@ -328,9 +357,17 @@ function assertFactionCovered($: CheerioAPI, slug: string, name: string, version
     ];
     card
       .find('span')
-      .filter((_j, s) => clean($(s).text()) === 'LEADER:')
+      .filter((_j, s) => /^LEADER:$/i.test(clean($(s).text())))
       .each((_j, s) => {
         claimed.push('LEADER:', clean($(s).nextAll('span').first().text()));
+      });
+    card
+      .find('span')
+      .map((_j, s) => clean($(s).text()))
+      .get()
+      .filter((t) => /^LEADER:\s*.+/i.test(t))
+      .forEach((t) => {
+        claimed.push(t);
       });
     card.find('ul.leaders li').each((_j, li) => {
       const spans = $(li).find('div').last().find('span');
