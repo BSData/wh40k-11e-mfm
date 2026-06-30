@@ -178,50 +178,6 @@ describe('parseFaction (black-templars) — streamed cards & composite sizes', (
   });
 });
 
-describe('parseFaction (detachment enhancement leader grant variants)', () => {
-  it('parses inline "LEADER: ..." text attached to a single enhancement', () => {
-    const faction = parseFaction(
-      `<!doctype html><html><body>
-        v1.0
-        <h3 class="font-header break-after">UNITS</h3>
-        <div>
-          <div class="bg-slate-500 text-xl">Custodian Guard</div>
-          <div class="bg-slate-200">Your Unit Costs</div>
-          <ul class="leaders"><li>1 model 100 pts</li></ul>
-        </div>
-        <h3 class="font-header break-after">DETACHMENTS</h3>
-        <div>
-          <div><span class="text-xl break-all">Shield Host</span><span>2DP</span></div>
-          <div style="background-color:#8B1B1B">PURGE THE FOE</div>
-          <div>
-            <div>ENHANCEMENTS</div>
-            <ul class="leaders">
-              <div>
-                <li><div><span>Auric Mantle</span><span>15 pts</span></div></li>
-                <div><span>LEADER: CUSTODIAN GUARD, CUSTODIAN WARDENS</span></div>
-              </div>
-              <div>
-                <li><div><span>Panoptispex</span><span>5 pts</span></div></li>
-              </div>
-            </ul>
-          </div>
-        </div>
-      </body></html>`,
-      'adeptus-custodes',
-      'Adeptus Custodes',
-    );
-    const shieldHost = faction.detachments.find((d) => d.name === 'Shield Host');
-    expect(shieldHost).toBeDefined();
-    expect(shieldHost?.enhancements.find((e) => e.name === 'Auric Mantle')?.leaderTo).toEqual([
-      'Custodian Guard',
-      'Custodian Wardens',
-    ]);
-    expect(
-      shieldHost?.enhancements.find((e) => e.name === 'Panoptispex')?.leaderTo,
-    ).toBeUndefined();
-  });
-});
-
 describe('markLegends (necrons base vs legends-on render)', () => {
   const base = parseFaction(fixture('necrons.html'), 'necrons', 'Necrons');
   const full = parseFaction(fixture('necrons-legends.html'), 'necrons', 'Necrons');

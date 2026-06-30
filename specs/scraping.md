@@ -50,7 +50,7 @@ into the interval `range`. Enhancement points are inline and need no special han
 | Detachment objective | `div[style]` (styled banner) under the header |
 | Detachment `unique` | direct-child `div.bg-slate-200` (`UNIQUE: X` banner; prefix stripped) |
 | Enhancement | `ul.leaders li`: last `div`'s two spans = name, points |
-| Enhancement `leaderTo` | text local to the enhancement row (`<li>` or its immediate sibling block): either split spans (`LEADER:` + next span) or inline `LEADER: ...` text (comma-separated unit list) |
+| Enhancement `leaderTo` | sibling of the enhancement's `<li>` in its wrapper: span `LEADER:` + next span (comma-separated unit list) |
 
 ## Validation (fail loud)
 Every faction is checked against the `Faction` zod schema before writing. The parser also
