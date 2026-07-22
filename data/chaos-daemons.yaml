@@ -1,7 +1,7 @@
 name: Chaos Daemons
 slug: chaos-daemons
-version: "1.0"
-firstSeen: 2026-06-17
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Blood Legion
     dp: 2
@@ -35,7 +35,7 @@ detachments:
       - { name: Soul Glutton, points: 10 }
   - name: Lords Of The Warp
     dp: 1
-    objective: PURGE THE FOE
+    objective: TAKE AND HOLD
     enhancements:
       - { name: Swollen with Power (Upgrade), points: 10 }
   - name: Plague Legion
@@ -51,9 +51,9 @@ detachments:
     objective: PRIORITY ASSETS
     enhancements:
       - { name: Improbable Shield, points: 30 }
-      - { name: Inescapable Eye, points: 10 }
-      - { name: Infernal Puppeteer, points: 25 }
-      - { name: Neverblade, points: 20 }
+      - { name: Inescapable Eye, points: 15 }
+      - { name: Infernal Puppeteer, points: 20 }
+      - { name: Neverblade, points: 25 }
   - name: Shadow Legion
     dp: 2
     objective: PURGE THE FOE
@@ -94,7 +94,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 70 }
+          - { models: 1, points: 75 }
           - { models: 2, points: 140 }
   - name: Bloodcrushers
     pricing:
@@ -102,12 +102,12 @@ units:
         label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 95 }
-          - { models: 6, points: 180 }
+          - { models: 6, points: 190 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 105 }
-          - { models: 6, points: 190 }
+          - { models: 3, points: 115 }
+          - { models: 6, points: 210 }
   - name: Bloodletters
     pricing:
       - range: "[1,)"
@@ -241,7 +241,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 80 }
+          - { models: 1, points: 70 }
     role: leader
     attachTo:
       - Blue Horrors
@@ -313,7 +313,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 295 }
+          - { models: 1, points: 305 }
   - name: Karanak
     pricing:
       - range: "[1,)"
@@ -338,11 +338,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 300 }
+          - { models: 1, points: 320 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 315 }
+          - { models: 1, points: 340 }
   - name: Nurglings
     pricing:
       - range: "[1,)"
@@ -434,7 +434,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 340 }
+          - { models: 1, points: 315 }
   - name: Skarbrand
     pricing:
       - range: "[1,)"

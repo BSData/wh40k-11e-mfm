@@ -1,7 +1,7 @@
 name: Adeptus Custodes
 slug: adeptus-custodes
-version: "1.0"
-firstSeen: 2026-06-23
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Auric Champions
     dp: 2
@@ -16,13 +16,13 @@ detachments:
     objective: DISRUPTION
     unique: Lions
     enhancements:
-      - { name: Admonimortis, points: 20 }
+      - { name: Admonimortis, points: 30 }
       - { name: Fierce Conqueror, points: 15 }
       - { name: Praesidius, points: 25 }
       - { name: Superior Creation, points: 25 }
   - name: Might Of The Moritoi
     dp: 1
-    objective: PURGE THE FOE
+    objective: TAKE AND HOLD
     unique: Armoury
     enhancements:
       - { name: Auramite Sarcophagus (Upgrade), points: 15 }
@@ -41,7 +41,7 @@ detachments:
     enhancements:
       - { name: Auric Mantle, points: 15 }
       - { name: Castellan’s Mark, points: 20 }
-      - { name: From the Hall of Armouries, points: 25 }
+      - { name: From the Hall of Armouries, points: 20 }
       - { name: Panoptispex, points: 5 }
   - name: Silent Hunters
     dp: 1
@@ -86,7 +86,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 65 }
+          - { models: 1, points: 55 }
     role: leader
     attachTo:
       - Prosecutors
@@ -103,8 +103,12 @@ units:
           - { models: 6, points: 330 }
   - name: Anathema Psykana Rhino
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 65 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 75 }
   - name: Aquilon Custodians
@@ -209,13 +213,13 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 4, points: 210 }
-          - { models: 5, points: 260 }
+          - { models: 4, points: 200 }
+          - { models: 5, points: 250 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 4, points: 230 }
-          - { models: 5, points: 280 }
+          - { models: 4, points: 220 }
+          - { models: 5, points: 270 }
   - name: Knight-Centura
     pricing:
       - range: "[1,)"
@@ -326,11 +330,18 @@ units:
       - Sagittarum Custodians
   - name: Venatari Custodians
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 150 }
+          - { models: 6, points: 300 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
           - { models: 3, points: 160 }
-          - { models: 6, points: 320 }
+          - { models: 6, points: 310 }
+    wargear:
+      - { item: Venatari lance, points: 5 }
   - name: Venerable Contemptor Dreadnought
     pricing:
       - range: "[1,2]"

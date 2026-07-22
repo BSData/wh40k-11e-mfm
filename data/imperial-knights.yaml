@@ -1,17 +1,17 @@
 name: Imperial Knights
 slug: imperial-knights
-version: "1.0"
-firstSeen: 2026-06-23
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Dominus Foebreakers
     dp: 1
-    objective: PURGE THE FOE
+    objective: PRIORITY ASSETS
     enhancements:
       - { name: Archeotech Autoloaders, points: 25 }
       - { name: Blessed Plate, points: 30 }
   - name: Freeblade Company
     dp: 3
-    objective: PURGE THE FOE
+    objective: PRIORITY ASSETS
     enhancements:
       - { name: Bringer of Justice, points: 30 }
       - { name: Hunter’s Eye, points: 25 }
@@ -19,7 +19,7 @@ detachments:
       - { name: Sanctuary, points: 20 }
   - name: Gate Warden Lance
     dp: 2
-    objective: PRIORITY ASSETS
+    objective: TAKE AND HOLD
     enhancements:
       - { name: Acquisitor-at-Arms, points: 15 }
       - { name: Augury Halo, points: 20 }
@@ -157,11 +157,11 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 400 }
+          - { models: 1, points: 425 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 420 }
+          - { models: 1, points: 450 }
   - name: Knight Crusader
     pricing:
       - range: "[1,1]"

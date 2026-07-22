@@ -1,7 +1,7 @@
 name: Orks
 slug: orks
-version: "1.0"
-firstSeen: 2026-06-23
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Blitz Brigade
     dp: 2
@@ -30,12 +30,18 @@ detachments:
       - { name: Surly as a Squiggoth, points: 20 }
   - name: Dread Mob
     dp: 2
-    objective: PURGE THE FOE
+    objective: PRIORITY ASSETS
     enhancements:
       - { name: Gitfinder Gogglez, points: 10 }
       - { name: Press It Fasta!, points: 35 }
       - { name: Smoky Gubbinz, points: 15 }
       - { name: Supa-glowy Fing, points: 20 }
+  - name: Equatorial Hordes
+    dp: 1
+    objective: DISRUPTION
+    enhancements:
+      - { name: Kunnin’ Hunta, points: 25 }
+      - { name: Unkillable Scourge, points: 25 }
   - name: Freebooter Krew
     dp: 2
     objective: TAKE AND HOLD
@@ -45,7 +51,7 @@ detachments:
       - { name: Git-Spotter Squig, points: 20 }
       - { name: Razgit’s Magik Map, points: 25 }
   - name: Green Tide
-    dp: 2
+    dp: 3
     objective: TAKE AND HOLD
     enhancements:
       - { name: Bloodthirsty Belligerence, points: 15 }
@@ -62,7 +68,7 @@ detachments:
       - { name: Wazblasta, points: 10 }
   - name: More Dakka!
     dp: 1
-    objective: PURGE THE FOE
+    objective: DISRUPTION
     enhancements:
       - { name: Da Gobshot Thunderbuss, points: 15 }
       - { name: Dead Shiny Shootas (Upgrade), points: 15 }
@@ -83,7 +89,7 @@ detachments:
       - { name: Supa-Burny Fuel, points: 15 }
   - name: Taktikal Brigade
     dp: 1
-    objective: DISRUPTION
+    objective: RECONNAISSANCE
     enhancements:
       - { name: Mork’s Kunnin’, points: 20 }
       - { name: Slippery Git, points: 15, leaderTo: [ Kommandos ] }
@@ -175,14 +181,10 @@ units:
       - Tankbustas
   - name: Big Mek Dakkarig
     pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
+      - range: "[1,)"
+        label: Your Unit Costs
         costs:
-          - { models: 1, points: 100 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
-        costs:
-          - { models: 1, points: 110 }
+          - { models: 1, points: 115 }
   - name: Big Mek In Mega Armour
     pricing:
       - range: "[1,)"
@@ -221,12 +223,12 @@ units:
     legends: true
   - name: Big Mek With Shokk Attack Gun
     pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
         costs:
           - { models: 1, points: 70 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
         costs:
           - { models: 1, points: 80 }
     role: leader
@@ -294,11 +296,16 @@ units:
     legends: true
   - name: Boyz
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
         costs:
           - { models: 10, points: 75 }
-          - { models: 20, points: 150 }
+          - { models: 20, points: 160 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
+        costs:
+          - { models: 10, points: 85 }
+          - { models: 20, points: 170 }
   - name: Breaka Boyz
     pricing:
       - range: "[1,2]"
@@ -444,8 +451,11 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 11, points: 45 }
-          - { models: 22, points: 80 }
+          - { models: 10, points: 45, desc: 10 Gretchin }
+          - { models: 11, points: 45, desc: "1 Runtherd, 10 Gretchin" }
+          - { models: 20, points: 80, desc: 20 Gretchin }
+          - { models: 21, points: 85, desc: "1 Runtherd, 20 Gretchin" }
+          - { models: 22, points: 90, desc: "2 Runtherd, 20 Gretchin" }
   - name: Grot Bomm Launcha
     pricing:
       - range: "[1,)"
@@ -602,7 +612,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 45 }
+          - { models: 1, points: 55 }
     role: leader
     attachTo:
       - Boyz
@@ -681,7 +691,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 60 }
+          - { models: 1, points: 70 }
     role: leader
     attachTo:
       - Beast Snagga Boyz
@@ -690,7 +700,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 80 }
+          - { models: 1, points: 90 }
     role: support
     attachTo:
       - Boyz
@@ -775,8 +785,12 @@ units:
           - { models: 6, points: 135 }
   - name: Trukk
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 55 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 65 }
   - name: Ufthak Blackhawk
@@ -802,7 +816,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 75 }
+          - { models: 1, points: 85 }
     role: leader
     attachTo:
       - Boyz
