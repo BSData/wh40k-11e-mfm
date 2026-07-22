@@ -52,6 +52,7 @@ function orderDetachments(ds: Detachment[], order: OrderMode): Detachment[] {
         name: e.name,
         points: e.points,
         ...(e.leaderTo !== undefined ? { leaderTo: e.leaderTo } : {}),
+        ...(e.supportTo !== undefined ? { supportTo: e.supportTo } : {}),
       })),
     };
   });

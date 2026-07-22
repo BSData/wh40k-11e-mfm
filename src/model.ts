@@ -76,6 +76,11 @@ export const Enhancement = z.object({
    * beside it): buying the enhancement grants its bearer the ability to lead these.
    */
   leaderTo: z.array(z.string().min(1)).optional(),
+  /**
+   * Units this enhancement unlocks the Support ability for (the "SUPPORT:" list shown
+   * beside it) — the Support-role counterpart of `leaderTo`.
+   */
+  supportTo: z.array(z.string().min(1)).optional(),
 });
 export type Enhancement = z.infer<typeof Enhancement>;
 

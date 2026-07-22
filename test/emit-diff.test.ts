@@ -46,7 +46,7 @@ describe('emit', () => {
 
   it('quotes the version and includes firstSeen', () => {
     const yaml = factionToYaml(necrons('2026-06-17'));
-    expect(yaml).toContain('version: "1.0"');
+    expect(yaml).toContain('version: "1.1"');
     expect(yaml).toContain('firstSeen: 2026-06-17');
   });
 
@@ -160,7 +160,7 @@ describe('changelog (ignores firstSeen)', () => {
     expect(log).toContain('**2 factions changed**');
   });
 
-  it('reports a detachment unique change and an enhancement leaderTo change', () => {
+  it('reports a detachment unique change and enhancement leaderTo/supportTo changes', () => {
     const before = necronsContent();
     const after = structuredClone(before);
     const dyn = after.detachments.find((d) => d.name === 'Awakened Dynasty');
@@ -168,10 +168,15 @@ describe('changelog (ignores firstSeen)', () => {
     const murdermind = after.detachments
       .find((d) => d.name === 'Cursed Legion')
       ?.enhancements.find((e) => e.name === 'Murdermind');
-    if (murdermind) murdermind.leaderTo = ['Lokhust Destroyers'];
+    // Murdermind grants Support in v1.1; add a Leader grant and narrow the Support one.
+    if (murdermind) {
+      murdermind.leaderTo = ['Lokhust Destroyers'];
+      murdermind.supportTo = ['Skorpekh Destroyers'];
+    }
     const log = changelog([before], [after]);
     expect(log).toContain('Awakened Dynasty — unique: Dynasty → Hypercrypt');
     expect(log).toContain('Cursed Legion · Murdermind — leaderTo:');
+    expect(log).toContain('Cursed Legion · Murdermind — supportTo:');
   });
 });
 
@@ -195,7 +200,7 @@ describe('changelogEntry (Keep a Changelog block)', () => {
     if (opt) opt.points += 10;
 
     const entry = changelogEntry([before], [after], { date: '2026-06-23' });
-    expect(entry).toContain('## [2026-06-23] — MFM v1.0');
+    expect(entry).toContain('## [2026-06-23] — MFM v1.1');
     expect(entry).toContain('### Added\n- **Necrons**: new unit Shiny New Lord');
     expect(entry).toContain('### Changed');
     expect(entry).toContain('**Necrons**: Necron Warriors — 10 models: 80 → 90 pts (+10)');

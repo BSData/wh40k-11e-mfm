@@ -112,14 +112,14 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "points": 20,
         },
         {
-          "leaderTo": [
-            "Lokhust Destroyers",
-            "Skorpekh Destroyers",
-            "Lokhust Heavy Destroyers",
-            "Ophydian Destroyers",
-          ],
           "name": "Murdermind",
           "points": 15,
+          "supportTo": [
+            "Skorpekh Destroyers",
+            "Lokhust Destroyers",
+            "Ophydian Destroyers",
+            "Lokhust Heavy Destroyers",
+          ],
         },
       ],
       "name": "Cursed Legion",
@@ -209,7 +209,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Pantheon Of Woe",
-      "objective": "PURGE THE FOE",
+      "objective": "DISRUPTION",
     },
     {
       "dp": 1,
@@ -321,7 +321,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "costs": [
             {
               "models": 1,
-              "points": 70,
+              "points": 75,
             },
           ],
           "label": "Your Unit Costs",
@@ -441,7 +441,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "costs": [
             {
               "models": 1,
-              "points": 80,
+              "points": 70,
             },
           ],
           "label": "Your 1st Unit Costs",
@@ -451,7 +451,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "costs": [
             {
               "models": 1,
-              "points": 90,
+              "points": 80,
             },
           ],
           "label": "Your 2nd + Unit Costs",
@@ -598,7 +598,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "costs": [
             {
               "models": 1,
-              "points": 200,
+              "points": 210,
             },
           ],
           "label": "Your 1st To 2nd Units Cost",
@@ -608,7 +608,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "costs": [
             {
               "models": 1,
-              "points": 220,
+              "points": 230,
             },
           ],
           "label": "Your 3rd + Unit Costs",
@@ -760,7 +760,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
             },
             {
               "models": 6,
-              "points": 160,
+              "points": 170,
             },
           ],
           "label": "Your 1st To 2nd Units Cost",
@@ -782,7 +782,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
             },
             {
               "models": 6,
-              "points": 170,
+              "points": 180,
             },
           ],
           "label": "Your 3rd + Unit Costs",
@@ -805,7 +805,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
             },
             {
               "models": 3,
-              "points": 150,
+              "points": 160,
             },
           ],
           "label": "Your 1st To 2nd Units Cost",
@@ -823,7 +823,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
             },
             {
               "models": 3,
-              "points": 160,
+              "points": 170,
             },
           ],
           "label": "Your 3rd + Unit Costs",
@@ -921,7 +921,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "costs": [
             {
               "models": 1,
-              "points": 175,
+              "points": 185,
             },
           ],
           "label": "Your Unit Costs",
@@ -1195,8 +1195,18 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
               "points": 90,
             },
           ],
-          "label": "Your Unit Costs",
-          "range": "[1,)",
+          "label": "Your 1st To 2nd Units Cost",
+          "range": "[1,2]",
+        },
+        {
+          "costs": [
+            {
+              "models": 1,
+              "points": 100,
+            },
+          ],
+          "label": "Your 3rd + Unit Costs",
+          "range": "[3,)",
         },
       ],
       "role": "leader",
@@ -1239,7 +1249,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "costs": [
             {
               "models": 1,
-              "points": 445,
+              "points": 465,
             },
           ],
           "label": "Your 1st Unit Costs",
@@ -1249,7 +1259,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "costs": [
             {
               "models": 1,
-              "points": 465,
+              "points": 485,
             },
           ],
           "label": "Your 2nd + Unit Costs",
@@ -1264,7 +1274,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "costs": [
             {
               "models": 3,
-              "points": 400,
+              "points": 420,
             },
           ],
           "label": "Your Unit Costs",
@@ -1396,6 +1406,6 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
   ],
-  "version": "1.0",
+  "version": "1.1",
 }
 `;
