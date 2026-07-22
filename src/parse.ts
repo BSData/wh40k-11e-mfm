@@ -63,7 +63,10 @@ function parseRange(label: string): string {
 const TRAILING_POINTS_RE = /([\d,]+)\s*pts\s*$/i;
 const PLAIN_SIZE_RE = /^\d+ models?$/i;
 
-function parseCostRow(unitName: string, text: string): CostOption {
+function parseCostRow(unitName: string, raw: string): CostOption {
+  // Belt-and-braces: strip any `▲`/`▼ (±N)` change marker that survived `deannotate`
+  // so a delta can never be miscounted as a model or leak into `desc`.
+  const text = clean(raw.replace(DELTA_MARKER_RE, ''));
   const m = text.match(TRAILING_POINTS_RE);
   const size = m ? clean(text.slice(0, m.index)) : '';
   if (!m || !size) throw new Error(`Unit "${unitName}": unreadable cost row "${text}"`);
@@ -105,7 +108,7 @@ function parseWargear($: CheerioAPI, card: ReturnType<CheerioAPI>): Wargear[] {
     .map((_i, li) => {
       const spans = $(li).find('span');
       const item = clean(spans.first().text()).replace(/^per\s+/i, '');
-      const points = leadingInt(clean(spans.last().text()));
+      const points = leadingInt(clean(spans.last().text()).replace(DELTA_MARKER_RE, ''));
       return item && points !== null ? { item, points } : null;
     })
     .get()
@@ -151,12 +154,78 @@ function hydrate($: CheerioAPI): void {
   $('div[hidden][id^="S:"]').remove();
 }
 
-function parseUnit($: CheerioAPI, nameDiv: ReturnType<CheerioAPI>): Unit {
-  const name = titleCase(nameDiv.text());
-  const card = nameDiv.parent();
+/**
+ * Every unit and detachment renders as one of these card containers; the parser
+ * walks these rather than the name element, so a card is handled whole and in
+ * isolation regardless of whether its header is in the plain or "changed" style.
+ */
+const CARD_SELECTOR = 'div.flex.flex-col.space-y-1.m-1';
+
+/**
+ * The "changed since the last MFM" annotation layer. After a points update GW
+ * decorates the affected cards with change chrome: a red/emerald/amber header, a
+ * `▲`/`▼` direction glyph on the name and each moved cost, a `(±N)` delta beside
+ * the new points, and a trailing `UPDATED` badge (optionally with a note). None of
+ * it is data — the current points are the `NN pts` value and the change history is
+ * the git diff of `data/` — and it disappears at the next update, so we strip it
+ * back to the plain shape before parsing. A note string we do *not* recognise is
+ * left in place so the coverage check surfaces it rather than silently dropping it.
+ */
+const DELTA_MARKER_RE = /[▲▼]\s*(?:\([+-]\d+\)\s*)?/g;
+const CHANGE_BADGE_TEXT: readonly string[] = [
+  'UPDATED',
+  'FORCE DISPOSITION(S) CHANGED',
+  'REQUISITION THRESHOLDS REMOVED',
+  'UNIQUE TAG REMOVED',
+];
+
+function deannotate($: CheerioAPI): void {
+  // Drop the standalone `UPDATED` / note badge divs (each a small div of one span).
+  $('div').each((_, el) => {
+    if (CHANGE_BADGE_TEXT.includes(clean($(el).text()))) $(el).remove();
+  });
+  // Strip the `▲`/`▼` glyphs and `(±N)` deltas from the leaf text spans that carry
+  // them — the header direction badge and the coloured points cells.
+  $('span').each((_, el) => {
+    const span = $(el);
+    if (span.children().length > 0) return;
+    const text = span.text();
+    if (/[▲▼]/.test(text)) span.text(clean(text.replace(DELTA_MARKER_RE, '')));
+  });
+}
+
+/**
+ * A card's display name. Plain unit headers put the name in the header div's own
+ * text (`div.bg-slate-500.text-xl`); detachment headers and every "changed"-style
+ * header put it in a `span.text-xl` inside a flex-row header.
+ */
+function cardName(card: ReturnType<CheerioAPI>): string {
+  const header = card.children().first();
+  const span = header.find('span.text-xl').first();
+  return clean(span.length > 0 ? span.text() : header.text());
+}
+
+/**
+ * A card prices a unit iff it carries a "YOUR … COST(S)" tier label; detachment
+ * cards never do (their labels are `ENHANCEMENTS`, a `UNIQUE:` banner or an
+ * objective). This holds in both header styles and with the annotation layer off.
+ */
+function isUnitCard($: CheerioAPI, card: ReturnType<CheerioAPI>): boolean {
+  return card.find('div.bg-slate-200').filter((_, el) => /COST/i.test($(el).text())).length > 0;
+}
+
+/** Top-level cards only (a card is never nested in another, but guard regardless). */
+function topCards($: CheerioAPI): ReturnType<CheerioAPI> {
+  return $(CARD_SELECTOR).filter((_, el) => $(el).parents(CARD_SELECTOR).length === 0);
+}
+
+function parseUnit($: CheerioAPI, card: ReturnType<CheerioAPI>): Unit {
+  const name = titleCase(cardName(card));
   const pricing: PricingTier[] = [];
 
-  // Each tier = a `div.bg-slate-200` label followed by a `ul.leaders` of rows.
+  // Each tier = a `div.bg-slate-200` label followed by a `ul.leaders` of rows. The
+  // role block's `div.bg-slate-200` label (LEADER/SUPPORT) has no `ul.leaders`, so
+  // it contributes no costs and is skipped.
   card.find('div.bg-slate-200').each((_, labelEl) => {
     const label = titleCase($(labelEl).text());
     const ul = $(labelEl).nextAll('ul.leaders').first();
@@ -177,41 +246,63 @@ function parseUnit($: CheerioAPI, nameDiv: ReturnType<CheerioAPI>): Unit {
   };
 }
 
-function parseDetachment($: CheerioAPI, nameSpan: ReturnType<CheerioAPI>): Detachment {
-  const name = titleCase(nameSpan.text());
-  const header = nameSpan.parent();
-  const card = header.parent();
-  const dp = leadingInt(clean(header.find('span').last().text()));
+/** Units a detachment enhancement grants an ability to via a "LEADER:"/"SUPPORT:" block. */
+function enhancementGrant(
+  $: CheerioAPI,
+  li: ReturnType<CheerioAPI>,
+  keyword: 'LEADER:' | 'SUPPORT:',
+): string[] {
+  return clean(
+    li
+      .parent()
+      .find('span')
+      .filter((_j, s) => clean($(s).text()) === keyword)
+      .first()
+      .nextAll('span')
+      .first()
+      .text(),
+  )
+    .split(',')
+    .map((s) => titleCase(s))
+    .filter(Boolean);
+}
+
+function parseDetachment($: CheerioAPI, card: ReturnType<CheerioAPI>): Detachment {
+  const header = card.children().first();
+  const name = titleCase(cardName(card));
+  const dp = leadingInt(clean(header.find('span.self-end').last().text()));
   // Objective is the styled banner div directly under the header.
   const objText = clean(card.children('div[style]').first().text());
   // "UNIQUE: X" restriction banner — a direct-child slate-200 div (same class units
-  // use for tier labels, here repurposed). Strip the literal "UNIQUE:" prefix.
+  // use for tier labels, here repurposed). Match on the literal prefix so the change
+  // badge/note divs (also direct children) are never mistaken for it.
   const unique = titleCase(
-    clean(card.children('div.bg-slate-200').first().text()).replace(UNIQUE_RE, ''),
+    clean(
+      card
+        .children('div.bg-slate-200')
+        .filter((_j, el) => UNIQUE_RE.test(clean($(el).text())))
+        .first()
+        .text(),
+    ).replace(UNIQUE_RE, ''),
   );
   const enhancements = card
     .find('ul.leaders li')
-    .map((_i, li) => {
-      const spans = $(li).find('div').last().find('span');
+    .map((_i, el) => {
+      const li = $(el);
+      const spans = li.find('div').last().find('span');
       const enhName = clean(spans.first().text());
       const points = leadingInt(clean(spans.last().text()));
       if (!enhName || points === null) return null;
-      // A "LEADER:" block sits beside the enhancement it belongs to (a sibling of the
-      // <li> within the same wrapper): buying this enhancement unlocks those leaders.
-      const leaderTo = clean(
-        $(li)
-          .parent()
-          .find('span')
-          .filter((_j, s) => clean($(s).text()) === 'LEADER:')
-          .first()
-          .nextAll('span')
-          .first()
-          .text(),
-      )
-        .split(',')
-        .map((s) => titleCase(s))
-        .filter(Boolean);
-      return { name: enhName, points, ...(leaderTo.length > 0 ? { leaderTo } : {}) };
+      // A "LEADER:"/"SUPPORT:" block sits beside the enhancement it belongs to (a
+      // sibling of the <li> in the same wrapper): buying it unlocks those units.
+      const leaderTo = enhancementGrant($, li, 'LEADER:');
+      const supportTo = enhancementGrant($, li, 'SUPPORT:');
+      return {
+        name: enhName,
+        points,
+        ...(leaderTo.length > 0 ? { leaderTo } : {}),
+        ...(supportTo.length > 0 ? { supportTo } : {}),
+      };
     })
     .get()
     .filter((e): e is NonNullable<typeof e> => e !== null);
@@ -284,73 +375,72 @@ function residue(text: string, claimed: Iterable<string>): string {
 function assertFactionCovered($: CheerioAPI, slug: string, name: string, version: string): void {
   const leftovers: string[] = [];
 
-  // (a) Unit cards: name + every pricing tier (label + rows) + role + wargear must
-  // account for the entire card.
-  $('div.bg-slate-500.text-xl').each((_i, el) => {
-    const nameDiv = $(el);
-    const card = nameDiv.parent();
-    const claimed = [...UNIT_BOILERPLATE, clean(nameDiv.text())];
-    card.find('div.bg-slate-200').each((_j, l) => {
-      claimed.push(clean($(l).text()));
-      $(l)
-        .nextAll('ul.leaders')
-        .first()
-        .find('li')
-        .each((_k, li) => {
-          claimed.push(clean($(li).text()));
-        });
-    });
-    const img = card.find('img[src$="leader.svg"], img[src$="support.svg"]').first();
-    if (img.length) claimed.push(clean(img.parent().nextAll('span').first().text()));
-    const cog = card.find('img[src$="cog.svg"]').first();
-    if (cog.length)
-      cog
-        .parent()
-        .parent()
-        .find('ul li')
-        .each((_j, li) => {
-          claimed.push(clean($(li).text()));
-        });
-    const left = residue(card.text(), claimed);
-    if (left) leftovers.push(`unit "${clean(nameDiv.text())}": ${JSON.stringify(left)}`);
-  });
-
-  // (b) Detachment cards: name + DP + objective + unique + leaderTo + enhancements.
-  $('span.text-xl.break-all').each((_i, el) => {
-    const span = $(el);
-    const card = span.parent().parent();
-    const claimed = [
-      ...DETACHMENT_BOILERPLATE,
-      clean(span.text()),
-      clean(span.parent().find('span').last().text()),
-      clean(card.children('div[style]').first().text()),
-      clean(card.children('div.bg-slate-200').first().text()),
-    ];
-    card
-      .find('span')
-      .filter((_j, s) => clean($(s).text()) === 'LEADER:')
-      .each((_j, s) => {
-        claimed.push('LEADER:', clean($(s).nextAll('span').first().text()));
+  topCards($).each((_i, el) => {
+    const card = $(el);
+    if (isUnitCard($, card)) {
+      // (a) Unit card: name + every pricing tier (label + rows) + role + wargear
+      // must account for the entire card.
+      const claimed = [...UNIT_BOILERPLATE, cardName(card)];
+      card.find('div.bg-slate-200').each((_j, l) => {
+        claimed.push(clean($(l).text()));
+        $(l)
+          .nextAll('ul.leaders')
+          .first()
+          .find('li')
+          .each((_k, li) => {
+            claimed.push(clean($(li).text()));
+          });
       });
-    card.find('ul.leaders li').each((_j, li) => {
-      const spans = $(li).find('div').last().find('span');
-      claimed.push(clean(spans.first().text()), clean(spans.last().text()));
-    });
-    const left = residue(card.text(), claimed);
-    if (left) leftovers.push(`detachment "${clean(span.text())}": ${JSON.stringify(left)}`);
+      const img = card.find('img[src$="leader.svg"], img[src$="support.svg"]').first();
+      if (img.length) claimed.push(clean(img.parent().nextAll('span').first().text()));
+      const cog = card.find('img[src$="cog.svg"]').first();
+      if (cog.length)
+        cog
+          .parent()
+          .parent()
+          .find('ul li')
+          .each((_j, li) => {
+            claimed.push(clean($(li).text()));
+          });
+      const left = residue(card.text(), claimed);
+      if (left) leftovers.push(`unit "${cardName(card)}": ${JSON.stringify(left)}`);
+    } else {
+      // (b) Detachment card: name + DP + objective + unique + leaderTo/supportTo
+      // grants + enhancements.
+      const header = card.children().first();
+      const claimed = [
+        ...DETACHMENT_BOILERPLATE,
+        cardName(card),
+        clean(header.find('span.self-end').last().text()),
+        clean(card.children('div[style]').first().text()),
+        ...card
+          .children('div.bg-slate-200')
+          .map((_j, l) => clean($(l).text()))
+          .get(),
+      ];
+      for (const kw of ['LEADER:', 'SUPPORT:'] as const) {
+        card
+          .find('span')
+          .filter((_j, s) => clean($(s).text()) === kw)
+          .each((_j, s) => {
+            claimed.push(kw, clean($(s).nextAll('span').first().text()));
+          });
+      }
+      card.find('ul.leaders li').each((_j, li) => {
+        const spans = $(li).find('div').last().find('span');
+        claimed.push(clean(spans.first().text()), clean(spans.last().text()));
+      });
+      const left = residue(card.text(), claimed);
+      if (left) leftovers.push(`detachment "${cardName(card)}": ${JSON.stringify(left)}`);
+    }
   });
 
   // (c) Page level: drop the parsed cards, the site chrome (header/nav, the cookie
   // dialog present on browser renders, the "Welcome…" notes captured into
   // meta.notes), then assert only known content-area headings (plus the faction
-  // name, parent-army title and version) remain. Catches a brand-new top-level
-  // section that sits outside any card.
-  $('div.bg-slate-500.text-xl').each((_i, el) => {
-    $(el).parent().remove();
-  });
-  $('span.text-xl.break-all').each((_i, el) => {
-    $(el).parent().parent().remove();
-  });
+  // name, sub-group/parent-army titles and version) remain. Catches a brand-new
+  // top-level section that sits outside any card.
+  $(CARD_SELECTOR).remove();
   $('header, nav, [id^="onetrust"], .onetrust-pc-dark-filter').remove();
   $('script, style, noscript, svg, head, link').remove();
   // The notes block (expanded only) is captured into meta.notes, not faction data.
@@ -360,7 +450,11 @@ function assertFactionCovered($: CheerioAPI, slug: string, name: string, version
     name,
     name.toUpperCase(),
     `v${version}`,
-    clean($(PARENT_TITLE_SELECTOR).text()), // parent-army title on sub-faction pages
+    // Sub-group / parent-army titles, each claimed on its own (a page can carry more
+    // than one, e.g. Aeldari's "Harlequins" and "Ynnari").
+    ...$(PARENT_TITLE_SELECTOR)
+      .map((_j, el) => clean($(el).text()))
+      .get(),
   ]);
   if (pageLeft) leftovers.push(`page-level: ${JSON.stringify(pageLeft)}`);
 
@@ -387,40 +481,43 @@ export function parseFaction(
   const $ = load(html);
   const version = parseVersion($);
   hydrate($);
+  deannotate($);
 
   // Units are partitioned into a base roster (directly under the UNITS section) plus
   // named sub-groups introduced by army-group headers — `h3.font-header` *without* the
   // section break-after class — e.g. "Harlequins"/"Ynnari" on Aeldari, a Chapter on
   // Space Marines, the shared "Space Marines" roster on a successor chapter. Walk the
-  // headers and unit cards in document order so each unit picks up the sub-group it sits
+  // headers and cards in document order so each unit picks up the sub-group it sits
   // under; a section header (UNITS/DETACHMENTS) resets back to the base roster.
-  const unitGroups: (string | undefined)[] = [];
   const groupTitles: string[] = [];
+  const groupByCard = new Map<unknown, string | undefined>();
   let currentGroup: string | undefined;
-  $('h3.font-header, div.bg-slate-500.text-xl').each((_i, el) => {
+  $(`h3.font-header, ${CARD_SELECTOR}`).each((_i, el) => {
     if ((el as { tagName?: string }).tagName === 'h3') {
       const isSection = ($(el).attr('class') ?? '').includes('break-after');
       currentGroup = isSection ? undefined : titleCase($(el).text());
       if (currentGroup) groupTitles.push(currentGroup);
-    } else {
-      unitGroups.push(currentGroup);
+    } else if (isUnitCard($, $(el))) {
+      groupByCard.set(el, currentGroup);
     }
   });
 
-  const units = $('div.bg-slate-500.text-xl')
-    .map((i, el) => {
-      const unit = parseUnit($, $(el));
-      const group = unitGroups[i];
-      return group ? { ...unit, groupTitle: group } : unit;
-    })
-    .get();
+  // Each card is a unit or a detachment; parse it whole, in document order.
+  const units: Unit[] = [];
+  const detachments: Detachment[] = [];
+  topCards($).each((_i, el) => {
+    const card = $(el);
+    if (isUnitCard($, card)) {
+      const unit = parseUnit($, card);
+      const group = groupByCard.get(el);
+      units.push(group ? { ...unit, groupTitle: group } : unit);
+    } else {
+      detachments.push(parseDetachment($, card));
+    }
+  });
   if (units.length === 0) {
-    throw new Error(`No units found for "${slug}" — the unit-name selector may have drifted`);
+    throw new Error(`No units found for "${slug}" — the card/name selector may have drifted`);
   }
-
-  const detachments = $('span.text-xl.break-all')
-    .map((_i, el) => parseDetachment($, $(el)))
-    .get();
 
   // A sub-group header that names *another* known faction marks this as that faction's
   // successor (e.g. "Space Marines" for Black Templars). Surfaced at the faction level as

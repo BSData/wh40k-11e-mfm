@@ -21,8 +21,9 @@ detachments:           # 'name' order by default; 'page' (--order page) preserve
         points: 10
       - name: Murdermind
         points: 15
-        leaderTo:      # optional: units this enhancement unlocks the Leader ability for
-          - Lokhust Destroyers
+        supportTo:     # optional: units this enhancement unlocks the Support ability for
+          - Skorpekh Destroyers
+        # leaderTo:    # the Leader-ability counterpart, same shape (whichever the site shows)
 units:                 # 'name' order by default; 'page' preserves source order
   - name: Necron Warriors
     pricing:           # tier order preserved (meaningful for per-instance pricing)
@@ -90,15 +91,15 @@ factions, and for non-faction sub-group headers (e.g. `Harlequins`), which live 
 units. A page can have several sub-groups (Aeldari has `Harlequins` and `Ynnari`); `parent`
 is the first that names a faction.
 
-### `unique` (detachment) / `leaderTo` (enhancement) — optional extras
+### `unique` (detachment) / `leaderTo` · `supportTo` (enhancement) — optional extras
 - `unique`: the sub-faction keyword a detachment is restricted to, from its `UNIQUE: X`
   banner (the `UNIQUE:` prefix stripped, Title-Cased). Omitted when absent.
-- `leaderTo`: lives on the **enhancement**, not the detachment — the units that enhancement
-  unlocks the Leader ability for, from the `LEADER:` list shown beside it (source order
-  preserved). Buying the enhancement is what grants the association, so it is modelled per
-  enhancement. Omitted when absent.
+- `leaderTo` / `supportTo`: live on the **enhancement**, not the detachment — the units that
+  enhancement unlocks the Leader (resp. Support) ability for, from the `LEADER:`/`SUPPORT:`
+  list shown beside it (source order preserved). Buying the enhancement is what grants the
+  association, so it is modelled per enhancement. Each omitted when absent.
 
-`parent`, `unique`, and `leaderTo` were all surfaced by the completeness coverage check in
+`parent`, `unique`, `leaderTo`, and `supportTo` were all surfaced by the completeness coverage check in
 `src/parse.ts` (see specs/scraping.md) — they were being silently dropped before it forced
 them into the model.
 

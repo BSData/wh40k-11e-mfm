@@ -24,6 +24,9 @@ const FIXTURES: { name: string; url: string }[] = [
   { name: 'black-templars.html', url: factionUrl('black-templars') },
   // titan-legions: thousands-separator points ("2,200 pts").
   { name: 'titan-legions.html', url: factionUrl('titan-legions') },
+  // adepta-sororitas: the "changed since last MFM" annotation layer — restyled unit
+  // and detachment headers (▲/▼, coloured), (±N) cost deltas, UPDATED/note badges.
+  { name: 'adepta-sororitas.html', url: factionUrl('adepta-sororitas') },
 ];
 
 const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'test', 'fixtures');

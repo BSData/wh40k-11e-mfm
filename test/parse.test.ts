@@ -15,7 +15,7 @@ describe('parseIndex', () => {
   });
 
   it('extracts the site version', () => {
-    expect(index.version).toBe('1.0');
+    expect(index.version).toBe('1.1');
   });
 
   it('finds all 30 factions with clean display names', () => {
@@ -34,7 +34,7 @@ describe('parseFaction (necrons)', () => {
   });
 
   it('captures version, units and detachments', () => {
-    expect(faction.version).toBe('1.0');
+    expect(faction.version).toBe('1.1');
     expect(faction.units).toHaveLength(52);
     expect(faction.detachments).toHaveLength(12);
   });
@@ -72,7 +72,7 @@ describe('parseFaction (necrons)', () => {
       costs: [
         { models: 1, points: 50 },
         { models: 2, points: 100 },
-        { models: 3, points: 150 },
+        { models: 3, points: 160 },
       ],
     });
     expect(pricing?.[1]?.range).toBe('[3,)');
@@ -90,9 +90,11 @@ describe('parseFaction (necrons)', () => {
     expect(det?.objective).toBe('PURGE THE FOE');
     expect(det?.enhancements).toContainEqual({ name: 'Eldritch Nightmare', points: 10 });
     expect(det?.enhancements).toHaveLength(4);
-    // a plain detachment has no UNIQUE banner, and none of its enhancements grant Leader
+    // a plain detachment has no UNIQUE banner, and none of its enhancements grant a role
     expect(det?.unique).toBeUndefined();
-    expect(det?.enhancements.every((e) => e.leaderTo === undefined)).toBe(true);
+    expect(
+      det?.enhancements.every((e) => e.leaderTo === undefined && e.supportTo === undefined),
+    ).toBe(true);
   });
 
   it('captures the UNIQUE restriction on detachments', () => {
@@ -102,17 +104,21 @@ describe('parseFaction (necrons)', () => {
     );
   });
 
-  it('attaches a LEADER grant to the enhancement that unlocks it', () => {
+  it('attaches a SUPPORT grant to the enhancement that unlocks it', () => {
     const cursed = faction.detachments.find((d) => d.name === 'Cursed Legion');
     const murdermind = cursed?.enhancements.find((e) => e.name === 'Murdermind');
-    expect(murdermind?.leaderTo).toEqual([
-      'Lokhust Destroyers',
+    // "SUPPORT:" grants are the Support-role counterpart of "LEADER:"/`leaderTo`.
+    expect(murdermind?.supportTo).toEqual([
       'Skorpekh Destroyers',
-      'Lokhust Heavy Destroyers',
+      'Lokhust Destroyers',
       'Ophydian Destroyers',
+      'Lokhust Heavy Destroyers',
     ]);
+    expect(murdermind?.leaderTo).toBeUndefined();
     // the other enhancements in the same detachment carry no grant
-    expect(cursed?.enhancements.find((e) => e.name === 'Destroyer Ankh')?.leaderTo).toBeUndefined();
+    expect(
+      cursed?.enhancements.find((e) => e.name === 'Destroyer Ankh')?.supportTo,
+    ).toBeUndefined();
   });
 
   it('matches the full snapshot', () => {
@@ -202,7 +208,9 @@ describe('markLegends (necrons base vs legends-on render)', () => {
 });
 
 describe('extractNotesMarkdown — the "Welcome…" notes as Markdown', () => {
-  const md = extractNotesMarkdown(fixture('necrons-legends.html'));
+  // A render with the "Welcome…" notes expanded (they are lazy — the legends render
+  // does not include them), which is what `extractNotes` feeds this pure function.
+  const md = extractNotesMarkdown(fixture('necrons-notes.html'));
 
   it('keeps the structure: headings, bullet lists and bold', () => {
     expect(md.startsWith('To muster a Warhammer 40,000 army')).toBe(true);
@@ -255,5 +263,56 @@ describe('parseFaction (titan-legions) — thousands-separator points', () => {
     // every titan costs four figures; none should be misparsed into the hundreds
     expect(allCosts.every((c) => c.points >= 1000)).toBe(true);
     expect(allCosts.some((c) => c.points === 2200)).toBe(true);
+  });
+});
+
+describe('change annotations — the "changed since the last MFM" layer', () => {
+  // After a points update GW decorates the affected cards with change chrome: a
+  // coloured header, ▲/▼ direction glyphs, (±N) deltas, and an UPDATED badge. The
+  // parser normalises it away so a changed card reads exactly like an unchanged one.
+  const necrons = parseFaction(fixture('necrons.html'), 'necrons', 'Necrons');
+  const sisters = parseFaction(
+    fixture('adepta-sororitas.html'),
+    'adepta-sororitas',
+    'Adepta Sororitas',
+  );
+  // ▲/▼ glyphs, (±N) deltas, and every known UPDATED note.
+  const MARKER = /[▲▼]|\([+-]\d+\)|UPDATED|FORCE DISPOSITION|REQUISITION THRESHOLDS|UNIQUE TAG/;
+
+  it('finds a unit whose header was restyled by a points change', () => {
+    // Canoptek Reanimator's points went up, so its card renders in the "changed"
+    // style (coloured flex-row header, name in a span, a ▲ badge) instead of the
+    // plain `div.bg-slate-500.text-xl` header — it must still be found and parsed.
+    expect(necrons.units.find((u) => u.name === 'Canoptek Reanimator')?.pricing).toEqual([
+      { range: '[1,)', label: 'Your Unit Costs', costs: [{ models: 1, points: 75 }] },
+    ]);
+  });
+
+  it('strips ▲/▼ glyphs and (±N) deltas — points and model counts stay clean', () => {
+    // Hospitaller dropped -10 on both tiers; the parsed values are the new points,
+    // and the "-10" delta is never miscounted as a model.
+    const hospitaller = sisters.units.find((u) => u.name === 'Hospitaller');
+    expect(hospitaller?.role).toBe('support');
+    expect(hospitaller?.pricing).toEqual([
+      { range: '[1,1]', label: 'Your 1st Unit Costs', costs: [{ models: 1, points: 65 }] },
+      { range: '[2,)', label: 'Your 2nd + Unit Costs', costs: [{ models: 1, points: 75 }] },
+    ]);
+  });
+
+  it('parses a restyled detachment without mistaking its UPDATED note for a UNIQUE banner', () => {
+    // "Bringers of Flame" changed: emerald header, a "2DP ▼" badge, and an
+    // UPDATED / "FORCE DISPOSITION(S) CHANGED" note whose divs are direct children of
+    // the card (the same shape a UNIQUE banner uses).
+    const bof = sisters.detachments.find((d) => d.name === 'Bringers Of Flame');
+    expect(bof?.dp).toBe(2);
+    expect(bof?.objective).toBe('PRIORITY ASSETS');
+    expect(bof?.unique).toBeUndefined();
+    expect(bof?.enhancements).toContainEqual({ name: 'Fire and Fury', points: 30 });
+  });
+
+  it('leaves no annotation chrome anywhere in the parsed output', () => {
+    for (const faction of [necrons, sisters]) {
+      expect(JSON.stringify(faction)).not.toMatch(MARKER);
+    }
   });
 });

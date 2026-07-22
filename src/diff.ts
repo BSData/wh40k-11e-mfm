@@ -188,9 +188,12 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     for (const e of d.enhancements) {
       const x = pe.get(e.name);
       if (!x) continue;
-      const pl = (x.leaderTo ?? []).join(', ');
-      const nl = (e.leaderTo ?? []).join(', ');
-      if (pl !== nl) detOther.push(`${d.name} · ${e.name} — leaderTo: ${pl || '—'} → ${nl || '—'}`);
+      for (const grant of ['leaderTo', 'supportTo'] as const) {
+        const pl = (x[grant] ?? []).join(', ');
+        const nl = (e[grant] ?? []).join(', ');
+        if (pl !== nl)
+          detOther.push(`${d.name} · ${e.name} — ${grant}: ${pl || '—'} → ${nl || '—'}`);
+      }
     }
   }
 
