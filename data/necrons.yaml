@@ -1,7 +1,7 @@
 name: Necrons
 slug: necrons
-version: "1.0"
-firstSeen: 2026-06-23
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Annihilation Legion
     dp: 2
@@ -43,7 +43,7 @@ detachments:
       - { name: Cursed Circlet, points: 25 }
       - { name: Destroyer Ankh, points: 20 }
       - { name: Mark of the Nekrosor, points: 20 }
-      - { name: Murdermind, points: 15, leaderTo: [ Skorpekh Destroyers, Lokhust Destroyers, Ophydian Destroyers, Lokhust Heavy Destroyers ] }
+      - { name: Murdermind, points: 15, supportTo: [ Skorpekh Destroyers, Lokhust Destroyers, Ophydian Destroyers, Lokhust Heavy Destroyers ] }
   - name: Hand Of The Dynasty
     dp: 1
     objective: TAKE AND HOLD
@@ -70,7 +70,7 @@ detachments:
       - { name: Warrior Noble, points: 15 }
   - name: Pantheon Of Woe
     dp: 2
-    objective: PURGE THE FOE
+    objective: DISRUPTION
     enhancements:
       - { name: Animus Damper, points: 35 }
       - { name: Quantum Goad, points: 45 }
@@ -157,7 +157,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 70 }
+          - { models: 1, points: 75 }
   - name: Canoptek Scarab Swarms
     pricing:
       - range: "[1,)"
@@ -215,11 +215,11 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 80 }
+          - { models: 1, points: 70 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 90 }
+          - { models: 1, points: 80 }
     role: support
     attachTo:
       - Immortals
@@ -261,11 +261,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 200 }
+          - { models: 1, points: 210 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 220 }
+          - { models: 1, points: 230 }
   - name: Flayed Ones
     pricing:
       - range: "[1,)"
@@ -335,14 +335,14 @@ units:
           - { models: 1, points: 40 }
           - { models: 2, points: 55 }
           - { models: 3, points: 80 }
-          - { models: 6, points: 160 }
+          - { models: 6, points: 170 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 50 }
           - { models: 2, points: 65 }
           - { models: 3, points: 90 }
-          - { models: 6, points: 170 }
+          - { models: 6, points: 180 }
   - name: Lokhust Heavy Destroyers
     pricing:
       - range: "[1,2]"
@@ -350,13 +350,13 @@ units:
         costs:
           - { models: 1, points: 50 }
           - { models: 2, points: 100 }
-          - { models: 3, points: 150 }
+          - { models: 3, points: 160 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 60 }
           - { models: 2, points: 110 }
-          - { models: 3, points: 160 }
+          - { models: 3, points: 170 }
   - name: Lokhust Lord
     pricing:
       - range: "[1,)"
@@ -408,7 +408,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 175 }
+          - { models: 1, points: 185 }
   - name: Nemesor Zahndrekh
     pricing:
       - range: "[1,)"
@@ -549,10 +549,14 @@ units:
           - { models: 6, points: 180 }
   - name: Skorpekh Lord
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 1, points: 90 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 100 }
     role: leader
     attachTo:
       - Skorpekh Destroyers
@@ -583,17 +587,17 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 445 }
+          - { models: 1, points: 465 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 465 }
+          - { models: 1, points: 485 }
   - name: The Silent King
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 3, points: 400 }
+          - { models: 3, points: 420 }
   - name: Tomb Blades
     pricing:
       - range: "[1,2]"

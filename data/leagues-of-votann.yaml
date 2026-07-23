@@ -1,14 +1,14 @@
 name: Leagues of Votann
 slug: leagues-of-votann
-version: "1.0"
-firstSeen: 2026-06-23
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Armoured Trailblazers
     dp: 1
     objective: DISRUPTION
     enhancements:
       - { name: Optimised Attack Lines (Upgrade), points: 15 }
-      - { name: Saturation Rounds (Upgrade), points: 10 }
+      - { name: Saturation Rounds (Upgrade), points: 15 }
   - name: Brandfast Oathband
     dp: 2
     objective: TAKE AND HOLD
@@ -91,7 +91,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 95 }
+          - { models: 1, points: 85 }
     role: leader
     attachTo:
       - Cthonian Beserks
@@ -100,7 +100,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 75 }
+          - { models: 5, points: 70 }
     role: leader
     attachTo:
       - Brôkhyr Thunderkyn
@@ -122,7 +122,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 95 }
+          - { models: 1, points: 85 }
   - name: Cthonian Beserks
     pricing:
       - range: "[1,)"
@@ -236,10 +236,14 @@ units:
       - Hearthkyn Warriors
   - name: Kapricus Carrier
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
         costs:
-          - { models: 1, points: 75 }
+          - { models: 1, points: 70 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
+        costs:
+          - { models: 1, points: 80 }
   - name: Kapricus Defenders
     pricing:
       - range: "[1,)"
@@ -259,10 +263,14 @@ units:
       - Ironkin Steeljacks With Melee Weapons
   - name: Sagitaur
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
         costs:
           - { models: 1, points: 85 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
+        costs:
+          - { models: 1, points: 95 }
   - name: ûthar The Destined
     pricing:
       - range: "[1,)"

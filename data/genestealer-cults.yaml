@@ -1,7 +1,7 @@
 name: Genestealer Cults
 slug: genestealer-cults
-version: "1.0"
-firstSeen: 2026-06-23
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Biosanctic Broodsurge
     dp: 2
@@ -30,7 +30,7 @@ detachments:
       - { name: Vanguard Tyrant, points: 25 }
   - name: Heroes Of The Uprising
     dp: 1
-    objective: PURGE THE FOE
+    objective: DISRUPTION
     enhancements:
       - { name: Contraband Munitions, points: 20 }
       - { name: Gene-tailored Toxins, points: 35 }
@@ -68,7 +68,7 @@ detachments:
       - { name: Incendiary Inspiration, points: 15 }
   - name: Xenocult Masses
     dp: 1
-    objective: DISRUPTION
+    objective: RECONNAISSANCE
     unique: Hosts
     enhancements:
       - { name: Devious Disguises (Upgrade), points: 15 }
@@ -79,13 +79,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 150 }
-          - { models: 10, points: 300 }
+          - { models: 5, points: 140 }
+          - { models: 10, points: 280 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 160 }
-          - { models: 10, points: 310 }
+          - { models: 5, points: 150 }
+          - { models: 10, points: 290 }
   - name: Abominant
     pricing:
       - range: "[1,2]"
@@ -126,7 +126,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 5, points: 75 }
-          - { models: 10, points: 150 }
+          - { models: 10, points: 140 }
   - name: Acolyte Iconward
     pricing:
       - range: "[1,)"
@@ -144,13 +144,15 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 90 }
-          - { models: 10, points: 160 }
+          - { models: 5, points: 85 }
+          - { models: 10, points: 150 }
+          - { models: 9, points: 160 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 100 }
-          - { models: 10, points: 170 }
+          - { models: 5, points: 95 }
+          - { models: 10, points: 160 }
+          - { models: 9, points: 170 }
   - name: Benefictus
     pricing:
       - range: "[1,)"
@@ -200,8 +202,12 @@ units:
           - { models: 1, points: 130 }
   - name: Goliath Truck
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 75 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 85 }
   - name: Hybrid Metamorphs
@@ -210,12 +216,12 @@ units:
         label: Your 1st To 2nd Units Cost
         costs:
           - { models: 5, points: 75 }
-          - { models: 10, points: 150 }
+          - { models: 10, points: 140 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 5, points: 85 }
-          - { models: 10, points: 160 }
+          - { models: 10, points: 150 }
   - name: Jackal Alphus
     pricing:
       - range: "[1,)"
@@ -261,7 +267,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 10, points: 70 }
-          - { models: 20, points: 145 }
+          - { models: 20, points: 135 }
   - name: Nexos
     pricing:
       - range: "[1,)"
@@ -300,19 +306,23 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 80 }
+          - { models: 5, points: 75 }
           - { models: 10, points: 140 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 90 }
+          - { models: 5, points: 85 }
           - { models: 10, points: 150 }
   - name: Reductus Saboteur
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 1, points: 70 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 80 }
   - name: Sanctus
     pricing:
       - range: "[1,)"

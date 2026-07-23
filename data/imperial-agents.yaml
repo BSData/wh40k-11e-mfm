@@ -1,26 +1,26 @@
 name: Imperial Agents
 slug: imperial-agents
-version: "1.0"
-firstSeen: 2026-06-23
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Imperialis Fleet
-    dp: 3
-    objective: DISRUPTION
+    dp: 2
+    objective: RECONNAISSANCE
     enhancements:
       - { name: Clandestine Operation, points: 15 }
       - { name: Combat Landers, points: 10 }
       - { name: Digital Weapons, points: 10 }
       - { name: Fleetmaster, points: 20 }
   - name: Ordo Hereticus, Purgation Force
-    dp: 3
-    objective: PURGE THE FOE
+    dp: 2
+    objective: TAKE AND HOLD
     enhancements:
       - { name: Ignis Judicium, points: 10 }
       - { name: Liber Heresius, points: 10 }
       - { name: No Escape, points: 25 }
       - { name: Witch Hunter, points: 15 }
   - name: Ordo Malleus, Daemon Hunters
-    dp: 3
+    dp: 2
     objective: PRIORITY ASSETS
     enhancements:
       - { name: Daemon Slayer, points: 10 }
@@ -28,7 +28,7 @@ detachments:
       - { name: Gift of the Prescient, points: 20 }
       - { name: Grimoire of True Names, points: 10 }
   - name: Ordo Xenos, Alien Hunters
-    dp: 3
+    dp: 2
     objective: PURGE THE FOE
     enhancements:
       - { name: Amulet of Auto-chastisement, points: 25 }
@@ -36,13 +36,13 @@ detachments:
       - { name: Blackweave Shroud, points: 15 }
       - { name: Universal Anathema, points: 10 }
   - name: Veiled Blade Elimination Force
-    dp: 3
-    objective: RECONNAISSANCE
+    dp: 1
+    objective: DISRUPTION
     enhancements:
-      - { name: Decoy Targets, points: 40 }
-      - { name: Esoteric Explosives, points: 40 }
-      - { name: Introneural Biotech, points: 35 }
-      - { name: Micromelta Rounds, points: 45 }
+      - { name: Decoy Targets, points: 15 }
+      - { name: Esoteric Explosives, points: 10 }
+      - { name: Introneural Biotech, points: 15 }
+      - { name: Micromelta Rounds, points: 20 }
 units:
   - name: Aquila Kill Team
     pricing:
@@ -128,7 +128,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 5, points: 100 }
-          - { models: 10, points: 200 }
+          - { models: 10, points: 190 }
   - name: Deathwatch Terminator Squad
     pricing:
       - range: "[1,)"
@@ -142,14 +142,14 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 110 }
+          - { models: 1, points: 100 }
   - name: Eversor Assassin
     groupTitle: Every Model Has The Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 120 }
+          - { models: 1, points: 110 }
   - name: Exaction Squad
     pricing:
       - range: "[1,)"
@@ -176,7 +176,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 190 }
+          - { models: 5, points: 175 }
     wargear:
       - { item: Psycannon, points: 5 }
   - name: Grey Knights Terminator Squad
@@ -185,7 +185,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 210 }
+          - { models: 5, points: 190 }
     wargear:
       - { item: Psycannon, points: 5 }
   - name: Imperial Navy Breachers
@@ -203,15 +203,23 @@ units:
           - { models: 10, points: 90 }
   - name: Imperial Rhino
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 65 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 75 }
   - name: Imperial Rhino
     groupTitle: Every Model Has The Imperium Keyword
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 65 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 75 }
   - name: Indomitor Kill Team
@@ -449,15 +457,23 @@ units:
           - { models: 12, points: 120 }
   - name: Inquisitorial Chimera
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 60 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 70 }
   - name: Inquisitorial Chimera
     groupTitle: Every Model Has The Imperium Keyword
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 60 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 70 }
   - name: Janus Draik
@@ -595,8 +611,12 @@ units:
           - { models: 9, points: 100 }
   - name: Sisters Of Battle Immolator
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 90 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 100 }
     wargear:
@@ -604,8 +624,12 @@ units:
   - name: Sisters Of Battle Immolator
     groupTitle: Every Model Has The Imperium Keyword
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 105 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 115 }
     wargear:
@@ -622,7 +646,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 115 }
+          - { models: 10, points: 110 }
   - name: Spectrus Kill Team
     pricing:
       - range: "[1,)"
@@ -750,7 +774,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 105 }
+          - { models: 1, points: 95 }
     role: leader
     attachTo:
       - Aquila Kill Team

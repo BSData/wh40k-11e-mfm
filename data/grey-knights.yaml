@@ -1,11 +1,11 @@
 name: Grey Knights
 slug: grey-knights
-version: "1.0"
-firstSeen: 2026-06-17
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Argent Assault
     dp: 1
-    objective: PURGE THE FOE
+    objective: PRIORITY ASSETS
     enhancements:
       - { name: Psychic Celerity, points: 15 }
       - { name: Vigilance of Titan, points: 20 }
@@ -49,7 +49,7 @@ detachments:
       - { name: Sanctic Reaper, points: 15 }
   - name: Immaterial Interdiction
     dp: 1
-    objective: PRIORITY ASSETS
+    objective: RECONNAISSANCE
     enhancements:
       - { name: Astral Overlap (Upgrade), points: 10 }
       - { name: Predestined Coordinates (Upgrade), points: 10 }
@@ -63,7 +63,7 @@ detachments:
       - { name: Spiritus Machina, points: 25 }
   - name: Warpbane Task Force
     dp: 3
-    objective: PURGE THE FOE
+    objective: TAKE AND HOLD
     enhancements:
       - { name: Mandulian Reliquary, points: 20 }
       - { name: Paragon of Sanctity, points: 10 }
@@ -138,20 +138,13 @@ units:
       - Strike Squad
   - name: Brotherhood Terminator Squad
     pricing:
-      - range: "[1,3]"
-        label: Your 1st To 3rd Units Cost
+      - range: "[1,)"
+        label: Your Unit Costs
         costs:
           - { models: 4, points: 140 }
           - { models: 5, points: 175 }
           - { models: 8, points: 300 }
-          - { models: 10, points: 375 }
-      - range: "[4,)"
-        label: Your 4th + Unit Costs
-        costs:
-          - { models: 4, points: 150 }
-          - { models: 5, points: 185 }
-          - { models: 8, points: 310 }
-          - { models: 10, points: 385 }
+          - { models: 10, points: 360 }
     wargear:
       - { item: Psycannon, points: 5 }
   - name: Castellan Crowe
@@ -191,7 +184,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 140 }
+          - { models: 1, points: 125 }
     role: leader
     attachTo:
       - Brotherhood Terminator Squad
@@ -333,14 +326,22 @@ units:
       - { item: Psycannon, points: 5 }
   - name: Razorback
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 75 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 85 }
   - name: Rhino
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 70 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 80 }
   - name: Servitors
@@ -377,8 +378,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 120 }
-          - { models: 10, points: 240 }
+          - { models: 5, points: 115 }
+          - { models: 10, points: 230 }
   - name: Venerable Dreadnought
     pricing:
       - range: "[1,2]"

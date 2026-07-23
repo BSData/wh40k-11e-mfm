@@ -1,11 +1,11 @@
 name: Chaos Knights
 slug: chaos-knights
-version: "1.0"
-firstSeen: 2026-06-23
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Bastions Of Tyranny
     dp: 1
-    objective: DISRUPTION
+    objective: PRIORITY ASSETS
     enhancements:
       - { name: Hate-filled Dominion, points: 20 }
       - { name: Pterrorshade Rookery, points: 20 }
@@ -41,7 +41,7 @@ detachments:
       - { name: Iconoclast Idol (Aura), points: 20 }
   - name: Infernal Lance
     dp: 3
-    objective: PURGE THE FOE
+    objective: PRIORITY ASSETS
     enhancements:
       - { name: Bestial Aspect, points: 30 }
       - { name: Blasphemous Engine, points: 35 }
@@ -49,7 +49,7 @@ detachments:
       - { name: Knight Diabolus, points: 25 }
   - name: Lords Of Dread
     dp: 2
-    objective: PRIORITY ASSETS
+    objective: TAKE AND HOLD
     enhancements:
       - { name: Blade of Celerity, points: 35 }
       - { name: Blessing of the Dark Master, points: 20 }
@@ -226,7 +226,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 140 }
+          - { models: 1, points: 135 }
   - name: War Dog Karnivore
     pricing:
       - range: "[1,)"
@@ -248,4 +248,4 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 140 }
+          - { models: 1, points: 135 }

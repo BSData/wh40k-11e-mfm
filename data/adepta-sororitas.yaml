@@ -1,7 +1,7 @@
 name: Adepta Sororitas
 slug: adepta-sororitas
-version: "1.0"
-firstSeen: 2026-06-23
+version: "1.1"
+firstSeen: 2026-07-22
 detachments:
   - name: Army Of Faith
     dp: 2
@@ -12,8 +12,8 @@ detachments:
       - { name: Litanies of Faith, points: 10 }
       - { name: Triptych of the Macharian Crusade, points: 20 }
   - name: Bringers Of Flame
-    dp: 3
-    objective: PURGE THE FOE
+    dp: 2
+    objective: PRIORITY ASSETS
     enhancements:
       - { name: Fire and Fury, points: 30 }
       - { name: Iron Surplice of Saint Istalela, points: 10 }
@@ -44,11 +44,11 @@ detachments:
       - { name: "Through Suffering, Strength", points: 25 }
   - name: Penitent Host
     dp: 2
-    objective: TAKE AND HOLD
+    objective: PURGE THE FOE
     enhancements:
-      - { name: Catechism of Divine Penitence, points: 20, leaderTo: [ Repentia Squad ] }
-      - { name: Psalm of Righteous Judgement, points: 30 }
-      - { name: Refrain of Enduring Faith, points: 25 }
+      - { name: Catechism of Divine Penitence, points: 15, leaderTo: [ Repentia Squad ] }
+      - { name: Psalm of Righteous Judgement, points: 20 }
+      - { name: Refrain of Enduring Faith, points: 15 }
       - { name: Verse of Holy Piety, points: 15 }
   - name: Sacred Champions
     dp: 1
@@ -59,7 +59,7 @@ detachments:
       - { name: Writ of Compunction (Upgrade), points: 20 }
   - name: Sanctified Orators
     dp: 1
-    objective: PURGE THE FOE
+    objective: DISRUPTION
     enhancements:
       - { name: Hagiomnifex (Upgrade), points: 25 }
 units:
@@ -148,16 +148,16 @@ units:
     legends: true
   - name: Celestian Sacresants
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 5, points: 75 }
           - { models: 10, points: 150 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 90 }
-          - { models: 10, points: 165 }
+          - { models: 5, points: 85 }
+          - { models: 10, points: 160 }
   - name: Crusaders
     pricing:
       - range: "[1,)"
@@ -214,11 +214,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 10, points: 100 }
+          - { models: 10, points: 90 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 10, points: 110 }
+          - { models: 10, points: 100 }
     wargear:
       - { item: Meltagun, points: 5 }
   - name: Exorcist
@@ -236,11 +236,11 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 75 }
+          - { models: 1, points: 65 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 85 }
+          - { models: 1, points: 75 }
     role: support
     attachTo:
       - Battle Sisters Squad
@@ -255,7 +255,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 65 }
+          - { models: 1, points: 55 }
     role: support
     attachTo:
       - Battle Sisters Squad
@@ -269,11 +269,11 @@ units:
       - range: "[1,3]"
         label: Your 1st To 3rd Units Cost
         costs:
-          - { models: 1, points: 110 }
+          - { models: 1, points: 100 }
       - range: "[4,)"
         label: Your 4th + Unit Costs
         costs:
-          - { models: 1, points: 120 }
+          - { models: 1, points: 115 }
     wargear:
       - { item: Twin multi-melta, points: 15 }
   - name: Intranzia Fraye
@@ -281,13 +281,13 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 150 }
+          - { models: 1, points: 135 }
   - name: Junith Eruita
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 115 }
+          - { models: 1, points: 105 }
     role: leader
     attachTo:
       - Battle Sisters Squad
@@ -324,7 +324,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 185 }
+          - { models: 1, points: 200 }
     role: leader
     attachTo:
       - Paragon Warsuits
@@ -367,8 +367,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 75 }
-          - { models: 10, points: 160 }
+          - { models: 5, points: 70 }
+          - { models: 10, points: 140 }
   - name: Repressor
     pricing:
       - range: "[1,)"
@@ -409,23 +409,27 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 85 }
-          - { models: 10, points: 160 }
+          - { models: 5, points: 75 }
+          - { models: 10, points: 150 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 95 }
-          - { models: 10, points: 170 }
+          - { models: 5, points: 85 }
+          - { models: 10, points: 160 }
   - name: Sisters Novitiate Squad
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 100 }
+          - { models: 10, points: 90 }
   - name: Sororitas Rhino
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 65 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 75 }
   - name: Triumph Of Saint Katherine
@@ -440,8 +444,13 @@ units:
       - Crusaders
   - name: Zephyrim Squad
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 80 }
+          - { models: 5, points: 75 }
+          - { models: 10, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 85 }
           - { models: 10, points: 160 }

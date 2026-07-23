@@ -1,12 +1,12 @@
 name: Dark Angels
 slug: dark-angels
-version: "1.0"
-firstSeen: 2026-06-23
+version: "1.1"
+firstSeen: 2026-07-22
 parent: Space Marines
 detachments:
   - name: 1st Company Task Force
     dp: 2
-    objective: PRIORITY ASSETS
+    objective: PURGE THE FOE
     enhancements:
       - { name: Fear Made Manifest, points: 30 }
       - { name: Iron Resolve, points: 15 }
@@ -66,7 +66,7 @@ detachments:
       - { name: Thundercowl Turbines (Upgrade), points: 15 }
   - name: Firestorm Assault Force
     dp: 2
-    objective: PURGE THE FOE
+    objective: PRIORITY ASSETS
     enhancements:
       - { name: Adamantine Mantle, points: 20 }
       - { name: Champion of Humanity, points: 10 }
@@ -74,7 +74,7 @@ detachments:
       - { name: War-tempered Artifice, points: 25 }
   - name: Fulguris Task Force
     dp: 1
-    objective: DISRUPTION
+    objective: RECONNAISSANCE
     enhancements:
       - { name: Bellicose Weapon Spirits (Upgrade), points: 15 }
       - { name: Raptorial Cogitator Core (Upgrade), points: 15 }
@@ -83,7 +83,7 @@ detachments:
     objective: PRIORITY ASSETS
     enhancements:
       - { name: Adept of the Codex, points: 20 }
-      - { name: Artificer Armour, points: 10 }
+      - { name: Artificer Armour, points: 20 }
       - { name: Fire Discipline, points: 25 }
       - { name: The Honour Vehement, points: 15 }
   - name: Headhunter Task Force
@@ -104,27 +104,27 @@ detachments:
       - { name: Singular Will, points: 20 }
   - name: Interrogation Conclave
     dp: 1
-    objective: PURGE THE FOE
+    objective: TAKE AND HOLD
     enhancements:
       - { name: Inescapable Interrogation, points: 20 }
       - { name: Limitless Zeal, points: 10 }
   - name: Ironstorm Spearhead
     dp: 2
-    objective: PURGE THE FOE
+    objective: TAKE AND HOLD
     enhancements:
       - { name: Adept of the Omnissiah, points: 35 }
       - { name: Master of Machine War, points: 20 }
       - { name: Target Augury Web, points: 30 }
-      - { name: The Flesh Is Weak, points: 10 }
+      - { name: The Flesh Is Weak, points: 20 }
   - name: Librarius Conclave
     dp: 1
     objective: RECONNAISSANCE
     enhancements:
       - { name: Celerity, points: 35 }
-      - { name: Fusillade, points: 20 }
+      - { name: Fusillade, points: 25 }
       - { name: Obfuscation, points: 25 }
       - { name: Prescience, points: 20 }
-      - { name: Temporal Corridor, points: 15 }
+      - { name: Temporal Corridor, points: 25 }
   - name: Lion’S Blade Task Force
     dp: 2
     objective: PURGE THE FOE
@@ -132,7 +132,7 @@ detachments:
       - { name: Calibanite Armaments, points: 15 }
       - { name: Fulgus Magna, points: 20 }
       - { name: Lord of the Hunt, points: 15 }
-      - { name: Stalwart Champion, points: 25 }
+      - { name: Stalwart Champion, points: 15 }
   - name: Orbital Assault Force
     dp: 2
     objective: TAKE AND HOLD
@@ -151,7 +151,7 @@ detachments:
       - { name: Portents of Wisdom, points: 15 }
   - name: Subversion Assets
     dp: 1
-    objective: RECONNAISSANCE
+    objective: DISRUPTION
     enhancements:
       - { name: Death in the Dark (Upgrade), points: 15 }
       - { name: Shroud Field, points: 20 }
@@ -171,6 +171,12 @@ detachments:
       - { name: Ghostweave Cloak, points: 15 }
       - { name: Shadow War Veteran, points: 30 }
       - { name: The Blade Driven Deep, points: 25 }
+  - name: Vengeful Hosts
+    dp: 1
+    objective: TAKE AND HOLD
+    enhancements:
+      - { name: Avenging Angel, points: 20 }
+      - { name: Orksbane, points: 20 }
   - name: Wrath Of The Rock
     dp: 3
     objective: PRIORITY ASSETS
@@ -186,13 +192,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 90 }
-          - { models: 6, points: 180 }
+          - { models: 3, points: 80 }
+          - { models: 6, points: 165 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 100 }
-          - { models: 6, points: 190 }
+          - { models: 3, points: 90 }
+          - { models: 6, points: 175 }
   - name: Ancient
     groupTitle: Space Marines
     pricing:
@@ -485,6 +491,8 @@ units:
         costs:
           - { models: 3, points: 175 }
           - { models: 6, points: 350 }
+    wargear:
+      - { item: Twin lascannon, points: 5 }
   - name: Chaplain
     groupTitle: Space Marines
     pricing:
@@ -565,12 +573,12 @@ units:
     legends: true
   - name: Deathwing Knights
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 5, points: 240 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
           - { models: 5, points: 260 }
   - name: Deathwing Strikemaster
@@ -622,8 +630,12 @@ units:
   - name: Drop Pod
     groupTitle: Space Marines
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 60 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 70 }
   - name: Eliminator Squad
@@ -649,12 +661,8 @@ units:
   - name: Eradicator Squad With Heavy Bolters
     groupTitle: Space Marines
     pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
-        costs:
-          - { models: 3, points: 70 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
+      - range: "[1,)"
+        label: Your Unit Costs
         costs:
           - { models: 3, points: 80 }
   - name: Ezekiel
@@ -740,8 +748,12 @@ units:
   - name: Impulsor
     groupTitle: Space Marines
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 70 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 80 }
   - name: Inceptor Squad
@@ -750,13 +762,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 120 }
-          - { models: 6, points: 240 }
+          - { models: 3, points: 125 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 135 }
-          - { models: 6, points: 255 }
+          - { models: 3, points: 140 }
   - name: Incursor Squad
     groupTitle: Space Marines
     pricing:
@@ -777,7 +787,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 5, points: 85 }
-          - { models: 10, points: 170 }
+          - { models: 10, points: 180 }
   - name: Infiltrator Squad
     groupTitle: Space Marines
     pricing:
@@ -797,12 +807,12 @@ units:
         label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 80 }
-          - { models: 6, points: 170 }
+          - { models: 6, points: 160 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 3, points: 90 }
-          - { models: 6, points: 180 }
+          - { models: 6, points: 170 }
   - name: Intercessor Squad
     groupTitle: Space Marines
     pricing:
@@ -882,12 +892,8 @@ units:
   - name: Land Speeder
     groupTitle: Space Marines
     pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
-        costs:
-          - { models: 1, points: 95 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
+      - range: "[1,)"
+        label: Your Unit Costs
         costs:
           - { models: 1, points: 105 }
   - name: Land Speeder Vengeance
@@ -895,11 +901,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 120 }
+          - { models: 1, points: 130 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 140 }
   - name: Lazarus
     pricing:
       - range: "[1,)"
@@ -918,10 +924,14 @@ units:
   - name: Librarian
     groupTitle: Space Marines
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 60 }
+          - { models: 1, points: 70 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 80 }
     role: leader
     attachTo:
       - Assault Intercessor Squad
@@ -1017,19 +1027,19 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 85 }
+          - { models: 1, points: 95 }
   - name: Lion El’Jonson
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 285 }
+          - { models: 1, points: 265 }
   - name: Nephilim Jetfighter
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 195 }
+          - { models: 1, points: 180 }
   - name: Outrider Squad
     groupTitle: Space Marines
     pricing:
@@ -1063,26 +1073,21 @@ units:
           - { models: 1, points: 150 }
   - name: Ravenwing Black Knights
     pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
+      - range: "[1,)"
+        label: Your Unit Costs
         costs:
           - { models: 3, points: 75 }
           - { models: 6, points: 150 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
-        costs:
-          - { models: 3, points: 85 }
-          - { models: 6, points: 160 }
   - name: Ravenwing Command Squad
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 115 }
+          - { models: 3, points: 105 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 125 }
+          - { models: 3, points: 115 }
     role: leader
     attachTo:
       - Outrider Squad
@@ -1098,7 +1103,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 80 }
+          - { models: 1, points: 70 }
   - name: Ravenwing Talonmaster
     pricing:
       - range: "[1,)"
@@ -1109,8 +1114,12 @@ units:
   - name: Razorback
     groupTitle: Space Marines
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 85 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 95 }
   - name: Redemptor Dreadnought
@@ -1156,11 +1165,17 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 250 }
+    wargear:
+      - { item: Heavy laser destroyer, points: 10 }
   - name: Rhino
     groupTitle: Space Marines
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 65 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 75 }
   - name: Sammael
@@ -1168,7 +1183,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 105 }
+          - { models: 1, points: 95 }
     role: leader
     attachTo:
       - Outrider Squad
@@ -1193,7 +1208,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 5, points: 100 }
-          - { models: 10, points: 190 }
+          - { models: 10, points: 200 }
   - name: Storm Speeder Hailstrike
     groupTitle: Space Marines
     pricing:
@@ -1211,11 +1226,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 140 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 140 }
+          - { models: 1, points: 150 }
   - name: Storm Speeder Thunderstrike
     groupTitle: Space Marines
     pricing:
@@ -1258,7 +1273,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 3, points: 75 }
+          - { models: 3, points: 85 }
   - name: Tactical Squad
     groupTitle: Space Marines
     pricing:
@@ -1315,13 +1330,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 100 }
-          - { models: 10, points: 200 }
+          - { models: 5, points: 105 }
+          - { models: 10, points: 210 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 110 }
-          - { models: 10, points: 210 }
+          - { models: 5, points: 115 }
+          - { models: 10, points: 220 }
   - name: Vindicator
     groupTitle: Space Marines
     pricing:
