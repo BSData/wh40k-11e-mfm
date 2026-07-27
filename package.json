@@ -19,12 +19,12 @@
   },
   "dependencies": {
     "cheerio": "^1.2.0",
-    "playwright": "^1.61.1",
+    "playwright": "^1.62.0",
     "yaml": "^2.9.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.4",
+    "@biomejs/biome": "^2.5.5",
     "@types/node": "^26.1.1",
     "lefthook": "^2.1.10",
     "tsx": "^4.23.1",
