@@ -7,6 +7,56 @@ git history remains the canonical, line-level record — this is the readable su
 
 <!-- BEGIN ENTRIES -->
 
+## [2026-08-05] — MFM v1.2
+
+### Added
+- **Aeldari**: new unit Clanblade
+- **Aeldari**: new unit Dragon Knights
+- **Aeldari**: new unit Leystalker
+- **Aeldari**: new unit Stonesinger
+- **Black Templars**: Inceptor Squad — 6 models [[1,2]] (250 pts)
+- **Black Templars**: Inceptor Squad — 6 models [[3,)] (265 pts)
+- **Dark Angels**: Inceptor Squad — 6 models [[1,2]] (250 pts)
+- **Dark Angels**: Inceptor Squad — 6 models [[3,)] (265 pts)
+- **Deathwatch**: Inceptor Squad — 6 models [[1,2]] (250 pts)
+- **Deathwatch**: Inceptor Squad — 6 models [[3,)] (265 pts)
+- **Space Wolves**: Inceptor Squad — 6 models [[1,2]] (250 pts)
+- **Space Wolves**: Inceptor Squad — 6 models [[3,)] (265 pts)
+
+### Changed
+- **Adepta Sororitas**: v1.1 → v1.2
+- **Adeptus Custodes**: v1.1 → v1.2
+- **Adeptus Mechanicus**: v1.1 → v1.2
+- **Aeldari**: v1.1 → v1.2
+- **Astra Militarum**: v1.1 → v1.2
+- **Black Templars**: v1.1 → v1.2
+- **Blood Angels**: v1.1 → v1.2
+- **Chaos Daemons**: v1.1 → v1.2
+- **Chaos Knights**: v1.1 → v1.2
+- **Chaos Space Marines**: v1.1 → v1.2
+- **Chaos Titan Legions**: v1.1 → v1.2
+- **Dark Angels**: Ravenwing Command Squad — role: leader → support
+- **Dark Angels**: v1.1 → v1.2
+- **Death Guard**: v1.1 → v1.2
+- **Deathwatch**: v1.1 → v1.2
+- **Drukhari**: v1.1 → v1.2
+- **Emperor’s Children**: v1.1 → v1.2
+- **Genestealer Cults**: v1.1 → v1.2
+- **Grey Knights**: v1.1 → v1.2
+- **Imperial Agents**: v1.1 → v1.2
+- **Imperial Knights**: v1.1 → v1.2
+- **Leagues of Votann**: v1.1 → v1.2
+- **Necrons**: v1.1 → v1.2
+- **Orks**: v1.1 → v1.2
+- **Space Marines**: v1.1 → v1.2
+- **Space Wolves**: Ancient — attaches to: Assault Intercessor Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Long Fangs, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad, Wolf Guard → Assault Intercessor Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Long Fangs, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad, Vanguard Veteran Squad, Wolf Guard
+- **Space Wolves**: v1.1 → v1.2
+- **Thousand Sons**: v1.1 → v1.2
+- **Titan Legions**: v1.1 → v1.2
+- **Tyranids**: v1.1 → v1.2
+- **T’au Empire**: v1.1 → v1.2
+- **World Eaters**: v1.1 → v1.2
+
 ## [2026-07-22] — MFM v1.1
 
 ### Added

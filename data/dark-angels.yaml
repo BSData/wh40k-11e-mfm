@@ -1,7 +1,7 @@
 name: Dark Angels
 slug: dark-angels
-version: "1.1"
-firstSeen: 2026-07-22
+version: "1.2"
+firstSeen: 2026-08-05
 parent: Space Marines
 detachments:
   - name: 1st Company Task Force
@@ -763,10 +763,12 @@ units:
         label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 125 }
+          - { models: 6, points: 250 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 3, points: 140 }
+          - { models: 6, points: 265 }
   - name: Incursor Squad
     groupTitle: Space Marines
     pricing:
@@ -1088,7 +1090,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 3, points: 115 }
-    role: leader
+    role: support
     attachTo:
       - Outrider Squad
       - Ravenwing Black Knights

@@ -1,7 +1,7 @@
 name: Aeldari
 slug: aeldari
-version: "1.1"
-firstSeen: 2026-07-22
+version: "1.2"
+firstSeen: 2026-08-05
 detachments:
   - name: Armoured Warhost
     dp: 1
@@ -199,6 +199,15 @@ units:
       - Wraithguard
       - Wraithlord
     legends: true
+  - name: Clanblade
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    role: leader
+    attachTo:
+      - Dragon Knights
   - name: Cobra
     pricing:
       - range: "[1,)"
@@ -284,6 +293,13 @@ units:
         costs:
           - { models: 5, points: 75 }
           - { models: 10, points: 150 }
+  - name: Dragon Knights
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 180 }
   - name: Eldrad Ulthran
     pricing:
       - range: "[1,)"
@@ -432,6 +448,12 @@ units:
       - Corsair Reaver Band
       - Corsair Voidreavers
       - Corsair Voidscarred
+  - name: Leystalker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
   - name: Lhykhis
     pricing:
       - range: "[1,)"
@@ -603,6 +625,15 @@ units:
         label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 80 }
+  - name: Stonesinger
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    role: support
+    attachTo:
+      - Dragon Knights
   - name: Storm Guardians
     pricing:
       - range: "[1,)"
