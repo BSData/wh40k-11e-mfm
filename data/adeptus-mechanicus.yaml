@@ -1,7 +1,7 @@
 name: Adeptus Mechanicus
 slug: adeptus-mechanicus
-version: "1.1"
-firstSeen: 2026-07-22
+version: "1.2"
+firstSeen: 2026-08-05
 detachments:
   - name: Cohort Acquisitus
     dp: 1
