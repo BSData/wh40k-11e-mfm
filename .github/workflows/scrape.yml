@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with:
       - uses: pnpm/setup@v1
         with:
           runtime: node@22
