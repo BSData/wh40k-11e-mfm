@@ -23,6 +23,7 @@ import { markLegends, parseFaction, parseIndex } from './parse.js';
  *   pnpm scrape --concurrency 6     # faction pages in flight at once (default 4)
  *   pnpm scrape --out /tmp/data     # custom output dir (default: data/)
  *   pnpm scrape --order page        # entity order: 'name' (default, alphabetical) or 'page'
+ *   pnpm scrape --dates-from <dir>  # extra snapshot to match `firstSeen` against (repeatable)
  *
  * Legends units and the "Welcome…" notes aren't in the server HTML, so capturing
  * them needs a headless browser (Playwright). Without `--no-legends`, each faction
@@ -40,10 +41,11 @@ interface Args {
   legends: boolean;
   order: OrderMode;
   report?: string;
+  datesFrom: string[];
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { out: 'data', concurrency: 4, legends: true, order: 'name' };
+  const args: Args = { out: 'data', concurrency: 4, legends: true, order: 'name', datesFrom: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--faction') {
@@ -60,6 +62,9 @@ function parseArgs(argv: string[]): Args {
     } else if (a === '--report') {
       const v = argv[++i];
       if (v !== undefined) args.report = v;
+    } else if (a === '--dates-from') {
+      const v = argv[++i];
+      if (v !== undefined) args.datesFrom.push(v);
     }
   }
   return args;
@@ -83,26 +88,32 @@ async function mapPool<T>(
 }
 
 /**
- * Decide the `firstSeen` date: reuse the existing file's date when the freshly
- * scraped content is identical (so a no-op scrape produces no diff), otherwise
- * stamp `today`.
+ * Decide the `firstSeen` date: reuse the date of the *oldest* snapshot whose content
+ * matches the freshly scraped one (so a no-op scrape produces no diff), otherwise
+ * stamp `today`. `dirs` is the output dir plus any `--dates-from` dirs; the scrape
+ * workflow points those at the open update PR's `data/`, so a change that PR already
+ * captured keeps the day it was first seen instead of being re-stamped on every run —
+ * and a value that reverts to the committed one still resolves to the committed date.
  */
 function resolveFirstSeen(
   content: FactionContent,
-  outDir: string,
+  dirs: string[],
   today: string,
   order: OrderMode,
 ): string {
-  const path = join(outDir, `${content.slug}.yaml`);
-  if (existsSync(path)) {
+  const key = contentKey(content, order);
+  const dates: string[] = [];
+  for (const dir of dirs) {
+    const path = join(dir, `${content.slug}.yaml`);
+    if (!existsSync(path)) continue;
     try {
       const existing = factionFromYaml(readFileSync(path, 'utf8'));
-      if (contentKey(existing, order) === contentKey(content, order)) return existing.firstSeen;
+      if (contentKey(existing, order) === key) dates.push(existing.firstSeen);
     } catch {
       // Unreadable/old-format file → treat as changed and re-stamp.
     }
   }
-  return today;
+  return dates.length > 0 ? dates.reduce((a, b) => (b < a ? b : a)) : today;
 }
 
 /**
@@ -170,7 +181,12 @@ async function main(): Promise<void> {
     await mapPool(targets, args.concurrency, async (f) => {
       try {
         const content = await scrapeFaction(f, ctx, knownFactions);
-        const firstSeen = resolveFirstSeen(content, args.out, today, args.order);
+        const firstSeen = resolveFirstSeen(
+          content,
+          [args.out, ...args.datesFrom],
+          today,
+          args.order,
+        );
         const faction = Faction.parse({ ...content, firstSeen });
         writeFileSync(join(args.out, `${f.slug}.yaml`), factionToYaml(faction, args.order));
         scraped.push({ slug: f.slug, firstSeen });
