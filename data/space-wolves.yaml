@@ -1,7 +1,7 @@
 name: Space Wolves
 slug: space-wolves
-version: "1.2"
-firstSeen: 2026-08-05
+version: "1.3"
+firstSeen: 2026-08-26
 parent: Space Marines
 detachments:
   - name: 1st Company Task Force
@@ -831,11 +831,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 250 }
+          - { models: 1, points: 260 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 270 }
+          - { models: 1, points: 280 }
   - name: Land Speeder
     groupTitle: Space Marines
     pricing:
@@ -891,7 +891,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 75 }
+          - { models: 1, points: 85 }
     role: leader
     attachTo:
       - Deathwatch Terminator Squad
@@ -1281,8 +1281,8 @@ units:
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 110 }
-          - { models: 6, points: 210 }
+          - { models: 3, points: 130 }
+          - { models: 6, points: 230 }
     wargear:
       - { item: Storm Shield, points: 5 }
   - name: Ulrik The Slayer
@@ -1437,13 +1437,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 150 }
-          - { models: 10, points: 300 }
+          - { models: 5, points: 155 }
+          - { models: 10, points: 310 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 165 }
-          - { models: 10, points: 315 }
+          - { models: 5, points: 195 }
+          - { models: 10, points: 350 }
     wargear:
       - { item: Storm Shield, points: 5 }
   - name: Wolf Lord On Thunderwolf

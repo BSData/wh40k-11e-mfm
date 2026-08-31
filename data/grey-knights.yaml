@@ -1,7 +1,7 @@
 name: Grey Knights
 slug: grey-knights
-version: "1.2"
-firstSeen: 2026-08-05
+version: "1.3"
+firstSeen: 2026-08-26
 detachments:
   - name: Argent Assault
     dp: 1
@@ -261,11 +261,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 250 }
+          - { models: 1, points: 260 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 270 }
+          - { models: 1, points: 280 }
   - name: Nemesis Dreadknight
     pricing:
       - range: "[1,2]"
@@ -286,14 +286,14 @@ units:
           - { models: 4, points: 170 }
           - { models: 5, points: 215 }
           - { models: 8, points: 360 }
-          - { models: 10, points: 450 }
+          - { models: 10, points: 460 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 4, points: 185 }
-          - { models: 5, points: 230 }
-          - { models: 8, points: 375 }
-          - { models: 10, points: 465 }
+          - { models: 4, points: 210 }
+          - { models: 5, points: 255 }
+          - { models: 8, points: 400 }
+          - { models: 10, points: 500 }
     wargear:
       - { item: Psycannon, points: 5 }
   - name: Purgation Squad
@@ -301,13 +301,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 110 }
-          - { models: 10, points: 220 }
+          - { models: 5, points: 105 }
+          - { models: 10, points: 210 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 120 }
-          - { models: 10, points: 230 }
+          - { models: 5, points: 115 }
+          - { models: 10, points: 220 }
     wargear:
       - { item: Psycannon, points: 5 }
   - name: Purifier Squad
@@ -322,8 +322,6 @@ units:
         costs:
           - { models: 5, points: 140 }
           - { models: 10, points: 270 }
-    wargear:
-      - { item: Psycannon, points: 5 }
   - name: Razorback
     pricing:
       - range: "[1,3]"

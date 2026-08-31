@@ -7,6 +7,328 @@ git history remains the canonical, line-level record — this is the readable su
 
 <!-- BEGIN ENTRIES -->
 
+## [2026-08-26] — MFM v1.3
+
+### Added
+- **Adeptus Custodes**: Allarus Custodians — 2 models [[1,2]] (110 pts)
+- **Adeptus Custodes**: Allarus Custodians — 2 models [[3,)] (140 pts)
+- **Adeptus Custodes**: Allarus Custodians — 3 models [[1,2]] (165 pts)
+- **Adeptus Custodes**: Allarus Custodians — 3 models [[3,)] (195 pts)
+- **Adeptus Custodes**: Allarus Custodians — 5 models [[1,2]] (280 pts)
+- **Adeptus Custodes**: Allarus Custodians — 5 models [[3,)] (310 pts)
+- **Adeptus Custodes**: Allarus Custodians — 6 models [[1,2]] (340 pts)
+- **Adeptus Custodes**: Allarus Custodians — 6 models [[3,)] (370 pts)
+- **Adeptus Custodes**: Vertus Praetors — 2 models [[1,2]] (145 pts)
+- **Adeptus Custodes**: Vertus Praetors — 2 models [[3,)] (170 pts)
+- **Adeptus Custodes**: Vertus Praetors — 3 models [[1,2]] (215 pts)
+- **Adeptus Custodes**: Vertus Praetors — 3 models [[3,)] (240 pts)
+- **Adeptus Mechanicus**: Servitor Battleclade — 9 models [[1,2]] (65 pts)
+- **Adeptus Mechanicus**: Servitor Battleclade — 9 models [[3,)] (75 pts)
+- **Astra Militarum**: Leman Russ Battle Tank — Lascannon (5 pts)
+- **Astra Militarum**: Leman Russ Battle Tank — Multi-melta (5 pts)
+- **Astra Militarum**: Leman Russ Battle Tank — Plasma cannon (5 pts)
+- **Astra Militarum**: Leman Russ Commander — Lascannon (5 pts)
+- **Astra Militarum**: Leman Russ Commander — Multi-melta (5 pts)
+- **Astra Militarum**: Leman Russ Commander — Plasma cannon (5 pts)
+- **Astra Militarum**: Leman Russ Demolisher — Lascannon (5 pts)
+- **Astra Militarum**: Leman Russ Demolisher — Multi-melta (5 pts)
+- **Astra Militarum**: Leman Russ Demolisher — Plasma cannon (5 pts)
+- **Astra Militarum**: Leman Russ Eradicator — Lascannon (5 pts)
+- **Astra Militarum**: Leman Russ Eradicator — Multi-melta (5 pts)
+- **Astra Militarum**: Leman Russ Eradicator — Plasma cannon (5 pts)
+- **Astra Militarum**: Leman Russ Executioner — Lascannon (5 pts)
+- **Astra Militarum**: Leman Russ Executioner — Multi-melta (5 pts)
+- **Astra Militarum**: Leman Russ Executioner — Plasma cannon (5 pts)
+- **Astra Militarum**: Leman Russ Exterminator — Lascannon (5 pts)
+- **Astra Militarum**: Leman Russ Exterminator — Multi-melta (5 pts)
+- **Astra Militarum**: Leman Russ Exterminator — Plasma cannon (5 pts)
+- **Astra Militarum**: Leman Russ Punisher — Lascannon (5 pts)
+- **Astra Militarum**: Leman Russ Punisher — Multi-melta (5 pts)
+- **Astra Militarum**: Leman Russ Punisher — Plasma cannon (5 pts)
+- **Astra Militarum**: Leman Russ Vanquisher — Lascannon (5 pts)
+- **Astra Militarum**: Leman Russ Vanquisher — Multi-melta (5 pts)
+- **Astra Militarum**: Leman Russ Vanquisher — Plasma cannon (5 pts)
+- **Chaos Daemons**: Contorted Epitome — 1 model [[1,2]] (115 pts)
+- **Chaos Daemons**: Contorted Epitome — 1 model [[3,)] (125 pts)
+- **Chaos Daemons**: Fiends — 3 models [[1,2]] (90 pts)
+- **Chaos Daemons**: Fiends — 3 models [[3,)] (105 pts)
+- **Chaos Daemons**: Fiends — 6 models [[1,2]] (190 pts)
+- **Chaos Daemons**: Fiends — 6 models [[3,)] (205 pts)
+- **Chaos Daemons**: Poxbringer — 1 model [[1,2]] (60 pts)
+- **Chaos Daemons**: Poxbringer — 1 model [[3,)] (70 pts)
+- **Dark Angels**: Ravenwing Black Knights — 3 models [[1,2]] (75 pts)
+- **Dark Angels**: Ravenwing Black Knights — 3 models [[3,)] (85 pts)
+- **Dark Angels**: Ravenwing Black Knights — 6 models [[1,2]] (150 pts)
+- **Dark Angels**: Ravenwing Black Knights — 6 models [[3,)] (160 pts)
+- **Leagues of Votann**: Kapricus Defenders — 1 model [[1,2]] (70 pts)
+- **Leagues of Votann**: Kapricus Defenders — 1 model [[3,)] (80 pts)
+- **Leagues of Votann**: Kapricus Defenders — 2 models [[1,2]] (140 pts)
+- **Leagues of Votann**: Kapricus Defenders — 2 models [[3,)] (150 pts)
+
+### Changed
+- **Adepta Sororitas**: v1.2 → v1.3
+- **Adeptus Custodes**: Lions Of The Emperor — DP: 2 → 3
+- **Adeptus Custodes**: Lions Of The Emperor — objective: DISRUPTION → TAKE AND HOLD
+- **Adeptus Custodes**: Tharanatoi Hammerblow — objective: PRIORITY ASSETS → DISRUPTION
+- **Adeptus Custodes**: v1.2 → v1.3
+- **Adeptus Mechanicus**: Kastelan Robots — 2 models [[1,1]]: 160 → 150 pts (-10)
+- **Adeptus Mechanicus**: Kastelan Robots — 4 models [[1,1]]: 320 → 300 pts (-20)
+- **Adeptus Mechanicus**: Kastelan Robots — 4 models [[2,)]: 340 → 330 pts (-10)
+- **Adeptus Mechanicus**: Pteraxii Skystalkers — 5 models [[1,2]]: 80 → 75 pts (-5)
+- **Adeptus Mechanicus**: Pteraxii Skystalkers — 5 models [[3,)]: 90 → 85 pts (-5)
+- **Adeptus Mechanicus**: Pteraxii Sterylizors — 10 models [[1,2]]: 160 → 150 pts (-10)
+- **Adeptus Mechanicus**: Pteraxii Sterylizors — 10 models [[3,)]: 170 → 160 pts (-10)
+- **Adeptus Mechanicus**: Pteraxii Sterylizors — 5 models [[1,2]]: 80 → 75 pts (-5)
+- **Adeptus Mechanicus**: Pteraxii Sterylizors — 5 models [[3,)]: 90 → 85 pts (-5)
+- **Adeptus Mechanicus**: Tech-Priest Dominus — 1 model: 65 → 60 pts (-5)
+- **Adeptus Mechanicus**: v1.2 → v1.3
+- **Aeldari**: Aspect Host — objective: DISRUPTION → PRIORITY ASSETS
+- **Aeldari**: Dark Reapers — 10 models: 210 → 200 pts (-10)
+- **Aeldari**: Dark Reapers — 5 models: 100 → 95 pts (-5)
+- **Aeldari**: Dire Avengers — 10 models: 150 → 140 pts (-10)
+- **Aeldari**: Dire Avengers — 5 models: 75 → 70 pts (-5)
+- **Aeldari**: Eldrad Ulthran — 1 model: 130 → 120 pts (-10)
+- **Aeldari**: Eldrad Ulthran — attaches to: Guardian Defenders, Storm Guardians, Warlock Conclave → Guardian Defenders, Storm Guardians
+- **Aeldari**: Farseer — attaches to: Guardian Defenders, Storm Guardians, Warlock Conclave → Guardian Defenders, Storm Guardians
+- **Aeldari**: Spiritseer — 1 model: 55 → 50 pts (-5)
+- **Aeldari**: Storm Guardians — 11 models: 110 → 100 pts (-10)
+- **Aeldari**: The Visarch — 1 model: 90 → 80 pts (-10)
+- **Aeldari**: The Visarch — attaches to: Corsair Reaver Band, Corsair Voidreavers, Corsair Voidscarred, Guardian Defenders, Storm Guardians, Ynnari Incubi, Ynnari Kabalite Warriors, Ynnari Wyches → Corsair Reaver Band, Corsair Voidreavers, Corsair Voidscarred, Guardian Defenders, Storm Guardians, Ynnari Kabalite Warriors, Ynnari Wyches
+- **Aeldari**: The Visarch — role: leader → support
+- **Aeldari**: War Walkers — 1 model: 85 → 80 pts (-5)
+- **Aeldari**: Warlock Conclave — role: leader → support
+- **Aeldari**: Warlock Skyrunners — 1 model: 55 → 45 pts (-10)
+- **Aeldari**: Warlock Skyrunners — role: leader → support
+- **Aeldari**: Warlock — 1 model: 45 → 40 pts (-5)
+- **Aeldari**: v1.2 → v1.3
+- **Astra Militarum**: Cadian Shock Troops — 10 models: 75 → 70 pts (-5)
+- **Astra Militarum**: Catachan Heavy Weapons Squad — 3 models: 65 → 70 pts (+5)
+- **Astra Militarum**: Catachan Jungle Fighters — 10 models: 75 → 70 pts (-5)
+- **Astra Militarum**: Catachan Jungle Fighters — 20 models: 145 → 135 pts (-10)
+- **Astra Militarum**: Death Korps Of Krieg — 10 models: 75 → 70 pts (-5)
+- **Astra Militarum**: Death Korps Of Krieg — 20 models: 145 → 135 pts (-10)
+- **Astra Militarum**: Krieg Heavy Weapons Squad — 4 models: 60 → 70 pts (+10)
+- **Astra Militarum**: Leman Russ Battle Tank — 1 model [[1,2]]: 185 → 160 pts (-25)
+- **Astra Militarum**: Leman Russ Battle Tank — 1 model [[3,)]: 195 → 175 pts (-20)
+- **Astra Militarum**: Leman Russ Commander — 1 model [[1,2]]: 215 → 195 pts (-20)
+- **Astra Militarum**: Leman Russ Commander — 1 model [[3,)]: 230 → 210 pts (-20)
+- **Astra Militarum**: Leman Russ Demolisher — 1 model [[1,2]]: 180 → 160 pts (-20)
+- **Astra Militarum**: Leman Russ Demolisher — 1 model [[3,)]: 190 → 175 pts (-15)
+- **Astra Militarum**: Leman Russ Eradicator — 1 model [[1,2]]: 170 → 145 pts (-25)
+- **Astra Militarum**: Leman Russ Eradicator — 1 model [[3,)]: 180 → 160 pts (-20)
+- **Astra Militarum**: Leman Russ Executioner — 1 model [[1,2]]: 170 → 145 pts (-25)
+- **Astra Militarum**: Leman Russ Executioner — 1 model [[3,)]: 180 → 160 pts (-20)
+- **Astra Militarum**: Leman Russ Exterminator — 1 model [[1,2]]: 180 → 160 pts (-20)
+- **Astra Militarum**: Leman Russ Exterminator — 1 model [[3,)]: 190 → 175 pts (-15)
+- **Astra Militarum**: Leman Russ Punisher — 1 model [[1,2]]: 150 → 130 pts (-20)
+- **Astra Militarum**: Leman Russ Punisher — 1 model [[3,)]: 160 → 145 pts (-15)
+- **Astra Militarum**: Leman Russ Vanquisher — 1 model [[1,2]]: 150 → 130 pts (-20)
+- **Astra Militarum**: Leman Russ Vanquisher — 1 model [[3,)]: 160 → 145 pts (-15)
+- **Astra Militarum**: Recon Element — DP: 3 → 2
+- **Astra Militarum**: v1.2 → v1.3
+- **Black Templars**: Land Raider Redeemer — 1 model [[1,2]]: 250 → 260 pts (+10)
+- **Black Templars**: Land Raider Redeemer — 1 model [[3,)]: 270 → 280 pts (+10)
+- **Black Templars**: Sword Brethren Squad — 10 models [[1,2]]: 260 → 250 pts (-10)
+- **Black Templars**: Sword Brethren Squad — 10 models [[3,)]: 275 → 270 pts (-5)
+- **Black Templars**: Sword Brethren Squad — 4 models [[1,2]]: 105 → 100 pts (-5)
+- **Black Templars**: Sword Brethren Squad — 5 models [[1,2]]: 130 → 125 pts (-5)
+- **Black Templars**: Sword Brethren Squad — 9 models [[1,2]]: 235 → 225 pts (-10)
+- **Black Templars**: Sword Brethren Squad — 9 models [[3,)]: 250 → 245 pts (-5)
+- **Black Templars**: v1.2 → v1.3
+- **Blood Angels**: Death Company Marines With Jump Packs — 5 models [[1,2]]: 120 → 115 pts (-5)
+- **Blood Angels**: Death Company Marines With Jump Packs — 5 models [[3,)]: 135 → 130 pts (-5)
+- **Blood Angels**: Land Raider Redeemer — 1 model [[1,2]]: 250 → 260 pts (+10)
+- **Blood Angels**: Land Raider Redeemer — 1 model [[3,)]: 270 → 280 pts (+10)
+- **Blood Angels**: Librarian In Terminator Armour — 1 model: 75 → 85 pts (+10)
+- **Blood Angels**: Sanguinary Guard — 3 models [[1,2]]: 125 → 120 pts (-5)
+- **Blood Angels**: Sanguinary Guard — 3 models [[3,)]: 145 → 140 pts (-5)
+- **Blood Angels**: The Sanguinor — 1 model: 130 → 120 pts (-10)
+- **Blood Angels**: v1.2 → v1.3
+- **Chaos Daemons**: Beasts Of Nurgle — 1 model: 75 → 80 pts (+5)
+- **Chaos Daemons**: Beasts Of Nurgle — 2 models: 140 → 150 pts (+10)
+- **Chaos Daemons**: Bloodcrushers — 3 models [[3,)]: 115 → 135 pts (+20)
+- **Chaos Daemons**: Bloodcrushers — 6 models [[1,2]]: 190 → 200 pts (+10)
+- **Chaos Daemons**: Bloodcrushers — 6 models [[3,)]: 210 → 240 pts (+30)
+- **Chaos Daemons**: Daemonettes — 10 models: 90 → 100 pts (+10)
+- **Chaos Daemons**: Daemonic Incursion — objective: DISRUPTION → TAKE AND HOLD
+- **Chaos Daemons**: Keeper Of Secrets — 1 model [[1,2]]: 255 → 265 pts (+10)
+- **Chaos Daemons**: Keeper Of Secrets — 1 model [[3,)]: 270 → 280 pts (+10)
+- **Chaos Daemons**: Rendmaster On Blood Throne — 1 model [[1,2]]: 150 → 160 pts (+10)
+- **Chaos Daemons**: Rendmaster On Blood Throne — 1 model [[3,)]: 170 → 180 pts (+10)
+- **Chaos Daemons**: Seekers — 5 models: 80 → 85 pts (+5)
+- **Chaos Daemons**: Skull Cannon — 1 model: 90 → 100 pts (+10)
+- **Chaos Daemons**: v1.2 → v1.3
+- **Chaos Knights**: Chaos Cerastus Knight Atrapos — 1 model [[1,1]]: 395 → 385 pts (-10)
+- **Chaos Knights**: Chaos Cerastus Knight Lancer — 1 model [[1,1]]: 395 → 385 pts (-10)
+- **Chaos Knights**: Houndpack Lance — unique: War Dogs → —
+- **Chaos Knights**: Hunting Warpack — unique: War Dogs → —
+- **Chaos Knights**: Knight Despoiler — 1 model [[1,1]]: 380 → 360 pts (-20)
+- **Chaos Knights**: Knight Despoiler — 1 model [[2,)]: 400 → 390 pts (-10)
+- **Chaos Knights**: Knight Despoiler — Despoiler battle cannon: 15 → 10 pts (-5)
+- **Chaos Knights**: Knight Rampager — 1 model [[1,2]]: 365 → 355 pts (-10)
+- **Chaos Knights**: Knight Rampager — 1 model [[3,)]: 380 → 370 pts (-10)
+- **Chaos Knights**: War Dog Brigand — 1 model: 140 → 135 pts (-5)
+- **Chaos Knights**: War Dog Karnivore — 1 model: 155 → 145 pts (-10)
+- **Chaos Knights**: v1.2 → v1.3
+- **Chaos Space Marines**: Defiler — 1 model [[2,)]: 340 → 350 pts (+10)
+- **Chaos Space Marines**: Huron Blackheart — attaches to: Chaos Terminator Squad, Chosen, Legionaries, Masters Of The Maelstrom, Red Corsairs Raiders → Chaos Terminator Squad, Chosen, Legionaries, Red Corsairs Raiders
+- **Chaos Space Marines**: Huron’S Marauders — objective: DISRUPTION → PURGE THE FOE
+- **Chaos Space Marines**: v1.2 → v1.3
+- **Chaos Titan Legions**: v1.2 → v1.3
+- **Dark Angels**: Company Of Hunters · Recon Hunter: 20 → 30 pts (+10)
+- **Dark Angels**: Land Raider Redeemer — 1 model [[1,2]]: 250 → 260 pts (+10)
+- **Dark Angels**: Land Raider Redeemer — 1 model [[3,)]: 270 → 280 pts (+10)
+- **Dark Angels**: Librarian In Terminator Armour — 1 model: 75 → 85 pts (+10)
+- **Dark Angels**: Sammael — 1 model: 95 → 105 pts (+10)
+- **Dark Angels**: v1.2 → v1.3
+- **Death Guard**: Blightlord Terminators — 10 models: 370 → 360 pts (-10)
+- **Death Guard**: Blightlord Terminators — 5 models: 185 → 180 pts (-5)
+- **Death Guard**: Champions Of Contagion — unique: Flyblown → —
+- **Death Guard**: Contagion Engines — unique: Engines → —
+- **Death Guard**: Defiler — 1 model [[2,)]: 340 → 350 pts (+10)
+- **Death Guard**: Flyblown Host — unique: Flyblown → —
+- **Death Guard**: Foul Blightspawn — 1 model: 65 → 60 pts (-5)
+- **Death Guard**: Mortarion — 1 model: 390 → 375 pts (-15)
+- **Death Guard**: Mortarion’S Hammer — unique: Engines → —
+- **Death Guard**: Myphitic Blight-Haulers — 1 model: 100 → 95 pts (-5)
+- **Death Guard**: Myphitic Blight-Haulers — 2 models: 200 → 190 pts (-10)
+- **Death Guard**: Noxious Blightbringer — 1 model: 60 → 50 pts (-10)
+- **Death Guard**: Plagueburst Crawler — 1 model [[1,1]]: 185 → 170 pts (-15)
+- **Death Guard**: Plagueburst Crawler — 1 model [[2,)]: 210 → 200 pts (-10)
+- **Death Guard**: v1.2 → v1.3
+- **Deathwatch**: Centurion Devastator Squad — 6 models: 350 → 365 pts (+15)
+- **Deathwatch**: Land Raider Redeemer — 1 model [[1,2]]: 250 → 260 pts (+10)
+- **Deathwatch**: Land Raider Redeemer — 1 model [[3,)]: 270 → 280 pts (+10)
+- **Deathwatch**: Librarian In Terminator Armour — 1 model: 75 → 85 pts (+10)
+- **Deathwatch**: v1.2 → v1.3
+- **Drukhari**: v1.2 → v1.3
+- **Emperor’s Children**: Carnival Of Excess · Possessed Blade: 25 → 35 pts (+10)
+- **Emperor’s Children**: Carnival Of Excess · Warp Walker: 30 → 35 pts (+5)
+- **Emperor’s Children**: Daemonettes — 10 models: 90 → 100 pts (+10)
+- **Emperor’s Children**: Defiler — 1 model [[2,)]: 340 → 350 pts (+10)
+- **Emperor’s Children**: Fiends — 6 models: 180 → 190 pts (+10)
+- **Emperor’s Children**: Keeper Of Secrets — 1 model [[1,2]]: 255 → 265 pts (+10)
+- **Emperor’s Children**: Keeper Of Secrets — 1 model [[3,)]: 270 → 280 pts (+10)
+- **Emperor’s Children**: Lord Exultant — 1 model [[1,2]]: 80 → 90 pts (+10)
+- **Emperor’s Children**: Lord Exultant — 1 model [[3,)]: 90 → 100 pts (+10)
+- **Emperor’s Children**: Seekers — 5 models: 80 → 85 pts (+5)
+- **Emperor’s Children**: v1.2 → v1.3
+- **Genestealer Cults**: v1.2 → v1.3
+- **Grey Knights**: Land Raider Redeemer — 1 model [[1,2]]: 250 → 260 pts (+10)
+- **Grey Knights**: Land Raider Redeemer — 1 model [[3,)]: 270 → 280 pts (+10)
+- **Grey Knights**: Paladin Squad — 10 models [[1,2]]: 450 → 460 pts (+10)
+- **Grey Knights**: Paladin Squad — 10 models [[3,)]: 465 → 500 pts (+35)
+- **Grey Knights**: Paladin Squad — 4 models [[3,)]: 185 → 210 pts (+25)
+- **Grey Knights**: Paladin Squad — 5 models [[3,)]: 230 → 255 pts (+25)
+- **Grey Knights**: Paladin Squad — 8 models [[3,)]: 375 → 400 pts (+25)
+- **Grey Knights**: Purgation Squad — 10 models [[1,2]]: 220 → 210 pts (-10)
+- **Grey Knights**: Purgation Squad — 10 models [[3,)]: 230 → 220 pts (-10)
+- **Grey Knights**: Purgation Squad — 5 models [[1,2]]: 110 → 105 pts (-5)
+- **Grey Knights**: Purgation Squad — 5 models [[3,)]: 120 → 115 pts (-5)
+- **Grey Knights**: v1.2 → v1.3
+- **Imperial Agents**: v1.2 → v1.3
+- **Imperial Knights**: v1.2 → v1.3
+- **Leagues of Votann**: Brôkhyr Thunderkyn — 6 models [[1,2]]: 160 → 170 pts (+10)
+- **Leagues of Votann**: Brôkhyr Thunderkyn — 6 models [[3,)]: 170 → 180 pts (+10)
+- **Leagues of Votann**: Cthonian Beserks — 10 models: 200 → 190 pts (-10)
+- **Leagues of Votann**: Cthonian Beserks — 5 models: 100 → 95 pts (-5)
+- **Leagues of Votann**: Cthonian Earthshakers — 2 models: 110 → 100 pts (-10)
+- **Leagues of Votann**: Hearthkyn Warriors — 10 models: 100 → 90 pts (-10)
+- **Leagues of Votann**: Ironkin Steeljacks With Heavy Volkanite Disintegrators — 6 models [[1,2]]: 160 → 170 pts (+10)
+- **Leagues of Votann**: Ironkin Steeljacks With Heavy Volkanite Disintegrators — 6 models [[3,)]: 170 → 180 pts (+10)
+- **Leagues of Votann**: Ironkin Steeljacks With Melee Weapons — 3 models [[1,2]]: 80 → 75 pts (-5)
+- **Leagues of Votann**: Ironkin Steeljacks With Melee Weapons — 3 models [[3,)]: 90 → 85 pts (-5)
+- **Leagues of Votann**: Ironkin Steeljacks With Melee Weapons — 6 models [[1,2]]: 160 → 150 pts (-10)
+- **Leagues of Votann**: Ironkin Steeljacks With Melee Weapons — 6 models [[3,)]: 170 → 160 pts (-10)
+- **Leagues of Votann**: v1.2 → v1.3
+- **Necrons**: Lokhust Destroyers — 1 model [[3,)]: 50 → 70 pts (+20)
+- **Necrons**: Lokhust Destroyers — 2 models [[3,)]: 65 → 85 pts (+20)
+- **Necrons**: Lokhust Destroyers — 3 models [[3,)]: 90 → 110 pts (+20)
+- **Necrons**: Lokhust Destroyers — 6 models [[1,2]]: 170 → 175 pts (+5)
+- **Necrons**: Lokhust Destroyers — 6 models [[3,)]: 180 → 205 pts (+25)
+- **Necrons**: Lokhust Heavy Destroyers — 3 models [[1,2]]: 160 → 165 pts (+5)
+- **Necrons**: Lokhust Heavy Destroyers — 3 models [[3,)]: 170 → 175 pts (+5)
+- **Necrons**: Lokhust Lord — 1 model: 70 → 80 pts (+10)
+- **Necrons**: Necron Warriors — 10 models: 80 → 85 pts (+5)
+- **Necrons**: Ophydian Destroyers — 6 models [[1,2]]: 145 → 150 pts (+5)
+- **Necrons**: Ophydian Destroyers — 6 models [[3,)]: 155 → 160 pts (+5)
+- **Necrons**: Plasmancer — 1 model: 55 → 60 pts (+5)
+- **Necrons**: Skorpekh Lord — 1 model [[1,2]]: 90 → 95 pts (+5)
+- **Necrons**: Skorpekh Lord — 1 model [[3,)]: 100 → 105 pts (+5)
+- **Necrons**: v1.2 → v1.3
+- **Orks**: v1.2 → v1.3
+- **Space Marines**: Centurion Devastator Squad — 6 models: 350 → 365 pts (+15)
+- **Space Marines**: Land Raider Redeemer — 1 model [[1,2]]: 250 → 260 pts (+10)
+- **Space Marines**: Land Raider Redeemer — 1 model [[3,)]: 270 → 280 pts (+10)
+- **Space Marines**: Librarian In Terminator Armour — 1 model: 75 → 85 pts (+10)
+- **Space Marines**: Marneus Calgar In Armour Of Antilochus — attaches to: Aggressor Squad, Assault Intercessor Squad, Assault Squad, Bladeguard Veteran Squad, Command Squad, Company Heroes, Eradicator Squad Sternguard Veteran Squad, Heavy Intercessor Squad, Infernus Squad, Intercessor Squad, Relic Terminator Squad, Tactical Squad, Terminator Assault Squad, Terminator Squad, Vanguard Veteran Squad, Victrix Honour Guard → Aggressor Squad, Assault Intercessor Squad, Assault Squad, Bladeguard Veteran Squad, Command Squad, Company Heroes, Eradicator Squad Sternguard Veteran Squad Terminator Squad, Heavy Intercessor Squad, Infernus Squad, Intercessor Squad, Relic Terminator Squad, Tactical Squad, Terminator Assault Squad, Terminator Squad, Vanguard Veteran Squad, Victrix Honour Guard
+- **Space Marines**: Vulkan He’Stan — 1 model: 85 → 95 pts (+10)
+- **Space Marines**: v1.2 → v1.3
+- **Space Wolves**: Land Raider Redeemer — 1 model [[1,2]]: 250 → 260 pts (+10)
+- **Space Wolves**: Land Raider Redeemer — 1 model [[3,)]: 270 → 280 pts (+10)
+- **Space Wolves**: Librarian In Terminator Armour — 1 model: 75 → 85 pts (+10)
+- **Space Wolves**: Thunderwolf Cavalry — 3 models [[3,)]: 110 → 130 pts (+20)
+- **Space Wolves**: Thunderwolf Cavalry — 6 models [[3,)]: 210 → 230 pts (+20)
+- **Space Wolves**: Wolf Guard Terminators — 10 models [[1,2]]: 300 → 310 pts (+10)
+- **Space Wolves**: Wolf Guard Terminators — 10 models [[3,)]: 315 → 350 pts (+35)
+- **Space Wolves**: Wolf Guard Terminators — 5 models [[1,2]]: 150 → 155 pts (+5)
+- **Space Wolves**: Wolf Guard Terminators — 5 models [[3,)]: 165 → 195 pts (+30)
+- **Space Wolves**: v1.2 → v1.3
+- **Thousand Sons**: Defiler — 1 model [[2,)]: 340 → 350 pts (+10)
+- **Thousand Sons**: Exalted Sorcerer — 1 model: 90 → 95 pts (+5)
+- **Thousand Sons**: Grand Coven · Umbralefic Crystal: 20 → 30 pts (+10)
+- **Thousand Sons**: Infernal Master — 1 model: 95 → 100 pts (+5)
+- **Thousand Sons**: Sorcerer In Terminator Armour — 1 model [[1,2]]: 95 → 100 pts (+5)
+- **Thousand Sons**: Sorcerer In Terminator Armour — 1 model [[3,)]: 105 → 110 pts (+5)
+- **Thousand Sons**: Sorcerer — 1 model [[1,2]]: 85 → 95 pts (+10)
+- **Thousand Sons**: Sorcerer — 1 model [[3,)]: 95 → 105 pts (+10)
+- **Thousand Sons**: v1.2 → v1.3
+- **Titan Legions**: v1.2 → v1.3
+- **Tyranids**: Exocrine — 1 model [[1,2]]: 140 → 135 pts (-5)
+- **Tyranids**: Exocrine — 1 model [[3,)]: 150 → 145 pts (-5)
+- **Tyranids**: Maleceptor — 1 model [[1,2]]: 190 → 180 pts (-10)
+- **Tyranids**: Maleceptor — 1 model [[3,)]: 200 → 190 pts (-10)
+- **Tyranids**: Pyrovores — 1 model [[1,2]]: 45 → 40 pts (-5)
+- **Tyranids**: Pyrovores — 1 model [[3,)]: 55 → 50 pts (-5)
+- **Tyranids**: Pyrovores — 2 models [[1,2]]: 65 → 70 pts (+5)
+- **Tyranids**: Pyrovores — 2 models [[3,)]: 75 → 80 pts (+5)
+- **Tyranids**: Pyrovores — 3 models [[1,2]]: 95 → 100 pts (+5)
+- **Tyranids**: Pyrovores — 3 models [[3,)]: 105 → 110 pts (+5)
+- **Tyranids**: Talons Of The Norn Queen · Synaptoprescience (Upgrade): 25 → 30 pts (+5)
+- **Tyranids**: Tyrannofex — 1 model [[1,2]]: 180 → 170 pts (-10)
+- **Tyranids**: Tyrannofex — 1 model [[3,)]: 190 → 180 pts (-10)
+- **Tyranids**: Tyrant Guard — 6 models: 160 → 170 pts (+10)
+- **Tyranids**: Zoanthropes — 6 models: 200 → 190 pts (-10)
+- **Tyranids**: v1.2 → v1.3
+- **T’au Empire**: Crisis Starscythe Battlesuits — 3 models [[1,2]]: 90 → 100 pts (+10)
+- **T’au Empire**: Crisis Starscythe Battlesuits — 3 models [[3,)]: 100 → 110 pts (+10)
+- **T’au Empire**: Mont’Ka · Strike Swiftly: 35 → 45 pts (+10)
+- **T’au Empire**: The Twin Lance — 2 models: 220 → 230 pts (+10)
+- **T’au Empire**: Tiger Shark — 1 model [[1,1]]: 375 → 395 pts (+20)
+- **T’au Empire**: Tiger Shark — 1 model [[2,)]: 425 → 445 pts (+20)
+- **T’au Empire**: v1.2 → v1.3
+- **World Eaters**: Khorne Berzerkers — 10 models: 170 → 160 pts (-10)
+- **World Eaters**: Khorne Berzerkers — 20 models: 330 → 320 pts (-10)
+- **World Eaters**: v1.2 → v1.3
+
+### Removed
+- **Adeptus Custodes**: removed Allarus Custodians — 2 models (was 110 pts)
+- **Adeptus Custodes**: removed Allarus Custodians — 3 models (was 165 pts)
+- **Adeptus Custodes**: removed Allarus Custodians — 5 models (was 275 pts)
+- **Adeptus Custodes**: removed Allarus Custodians — 6 models (was 330 pts)
+- **Adeptus Custodes**: removed Vertus Praetors — 2 models (was 145 pts)
+- **Adeptus Custodes**: removed Vertus Praetors — 3 models (was 215 pts)
+- **Adeptus Mechanicus**: removed Servitor Battleclade — 9 models (was 65 pts)
+- **Chaos Daemons**: removed Contorted Epitome — 1 model (was 100 pts)
+- **Chaos Daemons**: removed Fiends — 3 models (was 90 pts)
+- **Chaos Daemons**: removed Fiends — 6 models (was 180 pts)
+- **Chaos Daemons**: removed Poxbringer — 1 model (was 55 pts)
+- **Dark Angels**: removed Ravenwing Black Knights — 3 models (was 75 pts)
+- **Dark Angels**: removed Ravenwing Black Knights — 6 models (was 150 pts)
+- **Grey Knights**: removed Purifier Squad — Psycannon (was 5 pts)
+- **Leagues of Votann**: removed Kapricus Defenders — 1 model (was 65 pts)
+- **Leagues of Votann**: removed Kapricus Defenders — 2 models (was 130 pts)
+
 ## [2026-08-05] — MFM v1.2
 
 ### Added

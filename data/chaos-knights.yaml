@@ -1,7 +1,7 @@
 name: Chaos Knights
 slug: chaos-knights
-version: "1.2"
-firstSeen: 2026-08-05
+version: "1.3"
+firstSeen: 2026-08-26
 detachments:
   - name: Bastions Of Tyranny
     dp: 1
@@ -20,7 +20,6 @@ detachments:
   - name: Houndpack Lance
     dp: 2
     objective: RECONNAISSANCE
-    unique: War Dogs
     enhancements:
       - { name: Final Howl, points: 20 }
       - { name: Loping Predator, points: 10 }
@@ -29,7 +28,6 @@ detachments:
   - name: Hunting Warpack
     dp: 1
     objective: RECONNAISSANCE
-    unique: War Dogs
     enhancements:
       - { name: Snarling Rivalry (Upgrade), points: 10 }
       - { name: Soul-spoor Auspicator (Upgrade), points: 15 }
@@ -101,7 +99,7 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 395 }
+          - { models: 1, points: 385 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
@@ -121,7 +119,7 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 395 }
+          - { models: 1, points: 385 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
@@ -171,24 +169,24 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 380 }
+          - { models: 1, points: 360 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 400 }
+          - { models: 1, points: 390 }
     wargear:
       - { item: Despoiler gatling cannon, points: 25 }
-      - { item: Despoiler battle cannon, points: 15 }
+      - { item: Despoiler battle cannon, points: 10 }
   - name: Knight Rampager
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 365 }
+          - { models: 1, points: 355 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 380 }
+          - { models: 1, points: 370 }
   - name: Knight Ruinator
     pricing:
       - range: "[1,2]"
@@ -214,7 +212,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 140 }
+          - { models: 1, points: 135 }
   - name: War Dog Executioner
     pricing:
       - range: "[1,)"
@@ -232,7 +230,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 155 }
+          - { models: 1, points: 145 }
   - name: War Dog Moirax
     pricing:
       - range: "[1,2]"

@@ -1,7 +1,7 @@
 name: Chaos Space Marines
 slug: chaos-space-marines
-version: "1.2"
-firstSeen: 2026-08-05
+version: "1.3"
+firstSeen: 2026-08-26
 detachments:
   - name: Cabal Of Chaos
     dp: 1
@@ -65,7 +65,7 @@ detachments:
       - { name: Warp Tracer, points: 20 }
   - name: Huron’S Marauders
     dp: 3
-    objective: DISRUPTION
+    objective: PURGE THE FOE
     enhancements:
       - { name: Dread Reputation, points: 25 }
       - { name: Eager for Bloodshed, points: 30 }
@@ -428,7 +428,7 @@ units:
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 340 }
+          - { models: 1, points: 350 }
     wargear:
       - { item: Heavy reaper autocannon, points: 15 }
       - { item: Hades lascannon, points: 15 }
@@ -572,7 +572,6 @@ units:
       - Chaos Terminator Squad
       - Chosen
       - Legionaries
-      - Masters Of The Maelstrom
       - Red Corsairs Raiders
   - name: Kharybdis Assault Claw
     pricing:
