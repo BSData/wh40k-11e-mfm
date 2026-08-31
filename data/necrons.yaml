@@ -1,7 +1,7 @@
 name: Necrons
 slug: necrons
-version: "1.2"
-firstSeen: 2026-08-05
+version: "1.3"
+firstSeen: 2026-08-26
 detachments:
   - name: Annihilation Legion
     dp: 2
@@ -335,14 +335,14 @@ units:
           - { models: 1, points: 40 }
           - { models: 2, points: 55 }
           - { models: 3, points: 80 }
-          - { models: 6, points: 170 }
+          - { models: 6, points: 175 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 50 }
-          - { models: 2, points: 65 }
-          - { models: 3, points: 90 }
-          - { models: 6, points: 180 }
+          - { models: 1, points: 70 }
+          - { models: 2, points: 85 }
+          - { models: 3, points: 110 }
+          - { models: 6, points: 205 }
   - name: Lokhust Heavy Destroyers
     pricing:
       - range: "[1,2]"
@@ -350,19 +350,19 @@ units:
         costs:
           - { models: 1, points: 50 }
           - { models: 2, points: 100 }
-          - { models: 3, points: 160 }
+          - { models: 3, points: 165 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 60 }
           - { models: 2, points: 110 }
-          - { models: 3, points: 170 }
+          - { models: 3, points: 175 }
   - name: Lokhust Lord
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 70 }
+          - { models: 1, points: 80 }
     role: leader
     attachTo:
       - Lokhust Destroyers
@@ -401,7 +401,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 80 }
+          - { models: 10, points: 85 }
           - { models: 20, points: 190 }
   - name: Nekrosor Ammentar
     pricing:
@@ -450,12 +450,12 @@ units:
         label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 80 }
-          - { models: 6, points: 145 }
+          - { models: 6, points: 150 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 3, points: 90 }
-          - { models: 6, points: 155 }
+          - { models: 6, points: 160 }
   - name: Orikan The Diviner
     pricing:
       - range: "[1,)"
@@ -493,7 +493,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 55 }
+          - { models: 1, points: 60 }
     role: support
     attachTo:
       - Immortals
@@ -552,11 +552,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 90 }
+          - { models: 1, points: 95 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 100 }
+          - { models: 1, points: 105 }
     role: leader
     attachTo:
       - Skorpekh Destroyers

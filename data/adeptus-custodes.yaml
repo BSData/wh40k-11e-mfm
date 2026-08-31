@@ -1,7 +1,7 @@
 name: Adeptus Custodes
 slug: adeptus-custodes
-version: "1.2"
-firstSeen: 2026-08-05
+version: "1.3"
+firstSeen: 2026-08-26
 detachments:
   - name: Auric Champions
     dp: 2
@@ -12,8 +12,8 @@ detachments:
       - { name: Martial Philosopher, points: 30 }
       - { name: Veiled Blade, points: 25 }
   - name: Lions Of The Emperor
-    dp: 2
-    objective: DISRUPTION
+    dp: 3
+    objective: TAKE AND HOLD
     unique: Lions
     enhancements:
       - { name: Admonimortis, points: 30 }
@@ -68,7 +68,7 @@ detachments:
       - { name: Radiant Mantle, points: 30 }
   - name: Tharanatoi Hammerblow
     dp: 1
-    objective: PRIORITY ASSETS
+    objective: DISRUPTION
     unique: Lions
     enhancements:
       - { name: Efficient Aggression, points: 25 }
@@ -94,13 +94,20 @@ units:
       - Witchseekers
   - name: Allarus Custodians
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 2, points: 110 }
           - { models: 3, points: 165 }
-          - { models: 5, points: 275 }
-          - { models: 6, points: 330 }
+          - { models: 5, points: 280 }
+          - { models: 6, points: 340 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 2, points: 140 }
+          - { models: 3, points: 195 }
+          - { models: 5, points: 310 }
+          - { models: 6, points: 370 }
   - name: Anathema Psykana Rhino
     pricing:
       - range: "[1,3]"
@@ -364,11 +371,16 @@ units:
           - { models: 1, points: 240 }
   - name: Vertus Praetors
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 2, points: 145 }
           - { models: 3, points: 215 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 2, points: 170 }
+          - { models: 3, points: 240 }
   - name: Vigilators
     pricing:
       - range: "[1,)"

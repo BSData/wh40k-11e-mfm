@@ -1,7 +1,7 @@
 name: Dark Angels
 slug: dark-angels
-version: "1.2"
-firstSeen: 2026-08-05
+version: "1.3"
+firstSeen: 2026-08-26
 parent: Space Marines
 detachments:
   - name: 1st Company Task Force
@@ -51,7 +51,7 @@ detachments:
       - { name: Master of Manoeuvre, points: 15 }
       - { name: Master-crafted Weapon, points: 10 }
       - { name: Mounted Strategist, points: 30 }
-      - { name: Recon Hunter, points: 20 }
+      - { name: Recon Hunter, points: 30 }
   - name: Dark Age Arsenal
     dp: 1
     objective: PRIORITY ASSETS
@@ -886,11 +886,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 250 }
+          - { models: 1, points: 260 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 270 }
+          - { models: 1, points: 280 }
   - name: Land Speeder
     groupTitle: Space Marines
     pricing:
@@ -968,7 +968,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 75 }
+          - { models: 1, points: 85 }
     role: leader
     attachTo:
       - Deathwatch Terminator Squad
@@ -1075,11 +1075,16 @@ units:
           - { models: 1, points: 150 }
   - name: Ravenwing Black Knights
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 75 }
           - { models: 6, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 85 }
+          - { models: 6, points: 160 }
   - name: Ravenwing Command Squad
     pricing:
       - range: "[1,2]"
@@ -1185,7 +1190,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 95 }
+          - { models: 1, points: 105 }
     role: leader
     attachTo:
       - Outrider Squad

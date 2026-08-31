@@ -1,7 +1,7 @@
 name: Chaos Daemons
 slug: chaos-daemons
-version: "1.2"
-firstSeen: 2026-08-05
+version: "1.3"
+firstSeen: 2026-08-26
 detachments:
   - name: Blood Legion
     dp: 2
@@ -19,7 +19,7 @@ detachments:
       - { name: Soul-shattering Charge (Upgrade), points: 10 }
   - name: Daemonic Incursion
     dp: 3
-    objective: DISRUPTION
+    objective: TAKE AND HOLD
     enhancements:
       - { name: "A’rgath, The King of Blades", points: 20 }
       - { name: Soulstealer, points: 15 }
@@ -94,20 +94,20 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 75 }
-          - { models: 2, points: 140 }
+          - { models: 1, points: 80 }
+          - { models: 2, points: 150 }
   - name: Bloodcrushers
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 95 }
-          - { models: 6, points: 190 }
+          - { models: 6, points: 200 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 115 }
-          - { models: 6, points: 210 }
+          - { models: 3, points: 135 }
+          - { models: 6, points: 240 }
   - name: Bloodletters
     pricing:
       - range: "[1,)"
@@ -157,10 +157,14 @@ units:
       - Pink Horrors
   - name: Contorted Epitome
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 100 }
+          - { models: 1, points: 115 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 125 }
     role: leader
     attachTo:
       - Daemonettes
@@ -181,7 +185,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 90 }
+          - { models: 10, points: 100 }
   - name: Epidemius
     pricing:
       - range: "[1,)"
@@ -217,11 +221,16 @@ units:
           - { models: 1, points: 100 }
   - name: Fiends
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 90 }
-          - { models: 6, points: 180 }
+          - { models: 6, points: 190 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 105 }
+          - { models: 6, points: 205 }
   - name: Flamers
     pricing:
       - range: "[1,)"
@@ -328,11 +337,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 255 }
+          - { models: 1, points: 265 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 270 }
+          - { models: 1, points: 280 }
   - name: Lord Of Change
     pricing:
       - range: "[1,2]"
@@ -385,10 +394,14 @@ units:
     legends: true
   - name: Poxbringer
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 55 }
+          - { models: 1, points: 60 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 70 }
     role: leader
     attachTo:
       - Plaguebearers
@@ -397,11 +410,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 150 }
+          - { models: 1, points: 160 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 170 }
+          - { models: 1, points: 180 }
   - name: Rotigus
     pricing:
       - range: "[1,)"
@@ -427,7 +440,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 80 }
+          - { models: 5, points: 85 }
           - { models: 10, points: 155 }
   - name: Shalaxi Helbane
     pricing:
@@ -452,7 +465,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 90 }
+          - { models: 1, points: 100 }
   - name: Skullmaster
     pricing:
       - range: "[1,)"

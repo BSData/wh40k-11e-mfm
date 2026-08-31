@@ -1,7 +1,7 @@
 name: Aeldari
 slug: aeldari
-version: "1.2"
-firstSeen: 2026-08-05
+version: "1.3"
+firstSeen: 2026-08-26
 detachments:
   - name: Armoured Warhost
     dp: 1
@@ -11,7 +11,7 @@ detachments:
       - { name: Spirit Stone of Raelyth, points: 20 }
   - name: Aspect Host
     dp: 3
-    objective: DISRUPTION
+    objective: PRIORITY ASSETS
     enhancements:
       - { name: Aspect of Murder, points: 15 }
       - { name: Mantle of Wisdom, points: 20 }
@@ -277,8 +277,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 100 }
-          - { models: 10, points: 210 }
+          - { models: 5, points: 95 }
+          - { models: 10, points: 200 }
   - name: Death Jester
     groupTitle: Harlequins
     pricing:
@@ -291,8 +291,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 75 }
-          - { models: 10, points: 150 }
+          - { models: 5, points: 70 }
+          - { models: 10, points: 140 }
   - name: Dragon Knights
     pricing:
       - range: "[1,)"
@@ -305,12 +305,11 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 120 }
     role: leader
     attachTo:
       - Guardian Defenders
       - Storm Guardians
-      - Warlock Conclave
   - name: Falcon
     pricing:
       - range: "[1,)"
@@ -327,7 +326,6 @@ units:
     attachTo:
       - Guardian Defenders
       - Storm Guardians
-      - Warlock Conclave
   - name: Farseer Skyrunner
     pricing:
       - range: "[1,)"
@@ -606,7 +604,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 55 }
+          - { models: 1, points: 50 }
   - name: Starfangs
     pricing:
       - range: "[1,)"
@@ -639,7 +637,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 11, points: 110 }
+          - { models: 11, points: 100 }
   - name: Striking Scorpions
     pricing:
       - range: "[1,)"
@@ -665,15 +663,14 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 90 }
-    role: leader
+          - { models: 1, points: 80 }
+    role: support
     attachTo:
       - Corsair Reaver Band
       - Corsair Voidreavers
       - Corsair Voidscarred
       - Guardian Defenders
       - Storm Guardians
-      - Ynnari Incubi
       - Ynnari Kabalite Warriors
       - Ynnari Wyches
   - name: The Yncarne
@@ -742,14 +739,14 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 85 }
+          - { models: 1, points: 80 }
           - { models: 2, points: 160 }
   - name: Warlock
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 45 }
+          - { models: 1, points: 40 }
     role: support
     attachTo:
       - Guardian Defenders
@@ -761,7 +758,7 @@ units:
         costs:
           - { models: 2, points: 55 }
           - { models: 4, points: 120 }
-    role: leader
+    role: support
     attachTo:
       - Guardian Defenders
       - Storm Guardians
@@ -770,9 +767,9 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 55 }
+          - { models: 1, points: 45 }
           - { models: 2, points: 90 }
-    role: leader
+    role: support
     attachTo:
       - Windriders
   - name: Warp Hunter

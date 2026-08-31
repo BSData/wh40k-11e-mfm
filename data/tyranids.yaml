@@ -1,7 +1,7 @@
 name: Tyranids
 slug: tyranids
-version: "1.2"
-firstSeen: 2026-08-05
+version: "1.3"
+firstSeen: 2026-08-26
 detachments:
   - name: Ambush Predators
     dp: 1
@@ -54,7 +54,7 @@ detachments:
     objective: TAKE AND HOLD
     enhancements:
       - { name: Destabilising Predation (Upgrade), points: 20 }
-      - { name: Synaptoprescience (Upgrade), points: 25 }
+      - { name: Synaptoprescience (Upgrade), points: 30 }
   - name: Unending Swarm
     dp: 2
     objective: TAKE AND HOLD
@@ -134,11 +134,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 140 }
+          - { models: 1, points: 135 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 150 }
+          - { models: 1, points: 145 }
   - name: Gargoyles
     pricing:
       - range: "[1,)"
@@ -262,11 +262,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 190 }
+          - { models: 1, points: 180 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 200 }
+          - { models: 1, points: 190 }
   - name: Mawloc
     pricing:
       - range: "[1,)"
@@ -354,15 +354,15 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 45 }
-          - { models: 2, points: 65 }
-          - { models: 3, points: 95 }
+          - { models: 1, points: 40 }
+          - { models: 2, points: 70 }
+          - { models: 3, points: 100 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 55 }
-          - { models: 2, points: 75 }
-          - { models: 3, points: 105 }
+          - { models: 1, points: 50 }
+          - { models: 2, points: 80 }
+          - { models: 3, points: 110 }
   - name: Raveners
     pricing:
       - range: "[1,2]"
@@ -499,11 +499,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 180 }
+          - { models: 1, points: 170 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 190 }
+          - { models: 1, points: 180 }
     wargear:
       - { item: Acid spray, points: 10 }
       - { item: Rupture cannon, points: 20 }
@@ -513,7 +513,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 3, points: 80 }
-          - { models: 6, points: 160 }
+          - { models: 6, points: 170 }
   - name: Venomthropes
     pricing:
       - range: "[1,)"
@@ -551,4 +551,4 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 3, points: 90 }
-          - { models: 6, points: 200 }
+          - { models: 6, points: 190 }
