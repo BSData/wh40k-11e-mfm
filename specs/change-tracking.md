@@ -11,8 +11,10 @@ audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
 4. `src/diff.ts` renders a **human-readable changelog** by comparing the two snapshots
    (old copy vs. freshly scraped). YAML git diffs bury the signal in long lists, so the
    changelog is built to be scannable:
-   - a **dated title** (`# MFM data update — <window>`, see *Update dates* below), also
-     used as the PR title;
+   - a **title** naming the MFM version and the days it covers — `MFM v1.3 update —
+     2026-08-26`, see *Naming an update* below — used verbatim as the `# ` heading, the
+     PR title and the commit subject, so a merged update is identifiable from `git log`
+     alone;
    - a **summary line** of totals (factions changed, new/removed, unit & detachment
      counts, point-change count with ▲/▼ split and net delta), plus a **per-faction
      table** when two or more factions changed;
@@ -33,18 +35,30 @@ MFM update adds and removes nothing — it reprices, re-tiers and edits — so c
 whole entities left both columns reading `—` on every row, and any faction whose changes
 were all re-tiered cost rows or attribute edits showed an all-`—` row above a section
 full of changes. The invariant: **a non-empty section is always visible in its row.**
-The one row with nothing countable — a faction listed purely for a version/parent bump —
-names that note in its Faction cell, and its section says so rather than sitting empty.
+A faction listed purely for a version/parent bump has nothing countable, so it names
+that note in its Faction cell, and its section says so rather than sitting empty. But an
+MFM revision bumps **every** faction at once, and a note carried by all of them is a
+fact about the update, not about any one faction: when it is universal it is stated once
+in the summary line (`all v1.2 → v1.3`) and left off the rows entirely. Tagging it onto
+only the rows that had nothing else to show would read as "these are the ones that
+bumped", which is exactly backwards. The per-faction sections keep their own note either
+way, so a section read on its own is still true.
 
 ### Folding
 Above 50 lines the per-faction detail is wrapped in a `<details>` block, so the title,
 summary and table stay on one screen. A full MFM revision runs to hundreds of bullets;
 the summary is the thing a reviewer reads first, and the detail is one click away.
 
-## Update dates
-The scrape PR is **sticky**: `mfm/auto-update` is force-pushed on every run, so an
-update is not a single day's event. Dates therefore come out of the data — the
-`firstSeen` stamps of the factions in the change set — never from "now":
+## Naming an update
+`updateTitle()` names an update `MFM v<version> update — <window>`. The version is the
+site-wide one from `meta.yaml` (`loadVersion()`); failing that, the version most
+factions carry — they move together, but a page can lag a revision behind, so the
+majority is the update's version rather than whichever faction happens to sort first,
+and ties go to the higher version so the answer doesn't depend on directory order.
+
+The window is the days. The scrape PR is **sticky**: `mfm/auto-update` is force-pushed
+on every run, so an update is not a single day's event. Dates therefore come out of the
+data — the `firstSeen` stamps of the factions in the change set — never from "now":
 `updateWindow()` takes the earliest and latest of them, and `windowLabel()` renders
 `2026-08-31`, or `2026-08-31 → 2026-09-02` once the PR has accumulated changes across
 several days.
@@ -90,7 +104,8 @@ The scrape GitHub Action:
 5. runs `tsx scripts/update-data-changelog.ts <old> data` to prepend the entry to
    `DATA-CHANGELOG.md`,
 6. if `data/` changed, opens (or updates) the sticky PR whose title and body are those
-   two outputs, and which commits the updated `DATA-CHANGELOG.md`,
+   two outputs — the title also being the commit subject, as `data: <title>` — and which
+   commits the updated `DATA-CHANGELOG.md`,
 7. if the scrape fails, opens an issue whose body includes the per-faction failures file.
 
 A human reviews and merges the PR — giving reviewable, auditable history of every

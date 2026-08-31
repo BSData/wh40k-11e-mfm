@@ -72,7 +72,7 @@ jobs:
           base: main
           title: ${{ steps.changelog.outputs.title }}
           body-path: /tmp/changelog.md
-          commit-message: 'data: update MFM points values'
+          commit-message: 'data: ${{ steps.changelog.outputs.title }}'
           labels: mfm-update
           delete-branch: true
 
