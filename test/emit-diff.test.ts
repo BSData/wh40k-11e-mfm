@@ -260,7 +260,7 @@ describe('update dates (the sticky PR keeps its start date)', () => {
   it('dates an update from the firstSeen stamps of the factions that changed', () => {
     const after = necrons('2026-08-31');
     reprice(after, 5);
-    expect(updateTitle([necrons('2026-06-17')], [after])).toBe('MFM data update — 2026-08-31');
+    expect(updateTitle([necrons('2026-06-17')], [after])).toBe('MFM v1.1 update — 2026-08-31');
   });
 
   it('widens to a range when a later scrape adds to the still-open PR', () => {
@@ -271,7 +271,7 @@ describe('update dates (the sticky PR keeps its start date)', () => {
     reprice(day1, 5);
     const day3 = asOrks(necrons('2026-09-02'));
     reprice(day3, -5);
-    expect(updateTitle(before, [day1, day3])).toBe('MFM data update — 2026-08-31 → 2026-09-02');
+    expect(updateTitle(before, [day1, day3])).toBe('MFM v1.1 update — 2026-08-31 → 2026-09-02');
     expect(updateWindow(before, [day1, day3])).toEqual({
       from: '2026-08-31',
       to: '2026-09-02',
@@ -283,7 +283,7 @@ describe('update dates (the sticky PR keeps its start date)', () => {
     const after = necrons('2026-08-31');
     reprice(after, 5);
     expect(updateTitle([necrons('2026-06-17'), orks], [after, orks])).toBe(
-      'MFM data update — 2026-08-31',
+      'MFM v1.1 update — 2026-08-31',
     );
   });
 
@@ -291,14 +291,14 @@ describe('update dates (the sticky PR keeps its start date)', () => {
     const after = necronsContent();
     reprice(after, 5);
     expect(updateTitle([necronsContent()], [after], { today: '2026-07-04' })).toBe(
-      'MFM data update — 2026-07-04',
+      'MFM v1.1 update — 2026-07-04',
     );
   });
 
   it('heads the changelog and the DATA-CHANGELOG entry with the same window', () => {
     const after = necrons('2026-08-31');
     reprice(after, 5);
-    expect(changelog([necrons('2026-06-17')], [after])).toContain('# MFM data update — 2026-08-31');
+    expect(changelog([necrons('2026-06-17')], [after])).toContain('# MFM v1.1 update — 2026-08-31');
     expect(changelogEntry([necrons('2026-06-17')], [after])).toContain(
       '## [2026-08-31] — MFM v1.1',
     );
@@ -383,5 +383,56 @@ describe('folding a long change list', () => {
     expect(log.indexOf('<details>')).toBeGreaterThan(log.indexOf('**1 faction changed**'));
     expect(log.indexOf('## Necrons')).toBeGreaterThan(log.indexOf('<details>'));
     expect(log.trimEnd().endsWith('</details>')).toBe(true);
+  });
+});
+
+describe('naming an update after its MFM version', () => {
+  const row = (log: string, name: string) =>
+    log.split('\n').find((l) => l.startsWith(`| ${name} `)) ?? '';
+
+  it("prefers meta.yaml's site-wide version over the factions' own", () => {
+    const after = necrons('2026-08-31');
+    reprice(after, 5);
+    expect(updateTitle([necrons('2026-06-17')], [after], { version: '1.3' })).toBe(
+      'MFM v1.3 update — 2026-08-31',
+    );
+  });
+
+  it('takes the version most factions carry when a page lags a revision behind', () => {
+    const before = [necronsContent(), asOrks(necronsContent())];
+    const moved = { ...necronsContent(), version: '1.3' };
+    reprice(moved, 5);
+    const lagging = { ...asOrks(necronsContent()), version: '1.2' };
+    const alsoMoved = { ...asOrks(necronsContent()), slug: 'tyranids', name: 'Tyranids' };
+    alsoMoved.version = '1.3';
+    expect(updateTitle(before, [moved, lagging, alsoMoved], { today: '2026-08-31' })).toBe(
+      'MFM v1.3 update — 2026-08-31',
+    );
+  });
+
+  it('states a version bump every faction shares once, not on each row', () => {
+    const before = [necronsContent(), asOrks(necronsContent())];
+    const n = { ...necronsContent(), version: '1.2' };
+    reprice(n, 5);
+    const o = { ...asOrks(necronsContent()), version: '1.2' };
+    reprice(o, -5);
+    const log = changelog(before, [n, o], { today: '2026-08-31' });
+    expect(log).toContain('**2 factions changed** · all v1.1 → v1.2 ·');
+    // Not repeated on the rows — that would read as "these are the ones that bumped".
+    expect(row(log, 'Necrons')).toBe('| Necrons | ~1 | — | ▲1 (+5) |');
+    expect(row(log, 'Orks')).toBe('| Orks | ~1 | — | ▼1 (-5) |');
+    // The sections keep it, so one read on its own is still true.
+    expect(log).toContain('## Necrons  _(v1.1 → v1.2)_');
+  });
+
+  it('keeps the note on the rows when only some factions bumped', () => {
+    const before = [necronsContent(), asOrks(necronsContent())];
+    const n = { ...necronsContent(), version: '1.2' };
+    reprice(n, 5);
+    const o = asOrks(necronsContent());
+    reprice(o, -5);
+    const log = changelog(before, [n, o], { today: '2026-08-31' });
+    expect(log).not.toContain('· all v1.1 → v1.2');
+    expect(row(log, 'Necrons')).toBe('| Necrons _(v1.1 → v1.2)_ | ~1 | — | ▲1 (+5) |');
   });
 });

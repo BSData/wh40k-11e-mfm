@@ -1,8 +1,8 @@
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { argv } from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { factionFromYaml } from './emit.js';
+import { factionFromYaml, metaFromYaml } from './emit.js';
 import type { Faction, FactionContent } from './model.js';
 
 /**
@@ -418,7 +418,14 @@ function summary(changes: FactionChanges[]): string {
   const net = sum((x) => x.net);
   const changed = sum((x) => x.changed);
 
+  // An MFM revision bumps every faction's version at once. That is a fact about the
+  // update, not about any one faction, so when the note is universal it belongs in this
+  // line — tagging it onto rows instead would read as "these are the ones that bumped".
+  const heads = changes.map((c) => c.head.join(', '));
+  const shared = heads.length > 1 && heads.every((h) => h !== '' && h === heads[0]) ? heads[0] : '';
+
   const clauses = [`**${changes.length} faction${changes.length === 1 ? '' : 's'} changed**`];
+  if (shared) clauses.push(`all ${shared}`);
   if (news) clauses.push(`${news} new`);
   if (gone) clauses.push(`${gone} removed`);
   if (uA || uR || uC) clauses.push(`units ${counts(uA, uR, uC)}`);
@@ -433,10 +440,12 @@ function summary(changes: FactionChanges[]): string {
   const rows = changes.map((c) => {
     const x = tallies(c);
     const mark = c.status === 'added' ? ' 🆕' : c.status === 'removed' ? ' 🗑' : '';
-    // Nothing countable moved, so the row would be all "—": name the version/parent
-    // note that put the faction in the list, so no row is left unexplained.
-    const bare = x.uA + x.uR + x.uC + x.dA + x.dR + x.dC === 0 && c.head.length > 0;
-    const name = `${mark ? `**${c.name}**` : c.name}${mark}${bare ? ` _(${c.head.join(', ')})_` : ''}`;
+    // A version/parent note the faction does *not* share with the rest is part of what
+    // changed for it, so it belongs in its row — a row with nothing else in it then has
+    // its reason for being listed. When every faction carries the same note it is in
+    // the summary line above instead, and repeating it on all 30 rows would be noise.
+    const note = !shared && c.head.length > 0 ? ` _(${c.head.join(', ')})_` : '';
+    const name = `${mark ? `**${c.name}**` : c.name}${mark}${note}`;
     return `| ${name} | ${counts(x.uA, x.uR, x.uC)} | ${counts(x.dA, x.dR, x.dC)} | ${pointsCell(x)} |`;
   });
   const table = `| Faction | Units | Detachments | Points |\n| --- | --- | --- | --- |\n${rows.join('\n')}`;
@@ -462,7 +471,7 @@ function fold(detail: string, factions: number): string {
 }
 
 /** Build a full Markdown changelog (the PR body) from two faction snapshots. */
-export function changelog(before: Snapshot[], after: Snapshot[], opts: DateOpts = {}): string {
+export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpts = {}): string {
   const changes = collectChanges(before, after);
   if (changes.length === 0) return 'No changes detected.\n';
   const detail = fold(changes.map(renderSection).join('\n\n'), changes.length);
@@ -470,11 +479,39 @@ export function changelog(before: Snapshot[], after: Snapshot[], opts: DateOpts 
   return `${head}\n\n${summary(changes)}\n\n---\n\n${detail}\n`;
 }
 
-// ---- Update dates -------------------------------------------------------------
+// ---- Naming an update: MFM version + dates ------------------------------------
 
-export interface DateOpts {
+export interface RenderOpts {
   /** Today, `YYYY-MM-DD` UTC. Defaults to the real clock; pass it for determinism. */
   today?: string;
+  /** The MFM version this update lands on; `loadVersion()` reads it from `meta.yaml`. */
+  version?: string;
+}
+
+/**
+ * The MFM version an update lands on: the site-wide one from `meta.yaml` when the
+ * caller has it, otherwise the version most factions carry (they move together, but a
+ * page can lag a revision behind — the majority is the update's version, not whichever
+ * faction happens to sort first). Ties go to the higher version, so the answer does not
+ * depend on directory order.
+ */
+function updateVersion(after: Snapshot[], opts: RenderOpts): string | undefined {
+  if (opts.version) return opts.version;
+  const tally = new Map<string, number>();
+  for (const f of after) tally.set(f.version, (tally.get(f.version) ?? 0) + 1);
+  const ranked = [...tally].sort((a, b) => b[1] - a[1] || b[0].localeCompare(a[0]));
+  return ranked[0]?.[0];
+}
+
+/** The site-wide MFM version recorded in a snapshot's `meta.yaml`, when it has one. */
+export function loadVersion(dir: string): string | undefined {
+  const path = join(dir, 'meta.yaml');
+  if (!existsSync(path)) return undefined;
+  try {
+    return metaFromYaml(readFileSync(path, 'utf8')).version;
+  } catch {
+    return undefined; // A snapshot without usable meta just goes unnamed.
+  }
 }
 
 /**
@@ -489,7 +526,7 @@ export interface DateOpts {
 export function updateWindow(
   before: Snapshot[],
   after: Snapshot[],
-  opts: DateOpts = {},
+  opts: RenderOpts = {},
 ): { from: string; to: string } {
   const today = opts.today ?? new Date().toISOString().slice(0, 10);
   const dates = collectChanges(before, after).map((c) => c.firstSeen ?? today);
@@ -504,9 +541,16 @@ export function updateWindow(
 export const windowLabel = (w: { from: string; to: string }): string =>
   w.from === w.to ? w.from : `${w.from} → ${w.to}`;
 
-/** The scrape PR's title — stable across re-scrapes, widening as days accrue. */
-export function updateTitle(before: Snapshot[], after: Snapshot[], opts: DateOpts = {}): string {
-  return `MFM data update — ${windowLabel(updateWindow(before, after, opts))}`;
+/**
+ * What to call this update: `MFM v1.3 update — 2026-08-26`. Used verbatim as the PR
+ * title, the changelog's `# ` heading and the commit subject, so the version and the
+ * days it covers are legible from the merged history alone. Stable across re-scrapes,
+ * widening as days accrue.
+ */
+export function updateTitle(before: Snapshot[], after: Snapshot[], opts: RenderOpts = {}): string {
+  const version = updateVersion(after, opts);
+  const what = version ? `MFM v${version} update` : 'MFM data update';
+  return `${what} — ${windowLabel(updateWindow(before, after, opts))}`;
 }
 
 // ---- Keep-a-Changelog entry (DATA-CHANGELOG.md) -------------------------------
@@ -522,7 +566,7 @@ export function updateTitle(before: Snapshot[], after: Snapshot[], opts: DateOpt
 export function changelogEntry(
   before: Snapshot[],
   after: Snapshot[],
-  opts: DateOpts & { date?: string } = {},
+  opts: RenderOpts & { date?: string } = {},
 ): string {
   const changes = collectChanges(before, after);
   if (changes.length === 0) return '';
@@ -572,7 +616,7 @@ export function changelogEntry(
     .join('\n\n');
 
   const date = opts.date ?? windowLabel(updateWindow(before, after, opts));
-  const version = after[0]?.version;
+  const version = updateVersion(after, opts);
   const heading = version ? `## [${date}] — MFM v${version}` : `## [${date}]`;
   return `${heading}\n\n${body}\n`;
 }
@@ -609,7 +653,9 @@ if (isMain) {
   }
   const before = loadFactionDir(beforeDir);
   const after = loadFactionDir(afterDir);
-  // The workflow feeds the title to the PR alongside the body; same window, one read.
-  if (titleFile) writeFileSync(titleFile, `${updateTitle(before, after)}\n`);
-  process.stdout.write(changelog(before, after));
+  const version = loadVersion(afterDir);
+  const opts = version ? { version } : {};
+  // The workflow feeds the title to the PR and the commit alongside the body.
+  if (titleFile) writeFileSync(titleFile, `${updateTitle(before, after, opts)}\n`);
+  process.stdout.write(changelog(before, after, opts));
 }
