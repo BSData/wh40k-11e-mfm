@@ -31,29 +31,46 @@ jobs:
           mkdir -p /tmp/old-data
           cp -r data/. /tmp/old-data/ 2>/dev/null || true
 
+      # The update PR is sticky: its branch is force-pushed on every run. Its data/
+      # already carries the `firstSeen` stamps of the changes it captured, so the
+      # scrape matches against it as well as against main — a run that finds nothing
+      # new re-stamps nothing and so reproduces the branch byte for byte (no
+      # force-push, and the PR keeps its start date), while a later change widens the
+      # reported date range instead of resetting it to today.
+      - name: Fetch the open update PR's dates
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: mfm/auto-update
+        run: |
+          mkdir -p /tmp/pr-data
+          if [ "$(gh pr view "$BRANCH" --json state --jq .state 2>/dev/null)" = "OPEN" ]; then
+            git fetch --depth=1 origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+            git archive "origin/$BRANCH" data | tar -x -C /tmp/pr-data --strip-components=1
+            echo "Matching dates against the open $BRANCH PR."
+          else
+            echo "No open update PR — dates start fresh."
+          fi
+
       - name: Scrape
-        run: pnpm scrape --report /tmp/failures.md
+        run: pnpm scrape --report /tmp/failures.md --dates-from /tmp/pr-data
 
       - name: Generate changelog
+        id: changelog
         run: |
-          {
-            echo "# MFM data update — $(date -u +%Y-%m-%d)"
-            echo
-            echo "_Automated Munitorum Field Manual scrape. The YAML diff is canonical; this is the readable summary._"
-            echo
-            pnpm exec tsx src/diff.ts /tmp/old-data data
-          } > /tmp/changelog.md
+          pnpm exec tsx src/diff.ts /tmp/old-data data --title-file /tmp/title.txt > /tmp/changelog.md
+          echo "title=$(cat /tmp/title.txt)" >> "$GITHUB_OUTPUT"
           cat /tmp/changelog.md
 
       - name: Update DATA-CHANGELOG.md
-        run: pnpm exec tsx scripts/update-data-changelog.ts /tmp/old-data data "$(date -u +%Y-%m-%d)"
+        run: pnpm exec tsx scripts/update-data-changelog.ts /tmp/old-data data
 
       - name: Open pull request on change
         uses: peter-evans/create-pull-request@v8
         with:
           branch: mfm/auto-update
           base: main
-          title: 'MFM data update'
+          title: ${{ steps.changelog.outputs.title }}
           body-path: /tmp/changelog.md
           commit-message: 'data: update MFM points values'
           labels: mfm-update

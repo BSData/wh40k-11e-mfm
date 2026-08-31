@@ -2,7 +2,14 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parse as parseYaml } from 'yaml';
-import { changelog, changelogEntry, failuresReport } from '../src/diff.js';
+import {
+  changelog,
+  changelogEntry,
+  failuresReport,
+  updateTitle,
+  updateWindow,
+  windowLabel,
+} from '../src/diff.js';
 import { factionFromYaml, factionToYaml, metaFromYaml, metaToYaml } from '../src/emit.js';
 import type { Faction, FactionContent } from '../src/model.js';
 import { parseFaction } from '../src/parse.js';
@@ -10,8 +17,9 @@ import { parseFaction } from '../src/parse.js';
 const fixture = (name: string) =>
   readFileSync(fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url)), 'utf8');
 
-const necronsContent = (): FactionContent =>
-  parseFaction(fixture('necrons.html'), 'necrons', 'Necrons');
+// Parsed once — the fixture is large and most tests want a fresh, mutable copy.
+const parsedNecrons = parseFaction(fixture('necrons.html'), 'necrons', 'Necrons');
+const necronsContent = (): FactionContent => structuredClone(parsedNecrons);
 const necrons = (firstSeen = '2026-06-17'): Faction => ({ ...necronsContent(), firstSeen });
 
 describe('emit', () => {
@@ -232,5 +240,148 @@ describe('failuresReport', () => {
 
   it('returns empty string when there are no failures', () => {
     expect(failuresReport([])).toBe('');
+  });
+});
+
+/** Reprice the first Necron Warriors cost option, in place. */
+const reprice = (f: FactionContent, by: number) => {
+  const opt = f.units.find((u) => u.name === 'Necron Warriors')?.pricing[0]?.costs[0];
+  if (opt) opt.points += by;
+};
+
+/** A second faction to diff against, so the summary renders its table. */
+const asOrks = <T extends FactionContent>(f: T): T => ({
+  ...structuredClone(f),
+  slug: 'orks',
+  name: 'Orks',
+});
+
+describe('update dates (the sticky PR keeps its start date)', () => {
+  it('dates an update from the firstSeen stamps of the factions that changed', () => {
+    const after = necrons('2026-08-31');
+    reprice(after, 5);
+    expect(updateTitle([necrons('2026-06-17')], [after])).toBe('MFM data update — 2026-08-31');
+  });
+
+  it('widens to a range when a later scrape adds to the still-open PR', () => {
+    const before = [necrons('2026-06-17'), asOrks(necrons('2026-06-17'))];
+    // The Necrons change was captured on the 31st and keeps that stamp; the Orks one
+    // landed two days later, while the same PR was still open.
+    const day1 = necrons('2026-08-31');
+    reprice(day1, 5);
+    const day3 = asOrks(necrons('2026-09-02'));
+    reprice(day3, -5);
+    expect(updateTitle(before, [day1, day3])).toBe('MFM data update — 2026-08-31 → 2026-09-02');
+    expect(updateWindow(before, [day1, day3])).toEqual({
+      from: '2026-08-31',
+      to: '2026-09-02',
+    });
+  });
+
+  it('ignores unchanged factions, however old their stamp', () => {
+    const orks = asOrks(necrons('2026-01-01'));
+    const after = necrons('2026-08-31');
+    reprice(after, 5);
+    expect(updateTitle([necrons('2026-06-17'), orks], [after, orks])).toBe(
+      'MFM data update — 2026-08-31',
+    );
+  });
+
+  it('falls back to today when the snapshots carry no stamps', () => {
+    const after = necronsContent();
+    reprice(after, 5);
+    expect(updateTitle([necronsContent()], [after], { today: '2026-07-04' })).toBe(
+      'MFM data update — 2026-07-04',
+    );
+  });
+
+  it('heads the changelog and the DATA-CHANGELOG entry with the same window', () => {
+    const after = necrons('2026-08-31');
+    reprice(after, 5);
+    expect(changelog([necrons('2026-06-17')], [after])).toContain('# MFM data update — 2026-08-31');
+    expect(changelogEntry([necrons('2026-06-17')], [after])).toContain(
+      '## [2026-08-31] — MFM v1.1',
+    );
+  });
+
+  it('renders identically on a re-scrape that finds nothing new', () => {
+    const after = necrons('2026-08-31');
+    reprice(after, 5);
+    const first = changelog([necrons('2026-06-17')], [after]);
+    // Same data a day later: no re-stamping, so nothing in the body moves either.
+    expect(changelog([necrons('2026-06-17')], [after], { today: '2026-09-01' })).toBe(first);
+  });
+
+  it('collapses a single-day window to one date', () => {
+    expect(windowLabel({ from: '2026-08-31', to: '2026-08-31' })).toBe('2026-08-31');
+    expect(windowLabel({ from: '2026-08-31', to: '2026-09-02' })).toBe('2026-08-31 → 2026-09-02');
+  });
+});
+
+describe('summary table (stays in sync with the sections)', () => {
+  const row = (log: string, name: string) =>
+    log.split('\n').find((l) => l.startsWith(`| ${name} `)) ?? '';
+
+  it('counts entities changed in place, not just whole ones added or removed', () => {
+    const before = [necronsContent(), asOrks(necronsContent())];
+    // Necrons: a cost option re-tiered (a row added and one removed, no delta at all).
+    const retiered = necronsContent();
+    const opt = retiered.units
+      .find((u) => u.name === 'Necron Warriors')
+      ?.pricing[0]?.costs.find((c) => c.models === 10);
+    if (opt) opt.models = 11;
+    // Orks: a detachment attribute edited, nothing repriced.
+    const edited = asOrks(necronsContent());
+    const det = edited.detachments[0];
+    if (det) det.dp = 9;
+
+    const log = changelog(before, [retiered, edited], { today: '2026-08-31' });
+    // Both sections are non-empty, so neither row may read "—" across the board.
+    expect(row(log, 'Necrons')).toBe('| Necrons | ~1 | — | — |');
+    expect(row(log, 'Orks')).toBe('| Orks | — | ~1 | — |');
+    expect(log).toContain('units ~1 · detachments ~1');
+  });
+
+  it('shows the net swing beside the ▲/▼ split', () => {
+    const before = [necronsContent(), asOrks(necronsContent())];
+    const up = necronsContent();
+    reprice(up, 20);
+    const down = asOrks(necronsContent());
+    reprice(down, -5);
+    const log = changelog(before, [up, down], { today: '2026-08-31' });
+    expect(row(log, 'Necrons')).toBe('| Necrons | ~1 | — | ▲1 (+20) |');
+    expect(row(log, 'Orks')).toBe('| Orks | ~1 | — | ▼1 (-5) |');
+  });
+
+  it('names the note behind a row that has nothing to count', () => {
+    const before = [necronsContent(), asOrks(necronsContent())];
+    const bumped = { ...necronsContent(), version: '1.2' };
+    const other = asOrks(necronsContent());
+    reprice(other, 5);
+    const log = changelog(before, [bumped, other], { today: '2026-08-31' });
+    expect(log).toContain('| Necrons _(v1.1 → v1.2)_ | — | — | — |');
+    // …and the section below it says so too, instead of a bare heading.
+    expect(log).toContain('## Necrons  _(v1.1 → v1.2)_\n\n_No unit or detachment changes._');
+  });
+});
+
+describe('folding a long change list', () => {
+  it('leaves a short list expanded', () => {
+    const after = necronsContent();
+    reprice(after, 5);
+    expect(changelog([necronsContent()], [after], { today: '2026-08-31' })).not.toContain(
+      '<details>',
+    );
+  });
+
+  it('folds a long list into a collapsed <details> block', () => {
+    const after = necronsContent();
+    for (const u of after.units) for (const t of u.pricing) for (const c of t.costs) c.points += 5;
+    const log = changelog([necronsContent()], [after], { today: '2026-08-31' });
+    expect(log).toContain('<summary><strong>Per-faction detail</strong> — 1 faction, ');
+    // The summary and table stay outside the fold; only the detail is hidden.
+    expect(log.indexOf('<details>')).toBeGreaterThan(log.indexOf('**1 faction changed**'));
+    expect(log.indexOf('## Necrons')).toBeGreaterThan(log.indexOf('<details>'));
+    expect(log.trimEnd().endsWith('</details>')).toBe(true);
   });
 });

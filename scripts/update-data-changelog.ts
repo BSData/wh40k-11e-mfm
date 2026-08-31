@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs';
-import { changelogEntry, loadFactionDir } from '../src/diff.js';
+import { changelogEntry, loadFactionDir, updateWindow, windowLabel } from '../src/diff.js';
 
 /**
  * Prepend a dated Keep-a-Changelog entry to DATA-CHANGELOG.md for the changes
@@ -9,7 +9,10 @@ import { changelogEntry, loadFactionDir } from '../src/diff.js';
  *   tsx scripts/update-data-changelog.ts <beforeDir> <afterDir> [date]
  *
  * No-ops (leaving the file untouched) when there are no changes, so an unchanged
- * scrape produces no diff. `date` defaults to today (UTC); pass it for determinism.
+ * scrape produces no diff. `date` defaults to the update's own window — the days the
+ * changed factions were first seen, which is stable across re-scrapes of the sticky
+ * update PR and widens to `from → to` when a later day adds more. Pass it explicitly
+ * to override.
  */
 
 const FILE = 'DATA-CHANGELOG.md';
@@ -21,8 +24,10 @@ if (!beforeDir || !afterDir) {
   process.exit(2);
 }
 
-const date = dateArg ?? new Date().toISOString().slice(0, 10);
-const entry = changelogEntry(loadFactionDir(beforeDir), loadFactionDir(afterDir), { date });
+const before = loadFactionDir(beforeDir);
+const after = loadFactionDir(afterDir);
+const date = dateArg ?? windowLabel(updateWindow(before, after));
+const entry = changelogEntry(before, after, { date });
 if (!entry) {
   console.log(`No data changes — ${FILE} left untouched.`);
   process.exit(0);

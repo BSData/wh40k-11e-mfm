@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { argv } from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -8,20 +8,30 @@ import type { Faction, FactionContent } from './model.js';
 /**
  * Turns two dataset snapshots (committed YAML vs. freshly scraped) into readable
  * change reports. One structured diff (`collectChanges`) feeds three renderers:
- *  - `changelog()` — the rich PR body (summary line, per-faction table, sections);
+ *  - `changelog()` — the rich PR body (dated title, summary line, per-faction table,
+ *    and the sections, folded away once they get long);
  *  - `changelogEntry()` — a Keep-a-Changelog release block for `DATA-CHANGELOG.md`;
  *  - `failuresReport()` — the per-faction parse errors for the workflow's issue.
+ * `updateWindow()`/`updateTitle()` date an update from the data itself, which is what
+ * lets the sticky update PR keep its start date across force-pushes.
  * All pure; the CLI at the bottom wires `changelog` to two directories. The YAML
  * git diff is the canonical record — these are the human-readable views of it.
  */
 
 const sgn = (n: number): string => (n >= 0 ? `+${n}` : `${n}`);
 
-/** "+2 -1", or "—" when nothing moved. */
-const plusMinus = (a: number, r: number): string => {
+/**
+ * A snapshot entry: parsed faction content plus the `firstSeen` stamp it carries when
+ * loaded from disk (bare parser output has none).
+ */
+type Snapshot = FactionContent & { firstSeen?: string };
+
+/** "+2 -1 ~7" — added / removed / changed in place — or "—" when nothing moved. */
+const counts = (added: number, removed: number, changed = 0): string => {
   const parts: string[] = [];
-  if (a) parts.push(`+${a}`);
-  if (r) parts.push(`-${r}`);
+  if (added) parts.push(`+${added}`);
+  if (removed) parts.push(`-${removed}`);
+  if (changed) parts.push(`~${changed}`);
   return parts.length > 0 ? parts.join(' ') : '—';
 };
 
@@ -89,6 +99,8 @@ interface Delta {
   display: string;
   from: number;
   to: number;
+  /** Owning unit/detachment, so the summary table can count entities touched. */
+  entity: string;
 }
 interface NumericDiff {
   deltas: Delta[];
@@ -110,7 +122,12 @@ function diffNumeric(
     const prev = before.get(key);
     if (!prev) addedRows.push(row);
     else if (prev.points !== row.points)
-      deltas.push({ display: row.display, from: prev.points, to: row.points });
+      deltas.push({
+        display: row.display,
+        entity: row.entity,
+        from: prev.points,
+        to: row.points,
+      });
   }
   for (const [key, row] of before) {
     if (!inBoth(row.entity) || after.has(key)) continue;
@@ -124,9 +141,18 @@ function diffNumeric(
   return { deltas, added: addedRows.sort(byName), removed: removedRows.sort(byName) };
 }
 
+/** A non-numeric attribute change, keyed by the entity it belongs to. */
+interface Attr {
+  entity: string;
+  text: string;
+}
+
 /** The structured diff of one faction, shared by all renderers. */
 interface FactionChanges {
+  slug: string;
   name: string;
+  /** The scraped snapshot's `firstSeen` — the day this content appeared. */
+  firstSeen?: string;
   status: 'added' | 'removed' | 'changed';
   unitCount: number; // for whole-faction added/removed
   detCount: number;
@@ -138,8 +164,8 @@ interface FactionChanges {
   costs: NumericDiff;
   wargear: NumericDiff;
   enh: NumericDiff;
-  unitOther: string[];
-  detOther: string[];
+  unitOther: Attr[];
+  detOther: Attr[];
 }
 
 const emptyDiff = (): NumericDiff => ({ deltas: [], added: [], removed: [] });
@@ -163,27 +189,28 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
   const enh = diffNumeric(enhRows(before), enhRows(after), bothDet);
 
   // Non-numeric attribute changes on entities present in both snapshots.
-  const unitOther: string[] = [];
+  const unitOther: Attr[] = [];
   const beforeUnits = new Map(before.units.map((u) => [u.name, u]));
   for (const u of after.units) {
     const p = beforeUnits.get(u.name);
     if (!p) continue;
-    if ((p.role ?? '') !== (u.role ?? ''))
-      unitOther.push(`${u.name} — role: ${p.role ?? '—'} → ${u.role ?? '—'}`);
+    const note = (text: string) => unitOther.push({ entity: u.name, text: `${u.name} — ${text}` });
+    if ((p.role ?? '') !== (u.role ?? '')) note(`role: ${p.role ?? '—'} → ${u.role ?? '—'}`);
     const pa = (p.attachTo ?? []).join(', ');
     const na = (u.attachTo ?? []).join(', ');
-    if (pa !== na) unitOther.push(`${u.name} — attaches to: ${pa || '—'} → ${na || '—'}`);
+    if (pa !== na) note(`attaches to: ${pa || '—'} → ${na || '—'}`);
   }
-  const detOther: string[] = [];
+  const detOther: Attr[] = [];
   const beforeDets = new Map(before.detachments.map((d) => [d.name, d]));
   for (const d of after.detachments) {
     const p = beforeDets.get(d.name);
     if (!p) continue;
-    if (p.dp !== d.dp) detOther.push(`${d.name} — DP: ${p.dp ?? '—'} → ${d.dp ?? '—'}`);
+    const note = (text: string) => detOther.push({ entity: d.name, text });
+    if (p.dp !== d.dp) note(`${d.name} — DP: ${p.dp ?? '—'} → ${d.dp ?? '—'}`);
     if ((p.objective ?? '') !== (d.objective ?? ''))
-      detOther.push(`${d.name} — objective: ${p.objective ?? '—'} → ${d.objective ?? '—'}`);
+      note(`${d.name} — objective: ${p.objective ?? '—'} → ${d.objective ?? '—'}`);
     if ((p.unique ?? '') !== (d.unique ?? ''))
-      detOther.push(`${d.name} — unique: ${p.unique ?? '—'} → ${d.unique ?? '—'}`);
+      note(`${d.name} — unique: ${p.unique ?? '—'} → ${d.unique ?? '—'}`);
     const pe = new Map(p.enhancements.map((e) => [e.name, e]));
     for (const e of d.enhancements) {
       const x = pe.get(e.name);
@@ -191,13 +218,13 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
       for (const grant of ['leaderTo', 'supportTo'] as const) {
         const pl = (x[grant] ?? []).join(', ');
         const nl = (e[grant] ?? []).join(', ');
-        if (pl !== nl)
-          detOther.push(`${d.name} · ${e.name} — ${grant}: ${pl || '—'} → ${nl || '—'}`);
+        if (pl !== nl) note(`${d.name} · ${e.name} — ${grant}: ${pl || '—'} → ${nl || '—'}`);
       }
     }
   }
 
   const changes: FactionChanges = {
+    slug: after.slug,
     name: after.name,
     status: 'changed',
     unitCount: after.units.length,
@@ -231,6 +258,7 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
 /** A faction that appeared or disappeared entirely. */
 function wholeFaction(f: FactionContent, status: 'added' | 'removed'): FactionChanges {
   return {
+    slug: f.slug,
     name: f.name,
     status,
     unitCount: f.units.length,
@@ -249,16 +277,18 @@ function wholeFaction(f: FactionContent, status: 'added' | 'removed'): FactionCh
 }
 
 /** All faction changes between two snapshots: changed/added (by name), then removed. */
-function collectChanges(before: FactionContent[], after: FactionContent[]): FactionChanges[] {
+function collectChanges(before: Snapshot[], after: Snapshot[]): FactionChanges[] {
   const beforeBySlug = new Map(before.map((f) => [f.slug, f]));
   const afterBySlug = new Map(after.map((f) => [f.slug, f]));
   const out: FactionChanges[] = [];
+  // Carried only when present: bare parser content (tests, one-off diffs) has no stamp.
+  const seen = (f: Snapshot) => (f.firstSeen ? { firstSeen: f.firstSeen } : {});
   for (const f of [...after].sort((a, b) => a.name.localeCompare(b.name))) {
     const prev = beforeBySlug.get(f.slug);
-    if (!prev) out.push(wholeFaction(f, 'added'));
+    if (!prev) out.push({ ...wholeFaction(f, 'added'), ...seen(f) });
     else {
       const c = computeChanges(prev, f);
-      if (c) out.push(c);
+      if (c) out.push({ ...c, ...seen(f) });
     }
   }
   for (const f of [...before].sort((a, b) => a.name.localeCompare(b.name))) {
@@ -282,17 +312,37 @@ const countDeltas = (deltas: Delta[]) => {
 
 const allDeltas = (c: FactionChanges) => [...c.costs.deltas, ...c.wargear.deltas, ...c.enh.deltas];
 
-/** Per-faction tallies used by the summary line and table. */
+/** How many distinct entities a set of numeric diffs and attribute notes touches. */
+const touched = (diffs: NumericDiff[], notes: Attr[]): number => {
+  const names = new Set<string>();
+  for (const d of diffs)
+    for (const row of [...d.deltas, ...d.added, ...d.removed]) names.add(row.entity);
+  for (const n of notes) names.add(n.entity);
+  return names.size;
+};
+
+/**
+ * Per-faction tallies used by the summary line and table. `uC`/`dC` count entities
+ * changed **in place** — repriced, re-tiered or edited — which is what a routine MFM
+ * update consists of. Without them the Units and Detachments columns only ever see
+ * whole entities appearing or disappearing, so they read "—" on every row, and a
+ * faction whose changes are all re-tiered cost rows or attribute edits gets an
+ * all-"—" row above a section full of changes. Every non-empty section must show up
+ * in its row.
+ */
 function tallies(c: FactionChanges) {
+  const still = { up: 0, down: 0, net: 0, changed: 0 };
   if (c.status === 'added')
-    return { uA: c.unitCount, uR: 0, dA: c.detCount, dR: 0, up: 0, down: 0, net: 0, changed: 0 };
+    return { uA: c.unitCount, uR: 0, uC: 0, dA: c.detCount, dR: 0, dC: 0, ...still };
   if (c.status === 'removed')
-    return { uA: 0, uR: c.unitCount, dA: 0, dR: c.detCount, up: 0, down: 0, net: 0, changed: 0 };
+    return { uA: 0, uR: c.unitCount, uC: 0, dA: 0, dR: c.detCount, dC: 0, ...still };
   return {
     uA: c.unitsAdded.length,
     uR: c.unitsRemoved.length,
+    uC: touched([c.costs, c.wargear], c.unitOther),
     dA: c.detsAdded.length,
     dR: c.detsRemoved.length,
+    dC: touched([c.enh], c.detOther),
     ...countDeltas(allDeltas(c)),
   };
 }
@@ -323,15 +373,33 @@ function renderSection(c: FactionChanges): string {
     inlineBlock('Units removed', c.unitsRemoved),
     listBlock('Unit points', numericItems(c.costs)),
     listBlock('Wargear', numericItems(c.wargear)),
-    listBlock('Unit changes', c.unitOther),
+    listBlock(
+      'Unit changes',
+      c.unitOther.map((o) => o.text),
+    ),
     inlineBlock('Detachments added', c.detsAdded),
     inlineBlock('Detachments removed', c.detsRemoved),
     listBlock('Enhancements', numericItems(c.enh)),
-    listBlock('Detachment changes', c.detOther),
+    listBlock(
+      'Detachment changes',
+      c.detOther.map((o) => o.text),
+    ),
   ].filter((b): b is string => b !== null);
   const heading = c.head.length > 0 ? `## ${c.name}  _(${c.head.join(', ')})_` : `## ${c.name}`;
-  return `${heading}\n\n${blocks.join('\n\n')}`;
+  // A version/parent bump alone leaves nothing to list — say so, rather than emitting
+  // a bare heading that reads like a section the renderer forgot to fill in.
+  const body = blocks.length > 0 ? blocks.join('\n\n') : '_No unit or detachment changes._';
+  return `${heading}\n\n${body}`;
 }
+
+/** The table's Points cell: "▲3 ▼1 (-25)", or "—" when nothing was repriced. */
+const pointsCell = (t: { up: number; down: number; net: number }): string => {
+  const arrows = [t.up ? `▲${t.up}` : '', t.down ? `▼${t.down}` : ''].filter(Boolean);
+  return arrows.length > 0 ? `${arrows.join(' ')} (${sgn(t.net)})` : '—';
+};
+
+const LEGEND =
+  '_`+` added · `-` removed · `~` changed in place · ▲ raised · ▼ cut (net in brackets)_';
 
 /** The summary line + per-faction table shown at the top of the changelog. */
 function summary(changes: FactionChanges[]): string {
@@ -341,8 +409,10 @@ function summary(changes: FactionChanges[]): string {
   const gone = changes.filter((c) => c.status === 'removed').length;
   const uA = sum((x) => x.uA);
   const uR = sum((x) => x.uR);
+  const uC = sum((x) => x.uC);
   const dA = sum((x) => x.dA);
   const dR = sum((x) => x.dR);
+  const dC = sum((x) => x.dC);
   const up = sum((x) => x.up);
   const down = sum((x) => x.down);
   const net = sum((x) => x.net);
@@ -351,8 +421,8 @@ function summary(changes: FactionChanges[]): string {
   const clauses = [`**${changes.length} faction${changes.length === 1 ? '' : 's'} changed**`];
   if (news) clauses.push(`${news} new`);
   if (gone) clauses.push(`${gone} removed`);
-  if (uA || uR) clauses.push(`units ${plusMinus(uA, uR)}`);
-  if (dA || dR) clauses.push(`detachments ${plusMinus(dA, dR)}`);
+  if (uA || uR || uC) clauses.push(`units ${counts(uA, uR, uC)}`);
+  if (dA || dR || dC) clauses.push(`detachments ${counts(dA, dR, dC)}`);
   if (changed)
     clauses.push(
       `${changed} point change${changed === 1 ? '' : 's'} (▲${up} ▼${down}, net ${sgn(net)} pts)`,
@@ -361,20 +431,82 @@ function summary(changes: FactionChanges[]): string {
 
   if (changes.length < 2) return line;
   const rows = changes.map((c) => {
-    if (c.status === 'added') return `| **${c.name}** | 🆕 new | | |`;
-    if (c.status === 'removed') return `| **${c.name}** | 🗑 removed | | |`;
     const x = tallies(c);
-    const pts = x.changed > 0 ? `▲${x.up} ▼${x.down}` : '—';
-    return `| ${c.name} | ${plusMinus(x.uA, x.uR)} | ${plusMinus(x.dA, x.dR)} | ${pts} |`;
+    const mark = c.status === 'added' ? ' 🆕' : c.status === 'removed' ? ' 🗑' : '';
+    // Nothing countable moved, so the row would be all "—": name the version/parent
+    // note that put the faction in the list, so no row is left unexplained.
+    const bare = x.uA + x.uR + x.uC + x.dA + x.dR + x.dC === 0 && c.head.length > 0;
+    const name = `${mark ? `**${c.name}**` : c.name}${mark}${bare ? ` _(${c.head.join(', ')})_` : ''}`;
+    return `| ${name} | ${counts(x.uA, x.uR, x.uC)} | ${counts(x.dA, x.dR, x.dC)} | ${pointsCell(x)} |`;
   });
-  return `${line}\n\n| Faction | Units | Detachments | Points |\n| --- | --- | --- | --- |\n${rows.join('\n')}`;
+  const table = `| Faction | Units | Detachments | Points |\n| --- | --- | --- | --- |\n${rows.join('\n')}`;
+  return `${line}\n\n${table}\n\n${LEGEND}`;
 }
 
-/** Build a full Markdown changelog from two faction snapshots keyed by slug. */
-export function changelog(before: FactionContent[], after: FactionContent[]): string {
+/** Detail bodies longer than this fold into a collapsed `<details>` block. */
+const FOLD_AFTER_LINES = 50;
+
+const BLURB =
+  '_Automated Munitorum Field Manual scrape. The YAML diff is canonical; this is the readable summary._';
+
+/**
+ * Collapse a long per-faction detail body behind a `<details>` toggle, so the summary
+ * and table stay readable without scrolling past hundreds of bullets. GitHub renders
+ * Markdown inside `<details>` as long as a blank line follows `<summary>`.
+ */
+function fold(detail: string, factions: number): string {
+  const lines = detail.split('\n').length;
+  if (lines <= FOLD_AFTER_LINES) return detail;
+  const what = `${factions} faction${factions === 1 ? '' : 's'}, ${lines} lines`;
+  return `<details>\n<summary><strong>Per-faction detail</strong> — ${what}</summary>\n\n${detail}\n\n</details>`;
+}
+
+/** Build a full Markdown changelog (the PR body) from two faction snapshots. */
+export function changelog(before: Snapshot[], after: Snapshot[], opts: DateOpts = {}): string {
   const changes = collectChanges(before, after);
   if (changes.length === 0) return 'No changes detected.\n';
-  return `${summary(changes)}\n\n---\n\n${changes.map(renderSection).join('\n\n')}\n`;
+  const detail = fold(changes.map(renderSection).join('\n\n'), changes.length);
+  const head = `# ${updateTitle(before, after, opts)}\n\n${BLURB}`;
+  return `${head}\n\n${summary(changes)}\n\n---\n\n${detail}\n`;
+}
+
+// ---- Update dates -------------------------------------------------------------
+
+export interface DateOpts {
+  /** Today, `YYYY-MM-DD` UTC. Defaults to the real clock; pass it for determinism. */
+  today?: string;
+}
+
+/**
+ * The days a change set spans, read from the `firstSeen` stamps of the factions in it.
+ * The scrape PR is sticky — a later run force-pushes onto the same branch — so an
+ * update is not a single day's event. Taking the dates from the data instead of
+ * stamping "now" on every run keeps the first day stable across re-scrapes that find
+ * nothing new, and widens to a range only once a later scrape genuinely adds
+ * something. Entries with no stamp (a removed faction, or bare parser content) count
+ * as today.
+ */
+export function updateWindow(
+  before: Snapshot[],
+  after: Snapshot[],
+  opts: DateOpts = {},
+): { from: string; to: string } {
+  const today = opts.today ?? new Date().toISOString().slice(0, 10);
+  const dates = collectChanges(before, after).map((c) => c.firstSeen ?? today);
+  if (dates.length === 0) return { from: today, to: today };
+  return {
+    from: dates.reduce((a, b) => (b < a ? b : a)),
+    to: dates.reduce((a, b) => (b > a ? b : a)),
+  };
+}
+
+/** `2026-08-31`, or `2026-08-31 → 2026-09-02` once a sticky PR spans several days. */
+export const windowLabel = (w: { from: string; to: string }): string =>
+  w.from === w.to ? w.from : `${w.from} → ${w.to}`;
+
+/** The scrape PR's title — stable across re-scrapes, widening as days accrue. */
+export function updateTitle(before: Snapshot[], after: Snapshot[], opts: DateOpts = {}): string {
+  return `MFM data update — ${windowLabel(updateWindow(before, after, opts))}`;
 }
 
 // ---- Keep-a-Changelog entry (DATA-CHANGELOG.md) -------------------------------
@@ -383,11 +515,14 @@ export function changelog(before: FactionContent[], after: FactionContent[]): st
  * One dated Keep-a-Changelog release block, items grouped under Added / Changed /
  * Removed and prefixed by faction. `''` when nothing changed. Prepended to
  * `DATA-CHANGELOG.md` by `scripts/update-data-changelog.ts` on each scrape PR.
+ * `date` defaults to the update's own window (see `updateWindow`), so a re-scrape
+ * that finds nothing new rewrites the file byte-identically instead of churning
+ * the heading to today and force-pushing the sticky PR.
  */
 export function changelogEntry(
-  before: FactionContent[],
-  after: FactionContent[],
-  opts: { date: string },
+  before: Snapshot[],
+  after: Snapshot[],
+  opts: DateOpts & { date?: string } = {},
 ): string {
   const changes = collectChanges(before, after);
   if (changes.length === 0) return '';
@@ -417,7 +552,7 @@ export function changelogEntry(
 
     for (const d of allDeltas(c))
       changedItems.push(`${fx}: ${d.display}: ${d.from} → ${d.to} pts (${sgn(d.to - d.from)})`);
-    for (const o of [...c.unitOther, ...c.detOther]) changedItems.push(`${fx}: ${o}`);
+    for (const o of [...c.unitOther, ...c.detOther]) changedItems.push(`${fx}: ${o.text}`);
     for (const h of c.head) changedItems.push(`${fx}: ${h}`);
   }
 
@@ -436,8 +571,9 @@ export function changelogEntry(
     .filter((b): b is string => b !== null)
     .join('\n\n');
 
+  const date = opts.date ?? windowLabel(updateWindow(before, after, opts));
   const version = after[0]?.version;
-  const heading = version ? `## [${opts.date}] — MFM v${version}` : `## [${opts.date}]`;
+  const heading = version ? `## [${date}] — MFM v${version}` : `## [${date}]`;
   return `${heading}\n\n${body}\n`;
 }
 
@@ -460,15 +596,20 @@ export function loadFactionDir(dir: string): Faction[] {
     .map((f) => factionFromYaml(readFileSync(join(dir, f), 'utf8')));
 }
 
-// CLI: tsx src/diff.ts <beforeDir> <afterDir>
+// CLI: tsx src/diff.ts <beforeDir> <afterDir> [--title-file <path>]
 const isMain = argv[1] !== undefined && fileURLToPath(import.meta.url) === argv[1];
 if (isMain) {
-  const [beforeDir, afterDir] = argv.slice(2);
-  if (!beforeDir || !afterDir) {
-    console.error('usage: tsx src/diff.ts <beforeDir> <afterDir>');
+  const args = argv.slice(2);
+  const at = args.indexOf('--title-file');
+  const titleFile = at === -1 ? undefined : args[at + 1];
+  const [beforeDir, afterDir] = at === -1 ? args : [...args.slice(0, at), ...args.slice(at + 2)];
+  if (!beforeDir || !afterDir || (at !== -1 && !titleFile)) {
+    console.error('usage: tsx src/diff.ts <beforeDir> <afterDir> [--title-file <path>]');
     process.exit(2);
   }
   const before = loadFactionDir(beforeDir);
   const after = loadFactionDir(afterDir);
+  // The workflow feeds the title to the PR alongside the body; same window, one read.
+  if (titleFile) writeFileSync(titleFile, `${updateTitle(before, after)}\n`);
   process.stdout.write(changelog(before, after));
 }
