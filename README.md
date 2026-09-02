@@ -30,6 +30,8 @@ pnpm scrape                    # full run, all factions (with Legends + notes)
   are caught in CI.
 - A daily GitHub Action re-scrapes, opens a PR on change, and files an issue if a parse
   breaks.
+- Set a `DISCORD_WEBHOOK_URL` repository secret and each update is also announced to that
+  channel — one message per update, edited as the update grows. No secret, no post.
 
 ## Tech
 TypeScript (Node 22, ESM) · cheerio · zod · `yaml` · Vitest · Biome · pnpm.

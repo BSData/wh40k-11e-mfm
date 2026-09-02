@@ -55,6 +55,13 @@ jobs:
       - name: Scrape
         run: pnpm scrape --report /tmp/failures.md --dates-from /tmp/pr-data
 
+      # The announcement is rendered after the PR step (it links to the PR), by which
+      # point create-pull-request has had the working tree. Keep it a copy.
+      - name: Snapshot scraped data
+        run: |
+          mkdir -p /tmp/new-data
+          cp -r data/. /tmp/new-data/
+
       - name: Generate changelog
         id: changelog
         run: |
@@ -66,6 +73,7 @@ jobs:
         run: pnpm exec tsx scripts/update-data-changelog.ts /tmp/old-data data
 
       - name: Open pull request on change
+        id: pr
         uses: peter-evans/create-pull-request@v8
         with:
           branch: mfm/auto-update
@@ -75,6 +83,49 @@ jobs:
           commit-message: 'data: ${{ steps.changelog.outputs.title }}'
           labels: mfm-update
           delete-branch: true
+
+      # One Discord message per MFM update, not per scrape run. The sticky PR is the
+      # update's identity, and the hidden marker on one of its comments is the whole of
+      # the state: no marker means post, a marker means edit that message, so a multi-day
+      # update reads as one announcement whose numbers widen — the way the PR title and
+      # the changelog entry already do. The PR lives exactly as long as the update does,
+      # so once it is merged and its branch deleted the next update starts clean. Delete
+      # the comment to force a repost. See specs/change-tracking.md.
+      #
+      # The marker, rather than create-pull-request's `created`/`updated` output, is what
+      # decides — which makes a failed post self-healing: it leaves no marker, so the next
+      # run posts instead of assuming yesterday succeeded.
+      #
+      # continue-on-error, deliberately: a Discord outage must not fail this job, because
+      # the failure handler below would then open a "the source markup may have drifted"
+      # issue, which would be a lie.
+      - name: Announce on Discord
+        if: steps.pr.outputs.pull-request-number != ''
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ steps.pr.outputs.pull-request-number }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Only the GitHub half lives here: read the marker, then record a new one. The
+          # post/edit decision is in src/discord.ts, where tests can drive it.
+          id=$(gh pr view "$PR" --json comments --jq '
+            [ .comments[].body
+              | select(test("<!-- discord-message-id: [0-9]+ -->"))
+              | capture("<!-- discord-message-id: (?<id>[0-9]+) -->").id
+            ] | last // ""')
+          # No --changelog-url: at announce time main has yesterday's changelog, not this
+          # update's. The PR body is the changelog, so that is what the embed links to.
+          posted=$(pnpm exec tsx src/discord.ts /tmp/old-data /tmp/new-data --send \
+            --message-id "$id" \
+            --pr-number "$PR" \
+            --pr-url "$REPO_URL/pull/$PR")
+          if [ -n "$posted" ]; then
+            gh pr comment "$PR" --body "Announced on Discord. <!-- discord-message-id: $posted -->"
+          fi
 
       - name: Open issue on failure
         if: failure()

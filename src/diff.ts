@@ -3,28 +3,31 @@ import { join } from 'node:path';
 import { argv } from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { factionFromYaml, metaFromYaml } from './emit.js';
-import type { Faction, FactionContent } from './model.js';
+import type { CostOption, Faction, FactionContent, PricingTier, Unit } from './model.js';
 
 /**
  * Turns two dataset snapshots (committed YAML vs. freshly scraped) into readable
- * change reports. One structured diff (`collectChanges`) feeds three renderers:
+ * change reports. One structured diff (`collectChanges`) feeds three renderers here:
  *  - `changelog()` — the rich PR body (dated title, summary line, per-faction table,
  *    and the sections, folded away once they get long);
  *  - `changelogEntry()` — a Keep-a-Changelog release block for `DATA-CHANGELOG.md`;
  *  - `failuresReport()` — the per-faction parse errors for the workflow's issue.
+ * and a fourth next door: `announcement()` in `src/discord.ts` builds the webhook embed
+ * from the same `collectChanges`/`tallies`/`totals` — exported for it, so the two
+ * summaries cannot drift.
  * `updateWindow()`/`updateTitle()` date an update from the data itself, which is what
  * lets the sticky update PR keep its start date across force-pushes.
  * All pure; the CLI at the bottom wires `changelog` to two directories. The YAML
  * git diff is the canonical record — these are the human-readable views of it.
  */
 
-const sgn = (n: number): string => (n >= 0 ? `+${n}` : `${n}`);
+export const sgn = (n: number): string => (n >= 0 ? `+${n}` : `${n}`);
 
 /**
  * A snapshot entry: parsed faction content plus the `firstSeen` stamp it carries when
  * loaded from disk (bare parser output has none).
  */
-type Snapshot = FactionContent & { firstSeen?: string };
+export type Snapshot = FactionContent & { firstSeen?: string };
 
 /** "+2 -1 ~7" — added / removed / changed in place — or "—" when nothing moved. */
 const counts = (added: number, removed: number, changed = 0): string => {
@@ -46,6 +49,10 @@ interface Numeric {
   entity: string; // owning unit or detachment, so we can skip lines of added/removed entities
 }
 
+/** What a cost option is *for* — "3 models", a named option, an add-on. */
+const costLabel = (c: CostOption): string =>
+  `${c.desc ?? `${c.models} model${c.models === 1 ? '' : 's'}`}${c.addon ? ' (add-on)' : ''}`;
+
 /** Unit cost options keyed by `unit · tier · option`. */
 function costRows(f: FactionContent): Map<string, Numeric> {
   const m = new Map<string, Numeric>();
@@ -53,7 +60,7 @@ function costRows(f: FactionContent): Map<string, Numeric> {
     for (const t of u.pricing) {
       const tier = u.pricing.length > 1 ? ` [${t.range}]` : '';
       for (const c of t.costs) {
-        const what = `${c.desc ?? `${c.models} model${c.models === 1 ? '' : 's'}`}${c.addon ? ' (add-on)' : ''}`;
+        const what = costLabel(c);
         m.set(`${u.name} ${t.range} ${what}`, {
           entity: u.name,
           points: c.points,
@@ -147,8 +154,58 @@ interface Attr {
   text: string;
 }
 
+/**
+ * A unit whose pricing **scheme** changed: GW added or dropped a requisition tier, so
+ * the same unit is now costed differently rather than gaining or losing anything.
+ *
+ * This has to be its own category. Cost rows are keyed by `unit · tier · option`, so a
+ * unit going from one tier to two rewrites every key it has — reported row by row, one
+ * such unit becomes a wall of removals and additions. In MFM v1.3 eight units picked up
+ * a `3rd+` threshold and produced 45 of the changelog's 70 add/remove lines, none of
+ * which was an addition or a removal in any sense a reader cares about. Collapsed here
+ * to one line per unit that says what actually happened, and filed under *changed*.
+ */
+interface Retier {
+  unit: string;
+  text: string;
+}
+
+/** Every option's points across a unit's tiers, in tier order, keyed by option label. */
+function pricesByOption(pricing: PricingTier[]): Map<string, number[]> {
+  const m = new Map<string, number[]>();
+  for (const t of pricing) {
+    for (const c of t.costs) {
+      const key = costLabel(c);
+      m.set(key, [...(m.get(key) ?? []), c.points]);
+    }
+  }
+  return m;
+}
+
+/** The tier ranges a unit is priced over — its pricing scheme's identity. */
+const tierRanges = (u: Unit): string[] => u.pricing.map((t) => t.range);
+
+/**
+ * One line describing a re-tiering: the tiers before and after, then each option's old
+ * price and its new price in every tier — `5 models: 275 → 280 / 310`.
+ */
+function describeRetier(before: Unit, after: Unit): Retier {
+  const old = pricesByOption(before.pricing);
+  const now = pricesByOption(after.pricing);
+  const rows: string[] = [];
+  for (const [label, points] of now) {
+    const was = old.get(label);
+    rows.push(`${label}: ${was ? was.join(' / ') : '—'} → ${points.join(' / ')}`);
+  }
+  for (const [label, points] of old) {
+    if (!now.has(label)) rows.push(`${label}: ${points.join(' / ')} → —`);
+  }
+  const tiers = `${tierRanges(before).join(' + ')} → ${tierRanges(after).join(' + ')}`;
+  return { unit: after.name, text: `${after.name} — re-tiered ${tiers}; ${rows.join(' · ')}` };
+}
+
 /** The structured diff of one faction, shared by all renderers. */
-interface FactionChanges {
+export interface FactionChanges {
   slug: string;
   name: string;
   /** The scraped snapshot's `firstSeen` — the day this content appeared. */
@@ -164,6 +221,7 @@ interface FactionChanges {
   costs: NumericDiff;
   wargear: NumericDiff;
   enh: NumericDiff;
+  retiered: Retier[];
   unitOther: Attr[];
   detOther: Attr[];
 }
@@ -184,7 +242,19 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
   const bothUnit = (n: string) => ou.has(n) && nu.has(n);
   const bothDet = (n: string) => od.has(n) && nd.has(n);
 
-  const costs = diffNumeric(costRows(before), costRows(after), bothUnit);
+  // Units whose tier structure changed are described whole, and kept out of the cost
+  // diff — every one of their keys moved, so row-by-row it is all noise.
+  const beforeByName = new Map(before.units.map((u) => [u.name, u]));
+  const retiered: Retier[] = [];
+  for (const u of after.units) {
+    const p = beforeByName.get(u.name);
+    if (p && tierRanges(p).join('|') !== tierRanges(u).join('|'))
+      retiered.push(describeRetier(p, u));
+  }
+  const wasRetiered = new Set(retiered.map((r) => r.unit));
+  const costUnit = (n: string) => bothUnit(n) && !wasRetiered.has(n);
+
+  const costs = diffNumeric(costRows(before), costRows(after), costUnit);
   const wargear = diffNumeric(wargearRows(before), wargearRows(after), bothUnit);
   const enh = diffNumeric(enhRows(before), enhRows(after), bothDet);
 
@@ -237,6 +307,7 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     costs,
     wargear,
     enh,
+    retiered,
     unitOther,
     detOther,
   };
@@ -249,6 +320,7 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     changes.detsRemoved.length === 0 &&
     unitOther.length === 0 &&
     detOther.length === 0 &&
+    retiered.length === 0 &&
     [costs, wargear, enh].every(
       (d) => d.deltas.length === 0 && d.added.length === 0 && d.removed.length === 0,
     );
@@ -271,13 +343,14 @@ function wholeFaction(f: FactionContent, status: 'added' | 'removed'): FactionCh
     costs: emptyDiff(),
     wargear: emptyDiff(),
     enh: emptyDiff(),
+    retiered: [],
     unitOther: [],
     detOther: [],
   };
 }
 
 /** All faction changes between two snapshots: changed/added (by name), then removed. */
-function collectChanges(before: Snapshot[], after: Snapshot[]): FactionChanges[] {
+export function collectChanges(before: Snapshot[], after: Snapshot[]): FactionChanges[] {
   const beforeBySlug = new Map(before.map((f) => [f.slug, f]));
   const afterBySlug = new Map(after.map((f) => [f.slug, f]));
   const out: FactionChanges[] = [];
@@ -313,8 +386,8 @@ const countDeltas = (deltas: Delta[]) => {
 const allDeltas = (c: FactionChanges) => [...c.costs.deltas, ...c.wargear.deltas, ...c.enh.deltas];
 
 /** How many distinct entities a set of numeric diffs and attribute notes touches. */
-const touched = (diffs: NumericDiff[], notes: Attr[]): number => {
-  const names = new Set<string>();
+const touched = (diffs: NumericDiff[], notes: Attr[], also: string[] = []): number => {
+  const names = new Set<string>(also);
   for (const d of diffs)
     for (const row of [...d.deltas, ...d.added, ...d.removed]) names.add(row.entity);
   for (const n of notes) names.add(n.entity);
@@ -330,7 +403,7 @@ const touched = (diffs: NumericDiff[], notes: Attr[]): number => {
  * all-"—" row above a section full of changes. Every non-empty section must show up
  * in its row.
  */
-function tallies(c: FactionChanges) {
+export function tallies(c: FactionChanges) {
   const still = { up: 0, down: 0, net: 0, changed: 0 };
   if (c.status === 'added')
     return { uA: c.unitCount, uR: 0, uC: 0, dA: c.detCount, dR: 0, dC: 0, ...still };
@@ -339,12 +412,55 @@ function tallies(c: FactionChanges) {
   return {
     uA: c.unitsAdded.length,
     uR: c.unitsRemoved.length,
-    uC: touched([c.costs, c.wargear], c.unitOther),
+    uC: touched(
+      [c.costs, c.wargear],
+      c.unitOther,
+      c.retiered.map((r) => r.unit),
+    ),
     dA: c.detsAdded.length,
     dR: c.detsRemoved.length,
     dC: touched([c.enh], c.detOther),
     ...countDeltas(allDeltas(c)),
   };
+}
+
+/**
+ * Every faction's tallies summed — the numbers a whole-update summary is built from.
+ * Shared by the changelog's summary line and the Discord embed so the two can't report
+ * different totals for the same update.
+ */
+export function totals(changes: FactionChanges[]) {
+  const t = changes.map(tallies);
+  const sum = (pick: (x: (typeof t)[number]) => number) => t.reduce((s, x) => s + pick(x), 0);
+  return {
+    factions: changes.length,
+    news: changes.filter((c) => c.status === 'added').length,
+    gone: changes.filter((c) => c.status === 'removed').length,
+    uA: sum((x) => x.uA),
+    uR: sum((x) => x.uR),
+    uC: sum((x) => x.uC),
+    dA: sum((x) => x.dA),
+    dR: sum((x) => x.dR),
+    dC: sum((x) => x.dC),
+    up: sum((x) => x.up),
+    down: sum((x) => x.down),
+    net: sum((x) => x.net),
+    changed: sum((x) => x.changed),
+    retiered: changes.reduce((n, c) => n + c.retiered.length, 0),
+  };
+}
+
+/**
+ * The version/parent note every changed faction carries, when they all carry the same
+ * one — `v1.2 → v1.3`. An MFM revision bumps every faction at once, so a universal note
+ * is a fact about the update rather than about any one faction, and is stated once
+ * instead of on every row. `''` when the notes differ, are absent, or only one faction
+ * changed (nothing for it to be universal across).
+ */
+export function sharedHead(changes: FactionChanges[]): string {
+  const heads = changes.map((c) => c.head.join(', '));
+  const first = heads[0] ?? '';
+  return heads.length > 1 && heads.every((h) => h !== '' && h === first) ? first : '';
 }
 
 // ---- Rich changelog (PR body) -------------------------------------------------
@@ -372,6 +488,10 @@ function renderSection(c: FactionChanges): string {
     inlineBlock('Units added', c.unitsAdded),
     inlineBlock('Units removed', c.unitsRemoved),
     listBlock('Unit points', numericItems(c.costs)),
+    listBlock(
+      'Unit pricing re-tiered',
+      c.retiered.map((r) => r.text),
+    ),
     listBlock('Wargear', numericItems(c.wargear)),
     listBlock(
       'Unit changes',
@@ -403,26 +523,11 @@ const LEGEND =
 
 /** The summary line + per-faction table shown at the top of the changelog. */
 function summary(changes: FactionChanges[]): string {
-  const t = changes.map(tallies);
-  const sum = (pick: (x: (typeof t)[number]) => number) => t.reduce((s, x) => s + pick(x), 0);
-  const news = changes.filter((c) => c.status === 'added').length;
-  const gone = changes.filter((c) => c.status === 'removed').length;
-  const uA = sum((x) => x.uA);
-  const uR = sum((x) => x.uR);
-  const uC = sum((x) => x.uC);
-  const dA = sum((x) => x.dA);
-  const dR = sum((x) => x.dR);
-  const dC = sum((x) => x.dC);
-  const up = sum((x) => x.up);
-  const down = sum((x) => x.down);
-  const net = sum((x) => x.net);
-  const changed = sum((x) => x.changed);
-
+  const { news, gone, uA, uR, uC, dA, dR, dC, up, down, net, changed, retiered } = totals(changes);
   // An MFM revision bumps every faction's version at once. That is a fact about the
   // update, not about any one faction, so when the note is universal it belongs in this
   // line — tagging it onto rows instead would read as "these are the ones that bumped".
-  const heads = changes.map((c) => c.head.join(', '));
-  const shared = heads.length > 1 && heads.every((h) => h !== '' && h === heads[0]) ? heads[0] : '';
+  const shared = sharedHead(changes);
 
   const clauses = [`**${changes.length} faction${changes.length === 1 ? '' : 's'} changed**`];
   if (shared) clauses.push(`all ${shared}`);
@@ -434,6 +539,7 @@ function summary(changes: FactionChanges[]): string {
     clauses.push(
       `${changed} point change${changed === 1 ? '' : 's'} (▲${up} ▼${down}, net ${sgn(net)} pts)`,
     );
+  if (retiered) clauses.push(`${retiered} unit${retiered === 1 ? '' : 's'} re-tiered`);
   const line = clauses.join(' · ');
 
   if (changes.length < 2) return line;
@@ -596,6 +702,7 @@ export function changelogEntry(
 
     for (const d of allDeltas(c))
       changedItems.push(`${fx}: ${d.display}: ${d.from} → ${d.to} pts (${sgn(d.to - d.from)})`);
+    for (const r of c.retiered) changedItems.push(`${fx}: ${r.text}`);
     for (const o of [...c.unitOther, ...c.detOther]) changedItems.push(`${fx}: ${o.text}`);
     for (const h of c.head) changedItems.push(`${fx}: ${h}`);
   }

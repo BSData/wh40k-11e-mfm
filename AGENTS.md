@@ -17,6 +17,9 @@ the AI angle is purely this maintenance harness.
 - `src/browser.ts` — Playwright: Legends units + "Welcome…" notes (not in HTTP).
 - `src/emit.ts` — deterministic YAML in/out.
 - `src/diff.ts` — changelog from two snapshots (pure `changelog()` + CLI).
+- `src/discord.ts` — the same diff as a Discord webhook payload, plus the one call that
+  sends it (`announcement()` pure, `send()` tested against a stub server). One message
+  per update, edited as the update grows.
 - `src/cli.ts` — the pipeline entrypoint (`pnpm scrape`).
 - `specs/` — **source-of-truth prose**. Change the spec first, then the code.
 - `test/` — Vitest + saved HTML `fixtures/`. Tests run offline.
@@ -32,6 +35,7 @@ pnpm scrape --faction necrons  # live run for one faction (with Legends) → dat
 pnpm scrape --no-legends       # fast HTTP-only run, no browser/Legends
 pnpm scrape                    # full run, all factions → data/ + meta.yaml
 pnpm refresh-fixtures          # re-download test fixtures after a site change
+pnpm exec tsx src/discord.ts <before> <after>   # preview the Discord payload (--send posts it)
 pnpm check                     # Biome lint+format
 pnpm typecheck                 # tsc --noEmit
 ```
