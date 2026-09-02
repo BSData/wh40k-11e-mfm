@@ -1,7 +1,7 @@
 name: Space Wolves
 slug: space-wolves
-version: "1.3"
-firstSeen: 2026-08-26
+version: "1.4"
+firstSeen: 2026-09-02
 parent: Space Marines
 detachments:
   - name: 1st Company Task Force
@@ -796,6 +796,13 @@ units:
       - Sword Brethren Squad
       - Tactical Squad
       - Wolf Guard
+    supportTo:
+      - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
+      - Infernus Squad
+      - Intercessor Squad
+      - Sternguard Veteran Squad
+      - Vanguard Veteran Squad
   - name: Krom Dragongaze
     pricing:
       - range: "[1,)"

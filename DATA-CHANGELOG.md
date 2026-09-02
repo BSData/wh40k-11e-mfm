@@ -7,6 +7,262 @@ git history remains the canonical, line-level record — this is the readable su
 
 <!-- BEGIN ENTRIES -->
 
+## [2026-09-02] — MFM v1.4
+
+### Added
+- **Astra Militarum**: new unit Ciaphas Cain
+- **Orks**: Blitz Brigade · Boss Boomer (Upgrade) (10 pts)
+- **Orks**: Blitz Brigade · Targetin’ Gizmos (Upgrade) (10 pts)
+- **Orks**: Bully Boyz · Tellyporta Boss (20 pts)
+- **Orks**: Bully Boyz · Wimp-kickaz (Upgrade) (15 pts)
+- **Orks**: Da Big Hunt · It Came from da Drops (20 pts)
+- **Orks**: Dread Mob · Cybork Boosta (10 pts)
+- **Orks**: Dread Mob · Dreadherder (20 pts)
+- **Orks**: Ghazghkull Thraka — 1 model (300 pts)
+- **Orks**: Green Tide · 'Ardboyz (Upgrade) (25 pts)
+- **Orks**: Kult Of Speed · Competitive Streak (15 pts)
+- **Orks**: Kult Of Speed · Smoky Gubbinz (Upgrade) (10 pts)
+- **Orks**: Meganobz — Killsaw (5 pts)
+- **Orks**: Meganobz — Twin Killsaws (5 pts)
+- **Orks**: Nobz — Paired Krumpas (5 pts)
+- **Orks**: Taktikal Brigade · Kill Kommanda (20 pts)
+- **Orks**: Taktikal Brigade · Throat-slittas (Upgrade) (15 pts)
+- **Orks**: War Horde · Da Boss is Watchin' (25 pts)
+- **Orks**: new detachment Brute Bosses
+- **Orks**: new detachment Flyboyz
+- **Orks**: new detachment Madcap Meks
+- **Orks**: new detachment Runt Swarm
+- **Orks**: new detachment Shoota Boyz
+- **Orks**: new detachment Wreckas
+- **Orks**: new detachment Wurrband
+- **Orks**: new unit Gunwagon
+- **Orks**: new unit Nazdreg
+- **Orks**: new unit Rukkatrukk Squigbuggies
+- **Orks**: new unit Runtherd
+- **Orks**: new unit Wartrakks
+
+### Changed
+- **Adepta Sororitas**: v1.3 → v1.4
+- **Adeptus Custodes**: v1.3 → v1.4
+- **Adeptus Mechanicus**: v1.3 → v1.4
+- **Aeldari**: v1.3 → v1.4
+- **Astra Militarum**: v1.3 → v1.4
+- **Black Templars**: Apothecary — supportTo: Assault Intercessor Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad → Assault Intercessor Squad, Bladeguard Veteran Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad
+- **Black Templars**: Judiciar — supportTo: — → Assault Intercessor Squad, Bladeguard Veteran Squad, Infernus Squad, Intercessor Squad, Sternguard Veteran Squad
+- **Black Templars**: v1.3 → v1.4
+- **Blood Angels**: Apothecary — supportTo: Assault Intercessor Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad → Assault Intercessor Squad, Bladeguard Veteran Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad
+- **Blood Angels**: Judiciar — supportTo: — → Assault Intercessor Squad, Bladeguard Veteran Squad, Infernus Squad, Intercessor Squad, Sternguard Veteran Squad
+- **Blood Angels**: v1.3 → v1.4
+- **Chaos Daemons**: v1.3 → v1.4
+- **Chaos Knights**: v1.3 → v1.4
+- **Chaos Space Marines**: v1.3 → v1.4
+- **Chaos Titan Legions**: v1.3 → v1.4
+- **Dark Angels**: Apothecary — supportTo: Assault Intercessor Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad → Assault Intercessor Squad, Bladeguard Veteran Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad
+- **Dark Angels**: Judiciar — supportTo: — → Assault Intercessor Squad, Bladeguard Veteran Squad, Infernus Squad, Intercessor Squad, Sternguard Veteran Squad
+- **Dark Angels**: v1.3 → v1.4
+- **Death Guard**: v1.3 → v1.4
+- **Deathwatch**: Apothecary — supportTo: Assault Intercessor Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad → Assault Intercessor Squad, Bladeguard Veteran Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad
+- **Deathwatch**: Judiciar — supportTo: — → Assault Intercessor Squad, Bladeguard Veteran Squad, Infernus Squad, Intercessor Squad, Sternguard Veteran Squad
+- **Deathwatch**: v1.3 → v1.4
+- **Drukhari**: v1.3 → v1.4
+- **Emperor’s Children**: v1.3 → v1.4
+- **Genestealer Cults**: v1.3 → v1.4
+- **Grey Knights**: v1.3 → v1.4
+- **Imperial Agents**: v1.3 → v1.4
+- **Imperial Knights**: v1.3 → v1.4
+- **Leagues of Votann**: v1.3 → v1.4
+- **Necrons**: v1.3 → v1.4
+- **Orks**: Bannernob — 1 model: 50 → 35 pts (-15)
+- **Orks**: Bannernob — supportTo: Boyz, Breaka Boyz, Burna Boyz, Flash Gitz, Lootas, Nobz, Tankbustas → Boyz, Nobz
+- **Orks**: Battlewagon — re-tiered [1,) → [1,2] + [3,); 1 model: 145 → 150 / 160
+- **Orks**: Beast Snagga Boyz — re-tiered [1,) → [1,3] + [4,); 10 models: 90 → 85 / 95 · 20 models: 170 → 170 / 180
+- **Orks**: Beastboss On Squigosaur — leaderTo: Squighog Boyz → —
+- **Orks**: Beastboss On Squigosaur — re-tiered [1,) → [1,2] + [3,); 1 model: 95 → 140 / 155
+- **Orks**: Beastboss — 1 model: 80 → 85 pts (+5)
+- **Orks**: Big Mek Dakkarig — re-tiered [1,) → [1,2] + [3,); 1 model: 115 → 135 / 145
+- **Orks**: Big Mek In Mega Armour — 1 model: 80 → 90 pts (+10)
+- **Orks**: Big Mek In Mega Armour — leaderTo: Meganobz → Meganobz, Mek Gunz
+- **Orks**: Big Mek With Shokk Attack Gun — 1 model [[1,1]]: 70 → 95 pts (+25)
+- **Orks**: Big Mek With Shokk Attack Gun — 1 model [[2,)]: 80 → 105 pts (+25)
+- **Orks**: Big Mek With Shokk Attack Gun — leaderTo: Boyz, Breaka Boyz, Lootas, Mek Gunz, Nobz, Tankbustas → Boyz, Mek Gunz, Nobz, Tankbustas
+- **Orks**: Big Mek — leaderTo: Boyz, Breaka Boyz, Lootas, Mek Gunz, Nobz, Tankbustas → Boyz, Breaka Boyz, Flash Gitz, Mek Gunz, Nobz, Tankbustas
+- **Orks**: Big Mek — re-tiered [1,) → [1,2] + [3,); 1 model: 70 → 85 / 95
+- **Orks**: Bigboss — 1 model: 55 → 50 pts (-5)
+- **Orks**: Bigboss — leaderTo: Boyz, Breaka Boyz, Nobz → —
+- **Orks**: Bigboss — supportTo: — → Boyz, Breaka Boyz, Nobz
+- **Orks**: Blitz Brigade — DP: 2 → 1
+- **Orks**: Blitz Brigade — objectives: RECONNAISSANCE → TAKE AND HOLD
+- **Orks**: Blitz Brigade — unique: Wagons → —
+- **Orks**: Blitza-Bommer — 1 model: 105 → 115 pts (+10)
+- **Orks**: Boss Snikrot — 1 model: 75 → 80 pts (+5)
+- **Orks**: Boyz — 10 models [[1,3]]: 75 → 90 pts (+15)
+- **Orks**: Boyz — 10 models [[4,)]: 85 → 100 pts (+15)
+- **Orks**: Boyz — 20 models [[1,3]]: 160 → 180 pts (+20)
+- **Orks**: Boyz — 20 models [[4,)]: 170 → 190 pts (+20)
+- **Orks**: Breaka Boyz — 6 models [[1,2]]: 125 → 135 pts (+10)
+- **Orks**: Breaka Boyz — 6 models [[3,)]: 135 → 145 pts (+10)
+- **Orks**: Bully Boyz — DP: 2 → 1
+- **Orks**: Burna-Bommer — 1 model: 115 → 125 pts (+10)
+- **Orks**: Da Big Hunt · Glory Hog: 30 → 25 pts (-5)
+- **Orks**: Da Big Hunt — DP: 2 → 1
+- **Orks**: Deff Dread — 1 model [[1,2]]: 110 → 130 pts (+20)
+- **Orks**: Deff Dread — 1 model [[3,)]: 120 → 140 pts (+20)
+- **Orks**: Deffkilla Wartrike — 1 model: 70 → 80 pts (+10)
+- **Orks**: Deffkoptas — re-tiered [1,) → [1,2] + [3,); 3 models: 75 → 80 / 90 · 6 models: 140 → 160 / 170
+- **Orks**: Dread Mob — DP: 2 → 1
+- **Orks**: Dread Mob — objectives: PRIORITY ASSETS → PURGE THE FOE
+- **Orks**: Flash Gitz — 10 models [[1,2]]: 150 → 210 pts (+60)
+- **Orks**: Flash Gitz — 10 models [[3,)]: 160 → 240 pts (+80)
+- **Orks**: Flash Gitz — 5 models [[1,2]]: 75 → 105 pts (+30)
+- **Orks**: Flash Gitz — 5 models [[3,)]: 85 → 135 pts (+50)
+- **Orks**: Gargantuan Squiggoth — 1 model [[1,1]]: 440 → 500 pts (+60)
+- **Orks**: Gargantuan Squiggoth — 1 model [[2,)]: 490 → 550 pts (+60)
+- **Orks**: Ghazghkull Thraka — leaderTo: Boyz, Breaka Boyz, Meganobz, Nobz → —
+- **Orks**: Gorkanaut — 1 model [[1,2]]: 255 → 325 pts (+70)
+- **Orks**: Gorkanaut — 1 model [[3,)]: 275 → 355 pts (+80)
+- **Orks**: Green Tide · Ferocious Show Off: 10 → 15 pts (+5)
+- **Orks**: Green Tide — DP: 3 → 1
+- **Orks**: Hunta Rig — re-tiered [1,) → [1,2] + [3,); 1 model: 125 → 165 / 175
+- **Orks**: Kill Rig — re-tiered [1,) → [1,2] + [3,); 1 model: 145 → 175 / 185
+- **Orks**: Kill Tank — 1 model: 295 → 300 pts (+5)
+- **Orks**: Killa Kans — 3 models [[1,2]]: 120 → 130 pts (+10)
+- **Orks**: Killa Kans — 3 models [[3,)]: 130 → 150 pts (+20)
+- **Orks**: Killa Kans — 6 models [[1,2]]: 240 → 260 pts (+20)
+- **Orks**: Killa Kans — 6 models [[3,)]: 250 → 280 pts (+30)
+- **Orks**: Kommandos — 10 models: 120 → 125 pts (+5)
+- **Orks**: Kult Of Speed — DP: 2 → 1
+- **Orks**: Kult Of Speed — objectives: DISRUPTION → RECONNAISSANCE
+- **Orks**: Meganobz — 2 models [[1,2]]: 60 → 75 pts (+15)
+- **Orks**: Meganobz — 2 models [[3,)]: 80 → 115 pts (+35)
+- **Orks**: Meganobz — 3 models [[1,2]]: 90 → 110 pts (+20)
+- **Orks**: Meganobz — 3 models [[3,)]: 110 → 150 pts (+40)
+- **Orks**: Meganobz — 5 models [[1,2]]: 150 → 185 pts (+35)
+- **Orks**: Meganobz — 5 models [[3,)]: 170 → 225 pts (+55)
+- **Orks**: Meganobz — 6 models [[1,2]]: 180 → 225 pts (+45)
+- **Orks**: Meganobz — 6 models [[3,)]: 200 → 265 pts (+65)
+- **Orks**: Mek Gunz — 1 model [[1,2]]: 45 → 55 pts (+10)
+- **Orks**: Mek Gunz — 1 model [[3,)]: 55 → 65 pts (+10)
+- **Orks**: Mek Gunz — 2 models [[1,2]]: 90 → 110 pts (+20)
+- **Orks**: Mek Gunz — 2 models [[3,)]: 100 → 120 pts (+20)
+- **Orks**: Mek Gunz — 3 models [[1,2]]: 135 → 165 pts (+30)
+- **Orks**: Mek Gunz — 3 models [[3,)]: 145 → 175 pts (+30)
+- **Orks**: Mek — 1 model: 55 → 45 pts (-10)
+- **Orks**: Mek — leaderTo: Boyz, Lootas, Mek Gunz, Nobz, Tankbustas → —
+- **Orks**: Mek — supportTo: — → Boyz, Flash Gitz, Mek Gunz, Nobz, Tankbustas
+- **Orks**: Morkanaut — 1 model [[1,2]]: 270 → 345 pts (+75)
+- **Orks**: Morkanaut — 1 model [[3,)]: 290 → 375 pts (+85)
+- **Orks**: Mozrog Skragbad — 1 model: 125 → 170 pts (+45)
+- **Orks**: Mozrog Skragbad — leaderTo: Squighog Boyz → —
+- **Orks**: Nobz — 10 models [[1,2]]: 210 → 250 pts (+40)
+- **Orks**: Nobz — 10 models [[3,)]: 220 → 280 pts (+60)
+- **Orks**: Nobz — 5 models [[1,2]]: 105 → 125 pts (+20)
+- **Orks**: Nobz — 5 models [[3,)]: 115 → 155 pts (+40)
+- **Orks**: Painboss — leaderTo: Beast Snagga Boyz → —
+- **Orks**: Painboss — re-tiered [1,) → [1,2] + [3,); 1 model: 70 → 60 / 70
+- **Orks**: Painboss — supportTo: — → Beast Snagga Boyz, Squighog Boyz
+- **Orks**: Painboy — 1 model: 90 → 45 pts (-45)
+- **Orks**: Painboy — supportTo: Boyz, Breaka Boyz, Burna Boyz, Lootas, Nobz, Tankbustas → Boyz, Breaka Boyz, Flash Gitz, Nobz, Tankbustas
+- **Orks**: Squighog Boyz — re-tiered [1,) → [1,2] + [3,); 4 models: 140 → 140 / 160 · 8 models: 270 → 280 / 300
+- **Orks**: Stompa — 1 model [[1,1]]: 600 → 700 pts (+100)
+- **Orks**: Stompa — 1 model [[2,)]: 700 → 800 pts (+100)
+- **Orks**: Stormboyz — 10 models: 130 → 140 pts (+10)
+- **Orks**: Stormboyz — 5 models: 65 → 70 pts (+5)
+- **Orks**: Taktikal Brigade — objectives: RECONNAISSANCE → TAKE AND HOLD
+- **Orks**: Tankbustas — 6 models [[1,2]]: 125 → 145 pts (+20)
+- **Orks**: Tankbustas — 6 models [[3,)]: 135 → 155 pts (+20)
+- **Orks**: Trukk — 1 model [[1,3]]: 55 → 60 pts (+5)
+- **Orks**: Trukk — 1 model [[4,)]: 65 → 70 pts (+5)
+- **Orks**: War Horde · Follow Me Ladz: 25 → 20 pts (-5)
+- **Orks**: War Horde · Headwoppa’s Killchoppa: 20 → 15 pts (-5)
+- **Orks**: War Horde · Kunnin’ But Brutal: 15 → 20 pts (+5)
+- **Orks**: War Horde — objectives: TAKE AND HOLD → TAKE AND HOLD, PURGE THE FOE
+- **Orks**: Warbikers — 3 models: 60 → 75 pts (+15)
+- **Orks**: Warbikers — 6 models: 120 → 140 pts (+20)
+- **Orks**: Warboss In Mega Armour — re-tiered [1,) → [1,2] + [3,); 1 model: 80 → 125 / 140
+- **Orks**: Warboss On Warbike — leaderTo: Nobz On Warbikes, Skorchas, Warbikers, Warbuggies → Warbikers
+- **Orks**: Warboss — 1 model: 85 → 100 pts (+15)
+- **Orks**: Warbuggies — 1 model: 40 → 70 pts (+30)
+- **Orks**: Warbuggies — 2 models: 80 → 130 pts (+50)
+- **Orks**: Wazbom Blastajet — re-tiered [1,) → [1,2] + [3,); 1 model: 165 → 215 / 235
+- **Orks**: Wazdakka Gutsmek — 1 model: 175 → 200 pts (+25)
+- **Orks**: Weirdboy — leaderTo: Boyz, Breaka Boyz → —
+- **Orks**: Weirdboy — supportTo: — → Beast Snagga Boyz, Boyz
+- **Orks**: Zodgrod Wortsnagga — 1 model: 80 → 50 pts (-30)
+- **Orks**: v1.3 → v1.4
+- **Space Marines**: Apothecary — supportTo: Assault Intercessor Squad, Assault Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad, Vanguard Veteran Squad → Assault Intercessor Squad, Assault Squad, Bladeguard Veteran Squad, Crusader Squad, Deathwatch Veterans, Decimus Kill Team, Desolation Squad, Devastator Squad, Fortis Kill Team, Hellblaster Squad, Infernus Squad, Inner Circle Companions, Intercessor Squad, Sternguard Veteran Squad, Sword Brethren Squad, Tactical Squad, Vanguard Veteran Squad
+- **Space Marines**: Judiciar — supportTo: — → Assault Intercessor Squad, Bladeguard Veteran Squad, Infernus Squad, Intercessor Squad, Sternguard Veteran Squad, Vanguard Veteran Squad
+- **Space Marines**: v1.3 → v1.4
+- **Space Wolves**: Judiciar — supportTo: — → Assault Intercessor Squad, Bladeguard Veteran Squad, Infernus Squad, Intercessor Squad, Sternguard Veteran Squad, Vanguard Veteran Squad
+- **Space Wolves**: v1.3 → v1.4
+- **Thousand Sons**: v1.3 → v1.4
+- **Titan Legions**: v1.3 → v1.4
+- **Tyranids**: v1.3 → v1.4
+- **T’au Empire**: v1.3 → v1.4
+- **World Eaters**: v1.3 → v1.4
+
+### Removed
+- **Orks**: removed Battlewagon — ard case (was 15 pts)
+- **Orks**: removed Blitz Brigade · Blitzkaptin (was 25 pts)
+- **Orks**: removed Blitz Brigade · Runnin’ Boots (was 10 pts)
+- **Orks**: removed Blitz Brigade · Supercharged Squig Oil (was 10 pts)
+- **Orks**: removed Blitz Brigade · Tuff Git (was 5 pts)
+- **Orks**: removed Bully Boyz · Big Gob (was 20 pts)
+- **Orks**: removed Bully Boyz · Da Biggest Boss (was 15 pts)
+- **Orks**: removed Bully Boyz · Tellyporta (was 25 pts)
+- **Orks**: removed Bully Boyz · ’Eadstompa (was 10 pts)
+- **Orks**: removed Da Big Hunt · Proper Killy (was 15 pts)
+- **Orks**: removed Da Big Hunt · Skrag Every Stash! (was 25 pts)
+- **Orks**: removed Da Big Hunt · Surly as a Squiggoth (was 20 pts)
+- **Orks**: removed Dread Mob · Gitfinder Gogglez (was 10 pts)
+- **Orks**: removed Dread Mob · Press It Fasta! (was 35 pts)
+- **Orks**: removed Dread Mob · Smoky Gubbinz (was 15 pts)
+- **Orks**: removed Dread Mob · Supa-glowy Fing (was 20 pts)
+- **Orks**: removed Ghazghkull Thraka — 2 models (was 235 pts)
+- **Orks**: removed Green Tide · Bloodthirsty Belligerence (was 15 pts)
+- **Orks**: removed Green Tide · Brutal But Kunnin’ (was 25 pts)
+- **Orks**: removed Green Tide · Raucous Warcaller (was 20 pts)
+- **Orks**: removed Gretchin — 1 Runtherd, 10 Gretchin (was 45 pts)
+- **Orks**: removed Gretchin — 1 Runtherd, 20 Gretchin (was 85 pts)
+- **Orks**: removed Gretchin — 2 Runtherd, 20 Gretchin (was 90 pts)
+- **Orks**: removed Kult Of Speed · Fasta Than Yooz (was 35 pts)
+- **Orks**: removed Kult Of Speed · Speed Makes Right (was 25 pts)
+- **Orks**: removed Kult Of Speed · Squig-hide Tyres (was 15 pts)
+- **Orks**: removed Kult Of Speed · Wazblasta (was 10 pts)
+- **Orks**: removed Taktikal Brigade · Mork’s Kunnin’ (was 20 pts)
+- **Orks**: removed Taktikal Brigade · Slippery Git (was 15 pts)
+- **Orks**: removed War Horde · Supa-Cybork Body (was 15 pts)
+- **Orks**: removed detachment Equatorial Hordes
+- **Orks**: removed detachment Freebooter Krew
+- **Orks**: removed detachment More Dakka!
+- **Orks**: removed detachment Rollin' Deff
+- **Orks**: removed detachment Speedwaaagh!
+- **Orks**: removed unit Attack Fighta
+- **Orks**: removed unit Big Gunz
+- **Orks**: removed unit Big Mek On Warbike
+- **Orks**: removed unit Big Mek With Kustom Force Field
+- **Orks**: removed unit Boomdakka Snazzwagon
+- **Orks**: removed unit Chinork Warkopta
+- **Orks**: removed unit Da Red Gobbo
+- **Orks**: removed unit Deff Rolla Battle Fortress
+- **Orks**: removed unit Deffkoptas With Big Shootas
+- **Orks**: removed unit Fighta-Bommer
+- **Orks**: removed unit Grot Bomm Launcha
+- **Orks**: removed unit Kannonwagon
+- **Orks**: removed unit Kill Krusha
+- **Orks**: removed unit Kustom Boosta-Blasta
+- **Orks**: removed unit Mega Dread
+- **Orks**: removed unit Megatrakk Scrapjet
+- **Orks**: removed unit Meka-Dread
+- **Orks**: removed unit Nobz On Warbikes
+- **Orks**: removed unit Painboy On Warbike
+- **Orks**: removed unit Rukkatrukk Squigbuggy
+- **Orks**: removed unit Shokkjump Dragsta
+- **Orks**: removed unit Skorchas
+- **Orks**: removed unit Squiggoth
+- **Orks**: removed unit Ufthak Blackhawk
+- **Orks**: removed unit Wartrakk
+- **Orks**: removed unit Wurrboy
+
 ## [2026-09-02] — Schema change
 
 Field shapes only; no points, names or dates changed.
