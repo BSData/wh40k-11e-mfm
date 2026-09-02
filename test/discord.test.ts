@@ -251,16 +251,35 @@ const payload: DiscordMessage = {
 };
 
 describe('send', () => {
-  it('posts when the update has no message yet, and returns the id to record', async () => {
-    const stub = await stubDiscord(() => ({ status: 200, body: '{"id":"999"}' }));
+  it('posts when the update has no message yet, and returns the id and permalink', async () => {
+    const stub = await stubDiscord((call) =>
+      call.method === 'GET'
+        ? { status: 200, body: '{"guild_id":"77","channel_id":"88"}' }
+        : { status: 200, body: '{"id":"999","channel_id":"88"}' },
+    );
     running = stub.server;
 
-    await expect(send(stub.hook, payload)).resolves.toBe('999');
-    expect(stub.calls).toHaveLength(1);
-    expect(stub.calls[0]?.method).toBe('POST');
+    await expect(send(stub.hook, payload)).resolves.toEqual({
+      id: '999',
+      url: 'https://discord.com/channels/77/88/999',
+    });
+    const post = stub.calls.find((c) => c.method === 'POST');
     // wait=true is what makes Discord return the id at all.
-    expect(stub.calls[0]?.path).toContain('wait=true');
-    expect(JSON.parse(stub.calls[0]?.body ?? '{}')).toEqual(payload);
+    expect(post?.path).toContain('wait=true');
+    expect(JSON.parse(post?.body ?? '{}')).toEqual(payload);
+  });
+
+  it('still reports the message when the permalink cannot be resolved', async () => {
+    // The guild is only on the webhook object; without it there is no link to build.
+    const stub = await stubDiscord((call) =>
+      call.method === 'GET'
+        ? { status: 403, body: '{"message":"Missing Access"}' }
+        : { status: 200, body: '{"id":"999"}' },
+    );
+    running = stub.server;
+
+    // The announcement matters more than its link, so the id still comes back.
+    await expect(send(stub.hook, payload)).resolves.toEqual({ id: '999' });
   });
 
   it('edits the existing message on a later day, and records nothing new', async () => {
@@ -282,8 +301,11 @@ describe('send', () => {
     running = stub.server;
 
     // The announcement survives a message someone deleted in Discord.
-    await expect(send(stub.hook, payload, '555')).resolves.toBe('1000');
-    expect(stub.calls.map((c) => c.method)).toEqual(['PATCH', 'POST']);
+    await expect(send(stub.hook, payload, '555')).resolves.toMatchObject({ id: '1000' });
+    expect(stub.calls.filter((c) => c.method !== 'GET').map((c) => c.method)).toEqual([
+      'PATCH',
+      'POST',
+    ]);
   });
 
   it('throws when Discord rejects the post, rather than reporting success', async () => {

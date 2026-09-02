@@ -307,10 +307,40 @@ export function webhookUrl(raw: string): string {
   return `${url.origin}${url.pathname.replace(/\/+$/, '')}`;
 }
 
+/** A message this run posted: the id to edit next time, and a link a person can click. */
+export interface Posted {
+  id: string;
+  /** `https://discord.com/channels/…`; absent if the webhook wouldn't say where it posts. */
+  url?: string;
+}
+
 /**
- * Post `message`, or edit `messageId` when the update already has one. Returns the id of
- * a **newly posted** message — which the caller records so tomorrow's run edits it —
- * and `undefined` when an existing message was edited instead.
+ * The permalink for a message this webhook just posted. The execute response carries the
+ * channel it landed in (a thread's, when posting into one) but never the guild, and the
+ * webhook object is the only place that is exposed — hence the extra GET. Best-effort:
+ * the announcement is worth more than its link, so a failure here returns nothing rather
+ * than throwing.
+ */
+async function messageLink(
+  hook: string,
+  message: { id: string; channel_id?: string },
+): Promise<string | undefined> {
+  try {
+    const res = await fetch(hook);
+    if (!res.ok) return undefined;
+    const hookInfo = (await res.json()) as { guild_id?: string; channel_id?: string };
+    const channel = message.channel_id ?? hookInfo.channel_id;
+    if (!hookInfo.guild_id || !channel) return undefined;
+    return `https://discord.com/channels/${hookInfo.guild_id}/${channel}/${message.id}`;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Post `message`, or edit `messageId` when the update already has one. Returns the
+ * **newly posted** message — which the caller records so tomorrow's run edits it — and
+ * `undefined` when an existing message was edited instead.
  *
  * Takes an already-validated base URL, so a test can point it at a local server.
  */
@@ -318,7 +348,7 @@ export async function send(
   hook: string,
   message: DiscordMessage,
   messageId?: string,
-): Promise<string | undefined> {
+): Promise<Posted | undefined> {
   const headers = { 'content-type': 'application/json' };
   const body = JSON.stringify(message);
 
@@ -336,9 +366,13 @@ export async function send(
   if (!res.ok) {
     throw new Error(`Discord rejected the post: HTTP ${res.status} ${await res.text()}`);
   }
-  const posted = (await res.json()) as { id?: string };
+  const posted = (await res.json()) as { id?: string; channel_id?: string };
   if (!posted.id) throw new Error('Discord returned no message id');
-  return posted.id;
+  const url = await messageLink(hook, {
+    id: posted.id,
+    ...(posted.channel_id ? { channel_id: posted.channel_id } : {}),
+  });
+  return { id: posted.id, ...(url ? { url } : {}) };
 }
 
 // CLI: tsx src/discord.ts <beforeDir> <afterDir> [--send] [--message-id <id>]
@@ -390,8 +424,9 @@ if (isMain) {
     if (!raw) console.error('DISCORD_WEBHOOK_URL is not set — skipping the announcement.');
     else {
       const posted = await send(webhookUrl(raw), message, messageId || undefined);
-      if (posted) process.stdout.write(`${posted}\n`);
-      console.error(posted ? `Posted message ${posted}.` : `Edited message ${messageId}.`);
+      // "<id> [permalink]": the id drives the next run's edit, the link is for a reader.
+      if (posted) process.stdout.write(`${posted.id}${posted.url ? ` ${posted.url}` : ''}\n`);
+      console.error(posted ? `Posted message ${posted.id}.` : `Edited message ${messageId}.`);
     }
   }
 }

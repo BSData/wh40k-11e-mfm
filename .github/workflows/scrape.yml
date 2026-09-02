@@ -124,7 +124,11 @@ jobs:
             --pr-number "$PR" \
             --pr-url "$REPO_URL/pull/$PR")
           if [ -n "$posted" ]; then
-            gh pr comment "$PR" --body "Announced on Discord. <!-- discord-message-id: $posted -->"
+            # "<id> [permalink]": $1 drives the next run's edit, $2 is the clickable link
+            # (absent if the webhook wouldn't say which guild and channel it posts to).
+            set -- $posted
+            gh pr comment "$PR" \
+              --body "Announced on Discord: ${2:-link unavailable} <!-- discord-message-id: $1 -->"
           fi
 
       - name: Open issue on failure

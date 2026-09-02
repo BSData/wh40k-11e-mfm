@@ -153,6 +153,12 @@ So a multi-day update is one Discord message whose contents widen as its window 
 matching the PR title and the `DATA-CHANGELOG.md` entry, which do the same thing. Day
 one's thin summary doesn't stay wrong.
 
+That comment also carries the message's **permalink**, so a reviewer on the PR can open
+the announcement rather than being handed an opaque id. Building it needs the guild and
+channel, which the execute response never returns, so the sender fetches the webhook
+object once per post to read them. It is best-effort: a failure there costs the link, not
+the announcement, and the marker is still written.
+
 The PR is the natural carrier because it lives exactly as long as the update does: once
 merged and its branch deleted, the next update opens a fresh PR with no marker and gets a
 fresh message. No PAT, no cache, and no state committed to `data/` — which has to stay
