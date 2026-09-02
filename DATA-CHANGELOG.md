@@ -7,6 +7,18 @@ git history remains the canonical, line-level record — this is the readable su
 
 <!-- BEGIN ENTRIES -->
 
+## [2026-09-02] — Schema change
+
+Field shapes only; no points, names or dates changed.
+
+### Changed
+- **Units**: `role` + `attachTo` replaced by `leaderTo` and `supportTo`. MFM v1.4 gave the
+  Judiciar a Leader list of twelve units *and* a Support list of five, which a single
+  role/list pair cannot express. The names match `enhancement.leaderTo`/`supportTo`, which
+  already had this shape.
+- **Detachments**: `objective` (string or null) replaced by `objectives` (a list, possibly
+  empty). v1.4's Orks `WAR HORDE` grants two Force Dispositions.
+
 ## [2026-08-26] — MFM v1.3
 
 ### Added
