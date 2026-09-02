@@ -436,3 +436,95 @@ describe('naming an update after its MFM version', () => {
     expect(row(log, 'Necrons')).toBe('| Necrons _(v1.1 → v1.2)_ | ~1 | — | ▲1 (+5) |');
   });
 });
+
+describe('re-tiered pricing (a scheme change, not an add plus a remove)', () => {
+  /**
+   * GW's recurring MFM move: a unit priced over one tier gains a requisition threshold,
+   * so the same unit is now costed `1st–2nd` / `3rd+`. Every cost row is keyed by its
+   * tier, so row-by-row this reads as a wall of removals and additions — in v1.3, eight
+   * such units produced 45 of the changelog's 70 add/remove lines.
+   */
+  const retier = (bump = 30): FactionContent => {
+    const after = necronsContent();
+    const warriors = after.units.find((u) => u.name === 'Necron Warriors');
+    const base = warriors?.pricing[0];
+    if (!warriors || !base) throw new Error('fixture changed');
+    warriors.pricing = [
+      { ...base, range: '[1,2]', label: 'Your 1st To 2nd Units Cost' },
+      {
+        ...base,
+        range: '[3,)',
+        label: 'Your 3rd + Units Cost',
+        costs: base.costs.map((c) => ({ ...c, points: c.points + bump })),
+      },
+    ];
+    return after;
+  };
+
+  it('reports one line instead of a row-per-tier wall of additions and removals', () => {
+    const log = changelog([necronsContent()], [retier()]);
+    expect(log).toContain('**Unit pricing re-tiered:**');
+    expect(log).toContain('Necron Warriors — re-tiered [1,) → [1,2] + [3,)');
+    // The old prices and both new tiers are all still there, per option.
+    expect(log).toContain('10 models: 80 → 80 / 110');
+    // …and none of it is dressed up as an addition or a removal.
+    expect(log).not.toContain('➕');
+    expect(log).not.toContain('➖');
+  });
+
+  it('counts the unit as changed, and says how many were re-tiered', () => {
+    const log = changelog([necronsContent()], [retier()]);
+    expect(log).toContain('units ~1');
+    expect(log).toContain('1 unit re-tiered');
+  });
+
+  it('files it under Changed in DATA-CHANGELOG.md, never Added or Removed', () => {
+    const entry = changelogEntry([necronsContent()], [retier()], { date: '2026-08-31' });
+    expect(entry).toContain('### Changed');
+    expect(entry).not.toContain('### Added');
+    expect(entry).not.toContain('### Removed');
+    expect(entry).toContain('**Necrons**: Necron Warriors — re-tiered');
+  });
+
+  it('still reports a plain reprice normally when the tiers are untouched', () => {
+    const after = necronsContent();
+    const opt = after.units
+      .find((u) => u.name === 'Necron Warriors')
+      ?.pricing[0]?.costs.find((c) => c.models === 10);
+    if (opt) opt.points += 10;
+    const log = changelog([necronsContent()], [after]);
+    expect(log).toContain('Necron Warriors — 10 models: 80 → 90 pts (**+10**)');
+    expect(log).not.toContain('re-tiered');
+  });
+
+  it('handles tiers collapsing back to one, the reverse of the v1.3 move', () => {
+    const log = changelog([retier()], [necronsContent()]);
+    expect(log).toContain('Necron Warriors — re-tiered [1,2] + [3,) → [1,)');
+    expect(log).toContain('10 models: 80 / 110 → 80');
+    expect(log).not.toContain('➕');
+    expect(log).not.toContain('➖');
+  });
+});
+
+describe('the changed-unit count covers everything a unit can change', () => {
+  const withRod = (points: number): FactionContent => {
+    const f = necronsContent();
+    const tech = f.units.find((u) => u.name === 'Technomancer');
+    if (!tech) throw new Error('fixture changed');
+    tech.wargear = [{ item: 'Test Rod', points }];
+    return f;
+  };
+
+  it('counts a unit whose only change is a wargear price', () => {
+    expect(changelog([withRod(10)], [withRod(15)])).toContain('units ~1');
+  });
+
+  it('counts a unit once when its cost and its wargear both moved', () => {
+    const after = withRod(15);
+    const tech = after.units.find((u) => u.name === 'Technomancer');
+    const cost = tech?.pricing[0]?.costs[0];
+    if (cost) cost.points += 5;
+    // Two changes, one unit — the tally is of units touched, not of changes.
+    expect(changelog([withRod(10)], [after])).toContain('units ~1');
+  });
+});
