@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: Biosanctic Broodsurge
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Purestrain
     enhancements:
       - { name: Alien Majesty, points: 15 }
@@ -14,7 +15,8 @@ detachments:
       - { name: Predatory Instincts, points: 20 }
   - name: Brood Brothers Auxilia
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Adaptive Reprisal, points: 15 }
       - { name: Fire-point Commander, points: 10 }
@@ -22,7 +24,8 @@ detachments:
       - { name: The Hero Returned, points: 20 }
   - name: Final Day
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Enraptured Damnation, points: 10 }
       - { name: Inhuman Integration, points: 20 }
@@ -30,13 +33,15 @@ detachments:
       - { name: Vanguard Tyrant, points: 25 }
   - name: Heroes Of The Uprising
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Contraband Munitions, points: 20 }
       - { name: Gene-tailored Toxins, points: 35 }
   - name: Host Of Ascension
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Hosts
     enhancements:
       - { name: A Chink In Their Armour, points: 20 }
@@ -45,7 +50,8 @@ detachments:
       - { name: Prowling Agitant, points: 15 }
   - name: Outlander Claw
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Assault Commando, points: 15 }
       - { name: Cartographic Data-leech, points: 10 }
@@ -53,14 +59,16 @@ detachments:
       - { name: Starfall Shells, points: 10 }
   - name: Purestrain Broodswarm
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     unique: Purestrain
     enhancements:
       - { name: Mark of the Star Children (Upgrade), points: 30 }
       - { name: Talons of the Sire, points: 15 }
   - name: Xenocreed Congregation
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Deeds that Speak to the Masses, points: 25 }
       - { name: Denunciator of Tyrants, points: 25 }
@@ -68,7 +76,8 @@ detachments:
       - { name: Incendiary Inspiration, points: 15 }
   - name: Xenocult Masses
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     unique: Hosts
     enhancements:
       - { name: Devious Disguises (Upgrade), points: 15 }
@@ -96,8 +105,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aberrants
   - name: Achilles Ridgerunners
     pricing:
@@ -133,8 +141,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Acolyte Hybrids With Autopistols
       - Acolyte Hybrids With Hand Flamers
       - Hybrid Metamorphs
@@ -159,8 +166,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Acolyte Hybrids With Autopistols
       - Acolyte Hybrids With Hand Flamers
       - Hybrid Metamorphs
@@ -171,8 +177,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: support
-    attachTo:
+    supportTo:
       - Aberrants
       - Acolyte Hybrids With Autopistols
       - Acolyte Hybrids With Hand Flamers
@@ -184,8 +189,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: support
-    attachTo:
+    supportTo:
       - Acolyte Hybrids With Autopistols
       - Acolyte Hybrids With Hand Flamers
       - Hybrid Metamorphs
@@ -228,8 +232,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Atalan Jackals
   - name: Kelermorph
     pricing:
@@ -243,8 +246,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 35 }
-    role: support
-    attachTo:
+    supportTo:
       - Acolyte Hybrids With Autopistols
       - Acolyte Hybrids With Hand Flamers
       - Hybrid Metamorphs
@@ -255,8 +257,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Acolyte Hybrids With Autopistols
       - Acolyte Hybrids With Hand Flamers
       - Hybrid Metamorphs
@@ -274,8 +275,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: support
-    attachTo:
+    supportTo:
       - Acolyte Hybrids With Autopistols
       - Acolyte Hybrids With Hand Flamers
       - Hybrid Metamorphs
@@ -286,8 +286,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Purestrain Genestealers
   - name: Primus
     pricing:
@@ -295,8 +294,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Acolyte Hybrids With Autopistols
       - Acolyte Hybrids With Hand Flamers
       - Hybrid Metamorphs

@@ -78,16 +78,16 @@ describe('parseFaction (necrons)', () => {
     expect(pricing?.[1]?.range).toBe('[3,)');
   });
 
-  it('parses Support role with attach list', () => {
+  it('parses a Support role into supportTo, leaving leaderTo absent', () => {
     const tech = unit('Technomancer');
-    expect(tech?.role).toBe('support');
-    expect(tech?.attachTo).toEqual(['Canoptek Wraiths', 'Immortals', 'Necron Warriors']);
+    expect(tech?.supportTo).toEqual(['Canoptek Wraiths', 'Immortals', 'Necron Warriors']);
+    expect(tech?.leaderTo).toBeUndefined();
   });
 
   it('parses a detachment with objective and enhancements', () => {
     const det = faction.detachments.find((d) => d.name === 'Annihilation Legion');
     expect(det?.dp).toBe(2);
-    expect(det?.objective).toBe('PURGE THE FOE');
+    expect(det?.objectives).toEqual(['PURGE THE FOE']);
     expect(det?.enhancements).toContainEqual({ name: 'Eldritch Nightmare', points: 10 });
     expect(det?.enhancements).toHaveLength(4);
     // a plain detachment has no UNIQUE banner, and none of its enhancements grant a role
@@ -197,7 +197,7 @@ describe('markLegends (necrons base vs legends-on render)', () => {
     expect(legends.map((u) => u.name)).toContain('Anrakyr The Traveller');
     // a flagged legends unit still parses fully (pricing, role)
     const anrakyr = legends.find((u) => u.name === 'Anrakyr The Traveller');
-    expect(anrakyr?.role).toBe('leader');
+    expect(anrakyr?.leaderTo?.length).toBeGreaterThan(0);
     expect(anrakyr?.pricing[0]?.costs[0]).toEqual({ models: 1, points: 95 });
   });
 
@@ -292,7 +292,7 @@ describe('change annotations — the "changed since the last MFM" layer', () => 
     // Hospitaller dropped -10 on both tiers; the parsed values are the new points,
     // and the "-10" delta is never miscounted as a model.
     const hospitaller = sisters.units.find((u) => u.name === 'Hospitaller');
-    expect(hospitaller?.role).toBe('support');
+    expect(hospitaller?.supportTo?.length).toBeGreaterThan(0);
     expect(hospitaller?.pricing).toEqual([
       { range: '[1,1]', label: 'Your 1st Unit Costs', costs: [{ models: 1, points: 65 }] },
       { range: '[2,)', label: 'Your 2nd + Unit Costs', costs: [{ models: 1, points: 75 }] },
@@ -305,7 +305,7 @@ describe('change annotations — the "changed since the last MFM" layer', () => 
     // the card (the same shape a UNIQUE banner uses).
     const bof = sisters.detachments.find((d) => d.name === 'Bringers Of Flame');
     expect(bof?.dp).toBe(2);
-    expect(bof?.objective).toBe('PRIORITY ASSETS');
+    expect(bof?.objectives).toEqual(['PRIORITY ASSETS']);
     expect(bof?.unique).toBeUndefined();
     expect(bof?.enhancements).toContainEqual({ name: 'Fire and Fury', points: 30 });
   });

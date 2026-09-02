@@ -69,10 +69,10 @@ header styles (plain and "changed") and whether or not the annotation layer is p
 | Unit `groupTitle` / faction `parent` | `h3.font-header:not([class*="break-after"])` sub-group headers (the UNITS/DETACHMENTS section headings are `h3.font-header` *with* the break-after class). Walking headers + cards in document order, each unit takes the sub-group header it sits under as `groupTitle`; a section header resets to the base roster. A sub-group header that names another faction from the index is also surfaced as the faction-level `parent` |
 | Unit pricing tier | `div.bg-slate-200` label + following `ul.leaders` (label → `range`) |
 | Unit cost row | `ul.leaders > li` (post-hydration): trailing `NN pts` = points, rest → `models`/`desc` |
-| Unit role | `img[src$="leader.svg"]`/`img[src$="support.svg"]`; sibling span = comma-separated `attachTo` |
+| Unit roles | `img[src$="leader.svg"]`/`img[src$="support.svg"]`; each block's sibling span = its comma-separated list → `leaderTo`/`supportTo`. **Every** block is read: since v1.4 a unit can carry both, with a different list for each |
 | Unit wargear | `img[src$="cog.svg"]` block → `ul li`: `per <item>` + `NN pts` |
 | Detachment DP badge | `span.self-end` in the header (e.g. `2DP`) |
-| Detachment objective | `div[style]` (styled banner) under the header |
+| Detachment objectives | `div[style]` (styled banner) under the header — **all** of them, since v1.4 a detachment can grant two Force Dispositions |
 | Detachment `unique` | direct-child `div.bg-slate-200` whose text starts `UNIQUE:` (prefix stripped) |
 | Enhancement | `ul.leaders li`: last `div`'s two spans = name, points |
 | Enhancement `leaderTo` / `supportTo` | sibling of the enhancement's `<li>` in its wrapper: span `LEADER:`/`SUPPORT:` + next span (comma-separated unit list) |
@@ -90,7 +90,7 @@ no diff. `assertFactionCovered()` (run last in `parseFaction`, after units/detac
 built) closes that gap by **accounting for every visible string on the page**:
 - **Per unit card** — the name + every pricing tier (label + rows) + role + wargear must add
   up to the whole card's text. Any leftover throws.
-- **Per detachment card** — name + DP + objective + `unique` + enhancements (each with its
+- **Per detachment card** — name + DP + every objective + `unique` + enhancements (each with its
   optional `leaderTo`/`supportTo` grant) must add up to the whole card, give or take the
   `ENHANCEMENTS` heading.
 

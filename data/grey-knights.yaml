@@ -5,13 +5,15 @@ firstSeen: 2026-08-26
 detachments:
   - name: Argent Assault
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Psychic Celerity, points: 15 }
       - { name: Vigilance of Titan, points: 20 }
   - name: Augurium Task Force
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Doomseer’s Amulet, points: 25 }
       - { name: Grimoire of Conjunctions, points: 10 }
@@ -19,7 +21,8 @@ detachments:
       - { name: Shield of Prophecy, points: 20 }
   - name: Banishers
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Ephemeral Tome, points: 15 }
       - { name: Pyresoul, points: 20 }
@@ -27,7 +30,8 @@ detachments:
       - { name: Sixty-sixth Seal, points: 25 }
   - name: Brotherhood Strike
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Banishing Wave, points: 20 }
       - { name: Blinding Aura, points: 10 }
@@ -35,13 +39,15 @@ detachments:
       - { name: Tome of Forbidden Ways, points: 25 }
   - name: Fires Of Purgation
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Boons of Deimos (Upgrade), points: 20 }
       - { name: Precognicient Volleys (Upgrade), points: 10 }
   - name: Hallowed Conclave
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Eye of the Augurium, points: 25 }
       - { name: Inescapable Judgement, points: 20 }
@@ -49,13 +55,15 @@ detachments:
       - { name: Sanctic Reaper, points: 15 }
   - name: Immaterial Interdiction
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Astral Overlap (Upgrade), points: 10 }
       - { name: Predestined Coordinates (Upgrade), points: 10 }
   - name: Sanctic Spearhead
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Driven by Duty, points: 10 }
       - { name: Quickening Foci, points: 15 }
@@ -63,7 +71,8 @@ detachments:
       - { name: Spiritus Machina, points: 25 }
   - name: Warpbane Task Force
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Mandulian Reliquary, points: 20 }
       - { name: Paragon of Sanctity, points: 10 }
@@ -76,8 +85,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
   - name: Brother-Captain Stern
@@ -86,8 +94,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
     legends: true
@@ -97,8 +104,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Purgation Squad
       - Strike Squad
   - name: Brotherhood Chaplain
@@ -107,8 +113,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
   - name: Brotherhood Librarian
@@ -121,8 +126,7 @@ units:
         label: Your 2nd + Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
   - name: Brotherhood Techmarine
@@ -131,8 +135,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Purgation Squad
       - Purifier Squad
       - Strike Squad
@@ -153,8 +156,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Purifier Squad
   - name: Grand Master
     pricing:
@@ -162,8 +164,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
   - name: Grand Master In Nemesis Dreadknight
@@ -185,8 +186,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 125 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
   - name: Grey Knights Dreadnought
@@ -231,8 +231,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 125 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
     legends: true

@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: Berzerker Warband
     dp: 3
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Battle-lust, points: 20 }
       - { name: Berzerker Glaive, points: 35 }
@@ -13,19 +14,22 @@ detachments:
       - { name: Helm of Brazen Ire, points: 30 }
   - name: Brazen Engines
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Murder-forged Entity (Upgrade), points: 15 }
       - { name: Talons of Butchery (Upgrade), points: 20 }
   - name: Butchers Of Khorne
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Gore-stained Veterans (Upgrade), points: 20 }
       - { name: Sanctified in Slaughter (Upgrade), points: 15 }
   - name: Cult Of Blood
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Brazen Form, points: 25 }
       - { name: Butcher Lord, points: 10, leaderTo: [ Goremongers, Jakhals ] }
@@ -33,7 +37,8 @@ detachments:
       - { name: Strategic Slaughter, points: 20 }
   - name: Goretrack Onslaught
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Aggressive Deployment, points: 20 }
       - { name: Infernal Infusion, points: 25 }
@@ -41,7 +46,8 @@ detachments:
       - { name: Unleash Hell, points: 10 }
   - name: Khorne Daemonkin
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Blade of Endless Bloodshed, points: 30 }
       - { name: Blood-Forged Armour, points: 20 }
@@ -49,7 +55,8 @@ detachments:
       - { name: Icon of War, points: 25 }
   - name: Possessed Slaughterband
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Frenzied Focus, points: 20 }
       - { name: Killing Clarity, points: 15 }
@@ -57,7 +64,8 @@ detachments:
       - { name: Violent Demise, points: 10 }
   - name: Vessels Of Wrath
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Archslaughterer, points: 30 }
       - { name: Gateways to Glory, points: 10 }
@@ -257,8 +265,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 115 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Khorne Berzerkers
   - name: Khorne Berzerkers
     pricing:
@@ -283,8 +290,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Eightbound
       - Exalted Eightbound
       - Khorne Berzerkers
@@ -294,8 +300,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Eightbound
       - Exalted Eightbound
       - Khorne Berzerkers
@@ -305,8 +310,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Khorne Berzerkers
   - name: Maulerfiend
     pricing:
@@ -331,7 +335,6 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Eightbound
       - Exalted Eightbound

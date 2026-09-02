@@ -83,18 +83,27 @@ function parseCostRow(unitName: string, raw: string): CostOption {
   return PLAIN_SIZE_RE.test(size) ? { models, points } : { models, points, desc: size };
 }
 
-/** Parse a Leader/Support role block (icon + comma-separated attach list), if present. */
-function parseRole(card: ReturnType<CheerioAPI>): Pick<Unit, 'role' | 'attachTo'> {
+/**
+ * Parse the unit's role blocks (icon + comma-separated attach list) into one list per
+ * ability. A unit may carry a Leader block, a Support block, or **both** with different
+ * lists — v1.4's Judiciar leads twelve units and supports five — so this returns them
+ * keyed by ability rather than picking a single role. Two blocks of the *same* ability
+ * have never appeared and would be a genuine surprise, so that still throws.
+ */
+function parseRole(card: ReturnType<CheerioAPI>): Pick<Unit, 'leaderTo' | 'supportTo'> {
+  const out: Pick<Unit, 'leaderTo' | 'supportTo'> = {};
   const imgs = card.find('img[src$="leader.svg"], img[src$="support.svg"]');
-  if (imgs.length === 0) return {};
-  if (imgs.length > 1) throw new Error('Unexpected multiple role blocks on one unit');
-  const img = imgs.first();
-  const role = (img.attr('src') ?? '').includes('leader') ? 'leader' : 'support';
-  const attachTo = clean(img.parent().nextAll('span').first().text())
-    .split(',')
-    .map((s) => titleCase(s))
-    .filter(Boolean);
-  return attachTo.length > 0 ? { role, attachTo } : {};
+  imgs.each((_i, el) => {
+    const img = card.find(el);
+    const key = (img.attr('src') ?? '').includes('leader') ? 'leaderTo' : 'supportTo';
+    if (out[key]) throw new Error(`Unexpected repeated ${key} block on one unit`);
+    const attachTo = clean(img.parent().nextAll('span').first().text())
+      .split(',')
+      .map((s) => titleCase(s))
+      .filter(Boolean);
+    if (attachTo.length > 0) out[key] = attachTo;
+  });
+  return out;
 }
 
 /** Parse the "Wargear Options" block (cog icon + per-item costs), if present. */
@@ -271,8 +280,13 @@ function parseDetachment($: CheerioAPI, card: ReturnType<CheerioAPI>): Detachmen
   const header = card.children().first();
   const name = titleCase(cardName(card));
   const dp = leadingInt(clean(header.find('span.self-end').last().text()));
-  // Objective is the styled banner div directly under the header.
-  const objText = clean(card.children('div[style]').first().text());
+  // Force Dispositions are the styled banner divs directly under the header — plural
+  // since v1.4, where Orks' WAR HORDE grants both TAKE AND HOLD and PURGE THE FOE.
+  const objectives = card
+    .children('div[style]')
+    .map((_i, el) => clean($(el).text()))
+    .get()
+    .filter(Boolean);
   // "UNIQUE: X" restriction banner — a direct-child slate-200 div (same class units
   // use for tier labels, here repurposed). Match on the literal prefix so the change
   // badge/note divs (also direct children) are never mistaken for it.
@@ -307,7 +321,7 @@ function parseDetachment($: CheerioAPI, card: ReturnType<CheerioAPI>): Detachmen
     .get()
     .filter((e): e is NonNullable<typeof e> => e !== null);
 
-  return { name, dp, objective: objText || null, ...(unique ? { unique } : {}), enhancements };
+  return { name, dp, objectives, ...(unique ? { unique } : {}), enhancements };
 }
 
 /**
@@ -378,8 +392,8 @@ function assertFactionCovered($: CheerioAPI, slug: string, name: string, version
   topCards($).each((_i, el) => {
     const card = $(el);
     if (isUnitCard($, card)) {
-      // (a) Unit card: name + every pricing tier (label + rows) + role + wargear
-      // must account for the entire card.
+      // (a) Unit card: name + every pricing tier (label + rows) + each role block's
+      // attach list + wargear must account for the entire card.
       const claimed = [...UNIT_BOILERPLATE, cardName(card)];
       card.find('div.bg-slate-200').each((_j, l) => {
         claimed.push(clean($(l).text()));
@@ -391,8 +405,9 @@ function assertFactionCovered($: CheerioAPI, slug: string, name: string, version
             claimed.push(clean($(li).text()));
           });
       });
-      const img = card.find('img[src$="leader.svg"], img[src$="support.svg"]').first();
-      if (img.length) claimed.push(clean(img.parent().nextAll('span').first().text()));
+      card.find('img[src$="leader.svg"], img[src$="support.svg"]').each((_j, im) => {
+        claimed.push(clean($(im).parent().nextAll('span').first().text()));
+      });
       const cog = card.find('img[src$="cog.svg"]').first();
       if (cog.length)
         cog
@@ -405,14 +420,17 @@ function assertFactionCovered($: CheerioAPI, slug: string, name: string, version
       const left = residue(card.text(), claimed);
       if (left) leftovers.push(`unit "${cardName(card)}": ${JSON.stringify(left)}`);
     } else {
-      // (b) Detachment card: name + DP + objective + unique + leaderTo/supportTo
-      // grants + enhancements.
+      // (b) Detachment card: name + DP + every Force Disposition + unique +
+      // leaderTo/supportTo grants + enhancements.
       const header = card.children().first();
       const claimed = [
         ...DETACHMENT_BOILERPLATE,
         cardName(card),
         clean(header.find('span.self-end').last().text()),
-        clean(card.children('div[style]').first().text()),
+        ...card
+          .children('div[style]')
+          .map((_j, el) => clean($(el).text()))
+          .get(),
         ...card
           .children('div.bg-slate-200')
           .map((_j, l) => clean($(l).text()))

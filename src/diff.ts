@@ -265,10 +265,11 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     const p = beforeUnits.get(u.name);
     if (!p) continue;
     const note = (text: string) => unitOther.push({ entity: u.name, text: `${u.name} — ${text}` });
-    if ((p.role ?? '') !== (u.role ?? '')) note(`role: ${p.role ?? '—'} → ${u.role ?? '—'}`);
-    const pa = (p.attachTo ?? []).join(', ');
-    const na = (u.attachTo ?? []).join(', ');
-    if (pa !== na) note(`attaches to: ${pa || '—'} → ${na || '—'}`);
+    for (const grant of ['leaderTo', 'supportTo'] as const) {
+      const pa = (p[grant] ?? []).join(', ');
+      const na = (u[grant] ?? []).join(', ');
+      if (pa !== na) note(`${grant}: ${pa || '—'} → ${na || '—'}`);
+    }
   }
   const detOther: Attr[] = [];
   const beforeDets = new Map(before.detachments.map((d) => [d.name, d]));
@@ -277,8 +278,9 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     if (!p) continue;
     const note = (text: string) => detOther.push({ entity: d.name, text });
     if (p.dp !== d.dp) note(`${d.name} — DP: ${p.dp ?? '—'} → ${d.dp ?? '—'}`);
-    if ((p.objective ?? '') !== (d.objective ?? ''))
-      note(`${d.name} — objective: ${p.objective ?? '—'} → ${d.objective ?? '—'}`);
+    const po = p.objectives.join(', ');
+    const no = d.objectives.join(', ');
+    if (po !== no) note(`${d.name} — objectives: ${po || '—'} → ${no || '—'}`);
     if ((p.unique ?? '') !== (d.unique ?? ''))
       note(`${d.name} — unique: ${p.unique ?? '—'} → ${d.unique ?? '—'}`);
     const pe = new Map(p.enhancements.map((e) => [e.name, e]));

@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: Carnival Of Excess
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Dark Blessings, points: 10 }
       - { name: Empyric Suffusion, points: 15 }
@@ -13,7 +14,8 @@ detachments:
       - { name: Warp Walker, points: 35 }
   - name: Coterie Of The Conceited
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Pledge of Dark Glory, points: 25 }
       - { name: Pledge of Eternal Servitude, points: 25 }
@@ -21,7 +23,8 @@ detachments:
       - { name: Pledge of Unholy Fortune, points: 30 }
   - name: Court Of The Phoenician
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Exalted Patron, points: 15, leaderTo: [ Flawless Blades ] }
       - { name: Soulstain Made Manifest, points: 15 }
@@ -29,19 +32,22 @@ detachments:
       - { name: Tears of the Phoenix, points: 25 }
   - name: Elegant Brutes
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Cacophonic Accompaniment, points: 20 }
       - { name: Frenzied Ferocity (Upgrade), points: 15 }
   - name: Frenzied Host
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Euphoric Crown, points: 20 }
       - { name: Howling Plate, points: 20 }
   - name: Mercurial Host
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Intoxicating Musk, points: 20 }
       - { name: Loathsome Dexterity, points: 10 }
@@ -49,7 +55,8 @@ detachments:
       - { name: Tactical Perfection, points: 15 }
   - name: Peerless Bladesmen
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Blinding Speed, points: 25 }
       - { name: Distortion, points: 25 }
@@ -57,7 +64,8 @@ detachments:
       - { name: Rise to the Challenge, points: 30 }
   - name: Rapid Evisceration
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Accomplished Tactician, points: 35 }
       - { name: Heretek Adept, points: 35 }
@@ -65,7 +73,8 @@ detachments:
       - { name: Sublime Prescience, points: 25 }
   - name: Slaanesh’S Chosen
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Eager to Prove, points: 15 }
       - { name: Proud and Vainglorious, points: 20 }
@@ -73,7 +82,8 @@ detachments:
       - { name: Slayer of Champions, points: 15 }
   - name: Spectacle Of Slaughter
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Beguiling Grotesquerie (Upgrade), points: 15 }
       - { name: Eager Patrons (Upgrade), points: 20 }
@@ -205,8 +215,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Infractors
       - Tormentors
   - name: Lord Kakophonist
@@ -215,8 +224,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Chaos Terminators
       - Noise Marines
   - name: Lucius The Eternal
@@ -225,8 +233,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 120 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Flawless Blades
   - name: Maulerfiend
     pricing:
@@ -269,8 +276,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Infractors
       - Noise Marines
       - Tormentors

@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: 1st Company Task Force
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Fear Made Manifest, points: 30 }
       - { name: Iron Resolve, points: 15 }
@@ -13,7 +14,8 @@ detachments:
       - { name: The Imperium’s Sword, points: 25 }
   - name: Anvil Siege Force
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Architect of War, points: 25 }
       - { name: Fleet Commander, points: 15 }
@@ -21,7 +23,8 @@ detachments:
       - { name: Stoic Defender, points: 15 }
   - name: Armoured Speartip
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Armoured Commander, points: 25 }
       - { name: Liberator, points: 15 }
@@ -29,7 +32,8 @@ detachments:
       - { name: Tip of the Spear, points: 40 }
   - name: Bastion Task Force
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Blades of Valour, points: 15 }
       - { name: Bombast Omnivox, points: 15 }
@@ -37,7 +41,8 @@ detachments:
       - { name: Hero of the Chapter, points: 20 }
   - name: Blade Of Ultramar
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Armour of Antoninus, points: 20 }
       - { name: Oath of Macragge, points: 15 }
@@ -45,7 +50,8 @@ detachments:
       - { name: Veteran of Behemoth, points: 25 }
   - name: Ceramite Sentinels
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Castellum Omnivox, points: 20 }
       - { name: Defensive Mastery, points: 25 }
@@ -53,7 +59,8 @@ detachments:
       - { name: Spy-skull Data Link, points: 15 }
   - name: Emperor’S Shield
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Champion of the Feast, points: 25 }
       - { name: Disciple of Rhetoricus, points: 10 }
@@ -61,7 +68,8 @@ detachments:
       - { name: Malodraxian Standard, points: 20 }
   - name: Firestorm Assault Force
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Adamantine Mantle, points: 20 }
       - { name: Champion of Humanity, points: 10 }
@@ -69,7 +77,8 @@ detachments:
       - { name: War-tempered Artifice, points: 25 }
   - name: Forgefather’S Seekers
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Adamantine Mantle, points: 20 }
       - { name: Forged in Battle, points: 15 }
@@ -77,13 +86,15 @@ detachments:
       - { name: War-tempered Artifice, points: 25 }
   - name: Fulguris Task Force
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Bellicose Weapon Spirits (Upgrade), points: 15 }
       - { name: Raptorial Cogitator Core (Upgrade), points: 15 }
   - name: Gladius Task Force
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Adept of the Codex, points: 20 }
       - { name: Artificer Armour, points: 20 }
@@ -91,7 +102,8 @@ detachments:
       - { name: The Honour Vehement, points: 15 }
   - name: Hammer Of Avernii
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Iron Laurel, points: 10 }
       - { name: Medusan Roar, points: 30 }
@@ -99,7 +111,8 @@ detachments:
       - { name: Steel Font, points: 15 }
   - name: Headhunter Task Force
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Astartes Tank Ace, points: 40 }
       - { name: Firestorm Coordinators, points: 20 }
@@ -107,7 +120,8 @@ detachments:
       - { name: Redoubtable Machine Spirit, points: 25 }
   - name: Ironstorm Spearhead
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Adept of the Omnissiah, points: 35 }
       - { name: Master of Machine War, points: 20 }
@@ -115,7 +129,8 @@ detachments:
       - { name: The Flesh Is Weak, points: 20 }
   - name: Librarius Conclave
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Celerity, points: 35 }
       - { name: Fusillade, points: 25 }
@@ -124,7 +139,8 @@ detachments:
       - { name: Temporal Corridor, points: 25 }
   - name: Orbital Assault Force
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Dedicated Gunship, points: 15 }
       - { name: Laurels of Thunder, points: 15 }
@@ -132,7 +148,8 @@ detachments:
       - { name: Veteran of the Vanguard, points: 20 }
   - name: Reclamation Force
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Avenging Avatar, points: 10 }
       - { name: Liberatum, points: 25 }
@@ -140,7 +157,8 @@ detachments:
       - { name: Seals of Reconquest, points: 20 }
   - name: Shadowmark Talon
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Blackwing Shroud, points: 25 }
       - { name: Coronal Susurrant, points: 30 }
@@ -148,7 +166,8 @@ detachments:
       - { name: Umbral Raptor, points: 15 }
   - name: Spearpoint Task Force
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Chogorian Huntmaster, points: 25 }
       - { name: Hunter’s Eye, points: 20 }
@@ -156,7 +175,8 @@ detachments:
       - { name: Stormseers' Wisdom, points: 15 }
   - name: Stormlance Task Force
     dp: 3
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Feinting Withdrawal, points: 10 }
       - { name: Fury of the Storm, points: 25 }
@@ -164,13 +184,15 @@ detachments:
       - { name: Portents of Wisdom, points: 15 }
   - name: Subversion Assets
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Death in the Dark (Upgrade), points: 15 }
       - { name: Shroud Field, points: 20 }
   - name: Vanguard Spearhead
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Execute and Redeploy, points: 20 }
       - { name: Ghostweave Cloak, points: 15 }
@@ -178,7 +200,8 @@ detachments:
       - { name: The Blade Driven Deep, points: 25 }
   - name: Vengeful Hosts
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Avenging Angel, points: 20 }
       - { name: Orksbane, points: 20 }
@@ -190,8 +213,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -227,8 +249,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: support
-    attachTo:
+    supportTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Crusader Squad
@@ -251,8 +272,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: support
-    attachTo:
+    supportTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
       - Deathwing Terminator Squad
@@ -265,8 +285,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: support
-    attachTo:
+    supportTo:
       - Bike Squad
       - Company Veterans On Bikes
       - Outrider Squad
@@ -277,8 +296,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: support
-    attachTo:
+    supportTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Crusader Squad
@@ -301,8 +319,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: support
-    attachTo:
+    supportTo:
       - Aggressor Squad
       - Eradicator Squad
       - Heavy Intercessor Squad
@@ -313,8 +330,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: support
-    attachTo:
+    supportTo:
       - Bike Squad
       - Company Veterans On Bikes
       - Outrider Squad
@@ -405,8 +421,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: support
-    attachTo:
+    supportTo:
       - Bladeguard Veteran Squad
   - name: Bladeguard Veteran Squad
     pricing:
@@ -437,8 +452,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Relic Terminator Squad
       - Terminator Assault Squad
       - Terminator Squad
@@ -455,8 +469,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -481,8 +494,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aggressor Squad
       - Eradicator Squad
       - Heavy Intercessor Squad
@@ -493,8 +505,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Eliminator Squad
       - Incursor Squad
       - Infiltrator Squad
@@ -507,8 +518,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
       - Deathwing Terminator Squad
@@ -521,8 +531,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Bike Squad
       - Company Veterans On Bikes
       - Outrider Squad
@@ -534,8 +543,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -554,8 +562,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessors With Jump Packs
       - Assault Squad With Jump Packs
       - Sanguinary Guard
@@ -575,8 +582,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 105 }
-    role: support
-    attachTo:
+    supportTo:
       - Victrix Honour Guard
   - name: Centurion Assault Squad
     pricing:
@@ -607,8 +613,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -632,8 +637,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Squad
       - Command Squad
       - Sternguard Veteran Squad
@@ -647,8 +651,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
       - Deathwing Terminator Squad
@@ -661,8 +664,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Bike Squad
       - Company Veterans On Bikes
       - Outrider Squad
@@ -680,8 +682,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessors With Jump Packs
       - Assault Squad With Jump Packs
       - Death Company Marines With Jump Packs
@@ -694,8 +695,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -718,8 +718,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: support
-    attachTo:
+    supportTo:
       - Bike Squad
       - Company Veterans On Bikes
       - Outrider Squad
@@ -745,8 +744,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Relic Terminator Squad
       - Terminator Assault Squad
       - Terminator Squad
@@ -855,8 +853,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -946,8 +943,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: support
-    attachTo:
+    supportTo:
       - Assault Squad
       - Command Squad
       - Devastator Squad
@@ -1033,8 +1029,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aggressor Squad
       - Eradicator Squad
       - Heavy Intercessor Squad
@@ -1058,8 +1053,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -1081,8 +1075,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessors With Jump Packs
       - Assault Squad With Jump Packs
       - Vanguard Veteran Squad With Jump Packs
@@ -1093,8 +1086,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -1227,8 +1219,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Deathwatch Veterans
@@ -1249,8 +1240,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Eliminator Squad
       - Incursor Squad
       - Infiltrator Squad
@@ -1262,8 +1252,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
       - Deathwing Terminator Squad
@@ -1276,8 +1265,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Bike Squad
       - Company Veterans On Bikes
       - Outrider Squad
@@ -1288,8 +1276,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Squad With Jump Packs
       - Vanguard Veteran Squad With Jump Packs
     legends: true
@@ -1299,8 +1286,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: support
-    attachTo:
+    supportTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -1324,8 +1310,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: support
-    attachTo:
+    supportTo:
       - Incursor Squad
       - Infiltrator Squad
       - Reiver Squad
@@ -1336,8 +1321,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: support
-    attachTo:
+    supportTo:
       - Reiver Squad
   - name: Lieutenant With Combi-Weapon
     pricing:
@@ -1352,8 +1336,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 155 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aggressor Squad
       - Assault Intercessor Squad
       - Assault Squad
@@ -1399,8 +1382,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Bladeguard Veteran Squad
       - Command Squad
       - Company Heroes
@@ -1432,8 +1414,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: support
-    attachTo:
+    supportTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -1587,8 +1568,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Scout Sniper Squad
       - Scout Squad
     legends: true
@@ -1721,8 +1701,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Bike Squad
       - Company Veterans On Bikes
       - Outrider Squad
@@ -1760,8 +1739,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Crusader Squad
@@ -1779,8 +1757,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 110 }
-    role: support
-    attachTo:
+    supportTo:
       - Bike Squad
       - Company Veterans On Bikes
       - Outrider Squad
@@ -1842,8 +1819,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aggressor Squad
       - Eradicator Squad
       - Heavy Intercessor Squad
@@ -1868,8 +1844,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 105 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad
@@ -1947,8 +1922,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Command Squad
@@ -1963,8 +1937,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 6, points: 120 }
-    role: support
-    attachTo:
+    supportTo:
       - Assault Intercessor Squad
       - Assault Squad
       - Bladeguard Veteran Squad

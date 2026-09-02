@@ -5,13 +5,15 @@ firstSeen: 2026-08-26
 detachments:
   - name: Armoured Trailblazers
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Optimised Attack Lines (Upgrade), points: 15 }
       - { name: Saturation Rounds (Upgrade), points: 15 }
   - name: Brandfast Oathband
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Precursive Judgement, points: 15 }
       - { name: Signature Restoration, points: 5 }
@@ -19,7 +21,8 @@ detachments:
       - { name: Trivärg Cyber Implant, points: 40 }
   - name: Dêlve Assault Shift
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Dêlvewerke Navigator, points: 25 }
       - { name: Multiwave System Jammer, points: 10 }
@@ -27,13 +30,15 @@ detachments:
       - { name: Quake Supervisor, points: 20 }
   - name: Farseekers
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Pan-spectral Lockons (Upgrade), points: 10 }
       - { name: Shroudwërke Talismans (Upgrade), points: 15 }
   - name: Hearthband
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     unique: Hearthband
     enhancements:
       - { name: Bastion Shield, points: 25 }
@@ -42,7 +47,8 @@ detachments:
       - { name: Quake Multigenerator, points: 15 }
   - name: Hearthfyre Arsenal
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Calculated Tenacity, points: 15 }
       - { name: Fârstrydr Node, points: 20 }
@@ -50,14 +56,16 @@ detachments:
       - { name: Mantle of Elders, points: 10 }
   - name: Hearthguard Covenant
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     unique: Hearthband
     enhancements:
       - { name: High Kâhl, points: 30 }
       - { name: Ironskein, points: 10 }
   - name: Mercenary Oathband
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Asset Manipulator, points: 25 }
       - { name: Etacarn SB9 Targeting Implant, points: 15 }
@@ -65,7 +73,8 @@ detachments:
       - { name: Metaphysical Brokerage, points: 20 }
   - name: Needgaârd Oathband
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Ancestral Crest, points: 15 }
       - { name: Dead Reckoning, points: 10 }
@@ -73,7 +82,8 @@ detachments:
       - { name: Oathbound Speculator, points: 30 }
   - name: Persecution Prospect
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Eye for Weakness, points: 25 }
       - { name: Nomad Strategist, points: 20 }
@@ -92,8 +102,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cthonian Beserks
   - name: Brôkhyr Iron-Master
     pricing:
@@ -101,8 +110,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 5, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Brôkhyr Thunderkyn
       - Hearthkyn Warriors
   - name: Brôkhyr Thunderkyn
@@ -142,8 +150,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Einhyr Hearthguard
   - name: Einhyr Hearthguard
     pricing:
@@ -163,8 +170,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 3, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Hearthkyn Warriors
   - name: Hearthkyn Warriors
     pricing:
@@ -230,8 +236,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Einhyr Hearthguard
       - Hearthkyn Warriors
   - name: Kapricus Carrier
@@ -262,8 +267,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Ironkin Steeljacks With Heavy Volkanite Disintegrators
       - Ironkin Steeljacks With Melee Weapons
   - name: Sagitaur
@@ -282,7 +286,6 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Einhyr Hearthguard
       - Hearthkyn Warriors

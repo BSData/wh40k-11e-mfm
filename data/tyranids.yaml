@@ -5,13 +5,15 @@ firstSeen: 2026-08-26
 detachments:
   - name: Ambush Predators
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Cryptophotaic Camouflage (Upgrade), points: 15 }
       - { name: Encircling Horrors (Upgrade), points: 20 }
   - name: Assimilation Swarm
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Biophagic Flow, points: 10 }
       - { name: Instinctive Defence, points: 15 }
@@ -19,7 +21,8 @@ detachments:
       - { name: Regenerating Monstrosity, points: 20 }
   - name: Crusher Stampede
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Enraged Reserves, points: 20 }
       - { name: Monstrous Nemesis, points: 25 }
@@ -27,7 +30,8 @@ detachments:
       - { name: Ominous Presence, points: 15 }
   - name: Invasion Fleet
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Adaptive Biology, points: 25 }
       - { name: Alien Cunning, points: 30 }
@@ -35,7 +39,8 @@ detachments:
       - { name: Synaptic Linchpin, points: 20 }
   - name: Subterranean Assault
     dp: 3
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Synaptic Strategy, points: 15 }
       - { name: Tremor Senses, points: 20 }
@@ -43,7 +48,8 @@ detachments:
       - { name: Vanguard Intellect, points: 15 }
   - name: Synaptic Nexus
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Power of the Hive Mind, points: 10 }
       - { name: Psychostatic Disruption (Aura), points: 30 }
@@ -51,13 +57,15 @@ detachments:
       - { name: The Dirgeheart of Kharis, points: 15 }
   - name: Talons Of The Norn Queen
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Destabilising Predation (Upgrade), points: 20 }
       - { name: Synaptoprescience (Upgrade), points: 30 }
   - name: Unending Swarm
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Adrenalised Onslaught, points: 15 }
       - { name: Naturalised camouflage, points: 30 }
@@ -65,7 +73,8 @@ detachments:
       - { name: Relentless Hunger, points: 20 }
   - name: Vanguard Onslaught
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Chameleonic, points: 15 }
       - { name: Hunting Grounds, points: 30 }
@@ -73,7 +82,8 @@ detachments:
       - { name: Stalker, points: 10 }
   - name: Warrior Bioform Onslaught
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Elevated Might, points: 30 }
       - { name: Ocular Adaptation, points: 20 }
@@ -106,8 +116,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Genestealers
   - name: Carnifexes
     pricing:
@@ -218,8 +227,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 195 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Tyrant Guard
   - name: Hormagaunts
     pricing:
@@ -238,8 +246,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 5, points: 175 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Raveners
   - name: Lictor
     pricing:
@@ -253,8 +260,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Venomthropes
     legends: true
   - name: Maleceptor
@@ -303,8 +309,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 130 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Neurogaunts
       - Tyrant Guard
       - Zoanthropes
@@ -334,8 +339,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 140 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Carnifexes
   - name: Parasite Of Mortrex
     pricing:
@@ -443,8 +447,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 210 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Tyrant Guard
   - name: Toxicrene
     pricing:
@@ -464,8 +467,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Hormagaunts
       - Termagants
       - Tyranid Warriors With Melee Bio-Weapons
@@ -540,8 +542,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Gargoyles
       - Tyranid Warriors With Melee Bio-Weapons
       - Tyranid Warriors With Ranged Bio-Weapons

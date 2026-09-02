@@ -39,11 +39,11 @@ function orderCost(c: CostOption): CostOption {
 
 function orderDetachments(ds: Detachment[], order: OrderMode): Detachment[] {
   return ordered(ds, order).map((d) => {
-    // Build with a fixed key order: name, dp, objective, [unique], enhancements.
-    const head: Pick<Detachment, 'name' | 'dp' | 'objective'> = {
+    // Build with a fixed key order: name, dp, objectives, [unique], enhancements.
+    const head: Pick<Detachment, 'name' | 'dp' | 'objectives'> = {
       name: d.name,
       dp: d.dp,
-      objective: d.objective,
+      objectives: d.objectives,
     };
     return {
       ...head,
@@ -69,8 +69,8 @@ function orderUnits(us: Unit[], order: OrderMode): Unit[] {
         costs: t.costs.map(orderCost),
       })),
     };
-    if (u.role) unit.role = u.role;
-    if (u.attachTo) unit.attachTo = u.attachTo;
+    if (u.leaderTo) unit.leaderTo = u.leaderTo;
+    if (u.supportTo) unit.supportTo = u.supportTo;
     if (u.wargear) unit.wargear = u.wargear.map((w) => ({ item: w.item, points: w.points }));
     if (u.legends) unit.legends = true;
     return unit;

@@ -58,10 +58,14 @@ export const Unit = z.object({
    */
   groupTitle: z.string().min(1).optional(),
   pricing: z.array(PricingTier).min(1),
-  /** "leader" or "support" if the unit has that ability (lists `attachTo`). */
-  role: z.enum(['leader', 'support']).optional(),
-  /** Units this Leader/Support can be attached to. */
-  attachTo: z.array(z.string().min(1)).optional(),
+  /**
+   * Units this unit can join with its Leader ability. Separate from `supportTo`
+   * because a unit can have both, with a different list for each — MFM v1.4's Judiciar
+   * leads twelve units and supports five. Mirrors `Enhancement.leaderTo`/`supportTo`.
+   */
+  leaderTo: z.array(z.string().min(1)).optional(),
+  /** Units this unit can join with its Support ability — see `leaderTo`. */
+  supportTo: z.array(z.string().min(1)).optional(),
   wargear: z.array(Wargear).optional(),
   /** True for Legends (deprecated) units; absent for current ones. */
   legends: z.literal(true).optional(),
@@ -88,7 +92,12 @@ export const Detachment = z.object({
   name: z.string().min(1),
   /** The detachment's "detachment points" cost (e.g. `2DP` → 2), or null if absent. */
   dp: z.number().int().nonnegative().nullable(),
-  objective: z.string().nullable(),
+  /**
+   * The Force Dispositions this detachment grants, in page order. A list because v1.4's
+   * Orks `WAR HORDE` grants two (`TAKE AND HOLD` and `PURGE THE FOE`); empty when the
+   * detachment shows no banner at all.
+   */
+  objectives: z.array(z.string().min(1)),
   /** Sub-faction keyword this detachment is restricted to (the "UNIQUE: X" banner). */
   unique: z.string().min(1).optional(),
   enhancements: z.array(Enhancement),

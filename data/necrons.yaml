@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: Annihilation Legion
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Eldritch Nightmare, points: 10 }
       - { name: Eternal Madness, points: 20 }
@@ -13,7 +14,8 @@ detachments:
       - { name: Soulless Reaper, points: 15 }
   - name: Awakened Dynasty
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Dynasty
     enhancements:
       - { name: Enaegic Dermal Bond, points: 30 }
@@ -22,7 +24,8 @@ detachments:
       - { name: Veil of Darkness, points: 20 }
   - name: Canoptek Court
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Autodivinator, points: 15 }
       - { name: Dimensional Sanctum, points: 20 }
@@ -30,7 +33,8 @@ detachments:
       - { name: Metalodermal Tesla Weave, points: 10 }
   - name: Cryptek Conclave
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Atomic Disintegrators, points: 10 }
       - { name: Gauntlet of Compression, points: 20 }
@@ -38,7 +42,8 @@ detachments:
       - { name: Quantum Abacus, points: 15 }
   - name: Cursed Legion
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Cursed Circlet, points: 25 }
       - { name: Destroyer Ankh, points: 20 }
@@ -46,14 +51,16 @@ detachments:
       - { name: Murdermind, points: 15, supportTo: [ Skorpekh Destroyers, Lokhust Destroyers, Ophydian Destroyers, Lokhust Heavy Destroyers ] }
   - name: Hand Of The Dynasty
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Dynasty
     enhancements:
       - { name: Enlivened Sentinels (Upgrade), points: 20 }
       - { name: Tools of Dominion (Upgrade), points: 15 }
   - name: Hypercrypt Legion
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     unique: Hypercrypt
     enhancements:
       - { name: Arisen Tyrant, points: 25 }
@@ -62,7 +69,8 @@ detachments:
       - { name: Osteoclave Fulcrum, points: 20 }
   - name: Obeisance Phalanx
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Eternal Conqueror, points: 25 }
       - { name: Honourable Combatant, points: 10 }
@@ -70,7 +78,8 @@ detachments:
       - { name: Warrior Noble, points: 15 }
   - name: Pantheon Of Woe
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Animus Damper, points: 35 }
       - { name: Quantum Goad, points: 45 }
@@ -78,13 +87,15 @@ detachments:
       - { name: Singularity Matrix, points: 45 }
   - name: Skyshroud Spearhead
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Deepening Madness (Upgrade), points: 20 }
       - { name: Recursive Reanimation (Upgrade), points: 5 }
   - name: Starshatter Arsenal
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Chrono-impedance Fields, points: 25 }
       - { name: Demanding Leader, points: 10 }
@@ -92,7 +103,8 @@ detachments:
       - { name: Miniaturised Nebuloscope, points: 15 }
   - name: The Phaeron'S Armoury
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     unique: Hypercrypt
     enhancements:
       - { name: Mortality Shroud (Aura) (Upgrade), points: 10 }
@@ -110,8 +122,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Immortals
     legends: true
   - name: C’Tan Shard Of The Deceiver
@@ -220,8 +231,7 @@ units:
         label: Your 2nd + Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: support
-    attachTo:
+    supportTo:
       - Immortals
       - Necron Warriors
   - name: Convergence Of Dominion
@@ -286,8 +296,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: support
-    attachTo:
+    supportTo:
       - Canoptek Macrocytes
       - Immortals
       - Necron Warriors
@@ -322,8 +331,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Immortals
       - Lychguard
       - Necron Warriors
@@ -363,8 +371,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Lokhust Destroyers
       - Lokhust Heavy Destroyers
   - name: Lord
@@ -373,8 +380,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Immortals
       - Lychguard
       - Necron Warriors
@@ -415,8 +421,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Immortals
       - Lychguard
       - Necron Warriors
@@ -462,8 +467,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: support
-    attachTo:
+    supportTo:
       - Immortals
       - Necron Warriors
   - name: Overlord
@@ -472,8 +476,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Immortals
       - Lychguard
       - Necron Warriors
@@ -483,8 +486,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Immortals
       - Lychguard
       - Necron Warriors
@@ -494,8 +496,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: support
-    attachTo:
+    supportTo:
       - Immortals
       - Necron Warriors
   - name: Psychomancer
@@ -504,8 +505,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: support
-    attachTo:
+    supportTo:
       - Immortals
       - Necron Warriors
   - name: Royal Warden
@@ -514,8 +514,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Immortals
       - Necron Warriors
   - name: Sentry Pylons
@@ -557,8 +556,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 105 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Skorpekh Destroyers
   - name: Technomancer
     pricing:
@@ -570,8 +568,7 @@ units:
         label: Your 2nd + Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: support
-    attachTo:
+    supportTo:
       - Canoptek Wraiths
       - Immortals
       - Necron Warriors
@@ -633,8 +630,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Immortals
       - Lychguard
       - Necron Warriors
@@ -661,8 +657,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Immortals
       - Lychguard
       - Necron Warriors

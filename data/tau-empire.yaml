@@ -5,20 +5,23 @@ firstSeen: 2026-08-26
 detachments:
   - name: Advanced Acquisition Cadre
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Negation Emitters (Upgrade), points: 15 }
       - { name: Unmasking Suite (Upgrade), points: 15 }
   - name: Auxiliary Cadre
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     unique: Auxiliary
     enhancements:
       - { name: Admired Leader, points: 20 }
       - { name: Student of Kauyon, points: 20 }
   - name: Experimental Prototype Cadre
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     unique: Battlesuit
     enhancements:
       - { name: Plasma Accelerator Rifle, points: 20 }
@@ -26,7 +29,8 @@ detachments:
       - { name: Thermoneutronic Projector, points: 15 }
   - name: Kauyon
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Exemplar of the Kauyon, points: 20 }
       - { name: Precision of the Patient Hunter, points: 15 }
@@ -34,7 +38,8 @@ detachments:
       - { name: "Through Unity, Devastation", points: 30 }
   - name: Kroot Hunting Pack
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Auxiliary
     enhancements:
       - { name: Borthrod Gland, points: 15 }
@@ -43,7 +48,8 @@ detachments:
       - { name: Root-carved Weapons, points: 10 }
   - name: Mont’Ka
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Coordinated Exploitation, points: 30 }
       - { name: Exemplar of the Mont’ka, points: 10 }
@@ -51,7 +57,8 @@ detachments:
       - { name: Strike Swiftly, points: 45 }
   - name: Retaliation Cadre
     dp: 3
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     unique: Battlesuit
     enhancements:
       - { name: Internal Grenade Racks, points: 20 }
@@ -65,8 +72,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Breacher Team
       - Kroot Carnivores
       - Kroot Farstalkers
@@ -124,8 +130,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Breacher Team
       - Strike Team
   - name: Commander Farsight
@@ -134,8 +139,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Crisis Battlesuits
       - Crisis Fireknife Battlesuits
       - Crisis Starscythe Battlesuits
@@ -146,8 +150,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Crisis Battlesuits
       - Crisis Fireknife Battlesuits
       - Crisis Starscythe Battlesuits
@@ -158,8 +161,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Crisis Battlesuits
       - Crisis Fireknife Battlesuits
       - Crisis Starscythe Battlesuits
@@ -171,8 +173,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Crisis Battlesuits
       - Crisis Fireknife Battlesuits
       - Crisis Starscythe Battlesuits
@@ -231,8 +232,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Pathfinder Team
   - name: Devilfish
     pricing:
@@ -257,8 +257,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Breacher Team
       - Strike Team
   - name: Firesight Team
@@ -333,8 +332,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Kroot Carnivores
       - Kroot Farstalkers
   - name: Kroot Hounds
@@ -356,8 +354,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Kroot Carnivores
       - Kroot Farstalkers
   - name: Kroot War Shaper
@@ -366,8 +363,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Kroot Carnivores
       - Kroot Farstalkers
   - name: Krootox Rampagers
@@ -481,8 +477,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Xv9 Hazard Battlesuits
     legends: true
   - name: Sky Ray Gunship

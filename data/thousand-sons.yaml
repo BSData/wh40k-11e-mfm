@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: Changehost Of Deceit
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Diabolic Savant, points: 20 }
       - { name: Duplicitous Malediction, points: 15 }
@@ -13,7 +14,8 @@ detachments:
       - { name: Tome of True Names, points: 20 }
   - name: Grand Coven
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Eldritch Vortex of E’Taph, points: 35 }
       - { name: Incandaeum, points: 15 }
@@ -21,7 +23,8 @@ detachments:
       - { name: Umbralefic Crystal, points: 30 }
   - name: Hexwarp Thrallband
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Arcane Might, points: 20 }
       - { name: Empowered Manifestation, points: 20 }
@@ -29,13 +32,15 @@ detachments:
       - { name: Noctilith Mantle, points: 15 }
   - name: Ritual Of Regeneration
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Curse of Life, points: 20 }
       - { name: Eruption of Vitality, points: 35 }
   - name: Rubricae Phalanx
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Arcane Thralls, points: 5 }
       - { name: Lord of the Rubricae, points: 15 }
@@ -43,20 +48,23 @@ detachments:
       - { name: Stave Abominus, points: 20 }
   - name: Sekhetar Cohort
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Occulus Infernum, points: 20 }
       - { name: Walking Rampart, points: 30 }
   - name: Servants Of Change
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     unique: Mutant
     enhancements:
       - { name: Thicket of Bladed Bone (Upgrade), points: 10 }
       - { name: Unravelled Fates, points: 15 }
   - name: Warpforged Cabal
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Biomechanical Mutation, points: 15 }
       - { name: Perplexing Cloak, points: 20 }
@@ -64,7 +72,8 @@ detachments:
       - { name: Warp-Cursed Runemaster, points: 10 }
   - name: Warpmeld Pact
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     unique: Mutant
     enhancements:
       - { name: Bray Lord, points: 15, leaderTo: [ Tzaangors ] }
@@ -78,8 +87,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Rubric Marines
       - Tzaangor Enlightened
       - Tzaangor Enlightened With Fatecaster Greatbows
@@ -181,8 +189,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Rubric Marines
   - name: Exalted Sorcerer On Disc Of Tzeentch
     pricing:
@@ -190,8 +197,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Rubric Marines
       - Tzaangor Enlightened
       - Tzaangor Enlightened With Fatecaster Greatbows
@@ -233,8 +239,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Rubric Marines
   - name: Kairos Fateweaver
     groupTitle: Scintillating Legions
@@ -341,8 +346,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 105 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Rubric Marines
   - name: Sorcerer In Terminator Armour
     pricing:
@@ -354,8 +358,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 110 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Scarab Occult Terminators
   - name: Tzaangor Enlightened
     pricing:
@@ -377,8 +380,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Tzaangor Enlightened
       - Tzaangor Enlightened With Fatecaster Greatbows
       - Tzaangors

@@ -5,14 +5,16 @@ firstSeen: 2026-08-26
 detachments:
   - name: Abhuman Auxiliaries
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Abhuman
     enhancements:
       - { name: Exemplar of Duty (Upgrade), points: 10, leaderTo: [ Ogryn Squad, Bullgryn Squad ] }
       - { name: Sharp Eyes (Upgrade), points: 10 }
   - name: Armoured Infantry
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Exemplary Officer, points: 20 }
       - { name: Grand Strategist, points: 25 }
@@ -20,13 +22,15 @@ detachments:
       - { name: Omnissian Unguents, points: 35 }
   - name: Bridgehead Strike
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Bombast-class Vox-array, points: 15 }
       - { name: Priority Drop Beacon, points: 25 }
   - name: Combined Arms
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Death Mask of Ollanius, points: 10 }
       - { name: Drill Commander, points: 20 }
@@ -34,14 +38,16 @@ detachments:
       - { name: Reactive Command, points: 15 }
   - name: Designation Force
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     unique: Recon
     enhancements:
       - { name: Long-range Scout (Upgrade), points: 10 }
       - { name: Recon Star (Upgrade), points: 10 }
   - name: Grizzled Company
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     unique: Abhuman
     enhancements:
       - { name: Abhuman Detail, points: 20, leaderTo: [ Ogryn Squad, Bullgryn Squad ] }
@@ -50,7 +56,8 @@ detachments:
       - { name: Spec Ops Veteran, points: 15 }
   - name: Hammer Of The Emperor
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Calm Under Fire, points: 15 }
       - { name: Indomitable Steed, points: 15 }
@@ -58,7 +65,8 @@ detachments:
       - { name: Veteran Crew, points: 20 }
   - name: Mechanised Assault
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Bold Leadership, points: 25 }
       - { name: Sacred Unguents, points: 10 }
@@ -66,7 +74,8 @@ detachments:
       - { name: Vanguard Honours, points: 15 }
   - name: Recon Element
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     unique: Recon
     enhancements:
       - { name: Guerrilla Honours, points: 25 }
@@ -75,7 +84,8 @@ detachments:
       - { name: Tripwires, points: 20 }
   - name: Siege Regiment
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Eager Advance, points: 20 }
       - { name: Flash Grenades, points: 20 }
@@ -83,7 +93,8 @@ detachments:
       - { name: Stalwart’s Honours, points: 15 }
   - name: Steel Hammer
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Assault Hatches, points: 25 }
       - { name: Battalion Commander, points: 30 }
@@ -96,8 +107,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Catachan Jungle Fighters
     legends: true
   - name: Aegis Defence Line
@@ -230,8 +240,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cadian Shock Troops
       - Kasrkin
   - name: Cadian Command Squad
@@ -240,8 +249,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 5, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cadian Shock Troops
   - name: Cadian Heavy Weapons Squad
     pricing:
@@ -275,8 +283,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 5, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Catachan Jungle Fighters
   - name: Catachan Heavy Weapons Squad
     pricing:
@@ -331,8 +338,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 30 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
@@ -352,8 +358,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
@@ -367,8 +372,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 120 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
@@ -413,8 +417,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 35 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Death Riders
     legends: true
   - name: Death Riders
@@ -534,8 +537,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 5, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cadian Shock Troops
     legends: true
   - name: Hellhammer
@@ -606,8 +608,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 6, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Death Korps Grenadier Squad
       - Death Korps Of Krieg
       - Krieg Combat Engineers
@@ -738,8 +739,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Death Riders
   - name: Lord Solar Leontus
     pricing:
@@ -747,8 +747,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 130 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Attilan Rough Riders
       - Cadian Shock Troops
       - Catachan Jungle Fighters
@@ -861,8 +860,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 5, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Tempestus Scions
   - name: Ministorum Priest
     pricing:
@@ -870,8 +868,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 35 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
@@ -932,8 +929,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
@@ -947,8 +943,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Ratlings
     legends: true
   - name: Quartermaster Cadre Squad
@@ -957,8 +952,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 5, points: 45 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Death Korps Grenadier Squad
       - Death Korps Of Krieg
       - Krieg Combat Engineers
@@ -1055,8 +1049,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Catachan Jungle Fighters
     legends: true
   - name: Shadowsword
@@ -1165,8 +1158,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Of Krieg
@@ -1203,8 +1195,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Cadian Shock Troops
       - Kasrkin
   - name: Valdor

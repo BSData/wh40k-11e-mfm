@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: Imperialis Fleet
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Clandestine Operation, points: 15 }
       - { name: Combat Landers, points: 10 }
@@ -13,7 +14,8 @@ detachments:
       - { name: Fleetmaster, points: 20 }
   - name: Ordo Hereticus, Purgation Force
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Ignis Judicium, points: 10 }
       - { name: Liber Heresius, points: 10 }
@@ -21,7 +23,8 @@ detachments:
       - { name: Witch Hunter, points: 15 }
   - name: Ordo Malleus, Daemon Hunters
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Daemon Slayer, points: 10 }
       - { name: Formidable Resolve, points: 5 }
@@ -29,7 +32,8 @@ detachments:
       - { name: Grimoire of True Names, points: 10 }
   - name: Ordo Xenos, Alien Hunters
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Amulet of Auto-chastisement, points: 25 }
       - { name: Beacon Angelis, points: 30 }
@@ -37,7 +41,8 @@ detachments:
       - { name: Universal Anathema, points: 10 }
   - name: Veiled Blade Elimination Force
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Decoy Targets, points: 15 }
       - { name: Esoteric Explosives, points: 10 }
@@ -236,8 +241,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aquila Kill Team
       - Battleline Imperium Infantry
       - Exaction Squad
@@ -255,8 +259,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aquila Kill Team
       - Battleline Imperium Infantry
       - Exaction Squad
@@ -273,8 +276,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Battleline Imperium Infantry
       - Exaction Squad
       - Grey Knights Terminator Squad
@@ -289,8 +291,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Battleline Imperium Infantry
       - Exaction Squad
       - Grey Knights Terminator Squad
@@ -304,8 +305,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aquila Kill Team
       - Battleline Imperium Infantry
       - Exaction Squad
@@ -320,8 +320,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 110 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aquila Kill Team
       - Battleline Imperium Infantry
       - Exaction Squad
@@ -335,8 +334,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Daemonhost
       - Deathwatch Kill Team
       - Deathwatch Terminator Squad
@@ -356,8 +354,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Battleline Imperium Infantry
       - Exaction Squad
       - Imperial Navy Breachers
@@ -373,8 +370,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Battleline Imperium Infantry
       - Exaction Squad
       - Imperial Navy Breachers
@@ -389,8 +385,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Deathwatch Kill Team
       - Deathwatch Terminator Squad
       - Exaction Squad
@@ -431,8 +426,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 2, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Exaction Squad
       - Imperial Navy Breachers
       - Inquisitorial Agents
@@ -482,8 +476,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Imperial Navy Breachers
       - Voidsmen-At-Arms
     legends: true
@@ -493,8 +486,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 30 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Inquisitorial Agents
     legends: true
   - name: Kill Team Cassius
@@ -510,8 +502,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: support
-    attachTo:
+    supportTo:
       - Exaction Squad
       - Imperial Navy Breachers
       - Inquisitorial Agents
@@ -526,8 +517,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: support
-    attachTo:
+    supportTo:
       - Exaction Squad
       - Imperial Navy Breachers
       - Inquisitorial Agents
@@ -541,8 +531,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Imperial Navy Breachers
       - Voidsmen-At-Arms
   - name: Navigator
@@ -552,8 +541,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Imperial Navy Breachers
       - Voidsmen-At-Arms
   - name: Neyam Shai Murad
@@ -562,8 +550,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Imperial Navy Breachers
       - Voidsmen-At-Arms
     legends: true
@@ -581,8 +568,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 4, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Imperial Navy Breachers
       - Voidsmen-At-Arms
   - name: Rogue Trader Entourage
@@ -592,8 +578,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 4, points: 105 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Imperial Navy Breachers
       - Voidsmen-At-Arms
   - name: Sanctifiers
@@ -728,8 +713,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aquila Kill Team
       - Deathwatch Kill Team
       - Deathwatch Terminator Squad
@@ -744,8 +728,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aquila Kill Team
       - Deathwatch Kill Team
       - Deathwatch Terminator Squad
@@ -759,8 +742,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aquila Kill Team
       - Deathwatch Kill Team
       - Deathwatch Terminator Squad
@@ -775,8 +757,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aquila Kill Team
       - Deathwatch Kill Team
       - Deathwatch Terminator Squad

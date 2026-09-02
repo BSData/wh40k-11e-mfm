@@ -5,13 +5,15 @@ firstSeen: 2026-08-26
 detachments:
   - name: Dominus Foebreakers
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Archeotech Autoloaders, points: 25 }
       - { name: Blessed Plate, points: 30 }
   - name: Freeblade Company
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Bringer of Justice, points: 30 }
       - { name: Hunter’s Eye, points: 25 }
@@ -19,7 +21,8 @@ detachments:
       - { name: Sanctuary, points: 20 }
   - name: Gate Warden Lance
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Acquisitor-at-Arms, points: 15 }
       - { name: Augury Halo, points: 20 }
@@ -27,13 +30,15 @@ detachments:
       - { name: Vengeful Tread, points: 15 }
   - name: Questor Forgepact
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Knight of the Opus Machina (Aura), points: 15 }
       - { name: Magos Questoris, points: 20 }
   - name: Questoris Companions
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Crushing Condemnation, points: 10 }
       - { name: Herald of Triumph, points: 15 }
@@ -41,7 +46,8 @@ detachments:
       - { name: Wyrmslayer Divination, points: 10 }
   - name: Spearhead-At-Arms
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     unique: Armigers
     enhancements:
       - { name: Fables of Nightmare, points: 10 }
@@ -50,14 +56,16 @@ detachments:
       - { name: Tales of Heroism, points: 10 }
   - name: Throne-Bonded Outriders
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     unique: Armigers
     enhancements:
       - { name: Ancestral Overbleed (Upgrade), points: 10 }
       - { name: Gyro-optimised Actuators (Upgrade), points: 15 }
   - name: Valourstrike Lance
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Bearer of the Evanescent Ion, points: 15 }
       - { name: Bearer of the Iron Chalice, points: 20 }
