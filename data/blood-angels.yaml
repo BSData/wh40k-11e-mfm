@@ -1,7 +1,7 @@
 name: Blood Angels
 slug: blood-angels
-version: "1.3"
-firstSeen: 2026-08-26
+version: "1.4"
+firstSeen: 2026-09-02
 parent: Space Marines
 detachments:
   - name: 1st Company Task Force
@@ -272,6 +272,7 @@ units:
           - { models: 1, points: 40 }
     supportTo:
       - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
       - Crusader Squad
       - Deathwatch Veterans
       - Decimus Kill Team
@@ -951,6 +952,12 @@ units:
       - Sternguard Veteran Squad
       - Sword Brethren Squad
       - Tactical Squad
+    supportTo:
+      - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
+      - Infernus Squad
+      - Intercessor Squad
+      - Sternguard Veteran Squad
   - name: Land Raider
     groupTitle: Space Marines
     pricing:
