@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: Covenite Coterie
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Covens
     enhancements:
       - { name: Master Artisan, points: 20 }
@@ -14,21 +15,24 @@ detachments:
       - { name: Master Repugnomancer, points: 15 }
   - name: Exhibition Of Slaughter
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     unique: Wych Cult
     enhancements:
       - { name: Hyperstimm Trafficker, points: 20 }
       - { name: Periapt of Torments, points: 20 }
   - name: Kabalite Agonysts
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     unique: Kabal
     enhancements:
       - { name: Contempt for Rivals, points: 20 }
       - { name: Towering Arrogance, points: 15 }
   - name: Kabalite Cartel
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     unique: Kabal
     enhancements:
       - { name: Informant Network, points: 30 }
@@ -37,7 +41,8 @@ detachments:
       - { name: Webway Awl, points: 25 }
   - name: Realspace Raiders
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Crucible of Malediction, points: 15 }
       - { name: Dark Vitality, points: 20 }
@@ -45,7 +50,8 @@ detachments:
       - { name: Labyrinthine Cunning, points: 25 }
   - name: Reaper’S Wager
     dp: 3
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Archraider, points: 15 }
       - { name: Conductor of Torment, points: 20 }
@@ -53,7 +59,8 @@ detachments:
       - { name: Webway Walker, points: 15 }
   - name: Skysplinter Assault
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Nightmare Shroud, points: 20 }
       - { name: Phantasmal Smoke, points: 15 }
@@ -61,7 +68,8 @@ detachments:
       - { name: Spiteful Raider, points: 10 }
   - name: Spectacle Of Spite
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     unique: Wych Cult
     enhancements:
       - { name: Chronoshard, points: 15 }
@@ -70,7 +78,8 @@ detachments:
       - { name: Pharmacophex, points: 15 }
   - name: Tools Of Torment
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Covens
     enhancements:
       - { name: Elixir of the Corpse Courts (Upgrade), points: 15 }
@@ -82,8 +91,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Court Of The Archon
       - Hand Of The Archon
       - Incubi
@@ -115,8 +123,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Incubi
   - name: Grotesques
     pricing:
@@ -132,8 +139,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Wracks
   - name: Hand Of The Archon
     pricing:
@@ -177,8 +183,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Hand Of The Archon
       - Incubi
       - Kabalite Warriors
@@ -188,8 +193,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Wyches
   - name: Mandrakes
     pricing:
@@ -282,8 +286,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Wyches
   - name: Talos
     pricing:
@@ -312,8 +315,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Wracks
     legends: true
   - name: Venom

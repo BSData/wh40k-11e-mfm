@@ -5,13 +5,15 @@ firstSeen: 2026-08-26
 detachments:
   - name: Armoured Warhost
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Guiding Presence, points: 25 }
       - { name: Spirit Stone of Raelyth, points: 20 }
   - name: Aspect Host
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Aspect of Murder, points: 15 }
       - { name: Mantle of Wisdom, points: 20 }
@@ -19,7 +21,8 @@ detachments:
       - { name: Strategic Savant, points: 10 }
   - name: Corsair Coterie
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Archraider, points: 35 }
       - { name: Infamy, points: 25 }
@@ -27,7 +30,8 @@ detachments:
       - { name: Webway Pathstone, points: 25 }
   - name: Devoted Of Ynnead
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Borrowed Vigour, points: 10 }
       - { name: Gaze of Ynnead, points: 15 }
@@ -35,7 +39,8 @@ detachments:
       - { name: Storm of Whispers, points: 10 }
   - name: Eldritch Raiders
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Adrenal Infusions, points: 20 }
       - { name: Alacritous Assault, points: 20 }
@@ -43,14 +48,16 @@ detachments:
       - { name: Pirate Prince, points: 15 }
   - name: Fateful Performance
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     unique: Acrobatic
     enhancements:
       - { name: A Foot in the Future, points: 15 }
       - { name: Mistweave, points: 20 }
   - name: Ghosts Of The Webway
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     unique: Acrobatic
     enhancements:
       - { name: Cegorach’s Coil, points: 25 }
@@ -59,7 +66,8 @@ detachments:
       - { name: Murder’s Jest, points: 20 }
   - name: Guardian Battlehost
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Breath of Vaul, points: 10 }
       - { name: Craftworld’s Champion, points: 25 }
@@ -67,13 +75,15 @@ detachments:
       - { name: Protector of the Paths, points: 20 }
   - name: Path Of The Outcast
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Assassins' Eye (Upgrade), points: 15 }
       - { name: Camouflaged Snipers (Upgrade), points: 10 }
   - name: Seer Council
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Lucid Eye, points: 30 }
       - { name: Runes of Warding, points: 25 }
@@ -81,7 +91,8 @@ detachments:
       - { name: Torc of Morai-Heg, points: 20 }
   - name: Serpent’S Brood
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     unique: Acrobatic
     enhancements:
       - { name: Fanged Leer, points: 10 }
@@ -90,7 +101,8 @@ detachments:
       - { name: Weavers' Wail, points: 20 }
   - name: Spirit Conclave
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Higher Duty, points: 25 }
       - { name: Light of Clarity, points: 30 }
@@ -98,14 +110,16 @@ detachments:
       - { name: Stave of Kurnous, points: 15 }
   - name: Twilight Flickers
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Acrobatic
     enhancements:
       - { name: Prelude Performer, points: 20 }
       - { name: Shadowfall Masks (Upgrade), points: 15 }
   - name: Warhost
     dp: 3
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Gift of Foresight, points: 15 }
       - { name: Phoenix Gem, points: 35 }
@@ -113,7 +127,8 @@ detachments:
       - { name: Timeless Strategist, points: 15 }
   - name: Windrider Host
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Echoes of Ulthanesh, points: 20 }
       - { name: Firstdrawn Blade, points: 10 }
@@ -133,8 +148,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 135 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Dire Avengers
   - name: Autarch
     pricing:
@@ -142,8 +156,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Dark Reapers
       - Dire Avengers
       - Fire Dragons
@@ -157,8 +170,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Corsair Cloud Dancer Band
       - Windriders
     legends: true
@@ -168,8 +180,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Swooping Hawks
       - Warp Spiders
   - name: Avatar Of Khaine
@@ -184,8 +195,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 125 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Swooping Hawks
   - name: Bonesinger
     pricing:
@@ -193,8 +203,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Wraithblades
       - Wraithguard
       - Wraithlord
@@ -205,8 +214,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Dragon Knights
   - name: Cobra
     pricing:
@@ -306,8 +314,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 120 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Guardian Defenders
       - Storm Guardians
   - name: Falcon
@@ -322,8 +329,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Guardian Defenders
       - Storm Guardians
   - name: Farseer Skyrunner
@@ -332,8 +338,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Warlock Skyrunners
       - Windriders
   - name: Fire Dragons
@@ -367,8 +372,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 130 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Fire Dragons
   - name: Guardian Defenders
     pricing:
@@ -402,8 +406,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Rangers
     legends: true
   - name: Irillyth
@@ -412,8 +415,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 105 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Shadow Spectres
     legends: true
   - name: Jain Zar
@@ -422,8 +424,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 105 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Howling Banshees
   - name: Karandras
     pricing:
@@ -431,8 +432,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Striking Scorpions
     legends: true
   - name: Kharseth
@@ -441,8 +441,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Corsair Reaver Band
       - Corsair Voidreavers
       - Corsair Voidscarred
@@ -458,8 +457,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 135 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Warp Spiders
   - name: Lynx
     pricing:
@@ -474,8 +472,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Dark Reapers
   - name: Night Spinner
     pricing:
@@ -513,8 +510,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Corsair Reaver Band
       - Corsair Voidreavers
       - Corsair Voidscarred
@@ -560,8 +556,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Troupe
   - name: Shining Spears
     pricing:
@@ -629,8 +624,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: support
-    attachTo:
+    supportTo:
       - Dragon Knights
   - name: Storm Guardians
     pricing:
@@ -664,8 +658,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: support
-    attachTo:
+    supportTo:
       - Corsair Reaver Band
       - Corsair Voidreavers
       - Corsair Voidscarred
@@ -697,8 +690,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Troupe
   - name: Vampire Hunter
     pricing:
@@ -747,8 +739,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: support
-    attachTo:
+    supportTo:
       - Guardian Defenders
       - Storm Guardians
   - name: Warlock Conclave
@@ -758,8 +749,7 @@ units:
         costs:
           - { models: 2, points: 55 }
           - { models: 4, points: 120 }
-    role: support
-    attachTo:
+    supportTo:
       - Guardian Defenders
       - Storm Guardians
   - name: Warlock Skyrunners
@@ -769,8 +759,7 @@ units:
         costs:
           - { models: 1, points: 45 }
           - { models: 2, points: 90 }
-    role: support
-    attachTo:
+    supportTo:
       - Windriders
   - name: Warp Hunter
     pricing:
@@ -876,8 +865,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Ynnari Incubi
       - Ynnari Kabalite Warriors
   - name: Ynnari Incubi
@@ -926,8 +914,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Ynnari Wyches
   - name: Ynnari Venom
     groupTitle: Ynnari
@@ -954,8 +941,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Corsair Reaver Band
       - Corsair Voidreavers
       - Corsair Voidscarred

@@ -5,13 +5,15 @@ firstSeen: 2026-08-26
 detachments:
   - name: Cohort Acquisitus
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Explorator Dispensation, points: 20 }
       - { name: Stealth-screened Cybercanids (Upgrade), points: 15 }
   - name: Cohort Cybernetica
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Arch-negator, points: 5 }
       - { name: Emotionless Clarity, points: 10 }
@@ -19,7 +21,8 @@ detachments:
       - { name: Necromechanic, points: 20 }
   - name: Data-Psalm Conclave
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     unique: Data-Psalm
     enhancements:
       - { name: Data-blessed Autosermon, points: 15 }
@@ -28,7 +31,8 @@ detachments:
       - { name: Temporcopia, points: 20 }
   - name: Eradication Cohort
     dp: 3
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Belicosa-class Capacitor Vanes, points: 25 }
       - { name: Martial Signatum Amplificator, points: 15 }
@@ -36,7 +40,8 @@ detachments:
       - { name: Omnissiah’s Fury, points: 10 }
   - name: Explorator Maniple
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Artisan, points: 10 }
       - { name: Genetor, points: 20 }
@@ -44,7 +49,8 @@ detachments:
       - { name: Magos, points: 10 }
   - name: Haloscreed Battle Clade
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Cognitive Reinforcement, points: 30 }
       - { name: Inloaded Lethality, points: 15 }
@@ -52,20 +58,23 @@ detachments:
       - { name: Transoracular Dyad Wafers, points: 15 }
   - name: Lords Of The Forge
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: TL-4ø9, points: 30 }
       - { name: Vingh’s Wafers of Dynamism, points: 25 }
   - name: Luminen Auto-Choir
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     unique: Data-Psalm
     enhancements:
       - { name: Electromiasmic Brazier, points: 10 }
       - { name: Voltagheist Reliquary, points: 15 }
   - name: Rad-Zone Corps
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Autoclavic Denunciation, points: 15 }
       - { name: Malphonic Susurrus, points: 20 }
@@ -73,7 +82,8 @@ detachments:
       - { name: Radial Suffusion, points: 25 }
   - name: Skitarii Hunter Cohort
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Battle-sphere Uplink, points: 25 }
       - { name: Cantic Thrallnet, points: 25 }
@@ -117,8 +127,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 25 }
-    role: support
-    attachTo:
+    supportTo:
       - Kastelan Robots
   - name: Fulgurite Electro-Priests
     pricing:
@@ -289,8 +298,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 35 }
-    role: support
-    attachTo:
+    supportTo:
       - Hastarii Exterminators
       - Hastarii Fusiliers
       - Secutarii Hoplites
@@ -355,8 +363,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Corpuscarii Electro-Priests
       - Fulgurite Electro-Priests
       - Hastarii Exterminators
@@ -374,8 +381,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Corpuscarii Electro-Priests
       - Fulgurite Electro-Priests
       - Kataphron Breachers
@@ -390,8 +396,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Corpuscarii Electro-Priests
       - Fulgurite Electro-Priests
       - Hastarii Exterminators
@@ -409,8 +414,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: support
-    attachTo:
+    supportTo:
       - Corpuscarii Electro-Priests
       - Fulgurite Electro-Priests
       - Hastarii Exterminators

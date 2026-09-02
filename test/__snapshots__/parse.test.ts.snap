@@ -24,7 +24,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Annihilation Legion",
-      "objective": "PURGE THE FOE",
+      "objectives": [
+        "PURGE THE FOE",
+      ],
     },
     {
       "dp": 3,
@@ -47,7 +49,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Awakened Dynasty",
-      "objective": "TAKE AND HOLD",
+      "objectives": [
+        "TAKE AND HOLD",
+      ],
       "unique": "Dynasty",
     },
     {
@@ -71,7 +75,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Canoptek Court",
-      "objective": "TAKE AND HOLD",
+      "objectives": [
+        "TAKE AND HOLD",
+      ],
     },
     {
       "dp": 2,
@@ -94,7 +100,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Cryptek Conclave",
-      "objective": "PRIORITY ASSETS",
+      "objectives": [
+        "PRIORITY ASSETS",
+      ],
     },
     {
       "dp": 2,
@@ -123,7 +131,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Cursed Legion",
-      "objective": "PURGE THE FOE",
+      "objectives": [
+        "PURGE THE FOE",
+      ],
     },
     {
       "dp": 1,
@@ -138,7 +148,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Hand Of The Dynasty",
-      "objective": "TAKE AND HOLD",
+      "objectives": [
+        "TAKE AND HOLD",
+      ],
       "unique": "Dynasty",
     },
     {
@@ -162,7 +174,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Hypercrypt Legion",
-      "objective": "RECONNAISSANCE",
+      "objectives": [
+        "RECONNAISSANCE",
+      ],
       "unique": "Hypercrypt",
     },
     {
@@ -186,7 +200,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Obeisance Phalanx",
-      "objective": "DISRUPTION",
+      "objectives": [
+        "DISRUPTION",
+      ],
     },
     {
       "dp": 2,
@@ -209,7 +225,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Pantheon Of Woe",
-      "objective": "DISRUPTION",
+      "objectives": [
+        "DISRUPTION",
+      ],
     },
     {
       "dp": 1,
@@ -224,7 +242,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Skyshroud Spearhead",
-      "objective": "RECONNAISSANCE",
+      "objectives": [
+        "RECONNAISSANCE",
+      ],
     },
     {
       "dp": 3,
@@ -247,7 +267,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "Starshatter Arsenal",
-      "objective": "PRIORITY ASSETS",
+      "objectives": [
+        "PRIORITY ASSETS",
+      ],
     },
     {
       "dp": 1,
@@ -262,7 +284,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         },
       ],
       "name": "The Phaeron'S Armoury",
-      "objective": "PRIORITY ASSETS",
+      "objectives": [
+        "PRIORITY ASSETS",
+      ],
       "unique": "Hypercrypt",
     },
   ],
@@ -431,10 +455,6 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "attachTo": [
-        "Immortals",
-        "Necron Warriors",
-      ],
       "name": "Chronomancer",
       "pricing": [
         {
@@ -458,7 +478,10 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[2,)",
         },
       ],
-      "role": "support",
+      "supportTo": [
+        "Immortals",
+        "Necron Warriors",
+      ],
     },
     {
       "name": "Convergence Of Dominion",
@@ -636,11 +659,6 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "attachTo": [
-        "Canoptek Macrocytes",
-        "Immortals",
-        "Necron Warriors",
-      ],
       "name": "Geomancer",
       "pricing": [
         {
@@ -654,7 +672,11 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[1,)",
         },
       ],
-      "role": "support",
+      "supportTo": [
+        "Canoptek Macrocytes",
+        "Immortals",
+        "Necron Warriors",
+      ],
     },
     {
       "name": "Ghost Ark",
@@ -721,7 +743,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "attachTo": [
+      "leaderTo": [
         "Immortals",
         "Lychguard",
         "Necron Warriors",
@@ -739,7 +761,6 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[1,)",
         },
       ],
-      "role": "leader",
     },
     {
       "name": "Lokhust Destroyers",
@@ -832,7 +853,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "attachTo": [
+      "leaderTo": [
         "Lokhust Destroyers",
         "Lokhust Heavy Destroyers",
       ],
@@ -849,7 +870,6 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[1,)",
         },
       ],
-      "role": "leader",
     },
     {
       "name": "Lychguard",
@@ -1003,10 +1023,6 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "attachTo": [
-        "Immortals",
-        "Necron Warriors",
-      ],
       "name": "Orikan The Diviner",
       "pricing": [
         {
@@ -1020,10 +1036,13 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[1,)",
         },
       ],
-      "role": "support",
+      "supportTo": [
+        "Immortals",
+        "Necron Warriors",
+      ],
     },
     {
-      "attachTo": [
+      "leaderTo": [
         "Immortals",
         "Lychguard",
         "Necron Warriors",
@@ -1041,10 +1060,9 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[1,)",
         },
       ],
-      "role": "leader",
     },
     {
-      "attachTo": [
+      "leaderTo": [
         "Immortals",
         "Lychguard",
         "Necron Warriors",
@@ -1062,13 +1080,8 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[1,)",
         },
       ],
-      "role": "leader",
     },
     {
-      "attachTo": [
-        "Immortals",
-        "Necron Warriors",
-      ],
       "name": "Plasmancer",
       "pricing": [
         {
@@ -1082,13 +1095,12 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[1,)",
         },
       ],
-      "role": "support",
-    },
-    {
-      "attachTo": [
+      "supportTo": [
         "Immortals",
         "Necron Warriors",
       ],
+    },
+    {
       "name": "Psychomancer",
       "pricing": [
         {
@@ -1102,10 +1114,13 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[1,)",
         },
       ],
-      "role": "support",
+      "supportTo": [
+        "Immortals",
+        "Necron Warriors",
+      ],
     },
     {
-      "attachTo": [
+      "leaderTo": [
         "Immortals",
         "Necron Warriors",
       ],
@@ -1122,7 +1137,6 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[1,)",
         },
       ],
-      "role": "leader",
     },
     {
       "name": "Seraptek Heavy Construct",
@@ -1183,7 +1197,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "attachTo": [
+      "leaderTo": [
         "Skorpekh Destroyers",
       ],
       "name": "Skorpekh Lord",
@@ -1209,14 +1223,8 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[3,)",
         },
       ],
-      "role": "leader",
     },
     {
-      "attachTo": [
-        "Canoptek Wraiths",
-        "Immortals",
-        "Necron Warriors",
-      ],
       "name": "Technomancer",
       "pricing": [
         {
@@ -1240,7 +1248,11 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[2,)",
         },
       ],
-      "role": "support",
+      "supportTo": [
+        "Canoptek Wraiths",
+        "Immortals",
+        "Necron Warriors",
+      ],
     },
     {
       "name": "Tesseract Vault",
@@ -1341,7 +1353,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "attachTo": [
+      "leaderTo": [
         "Immortals",
         "Lychguard",
         "Necron Warriors",
@@ -1359,7 +1371,6 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "range": "[1,)",
         },
       ],
-      "role": "leader",
     },
     {
       "name": "Triarch Praetorians",

@@ -14,7 +14,7 @@ parent: Space Marines  # optional: parent army (sub-factions only; Necrons itsel
 detachments:           # 'name' order by default; 'page' (--order page) preserves source order
   - name: Annihilation Legion
     dp: 2              # detachment's "detachment points" cost (integer) or null
-    objective: PURGE THE FOE   # objective banner text, or null
+    objectives: [PURGE THE FOE] # Force Dispositions granted; always a list, may be empty
     unique: Dynasty   # optional: sub-faction the detachment is restricted to ("UNIQUE: X")
     enhancements:      # 'name' order by default; 'page' preserves source order
       - name: Eldritch Nightmare
@@ -40,8 +40,8 @@ units:                 # 'name' order by default; 'page' preserves source order
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs: [{ models: 1, points: 90 }]
-    role: support              # leader | support, if the unit has that ability
-    attachTo: [Immortals, Necron Warriors]   # units it can be attached to
+    supportTo: [Immortals, Necron Warriors]  # units it can attach to as Support
+    leaderTo: [Lychguard]                    # …and as Leader; a unit may have both
   - name: Redemptor Dreadnought
     groupTitle: Space Marines  # sub-group header this unit sits under (illustrative; see below)
     pricing: [...]
@@ -73,9 +73,12 @@ costs:
   - { models: 1, points: 3500 }                                            # "3,500 pts" (thousands comma)
 ```
 
-### `role` / `attachTo` / `wargear` / `groupTitle` — optional unit extras
-- `role` (`leader`/`support`) + `attachTo`: present when the unit has the Leader/Support
-  ability; `attachTo` lists the units it can join (from the role block's icon + list).
+### `leaderTo` / `supportTo` / `wargear` / `groupTitle` — optional unit extras
+- `leaderTo` / `supportTo`: the units this unit can join, listed separately per ability
+  (from each role block's icon + list). Either may be present, or both — MFM v1.4 gave the
+  Judiciar a Leader list of twelve units and a Support list of five, so a single `role` +
+  `attachTo` pair cannot express what the page says. These are named to match
+  `Enhancement.leaderTo`/`supportTo`, which already modelled exactly this shape.
 - `wargear`: per-item point costs from the unit's "Wargear Options" block (`per` stripped).
 - `legends: true`: marks Legends (deprecated) units — see specs/scraping.md.
 - `groupTitle`: the page sub-group the unit is listed under, Title-Cased from its army-group

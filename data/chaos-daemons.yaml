@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: Blood Legion
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Brazenmaw, points: 15 }
       - { name: Fury’s Cage, points: 20 }
@@ -13,13 +14,15 @@ detachments:
       - { name: Slaughterthirst, points: 25 }
   - name: Cavalcade Of Chaos
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Apocalyptic Steeds (Upgrade), points: 10 }
       - { name: Soul-shattering Charge (Upgrade), points: 10 }
   - name: Daemonic Incursion
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: "A’rgath, The King of Blades", points: 20 }
       - { name: Soulstealer, points: 15 }
@@ -27,7 +30,8 @@ detachments:
       - { name: The Everstave, points: 25 }
   - name: Legion Of Excess
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Avatar of Perfection, points: 15 }
       - { name: Dreaming Crown, points: 30 }
@@ -35,12 +39,14 @@ detachments:
       - { name: Soul Glutton, points: 10 }
   - name: Lords Of The Warp
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Swollen with Power (Upgrade), points: 10 }
   - name: Plague Legion
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Cankerblight, points: 15 }
       - { name: Droning Shroud, points: 35 }
@@ -48,7 +54,8 @@ detachments:
       - { name: Maggot Maws, points: 15 }
   - name: Scintillating Legion
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Improbable Shield, points: 30 }
       - { name: Inescapable Eye, points: 15 }
@@ -56,7 +63,8 @@ detachments:
       - { name: Neverblade, points: 25 }
   - name: Shadow Legion
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Fade to Darkness, points: 30 }
       - { name: Leaping Shadows, points: 25 }
@@ -64,7 +72,8 @@ detachments:
       - { name: Mantle of Gloom, points: 20 }
   - name: Warptide
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Bane-forged Weapons (Upgrade), points: 15 }
       - { name: Soul-hungry Slaughterers (Upgrade), points: 10 }
@@ -120,8 +129,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Bloodletters
   - name: Bloodthirster
     pricing:
@@ -151,8 +159,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blue Horrors
       - Pink Horrors
   - name: Contorted Epitome
@@ -165,8 +172,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 125 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Daemonettes
   - name: Daemon Prince Of Chaos
     pricing:
@@ -192,8 +198,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plaguebearers
   - name: Exalted Flamer
     pricing:
@@ -201,8 +206,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Flamers
   - name: Fateskimmer
     pricing:
@@ -210,8 +214,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Screamers
   - name: Feculent Gnarlmaw
     pricing:
@@ -251,8 +254,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blue Horrors
       - Pink Horrors
   - name: Furies
@@ -293,8 +295,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Seekers
     legends: true
   - name: Horticulous Slimux
@@ -303,8 +304,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 120 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Beasts Of Nurgle
       - Plague Toads
       - Pox Riders
@@ -314,8 +314,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Daemonettes
   - name: Kairos Fateweaver
     pricing:
@@ -329,8 +328,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Flesh Hounds
   - name: Keeper Of Secrets
     pricing:
@@ -402,8 +400,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plaguebearers
   - name: Rendmaster On Blood Throne
     pricing:
@@ -472,8 +469,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Bloodcrushers
   - name: Skulltaker
     pricing:
@@ -481,8 +477,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Bloodletters
   - name: Sloppity Bilepiper
     pricing:
@@ -490,8 +485,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plaguebearers
   - name: Soul Grinder
     pricing:
@@ -516,8 +510,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plaguebearers
   - name: Syll’Esske
     pricing:
@@ -525,8 +518,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 120 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Daemonettes
   - name: The Blue Scribes
     pricing:
@@ -552,8 +544,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 135 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Hellflayers
   - name: Tranceweaver
     pricing:
@@ -561,8 +552,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Daemonettes
   - name: Zarakynel
     pricing:

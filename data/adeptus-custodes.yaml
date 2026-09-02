@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: Auric Champions
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Blade Imperator, points: 25 }
       - { name: Inspirational Exemplar, points: 10 }
@@ -13,7 +14,8 @@ detachments:
       - { name: Veiled Blade, points: 25 }
   - name: Lions Of The Emperor
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Lions
     enhancements:
       - { name: Admonimortis, points: 30 }
@@ -22,14 +24,16 @@ detachments:
       - { name: Superior Creation, points: 25 }
   - name: Might Of The Moritoi
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Armoury
     enhancements:
       - { name: Auramite Sarcophagus (Upgrade), points: 15 }
       - { name: Interred Expertise (Upgrade), points: 25 }
   - name: Null Maiden Vigil
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Enhanced Voidsheen Cloak, points: 10 }
       - { name: Huntress’ Eye, points: 15 }
@@ -37,7 +41,8 @@ detachments:
       - { name: Raptor Blade, points: 5 }
   - name: Shield Host
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Auric Mantle, points: 15 }
       - { name: Castellan’s Mark, points: 20 }
@@ -45,13 +50,15 @@ detachments:
       - { name: Panoptispex, points: 5 }
   - name: Silent Hunters
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Encircling Hunter, points: 15 }
       - { name: Psyk-out Grenades (Upgrade), points: 10 }
   - name: Solar Spearhead
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     unique: Armoury
     enhancements:
       - { name: Adamantine Talisman, points: 25 }
@@ -60,7 +67,8 @@ detachments:
       - { name: Veteran of the Kataphraktoi, points: 10 }
   - name: Talons Of The Emperor
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Aegis Projector, points: 20 }
       - { name: Champion of the Imperium, points: 25 }
@@ -68,7 +76,8 @@ detachments:
       - { name: Radiant Mantle, points: 30 }
   - name: Tharanatoi Hammerblow
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     unique: Lions
     enhancements:
       - { name: Efficient Aggression, points: 25 }
@@ -87,8 +96,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Prosecutors
       - Vigilators
       - Witchseekers
@@ -145,8 +153,7 @@ units:
         label: Your 2nd + Unit Costs
         costs:
           - { models: 1, points: 125 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Custodian Guard
       - Custodian Guard With Adrasite And Pyrithite Spears
       - Custodian Wardens
@@ -233,8 +240,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Prosecutors
       - Vigilators
       - Witchseekers
@@ -275,8 +281,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 110 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Custodian Guard
       - Custodian Guard With Adrasite And Pyrithite Spears
       - Custodian Wardens
@@ -287,8 +292,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 130 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Allarus Custodians
       - Aquilon Custodians
   - name: Shield-Captain On Dawneagle Jetbike
@@ -297,8 +301,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 140 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Agamatus Custodians
       - Vertus Praetors
   - name: Telemon Heavy Dreadnought
@@ -317,8 +320,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 135 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Custodian Guard
       - Custodian Guard With Adrasite And Pyrithite Spears
       - Custodian Wardens
@@ -329,8 +331,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 110 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Custodian Guard
       - Custodian Guard With Adrasite And Pyrithite Spears
       - Custodian Wardens

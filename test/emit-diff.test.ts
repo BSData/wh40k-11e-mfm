@@ -120,21 +120,22 @@ describe('changelog (ignores firstSeen)', () => {
     expect(log).toContain('**Units added:** Test Construct');
   });
 
-  it('reports wargear, role and attach-list changes', () => {
+  it('reports wargear and per-ability attach-list changes', () => {
     const before = necronsContent();
     const after = structuredClone(before);
     const tech = after.units.find((u) => u.name === 'Technomancer');
     if (tech) {
-      tech.role = 'leader';
-      tech.attachTo = ['Immortals'];
+      // Gains a Leader list while keeping its Support one — the v1.4 Judiciar shape.
+      tech.leaderTo = ['Immortals'];
+      tech.supportTo = ['Canoptek Wraiths'];
       tech.wargear = [{ item: 'Test Rod', points: 15 }];
     }
     const tb = before.units.find((u) => u.name === 'Technomancer');
     if (tb) tb.wargear = [{ item: 'Test Rod', points: 10 }];
     const log = changelog([before], [after]);
     expect(log).toContain('Technomancer — Test Rod: 10 → 15 pts (**+5**)');
-    expect(log).toContain('Technomancer — role: support → leader');
-    expect(log).toContain('Technomancer — attaches to:');
+    expect(log).toContain('Technomancer — leaderTo: — → Immortals');
+    expect(log).toContain('Technomancer — supportTo:');
   });
 
   it('reports detachment DP and objective changes', () => {
@@ -143,11 +144,13 @@ describe('changelog (ignores firstSeen)', () => {
     const det = after.detachments.find((d) => d.name === 'Annihilation Legion');
     if (det) {
       det.dp = 3;
-      det.objective = 'NEW OBJECTIVE';
+      det.objectives = ['NEW OBJECTIVE', 'SECOND DISPOSITION'];
     }
     const log = changelog([before], [after]);
     expect(log).toContain('Annihilation Legion — DP: 2 → 3');
-    expect(log).toContain('Annihilation Legion — objective: PURGE THE FOE → NEW OBJECTIVE');
+    expect(log).toContain(
+      'Annihilation Legion — objectives: PURGE THE FOE → NEW OBJECTIVE, SECOND DISPOSITION',
+    );
   });
 
   it('reports a brand new and a removed faction', () => {

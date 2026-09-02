@@ -5,7 +5,8 @@ firstSeen: 2026-08-26
 detachments:
   - name: Champions Of Contagion
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Cornucophagus, points: 35 }
       - { name: Final Ingredient, points: 20 }
@@ -13,13 +14,15 @@ detachments:
       - { name: Visions of Virulence, points: 15 }
   - name: Contagion Engines
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Lancet of the Worldsore (Upgrade), points: 15 }
       - { name: Parasitic Woe‑reaper (Upgrade), points: 15 }
   - name: Death Lord’S Chosen
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Face of Death, points: 10 }
       - { name: Helm of The Fly King, points: 20 }
@@ -27,13 +30,15 @@ detachments:
       - { name: Warprot Talisman, points: 30 }
   - name: Flyblown Host
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Insectile Murmuration (Upgrade), points: 15 }
       - { name: Plagueveil (Upgrade), points: 15 }
   - name: Mortarion’S Hammer
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Bilemaw Blight, points: 10 }
       - { name: Eye of Affliction, points: 20 }
@@ -41,13 +46,15 @@ detachments:
       - { name: Tendrilous Emissions, points: 30 }
   - name: Paragons Of Putrescence
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Host of the Hybridised Pox, points: 40 }
       - { name: Rejuvenating Swarm, points: 20 }
   - name: Shamblerot Vectorium
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Lord of the Walking Pox, points: 15 }
       - { name: Sorrowsyphon, points: 10 }
@@ -55,7 +62,8 @@ detachments:
       - { name: Witherbone Pipes, points: 25 }
   - name: Tallyband Summoners
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Beckoning Blight, points: 20 }
       - { name: Entropic Knell, points: 15 }
@@ -63,7 +71,8 @@ detachments:
       - { name: Tome of Bounteous Blessings, points: 20 }
   - name: Virulent Vectorium
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Arch Contaminator, points: 25 }
       - { name: Daemon Weapon of Nurgle, points: 10 }
@@ -84,8 +93,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plague Marines
   - name: Blightlord Terminators
     pricing:
@@ -159,8 +167,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plague Marines
     legends: true
   - name: Death Guard Chaos Lord In Terminator Armour
@@ -169,8 +176,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blightlord Terminators
       - Deathshroud Terminators
     legends: true
@@ -196,8 +202,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blightlord Terminators
       - Deathshroud Terminators
     legends: true
@@ -252,8 +257,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plague Marines
   - name: Great Unclean One
     groupTitle: Plague Legions
@@ -278,8 +282,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plague Marines
   - name: Lord Of Contagion
     pricing:
@@ -287,8 +290,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 120 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blightlord Terminators
       - Deathshroud Terminators
   - name: Lord Of Poxes
@@ -297,8 +299,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plague Marines
   - name: Lord Of Virulence
     pricing:
@@ -306,8 +307,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blightlord Terminators
       - Deathshroud Terminators
   - name: Malignant Plaguecaster
@@ -316,8 +316,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plague Marines
       - Poxwalkers
   - name: Miasmic Malignifier
@@ -345,8 +344,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plague Marines
       - Poxwalkers
   - name: Nurglings
@@ -379,8 +377,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plague Marines
   - name: Plaguebearers
     groupTitle: Plague Legions
@@ -419,8 +416,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Plague Marines
   - name: Typhus
     pricing:
@@ -428,8 +424,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blightlord Terminators
       - Deathshroud Terminators
       - Poxwalkers

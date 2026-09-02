@@ -6,7 +6,8 @@ parent: Space Marines
 detachments:
   - name: 1st Company Task Force
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Fear Made Manifest, points: 30 }
       - { name: Iron Resolve, points: 15 }
@@ -14,7 +15,8 @@ detachments:
       - { name: The Imperium’s Sword, points: 25 }
   - name: Anvil Siege Force
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Architect of War, points: 25 }
       - { name: Fleet Commander, points: 15 }
@@ -22,7 +24,8 @@ detachments:
       - { name: Stoic Defender, points: 15 }
   - name: Armoured Speartip
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Armoured Commander, points: 25 }
       - { name: Liberator, points: 15 }
@@ -30,7 +33,8 @@ detachments:
       - { name: Tip of the Spear, points: 40 }
   - name: Bastion Task Force
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Blades of Valour, points: 15 }
       - { name: Bombast Omnivox, points: 15 }
@@ -38,7 +42,8 @@ detachments:
       - { name: Hero of the Chapter, points: 20 }
   - name: Ceramite Sentinels
     dp: 3
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Castellum Omnivox, points: 20 }
       - { name: Defensive Mastery, points: 25 }
@@ -46,13 +51,15 @@ detachments:
       - { name: Spy-skull Data Link, points: 15 }
   - name: Champions Of Fenris
     dp: 1
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: A Giant Amongst Giants, points: 15 }
       - { name: Preyslayer, points: 15 }
   - name: Firestorm Assault Force
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Adamantine Mantle, points: 20 }
       - { name: Champion of Humanity, points: 10 }
@@ -60,13 +67,15 @@ detachments:
       - { name: War-tempered Artifice, points: 25 }
   - name: Fulguris Task Force
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Bellicose Weapon Spirits (Upgrade), points: 15 }
       - { name: Raptorial Cogitator Core (Upgrade), points: 15 }
   - name: Gladius Task Force
     dp: 3
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Adept of the Codex, points: 20 }
       - { name: Artificer Armour, points: 20 }
@@ -74,7 +83,8 @@ detachments:
       - { name: The Honour Vehement, points: 15 }
   - name: Headhunter Task Force
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Astartes Tank Ace, points: 40 }
       - { name: Firestorm Coordinators, points: 20 }
@@ -82,7 +92,8 @@ detachments:
       - { name: Redoubtable Machine Spirit, points: 25 }
   - name: Ironstorm Spearhead
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Adept of the Omnissiah, points: 35 }
       - { name: Master of Machine War, points: 20 }
@@ -90,13 +101,15 @@ detachments:
       - { name: The Flesh Is Weak, points: 20 }
   - name: Legends Of Saga And Song
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Fierce Example (Upgrade), points: 25 }
       - { name: Thirst for Glory (Upgrade), points: 15 }
   - name: Librarius Conclave
     dp: 1
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Celerity, points: 35 }
       - { name: Fusillade, points: 25 }
@@ -105,7 +118,8 @@ detachments:
       - { name: Temporal Corridor, points: 25 }
   - name: Orbital Assault Force
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Dedicated Gunship, points: 15 }
       - { name: Laurels of Thunder, points: 15 }
@@ -113,7 +127,8 @@ detachments:
       - { name: Veteran of the Vanguard, points: 20 }
   - name: Saga Of The Beastslayer
     dp: 2
-    objective: PURGE THE FOE
+    objectives:
+      - PURGE THE FOE
     enhancements:
       - { name: Elder’s Guidance, points: 20 }
       - { name: Helm of the Beastslayer, points: 15 }
@@ -121,7 +136,8 @@ detachments:
       - { name: Wolf-touched, points: 15, leaderTo: [ Wulfen, Wulfen With Storm Shields ] }
   - name: Saga Of The Bold
     dp: 2
-    objective: PRIORITY ASSETS
+    objectives:
+      - PRIORITY ASSETS
     enhancements:
       - { name: Braggart’s Steel, points: 20 }
       - { name: Hordeslayer, points: 15 }
@@ -129,7 +145,8 @@ detachments:
       - { name: Thunderwolf’s Fortitude, points: 25 }
   - name: Saga Of The Great Wolf
     dp: 2
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Chariots of the Storm, points: 25 }
       - { name: Grimnar’s Mark, points: 20, leaderTo: [ Wolf Guard Terminators ] }
@@ -137,7 +154,8 @@ detachments:
       - { name: Skjald’s Foretelling, points: 25 }
   - name: Saga Of The Hunter
     dp: 2
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Fenrisian Grit, points: 15 }
       - { name: Feral Rage, points: 10 }
@@ -145,7 +163,8 @@ detachments:
       - { name: Wolf Master, points: 5 }
   - name: Stormlance Task Force
     dp: 3
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Feinting Withdrawal, points: 10 }
       - { name: Fury of the Storm, points: 25 }
@@ -153,13 +172,15 @@ detachments:
       - { name: Portents of Wisdom, points: 15 }
   - name: Subversion Assets
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Death in the Dark (Upgrade), points: 15 }
       - { name: Shroud Field, points: 20 }
   - name: Vanguard Spearhead
     dp: 2
-    objective: RECONNAISSANCE
+    objectives:
+      - RECONNAISSANCE
     enhancements:
       - { name: Execute and Redeploy, points: 20 }
       - { name: Ghostweave Cloak, points: 15 }
@@ -167,13 +188,15 @@ detachments:
       - { name: The Blade Driven Deep, points: 25 }
   - name: Vengeful Hosts
     dp: 1
-    objective: TAKE AND HOLD
+    objectives:
+      - TAKE AND HOLD
     enhancements:
       - { name: Avenging Angel, points: 20 }
       - { name: Orksbane, points: 20 }
   - name: Veterans Of The Fang
     dp: 1
-    objective: DISRUPTION
+    objectives:
+      - DISRUPTION
     enhancements:
       - { name: Eye of the Hunter, points: 20 }
       - { name: Weaver of Sagas, points: 15 }
@@ -198,8 +221,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: support
-    attachTo:
+    supportTo:
       - Assault Intercessor Squad
       - Crusader Squad
       - Deathwatch Veterans
@@ -224,8 +246,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: support
-    attachTo:
+    supportTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
       - Deathwing Terminator Squad
@@ -237,8 +258,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 95 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Wolf Guard Terminators
   - name: Assault Intercessor Squad
     groupTitle: Space Marines
@@ -296,8 +316,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: support
-    attachTo:
+    supportTo:
       - Bladeguard Veteran Squad
   - name: Bladeguard Veteran Squad
     groupTitle: Space Marines
@@ -336,8 +355,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Fenrisian Wolves
       - Thunderwolf Cavalry
     legends: true
@@ -348,8 +366,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Bladeguard Veteran Squad
       - Company Heroes
@@ -373,8 +390,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Aggressor Squad
       - Eradicator Squad
       - Heavy Intercessor Squad
@@ -386,8 +402,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Eliminator Squad
       - Hounds Of Morkai
       - Incursor Squad
@@ -402,8 +417,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
       - Deathwing Terminator Squad
@@ -416,8 +430,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessors With Jump Packs
       - Sanguinary Guard
       - Skyclaws
@@ -448,8 +461,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 60 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Bladeguard Veteran Squad
       - Crusader Squad
@@ -473,8 +485,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
       - Deathwing Terminator Squad
@@ -487,8 +498,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Outrider Squad
       - Ravenwing Black Knights
   - name: Chaplain With Jump Pack
@@ -498,8 +508,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessors With Jump Packs
       - Death Company Marines With Jump Packs
       - Skyclaws
@@ -518,8 +527,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 20 }
-    role: support
-    attachTo:
+    supportTo:
       - Fenrisian Wolves
     legends: true
   - name: Desolation Squad
@@ -650,8 +658,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Thunderwolf Cavalry
     legends: true
   - name: Heavy Intercessor Squad
@@ -764,8 +771,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blood Claws
       - Grey Hunters
       - Wolf Guard Headtakers
@@ -776,8 +782,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Bladeguard Veteran Squad
       - Crusader Squad
@@ -797,8 +802,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blood Claws
       - Grey Hunters
       - Wolf Guard
@@ -854,8 +858,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Deathwatch Veterans
       - Decimus Kill Team
@@ -877,8 +880,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Eliminator Squad
       - Hounds Of Morkai
       - Incursor Squad
@@ -892,8 +894,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 85 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
       - Deathwing Terminator Squad
@@ -906,8 +907,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: support
-    attachTo:
+    supportTo:
       - Assault Intercessor Squad
       - Bladeguard Veteran Squad
       - Company Heroes
@@ -930,8 +930,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: support
-    attachTo:
+    supportTo:
       - Hounds Of Morkai
       - Incursor Squad
       - Infiltrator Squad
@@ -944,8 +943,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 45 }
-    role: support
-    attachTo:
+    supportTo:
       - Hounds Of Morkai
       - Reiver Squad
   - name: Lieutenant With Combi-Weapon
@@ -961,8 +959,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Wolf Guard Terminators
   - name: Logan Grimnar On Stormrider
     pricing:
@@ -970,8 +967,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 180 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Thunderwolf Cavalry
     legends: true
   - name: Long Fangs
@@ -988,8 +984,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 50 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blood Claws
     legends: true
   - name: Murderfang
@@ -1004,8 +999,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blood Claws
       - Grey Hunters
       - Wolf Guard Headtakers
@@ -1046,8 +1040,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blood Claws
       - Wolf Guard Headtakers
   - name: Razorback
@@ -1233,8 +1226,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Assault Intercessor Squad
       - Crusader Squad
       - Decimus Kill Team
@@ -1291,8 +1283,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blood Claws
       - Grey Hunters
       - Wolf Guard Headtakers
@@ -1355,8 +1346,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 65 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blood Claws
       - Grey Hunters
       - Wolf Guard Headtakers
@@ -1366,8 +1356,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Terminator Assault Squad
       - Terminator Squad
       - Wolf Guard Terminators
@@ -1378,8 +1367,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Thunderwolf Cavalry
     legends: true
   - name: Wolf Guard Headtakers
@@ -1404,8 +1392,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 30 }
-    role: support
-    attachTo:
+    supportTo:
       - Blood Claws
       - Grey Hunters
       - Long Fangs
@@ -1416,8 +1403,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 40 }
-    role: support
-    attachTo:
+    supportTo:
       - Blood Claws
       - Grey Hunters
       - Long Fangs
@@ -1428,8 +1414,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 35 }
-    role: support
-    attachTo:
+    supportTo:
       - Skyclaws
     legends: true
   - name: Wolf Guard Terminators
@@ -1452,8 +1437,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 100 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Thunderwolf Cavalry
     legends: true
   - name: Wolf Priest
@@ -1462,8 +1446,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 70 }
-    role: leader
-    attachTo:
+    leaderTo:
       - Blood Claws
       - Grey Hunters
       - Wolf Guard Headtakers
