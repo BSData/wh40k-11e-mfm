@@ -29,6 +29,12 @@ audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
    It is **comprehensive**: every field the model carries is diffed, so a change can't
    slip through unreported (the readable counterpart to the parser's coverage guard).
 
+   Leader/Support lists on units and enhancements show only membership changes, with
+   `-` for removed names and `+` for added names (e.g.
+   `Apothecary — supportTo: + Bladeguard Veteran Squad` or
+   `Unit — leaderTo: - Old, + New`). Unchanged members are omitted, and list order
+   alone does not count as a change. The same detail appears in the persistent changelog.
+
 ### The table must explain every row
 The Units and Detachments columns count entities **added (`+`), removed (`-`) and
 changed in place (`~`)**; Points shows the `▲`/`▼` split with the net swing. A routine
