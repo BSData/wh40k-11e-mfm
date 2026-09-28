@@ -42,6 +42,16 @@ const unitNames = (f: FactionContent) => new Set(f.units.map((u) => u.name));
 const detNames = (f: FactionContent) => new Set(f.detachments.map((d) => d.name));
 const onlyIn = <T>(a: Set<T>, b: Set<T>) => [...a].filter((x) => !b.has(x)).sort();
 
+/** Only the changed Leader/Support targets, with removals before additions. */
+function listDelta(before: string[] | undefined, after: string[] | undefined): string {
+  const old = new Set(before ?? []);
+  const now = new Set(after ?? []);
+  return [
+    ...onlyIn(old, now).map((name) => `- ${name}`),
+    ...onlyIn(now, old).map((name) => `+ ${name}`),
+  ].join(', ');
+}
+
 /** A keyed numeric value (a unit cost option, a wargear item, or an enhancement). */
 interface Numeric {
   display: string;
@@ -266,9 +276,8 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     if (!p) continue;
     const note = (text: string) => unitOther.push({ entity: u.name, text: `${u.name} — ${text}` });
     for (const grant of ['leaderTo', 'supportTo'] as const) {
-      const pa = (p[grant] ?? []).join(', ');
-      const na = (u[grant] ?? []).join(', ');
-      if (pa !== na) note(`${grant}: ${pa || '—'} → ${na || '—'}`);
+      const delta = listDelta(p[grant], u[grant]);
+      if (delta) note(`${grant}: ${delta}`);
     }
   }
   const detOther: Attr[] = [];
@@ -288,9 +297,8 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
       const x = pe.get(e.name);
       if (!x) continue;
       for (const grant of ['leaderTo', 'supportTo'] as const) {
-        const pl = (x[grant] ?? []).join(', ');
-        const nl = (e[grant] ?? []).join(', ');
-        if (pl !== nl) note(`${d.name} · ${e.name} — ${grant}: ${pl || '—'} → ${nl || '—'}`);
+        const delta = listDelta(x[grant], e[grant]);
+        if (delta) note(`${d.name} · ${e.name} — ${grant}: ${delta}`);
       }
     }
   }

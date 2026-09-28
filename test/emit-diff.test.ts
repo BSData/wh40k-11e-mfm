@@ -127,15 +127,44 @@ describe('changelog (ignores firstSeen)', () => {
     if (tech) {
       // Gains a Leader list while keeping its Support one — the v1.4 Judiciar shape.
       tech.leaderTo = ['Immortals'];
-      tech.supportTo = ['Canoptek Wraiths'];
+      tech.supportTo = ['Canoptek Wraiths', 'Lychguard'];
       tech.wargear = [{ item: 'Test Rod', points: 15 }];
     }
     const tb = before.units.find((u) => u.name === 'Technomancer');
     if (tb) tb.wargear = [{ item: 'Test Rod', points: 10 }];
     const log = changelog([before], [after]);
     expect(log).toContain('Technomancer — Test Rod: 10 → 15 pts (**+5**)');
-    expect(log).toContain('Technomancer — leaderTo: — → Immortals');
-    expect(log).toContain('Technomancer — supportTo:');
+    expect(log).toContain('- Technomancer — leaderTo: + Immortals\n');
+    expect(log).toContain(
+      '- Technomancer — supportTo: - Immortals, - Necron Warriors, + Lychguard\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Technomancer — supportTo: - Immortals, - Necron Warriors, + Lychguard\n',
+    );
+  });
+
+  it('reports only the added target when an existing Support list grows', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const tech = after.units.find((u) => u.name === 'Technomancer');
+    if (!tech?.supportTo) throw new Error('fixture changed');
+    tech.supportTo.push('Bladeguard Veteran Squad');
+
+    const log = changelog([before], [after]);
+    expect(log).toContain('- Technomancer — supportTo: + Bladeguard Veteran Squad\n');
+    expect(log).not.toContain('Technomancer — supportTo: Canoptek Wraiths');
+  });
+
+  it('reports removing an entire unit Support list', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const tech = after.units.find((u) => u.name === 'Technomancer');
+    if (!tech) throw new Error('fixture changed');
+    delete tech.supportTo;
+
+    expect(changelog([before], [after])).toContain(
+      '- Technomancer — supportTo: - Canoptek Wraiths, - Immortals, - Necron Warriors\n',
+    );
   });
 
   it('reports detachment DP and objective changes', () => {
@@ -179,15 +208,32 @@ describe('changelog (ignores firstSeen)', () => {
     const murdermind = after.detachments
       .find((d) => d.name === 'Cursed Legion')
       ?.enhancements.find((e) => e.name === 'Murdermind');
-    // Murdermind grants Support in v1.1; add a Leader grant and narrow the Support one.
+    // Murdermind grants Support in v1.1; add a Leader grant and trade some Support targets.
     if (murdermind) {
       murdermind.leaderTo = ['Lokhust Destroyers'];
-      murdermind.supportTo = ['Skorpekh Destroyers'];
+      murdermind.supportTo = ['Canoptek Wraiths', 'Skorpekh Destroyers'];
     }
     const log = changelog([before], [after]);
     expect(log).toContain('Awakened Dynasty — unique: Dynasty → Hypercrypt');
-    expect(log).toContain('Cursed Legion · Murdermind — leaderTo:');
-    expect(log).toContain('Cursed Legion · Murdermind — supportTo:');
+    expect(log).toContain('- Cursed Legion · Murdermind — leaderTo: + Lokhust Destroyers\n');
+    expect(log).toContain(
+      '- Cursed Legion · Murdermind — supportTo: - Lokhust Destroyers, - Lokhust Heavy Destroyers, - Ophydian Destroyers, + Canoptek Wraiths\n',
+    );
+  });
+
+  it('ignores Leader/Support list order on units and enhancements', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const tech = after.units.find((u) => u.name === 'Technomancer');
+    const murdermind = after.detachments
+      .find((d) => d.name === 'Cursed Legion')
+      ?.enhancements.find((e) => e.name === 'Murdermind');
+    if (!tech?.supportTo || !murdermind?.supportTo) throw new Error('fixture changed');
+    tech.supportTo.reverse();
+    murdermind.supportTo.reverse();
+
+    expect(changelog([before], [after])).toBe('No changes detected.\n');
+    expect(changelogEntry([before], [after])).toBe('');
   });
 });
 
