@@ -221,7 +221,7 @@ describe('changelog (ignores firstSeen)', () => {
     );
   });
 
-  it('ignores Leader/Support list order on units and enhancements', () => {
+  it('reports order-only Leader/Support changes on units and enhancements', () => {
     const before = necronsContent();
     const after = structuredClone(before);
     const tech = after.units.find((u) => u.name === 'Technomancer');
@@ -232,8 +232,16 @@ describe('changelog (ignores firstSeen)', () => {
     tech.supportTo.reverse();
     murdermind.supportTo.reverse();
 
-    expect(changelog([before], [after])).toBe('No changes detected.\n');
-    expect(changelogEntry([before], [after])).toBe('');
+    const log = changelog([before], [after]);
+    expect(log).toContain(
+      '- Technomancer — supportTo: list updated to: Necron Warriors, Immortals, Canoptek Wraiths\n',
+    );
+    expect(log).toContain(
+      '- Cursed Legion · Murdermind — supportTo: list updated to: Lokhust Heavy Destroyers, Ophydian Destroyers, Lokhust Destroyers, Skorpekh Destroyers\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Technomancer — supportTo: list updated to: Necron Warriors, Immortals, Canoptek Wraiths\n',
+    );
   });
 });
 

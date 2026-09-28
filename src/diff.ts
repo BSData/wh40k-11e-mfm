@@ -42,14 +42,18 @@ const unitNames = (f: FactionContent) => new Set(f.units.map((u) => u.name));
 const detNames = (f: FactionContent) => new Set(f.detachments.map((d) => d.name));
 const onlyIn = <T>(a: Set<T>, b: Set<T>) => [...a].filter((x) => !b.has(x)).sort();
 
-/** Only the changed Leader/Support targets, with removals before additions. */
+/** Changed Leader/Support targets, or an order-only list update. */
 function listDelta(before: string[] | undefined, after: string[] | undefined): string {
   const old = new Set(before ?? []);
   const now = new Set(after ?? []);
-  return [
+  const changes = [
     ...onlyIn(old, now).map((name) => `- ${name}`),
     ...onlyIn(now, old).map((name) => `+ ${name}`),
-  ].join(', ');
+  ];
+  if (changes.length > 0) return changes.join(', ');
+  const previous = (before ?? []).join(', ');
+  const current = (after ?? []).join(', ');
+  return previous === current ? '' : `list updated to: ${current || '—'}`;
 }
 
 /** A keyed numeric value (a unit cost option, a wargear item, or an enhancement). */
