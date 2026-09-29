@@ -42,7 +42,7 @@ const unitNames = (f: FactionContent) => new Set(f.units.map((u) => u.name));
 const detNames = (f: FactionContent) => new Set(f.detachments.map((d) => d.name));
 const onlyIn = <T>(a: Set<T>, b: Set<T>) => [...a].filter((x) => !b.has(x)).sort();
 
-/** Changed list members, or full lists when the order of retained members changes. */
+/** Changed list members, or full lists when order or repeated entries need preserving. */
 function listDelta(before: string[] | undefined, after: string[] | undefined): string {
   const previous = before ?? [];
   const current = after ?? [];
@@ -58,7 +58,12 @@ function listDelta(before: string[] | undefined, after: string[] | undefined): s
     retainedBefore.some((name, i) => name !== retainedAfter[i]);
   const removed = onlyIn(old, now);
   const added = onlyIn(now, old);
-  if (reordered || (removed.length === 0 && added.length === 0))
+  if (
+    reordered ||
+    previous.length !== old.size ||
+    current.length !== now.size ||
+    (removed.length === 0 && added.length === 0)
+  )
     return `  - **Before:** ${previous.join(', ') || '—'}\n  - **After:** ${current.join(', ') || '—'}`;
 
   const changes = [

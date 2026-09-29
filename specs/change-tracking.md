@@ -32,9 +32,9 @@ audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
    Leader/Support lists on units and enhancements, and detachment Force Dispositions
    (`objectives`), show only membership changes: one nested item per removed (➖) or
    added (➕) name, with unchanged members omitted. If the order of retained members
-   also changes, show the complete before and after lists on separate nested lines
-   instead, since the YAML still changes and the new order matters. The same
-   formatting is used in the persistent changelog.
+   also changes, or either list contains repeated names, show the complete before
+   and after lists on separate nested lines instead, so no order or occurrence is
+   lost. The same formatting is used in the persistent changelog.
 
 ### Example from the v1.4 update
 Selected lines from the changelog for [PR #42](https://github.com/BSData/wh40k-11e-mfm/pull/42),

@@ -251,6 +251,21 @@ describe('changelog (ignores firstSeen)', () => {
     );
   });
 
+  it('preserves repeated objective names in the before/after lists', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const det = after.detachments.find((d) => d.name === 'Annihilation Legion');
+    if (!det) throw new Error('fixture changed');
+    det.objectives = ['PURGE THE FOE', 'TAKE AND HOLD', 'TAKE AND HOLD'];
+
+    expect(changelog([before], [after])).toContain(
+      '- Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE\n  - **After:** PURGE THE FOE, TAKE AND HOLD, TAKE AND HOLD\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE\n  - **After:** PURGE THE FOE, TAKE AND HOLD, TAKE AND HOLD\n',
+    );
+  });
+
   it('reports a brand new and a removed faction', () => {
     expect(changelog([], [necronsContent()])).toContain('🆕 **New faction**');
     expect(changelog([necronsContent()], [])).toContain('🗑 **Removed faction**');
