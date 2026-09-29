@@ -31,14 +31,43 @@ audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
 
    Leader/Support lists on units and enhancements show only membership changes,
    one nested list item per changed target. Each item carries a visible `-` (removed)
-   or `+` (added) marker; unchanged members are omitted. For example:
+   or `+` (added) marker; unchanged members are omitted. If only the order changes,
+   show the complete before and after lists on separate nested lines instead, since
+   the YAML still changes and the new order matters. The same formatting is used in
+   the persistent changelog.
 
-       - Apothecary — supportTo:
-         - `+` Bladeguard Veteran Squad
+### Example from the v1.4 update
+Selected lines from the changelog for [PR #42](https://github.com/BSData/wh40k-11e-mfm/pull/42),
+rendered with this format (other changes omitted):
 
-   If only the order changes, show the complete before and after lists on separate
-   nested lines instead, since the YAML still changes and the new order matters.
-   The same formatting is used in the persistent changelog.
+```markdown
+## Black Templars  _(v1.3 → v1.4)_
+
+**Unit changes:**
+- Apothecary — supportTo:
+  - `+` Bladeguard Veteran Squad
+- Judiciar — supportTo:
+  - `+` Assault Intercessor Squad
+  - `+` Bladeguard Veteran Squad
+  - `+` Infernus Squad
+  - `+` Intercessor Squad
+  - `+` Sternguard Veteran Squad
+
+## Orks  _(v1.3 → v1.4)_
+
+**Unit changes:**
+- Big Mek — leaderTo:
+  - `-` Lootas
+  - `+` Flash Gitz
+```
+
+For an order-only change, the two complete lists would instead appear as:
+
+```markdown
+- Technomancer — supportTo:
+  - **Before:** Canoptek Wraiths, Immortals, Necron Warriors
+  - **After:** Necron Warriors, Immortals, Canoptek Wraiths
+```
 
 ### The table must explain every row
 The Units and Detachments columns count entities **added (`+`), removed (`-`) and
