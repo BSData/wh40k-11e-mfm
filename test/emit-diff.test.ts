@@ -134,12 +134,12 @@ describe('changelog (ignores firstSeen)', () => {
     if (tb) tb.wargear = [{ item: 'Test Rod', points: 10 }];
     const log = changelog([before], [after]);
     expect(log).toContain('Technomancer — Test Rod: 10 → 15 pts (**+5**)');
-    expect(log).toContain('- Technomancer — leaderTo: + Immortals\n');
+    expect(log).toContain('- Technomancer — leaderTo:\n  - `+` Immortals\n');
     expect(log).toContain(
-      '- Technomancer — supportTo: - Immortals, - Necron Warriors, + Lychguard\n',
+      '- Technomancer — supportTo:\n  - `-` Immortals\n  - `-` Necron Warriors\n  - `+` Lychguard\n',
     );
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Technomancer — supportTo: - Immortals, - Necron Warriors, + Lychguard\n',
+      '- **Necrons**: Technomancer — supportTo:\n  - `-` Immortals\n  - `-` Necron Warriors\n  - `+` Lychguard\n',
     );
   });
 
@@ -151,8 +151,8 @@ describe('changelog (ignores firstSeen)', () => {
     tech.supportTo.push('Bladeguard Veteran Squad');
 
     const log = changelog([before], [after]);
-    expect(log).toContain('- Technomancer — supportTo: + Bladeguard Veteran Squad\n');
-    expect(log).not.toContain('Technomancer — supportTo: Canoptek Wraiths');
+    expect(log).toContain('- Technomancer — supportTo:\n  - `+` Bladeguard Veteran Squad\n');
+    expect(log).not.toContain('  - `+` Canoptek Wraiths');
   });
 
   it('reports removing an entire unit Support list', () => {
@@ -163,7 +163,7 @@ describe('changelog (ignores firstSeen)', () => {
     delete tech.supportTo;
 
     expect(changelog([before], [after])).toContain(
-      '- Technomancer — supportTo: - Canoptek Wraiths, - Immortals, - Necron Warriors\n',
+      '- Technomancer — supportTo:\n  - `-` Canoptek Wraiths\n  - `-` Immortals\n  - `-` Necron Warriors\n',
     );
   });
 
@@ -215,9 +215,12 @@ describe('changelog (ignores firstSeen)', () => {
     }
     const log = changelog([before], [after]);
     expect(log).toContain('Awakened Dynasty — unique: Dynasty → Hypercrypt');
-    expect(log).toContain('- Cursed Legion · Murdermind — leaderTo: + Lokhust Destroyers\n');
+    expect(log).toContain('- Cursed Legion · Murdermind — leaderTo:\n  - `+` Lokhust Destroyers\n');
     expect(log).toContain(
-      '- Cursed Legion · Murdermind — supportTo: - Lokhust Destroyers, - Lokhust Heavy Destroyers, - Ophydian Destroyers, + Canoptek Wraiths\n',
+      '- Cursed Legion · Murdermind — supportTo:\n  - `-` Lokhust Destroyers\n  - `-` Lokhust Heavy Destroyers\n  - `-` Ophydian Destroyers\n  - `+` Canoptek Wraiths\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Cursed Legion · Murdermind — leaderTo:\n  - `+` Lokhust Destroyers\n',
     );
   });
 
@@ -234,13 +237,13 @@ describe('changelog (ignores firstSeen)', () => {
 
     const log = changelog([before], [after]);
     expect(log).toContain(
-      '- Technomancer — supportTo: list updated to: Necron Warriors, Immortals, Canoptek Wraiths\n',
+      '- Technomancer — supportTo:\n  - **Before:** Canoptek Wraiths, Immortals, Necron Warriors\n  - **After:** Necron Warriors, Immortals, Canoptek Wraiths\n',
     );
     expect(log).toContain(
-      '- Cursed Legion · Murdermind — supportTo: list updated to: Lokhust Heavy Destroyers, Ophydian Destroyers, Lokhust Destroyers, Skorpekh Destroyers\n',
+      '- Cursed Legion · Murdermind — supportTo:\n  - **Before:** Skorpekh Destroyers, Lokhust Destroyers, Ophydian Destroyers, Lokhust Heavy Destroyers\n  - **After:** Lokhust Heavy Destroyers, Ophydian Destroyers, Lokhust Destroyers, Skorpekh Destroyers\n',
     );
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Technomancer — supportTo: list updated to: Necron Warriors, Immortals, Canoptek Wraiths\n',
+      '- **Necrons**: Technomancer — supportTo:\n  - **Before:** Canoptek Wraiths, Immortals, Necron Warriors\n  - **After:** Necron Warriors, Immortals, Canoptek Wraiths\n',
     );
   });
 });

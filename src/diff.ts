@@ -47,13 +47,15 @@ function listDelta(before: string[] | undefined, after: string[] | undefined): s
   const old = new Set(before ?? []);
   const now = new Set(after ?? []);
   const changes = [
-    ...onlyIn(old, now).map((name) => `- ${name}`),
-    ...onlyIn(now, old).map((name) => `+ ${name}`),
+    ...onlyIn(old, now).map((name) => `  - \`-\` ${name}`),
+    ...onlyIn(now, old).map((name) => `  - \`+\` ${name}`),
   ];
-  if (changes.length > 0) return changes.join(', ');
+  if (changes.length > 0) return changes.join('\n');
   const previous = (before ?? []).join(', ');
   const current = (after ?? []).join(', ');
-  return previous === current ? '' : `list updated to: ${current || '—'}`;
+  return previous === current
+    ? ''
+    : `  - **Before:** ${previous || '—'}\n  - **After:** ${current || '—'}`;
 }
 
 /** A keyed numeric value (a unit cost option, a wargear item, or an enhancement). */
@@ -281,7 +283,7 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     const note = (text: string) => unitOther.push({ entity: u.name, text: `${u.name} — ${text}` });
     for (const grant of ['leaderTo', 'supportTo'] as const) {
       const delta = listDelta(p[grant], u[grant]);
-      if (delta) note(`${grant}: ${delta}`);
+      if (delta) note(`${grant}:\n${delta}`);
     }
   }
   const detOther: Attr[] = [];
@@ -302,7 +304,7 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
       if (!x) continue;
       for (const grant of ['leaderTo', 'supportTo'] as const) {
         const delta = listDelta(x[grant], e[grant]);
-        if (delta) note(`${d.name} · ${e.name} — ${grant}: ${delta}`);
+        if (delta) note(`${d.name} · ${e.name} — ${grant}:\n${delta}`);
       }
     }
   }

@@ -29,12 +29,16 @@ audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
    It is **comprehensive**: every field the model carries is diffed, so a change can't
    slip through unreported (the readable counterpart to the parser's coverage guard).
 
-   Leader/Support lists on units and enhancements show only membership changes, with
-   `-` for removed names and `+` for added names (e.g.
-   `Apothecary — supportTo: + Bladeguard Veteran Squad` or
-   `Unit — leaderTo: - Old, + New`). Unchanged members are omitted. If only the
-   ordered list changes, report `list updated to: ...` instead of leaving a YAML
-   change without a changelog entry. The same detail appears in the persistent changelog.
+   Leader/Support lists on units and enhancements show only membership changes,
+   one nested list item per changed target. Each item carries a visible `-` (removed)
+   or `+` (added) marker; unchanged members are omitted. For example:
+
+       - Apothecary — supportTo:
+         - `+` Bladeguard Veteran Squad
+
+   If only the order changes, show the complete before and after lists on separate
+   nested lines instead, since the YAML still changes and the new order matters.
+   The same formatting is used in the persistent changelog.
 
 ### The table must explain every row
 The Units and Detachments columns count entities **added (`+`), removed (`-`) and
