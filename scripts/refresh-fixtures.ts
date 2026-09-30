@@ -1,7 +1,12 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createScrapeContext, launchBrowser, renderWithLegends } from '../src/browser.js';
+import {
+  createScrapeContext,
+  launchBrowser,
+  renderRulesPanels,
+  renderWithLegends,
+} from '../src/browser.js';
 import { BASE_URL, factionUrl, fetchText, sleep } from '../src/fetch.js';
 
 /**
@@ -39,13 +44,19 @@ for (const [i, fx] of FIXTURES.entries()) {
   console.log(`saved ${fx.name} (${html.length} bytes) from ${fx.url}`);
 }
 
-// necrons-legends: the legends-on render (browser) — pins legends detection.
+// Browser renders: necrons-legends (legends toggled on) pins legends detection;
+// necrons-panels (both rules panels open) pins the notes/muster Markdown.
 const browser = await launchBrowser();
 const ctx = await createScrapeContext(browser);
 try {
-  const full = await renderWithLegends(ctx, factionUrl('necrons'));
-  writeFileSync(join(dir, 'necrons-legends.html'), full);
-  console.log(`saved necrons-legends.html (${full.length} bytes, browser render)`);
+  for (const [name, render] of [
+    ['necrons-legends.html', renderWithLegends],
+    ['necrons-panels.html', renderRulesPanels],
+  ] as const) {
+    const html = await render(ctx, factionUrl('necrons'));
+    writeFileSync(join(dir, name), html);
+    console.log(`saved ${name} (${html.length} bytes, browser render)`);
+  }
 } finally {
   await ctx.close();
   await browser.close();

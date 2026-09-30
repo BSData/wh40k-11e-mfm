@@ -14,7 +14,8 @@ the AI angle is purely this maintenance harness.
 - `src/model.ts` — zod schemas; the **data-model contract** (and TS types).
 - `src/parse.ts` — cheerio HTML → model. Pure. The drift-prone surface.
 - `src/fetch.ts` — polite HTTP (retry/backoff).
-- `src/browser.ts` — Playwright: Legends units + "Welcome…" notes (not in HTTP).
+- `src/browser.ts` — Playwright: Legends units + the rules panels ("Welcome…" notes,
+  "Muster Armies") (not in HTTP).
 - `src/emit.ts` — deterministic YAML in/out.
 - `src/diff.ts` — changelog from two snapshots (pure `changelog()` + CLI).
 - `src/discord.ts` — the same diff as a Discord webhook payload, plus the one call that
@@ -39,8 +40,8 @@ pnpm exec tsx src/discord.ts <before> <after>   # preview the Discord payload (-
 pnpm check                     # Biome lint+format
 pnpm typecheck                 # tsc --noEmit
 ```
-Legends units and the "Welcome…" notes aren't in the server HTML; `src/browser.ts`
-(Playwright) captures them. Use `--no-legends` for quick iteration without a browser.
+Legends units and the rules panels ("Welcome…" notes, "Muster Armies") aren't in the
+server HTML; `src/browser.ts` (Playwright) captures them. Use `--no-legends` for quick iteration without a browser.
 
 ## Conventions
 - TypeScript ESM (`.js` import specifiers), Node ≥ 22, pnpm. Biome for lint/format.

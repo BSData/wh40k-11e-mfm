@@ -10,8 +10,9 @@ changes over time.
   updates the manual.
 
 Most data is server-rendered, so the core scrape is a plain HTTP GET + HTML parse.
-**Legends** units and the expandable **"Welcome…" notes** are client-only, so those are
-captured with a headless browser (Playwright); pass `--no-legends` to skip it.
+**Legends** units and the expandable **"Welcome…" notes** and **"Muster Armies" rules** are
+client-only, so those are captured with a headless browser (Playwright); pass `--no-legends`
+to skip it.
 
 ## Quick start
 ```bash

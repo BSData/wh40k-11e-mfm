@@ -9,7 +9,8 @@ especially if a parse has started failing.
 - Faction page: `https://mfm.warhammer-community.com/en/<slug>`
 - The site is **Next.js (App Router), server-rendered**. The **base** data is present in
   the initial HTML, so a plain GET covers it — no JS execution required. (Legends units
-  and the "Welcome…" notes are client-only and need a headless browser — see below.)
+  and the rules panels — the "Welcome…" notes and "Muster Armies" — are client-only and
+  need a headless browser — see below.)
 
 ## Fetch policy
 - Native `fetch` with a descriptive User-Agent.
@@ -98,9 +99,10 @@ The coverage runs on the **de-annotated** DOM, so the change-annotation layer (s
 already gone; an *unrecognised* `UPDATED` note, however, survives `deannotate()` and so is
 caught here as unconsumed — exactly the loud failure we want for a new note variant.
 - **Page level** — after dropping the parsed cards, the site chrome (`header`/`nav`, the
-  OneTrust cookie dialog on browser renders, the `Welcome…` notes block captured into
-  `meta.notes`), the army-group title (`parent`), and the known content-area headings
-  (`UNITS`/`DETACHMENTS`/`LEGENDS`), *nothing* may remain.
+  OneTrust cookie dialog on browser renders, the open rules panels captured into
+  `meta.notes`/`meta.muster`), the army-group title (`parent`), the known content-area
+  headings (`UNITS`/`DETACHMENTS`/`LEGENDS`), and the rules panels' button labels (shown
+  whether open or not), *nothing* may remain.
 
 The allowlists (`UNIT_BOILERPLATE`, `DETACHMENT_BOILERPLATE`, `PAGE_BOILERPLATE`, and the
 `CHANGE_BADGE_TEXT` notes stripped by `deannotate()` — all in `src/parse.ts`) are the
@@ -109,13 +111,14 @@ there in a reviewed commit; when they add new *data* you teach the parser to cap
 Either way the change is forced through human review rather than lost.
 Keep the allowlists tight — a too-broad entry is how a real addition gets swallowed.
 
-## Legends & the "Welcome…" notes (browser-only)
+## Legends & the rules panels (browser-only)
 Two things are **not** in any HTTP response — they're rendered client-side:
 - **Legends units**: revealed by the client-only "Show Legends" toggle.
-- **The expandable "Welcome…" help text** (rules notes).
+- **The two collapsible rules panels**: "Welcome…" (help text on reading the MFM) and
+  "Muster Armies" (the army-building rules, including the battle-size table).
 
 `src/browser.ts` (Playwright, headless Chromium) handles both, interacting only with the
-button and the rendered DOM — no dependence on the request/response shape:
+buttons and the rendered DOM — no dependence on the request/response shape:
 - **Detecting Legends** is done from the *raw HTML*: `hasLegends(html)` checks for the
   `show-legends` toggle markup, which the server ships only for factions that have Legends.
   So base data is parsed from plain HTTP, and **only Legends factions open the browser**.
@@ -125,12 +128,15 @@ button and the rendered DOM — no dependence on the request/response shape:
   so this wait is exact and deterministic under concurrency. `markLegends()` then diffs the
   HTTP base against the rendered full DOM — units present only with Legends on get
   `legends: true`.
-- `extractNotes()` expands "Welcome to the Munitorum Field Manual", waits for the stable
-  anchor ("Leader/Support") to appear, then hands the rendered HTML to the pure
-  `extractNotesMarkdown()` in `src/parse.ts`. That finds the notes block (tightest element
-  carrying "To muster a Warhammer 40,000 army"; innermost on ties) and converts it to
-  **Markdown** — `<b>` → `**bold**`, all-caps labels → `##` headings, `<ul>/<li>` → bullets —
-  preserving its structure. Identical across pages, grabbed once → `meta.notes`.
+- `renderRulesPanels()` clicks each panel's button (`RULES_PANELS` in `src/parse.ts`) and
+  waits for the panel that button controls (`aria-controls`) to have content, then hands the
+  rendered HTML to the pure `extractNotesMarkdown()` / `extractMusterMarkdown()` in
+  `src/parse.ts`. Those find the open panel the same way (button label → `aria-controls` →
+  panel) and convert it to **Markdown** with
+  [node-html-markdown](https://github.com/crosstype/node-html-markdown) — `<b>` → `**bold**`,
+  `<ul>/<li>` → bullets, `<table>` → GFM tables. The one project-specific step: the site marks
+  section labels up as a plain `<b>` alone on its line, so an all-caps one is promoted to a
+  `##` heading first. Identical across pages, rendered once → `meta.notes` and `meta.muster`.
 
 `pnpm scrape` renders Legends factions in the browser at `--concurrency` (default 4) in
 parallel; `--no-legends` skips the browser entirely. CI installs Chromium via

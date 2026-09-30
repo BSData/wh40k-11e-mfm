@@ -3,16 +3,22 @@ import { join } from 'node:path';
 import type { BrowserContext } from 'playwright';
 import {
   createScrapeContext,
-  extractNotes,
   hasLegends,
   launchBrowser,
+  renderRulesPanels,
   renderWithLegends,
 } from './browser.js';
 import { failuresReport } from './diff.js';
 import { contentKey, factionFromYaml, factionToYaml, metaToYaml, type OrderMode } from './emit.js';
 import { BASE_URL, factionUrl, fetchText } from './fetch.js';
 import { Faction, type FactionContent } from './model.js';
-import { markLegends, parseFaction, parseIndex } from './parse.js';
+import {
+  extractMusterMarkdown,
+  extractNotesMarkdown,
+  markLegends,
+  parseFaction,
+  parseIndex,
+} from './parse.js';
 
 /**
  * Scrape pipeline: index → faction pages → validated YAML.
@@ -25,10 +31,11 @@ import { markLegends, parseFaction, parseIndex } from './parse.js';
  *   pnpm scrape --order page        # entity order: 'name' (default, alphabetical) or 'page'
  *   pnpm scrape --dates-from <dir>  # extra snapshot to match `firstSeen` against (repeatable)
  *
- * Legends units and the "Welcome…" notes aren't in the server HTML, so capturing
- * them needs a headless browser (Playwright). Without `--no-legends`, each faction
- * page is rendered, "Show Legends" is toggled, and units only present then are
- * flagged `legends: true`. `--no-legends` falls back to plain, faster HTTP.
+ * Legends units and the rules panels ("Welcome…" notes, "Muster Armies") aren't in
+ * the server HTML, so capturing them needs a headless browser (Playwright). Without
+ * `--no-legends`, each faction page is rendered, "Show Legends" is toggled, and units
+ * only present then are flagged `legends: true`, and the rules panels are opened once
+ * for meta.yaml. `--no-legends` falls back to plain, faster HTTP.
  *
  * One faction failing does not abort the run; the process exits 1 at the end so CI
  * fails loudly, while still writing the factions that did parse.
@@ -172,11 +179,13 @@ async function main(): Promise<void> {
   const browser = args.legends ? await launchBrowser() : null;
   const ctx = browser ? await createScrapeContext(browser) : null;
   try {
-    // The "Welcome…" notes are identical across pages — grab once for a full run.
-    let notes = '';
+    // The rules panels are identical across pages — render them once for a full run.
+    let panels = '';
     if (ctx && !args.faction && targets[0]) {
-      notes = await extractNotes(ctx, factionUrl(targets[0].slug)).catch(() => '');
+      panels = await renderRulesPanels(ctx, factionUrl(targets[0].slug)).catch(() => '');
     }
+    const notes = extractNotesMarkdown(panels);
+    const muster = extractMusterMarkdown(panels);
 
     await mapPool(targets, args.concurrency, async (f) => {
       try {
@@ -214,6 +223,7 @@ async function main(): Promise<void> {
           version: index.version,
           lastUpdated,
           ...(notes ? { notes } : {}),
+          ...(muster ? { muster } : {}),
           factions: scraped.map((s) => s.slug),
         }),
       );
