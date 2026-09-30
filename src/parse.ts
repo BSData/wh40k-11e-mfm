@@ -1,4 +1,5 @@
 import { type CheerioAPI, load } from 'cheerio';
+import { NodeHtmlMarkdown } from 'node-html-markdown';
 import type {
   CostOption,
   Detachment,
@@ -332,33 +333,41 @@ function parseDetachment($: CheerioAPI, card: ReturnType<CheerioAPI>): Detachmen
  */
 const UNIT_BOILERPLATE: readonly string[] = [];
 const DETACHMENT_BOILERPLATE: readonly string[] = ['ENHANCEMENTS'];
-// Page chrome is mostly removed by container (header/nav/cookie dialog/notes) in
-// the page-level pass; these are the few content-area headings that remain.
+
+/**
+ * The page's collapsible rules panels, keyed by where they land in `meta.yaml`, each
+ * named by (a prefix of) its button label. Their bodies are client-only — rendered
+ * by the browser once the button is clicked, never in the HTTP HTML.
+ */
+export const RULES_PANELS = {
+  notes: 'Welcome to the Munitorum Field Manual',
+  muster: 'Muster Armies',
+} as const;
+
+// Page chrome is mostly removed by container (header/nav/cookie dialog/rules panels)
+// in the page-level pass; these are the few content-area headings that remain.
 const PAGE_BOILERPLATE: readonly string[] = [
+  // The rules panels' button labels — always shown, open or not.
   'Welcome to the Munitorum Field Manual, containing the most up-to-date points values for every Warhammer 40,000 faction.',
+  RULES_PANELS.muster,
   'Show Legends', // the Legends toggle label (sits in the content area, not the nav)
   'Hide Legends', // its toggled state, on browser (Legends) renders
   'UNITS',
   'DETACHMENTS',
   'LEGENDS', // section heading shown on browser renders with Legends toggled on
 ];
-/** Anchor identifying the expandable "Welcome…" notes block (captured into meta.notes). */
-const NOTES_ANCHOR = 'To muster a Warhammer 40,000 army';
-
 /**
- * The "Welcome…" notes block: the tightest element carrying the anchor, and among
- * equal-length ties the innermost (deepest) one — a thin wrapper and its real
- * content div have identical text, so prefer the content. `null` if not present.
+ * The open panel of the rules collapsible whose button label starts with `label`:
+ * the element the button's `aria-controls` names. `null` when the panel is closed
+ * (it is then not rendered at all, as on every HTTP page).
  */
-function findNotesBlock($: CheerioAPI): ReturnType<CheerioAPI> | null {
-  const el = $('div, section')
-    .filter((_i, e) => $(e).text().includes(NOTES_ANCHOR))
-    .toArray()
-    .sort(
-      (a, b) =>
-        $(a).text().length - $(b).text().length || $(b).parents().length - $(a).parents().length,
-    )[0];
-  return el ? $(el) : null;
+function findPanel($: CheerioAPI, label: string): ReturnType<CheerioAPI> | null {
+  const id = $('button')
+    .filter((_i, b) => clean($(b).text()).startsWith(label))
+    .first()
+    .attr('aria-controls');
+  const panel = id ? $(`[id="${id}"]`) : null;
+  return panel?.length ? panel : null;
 }
 /** The army-group title (`parent`), distinct from the UNITS/DETACHMENTS section headings. */
 const PARENT_TITLE_SELECTOR = 'h3.font-header:not([class*="break-after"])';
@@ -454,15 +463,15 @@ function assertFactionCovered($: CheerioAPI, slug: string, name: string, version
   });
 
   // (c) Page level: drop the parsed cards, the site chrome (header/nav, the cookie
-  // dialog present on browser renders, the "Welcome…" notes captured into
-  // meta.notes), then assert only known content-area headings (plus the faction
+  // dialog present on browser renders, the open rules panels captured into
+  // meta.notes/meta.muster), then assert only known content-area headings (plus the faction
   // name, sub-group/parent-army titles and version) remain. Catches a brand-new
   // top-level section that sits outside any card.
   $(CARD_SELECTOR).remove();
   $('header, nav, [id^="onetrust"], .onetrust-pc-dark-filter').remove();
   $('script, style, noscript, svg, head, link').remove();
-  // The notes block (expanded only) is captured into meta.notes, not faction data.
-  findNotesBlock($)?.remove();
+  // The rules panels (open only) are captured into meta.yaml, not faction data.
+  for (const label of Object.values(RULES_PANELS)) findPanel($, label)?.remove();
   const pageLeft = residue($('body').text(), [
     ...PAGE_BOILERPLATE,
     name,
@@ -551,73 +560,61 @@ export function parseFaction(
   return { slug, name, version, ...(parent ? { parent } : {}), detachments, units };
 }
 
-/** All-caps standalone label (e.g. "UNITS") promoted to a Markdown heading. */
-const NOTES_HEADING_RE = /^[A-Z][A-Z0-9 ()/'’-]+$/;
+/** All-caps label standing alone on its line (e.g. "UNITS") — a heading, not bold. */
+const PANEL_HEADING_RE = /^[A-Z][A-Z0-9 ()/'’-]+$/;
 
 /**
- * Convert the rendered "Welcome…" notes block to Markdown, keeping its structure:
- * `<b>` → `**bold**`, all-caps standalone labels → `## headings`, `<ul>/<li>` →
- * bullet lists, `<br><br>` → paragraph breaks. `pageHtml` is a fully-rendered
- * page's HTML (from the browser, where the notes are expanded); returns `''` if
- * the notes block isn't present. Pure — used by `browser.ts`'s `extractNotes`.
+ * HTML → Markdown for the rules panels. node-html-markdown does the generic work
+ * (paragraphs, bold, lists, tables, escaping); the overrides match the panels'
+ * layout: a `<br>` is a plain line break (not a trailing-space hard break) and a
+ * list always sits in its own paragraph.
  */
-export function extractNotesMarkdown(pageHtml: string): string {
+const panelMarkdown = new NodeHtmlMarkdown(
+  { bulletMarker: '-', maxConsecutiveNewlines: 2 },
+  { br: { content: '\n', recurse: false }, 'ol,ul': { surroundingNewlines: 2 } },
+);
+
+/**
+ * Convert one rendered rules panel to Markdown, keeping its structure: `<b>` →
+ * `**bold**`, all-caps standalone labels → `## headings`, lists → bullets, tables →
+ * GFM tables. `pageHtml` is a fully-rendered page's HTML (from the browser, with
+ * the panel open); returns `''` if the panel isn't open. The one project-specific
+ * step is spotting the headings: the site marks them up as plain `<b>` on a line
+ * of their own, so they are promoted to `<h2>` before conversion.
+ */
+function extractPanelMarkdown(pageHtml: string, label: string): string {
   const $ = load(pageHtml);
-  const block = findNotesBlock($);
-  if (!block) return '';
+  const panel = findPanel($, label);
+  if (!panel) return '';
 
-  // Inline run → Markdown (bold, soft breaks); used for list items and paragraphs.
-  const inline = (el: ReturnType<CheerioAPI>): string => {
-    let s = '';
-    el.contents().each((_i, n) => {
-      if (n.type === 'text') {
-        s += $(n).text();
-      } else if (n.type === 'tag') {
-        if (n.tagName === 'b' || n.tagName === 'strong') {
-          const t = clean($(n).text());
-          if (t) s += `**${t}**`;
-        } else if (n.tagName === 'br') {
-          s += '\n';
-        } else {
-          s += inline($(n));
-        }
-      }
-    });
-    return s;
-  };
-
-  let md = '';
-  block.contents().each((_i, n) => {
-    if (n.type === 'text') {
-      md += $(n).text();
-    } else if (n.type === 'tag') {
-      if (n.tagName === 'ul' || n.tagName === 'ol') {
-        md += '\n';
-        $(n)
-          .children('li')
-          .each((_j, li) => {
-            md += `\n- ${clean(inline($(li)))}`;
-          });
-        md += '\n\n';
-      } else if (n.tagName === 'b' || n.tagName === 'strong') {
-        const t = clean($(n).text());
-        if (NOTES_HEADING_RE.test(t)) md += `\n\n## ${t}\n\n`;
-        else if (t) md += `**${t}**`;
-      } else if (n.tagName === 'br') {
-        md += '\n';
-      } else {
-        md += inline($(n));
-      }
-    }
+  panel.find('b, strong').each((_i, el) => {
+    const b = $(el);
+    if (!PANEL_HEADING_RE.test(clean(b.text()))) return;
+    // Alone on its line: the nearest non-blank siblings are line breaks or nothing.
+    const line = b.parent().contents().toArray();
+    const at = line.indexOf(el);
+    const neighbour = (step: 1 | -1) => {
+      let j = at + step;
+      while (line[j]?.type === 'text' && !clean($(line[j]).text())) j += step;
+      return line[j];
+    };
+    if ([neighbour(-1), neighbour(1)].every((n) => !n || $(n).is('br')))
+      b.replaceWith(`<h2>${b.html()}</h2>`);
   });
 
-  return md
-    .replace(/\r/g, '')
-    .replace(/[^\S\n]+/g, ' ') // collapse runs of spaces/tabs, keep newlines
-    .replace(/ *\n */g, '\n') // trim spaces around line breaks
-    .replace(/\n{3,}/g, '\n\n') // at most one blank line between blocks
+  return panelMarkdown
+    .translate(panel.html() ?? '')
+    .replace(/[^\S\n]+\n/g, '\n') // drop trailing spaces (list items' hard breaks)
     .trim();
 }
+
+/** The "Welcome…" help text as Markdown (→ `meta.notes`). See `extractPanelMarkdown`. */
+export const extractNotesMarkdown = (pageHtml: string): string =>
+  extractPanelMarkdown(pageHtml, RULES_PANELS.notes);
+
+/** The "Muster Armies" army-building rules as Markdown (→ `meta.muster`). */
+export const extractMusterMarkdown = (pageHtml: string): string =>
+  extractPanelMarkdown(pageHtml, RULES_PANELS.muster);
 
 /**
  * Mark units that appear only in the legends-on render (`full`) as legends.

@@ -1,20 +1,19 @@
 import { type Browser, type BrowserContext, chromium, type Page } from 'playwright';
-import { extractNotesMarkdown } from './parse.js';
+import { RULES_PANELS } from './parse.js';
 
 /**
  * Headless-browser access for the bits that aren't in the server HTML:
  *  - Legends units (revealed by the client-only "Show Legends" toggle), and
- *  - the expandable "Welcome…" help text.
+ *  - the collapsible rules panels ("Welcome…" notes and "Muster Armies").
  *
  * Everything else is scraped over plain HTTP; this module is used only when
- * legends/notes are wanted. Pages are rendered, so the resulting HTML is already
+ * legends/rules panels are wanted. Pages are rendered, so the resulting HTML is already
  * hydrated — `parseFaction` runs on it unchanged (its template-hydration no-ops).
  *
  * Use one context (`createScrapeContext`) for the whole run: declining cookies
  * once persists, and image/font/media requests are blocked so pages settle fast.
  */
 
-const NOTES_ANCHORS = ['To muster a Warhammer 40,000 army', 'Leader/Support'] as const;
 const UNIT_SELECTOR = 'div.bg-slate-500.text-xl';
 const LEGENDS_TOGGLE = '#show-legends-label';
 const NAV_TIMEOUT = 45_000;
@@ -82,24 +81,32 @@ export async function renderWithLegends(ctx: BrowserContext, url: string): Promi
 export const hasLegends = (html: string): boolean => html.includes('show-legends');
 
 /**
- * Extract the expandable "Welcome…" help/notes text as Markdown (identical across
- * faction pages). We only drive the page here — expand the notes, wait for the
- * deterministic content signal — then hand the rendered HTML to the pure
- * `extractNotesMarkdown` parser, which preserves the block's structure.
+ * Render a faction page with its rules panels (`RULES_PANELS`: the "Welcome…" notes
+ * and "Muster Armies") open, returning the page HTML for the pure
+ * `extractNotesMarkdown` / `extractMusterMarkdown` (identical across faction pages).
+ * We only drive the page: click each panel's button, then wait for the panel it
+ * controls (`aria-controls`) to have content — a deterministic signal, not a timeout.
  */
-export async function extractNotes(ctx: BrowserContext, url: string): Promise<string> {
+export async function renderRulesPanels(ctx: BrowserContext, url: string): Promise<string> {
   const page = await ctx.newPage();
   try {
     await page.goto(url, { waitUntil: 'networkidle', timeout: NAV_TIMEOUT });
     await dismissCookies(page);
-    await page
-      .getByText('Welcome to the Munitorum Field Manual', { exact: false })
-      .click({ timeout: ACTION_TIMEOUT });
-    // Wait for the expanded notes to actually be present (deterministic signal).
-    await page.waitForFunction((a) => document.body.innerText.includes(a), NOTES_ANCHORS[1], {
-      timeout: ACTION_TIMEOUT,
-    });
-    return extractNotesMarkdown(await page.content());
+    for (const label of Object.values(RULES_PANELS)) {
+      await page.getByRole('button', { name: label }).click({ timeout: ACTION_TIMEOUT });
+      await page.waitForFunction(
+        (l) => {
+          const button = [...document.querySelectorAll('button')].find((b) =>
+            b.textContent?.trim().startsWith(l),
+          );
+          const id = button?.getAttribute('aria-controls');
+          return !!id && !!document.getElementById(id)?.textContent?.trim();
+        },
+        label,
+        { timeout: ACTION_TIMEOUT },
+      );
+    }
+    return await page.content();
   } finally {
     await page.close();
   }

@@ -2,7 +2,13 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { FactionContent, SiteIndex } from '../src/model.js';
-import { extractNotesMarkdown, markLegends, parseFaction, parseIndex } from '../src/parse.js';
+import {
+  extractMusterMarkdown,
+  extractNotesMarkdown,
+  markLegends,
+  parseFaction,
+  parseIndex,
+} from '../src/parse.js';
 
 const fixture = (name: string) =>
   readFileSync(fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url)), 'utf8');
@@ -208,9 +214,9 @@ describe('markLegends (necrons base vs legends-on render)', () => {
 });
 
 describe('extractNotesMarkdown — the "Welcome…" notes as Markdown', () => {
-  // A render with the "Welcome…" notes expanded (they are lazy — the legends render
-  // does not include them), which is what `extractNotes` feeds this pure function.
-  const md = extractNotesMarkdown(fixture('necrons-notes.html'));
+  // A render with both rules panels open (they are lazy — the legends render does not
+  // include them), which is what `renderRulesPanels` feeds this pure function.
+  const md = extractNotesMarkdown(fixture('necrons-panels.html'));
 
   it('keeps the structure: headings, bullet lists and bold', () => {
     expect(md.startsWith('To muster a Warhammer 40,000 army')).toBe(true);
@@ -226,10 +232,55 @@ describe('extractNotesMarkdown — the "Welcome…" notes as Markdown', () => {
     expect(md).not.toMatch(/\n{3,}/);
   });
 
+  it('takes only its own panel, not the neighbouring "Muster Armies" one', () => {
+    expect(md).not.toContain('START YOUR ARMY ROSTER');
+  });
+
   it('returns empty string when no notes block is present (HTTP base render)', () => {
-    // On the plain HTTP page the notes live inside a <template>, so they are not
-    // reachable as a div/section — only the browser render exposes them.
+    // On the plain HTTP page the panels are closed, so their bodies are not rendered
+    // at all — only the browser render (with the panel open) exposes them.
     expect(extractNotesMarkdown(fixture('necrons.html'))).toBe('');
+  });
+});
+
+describe('extractMusterMarkdown — the "Muster Armies" rules as Markdown', () => {
+  const md = extractMusterMarkdown(fixture('necrons-panels.html'));
+
+  it('keeps the structure: headings, bullet lists and bold', () => {
+    expect(md.startsWith('The following rules tell you how to create an army list')).toBe(true);
+    expect(md).toContain('## SELECT BATTLE SIZE');
+    expect(md).toContain('## ATTACH LEADERS AND SUPPORT UNITS');
+    expect(md).toContain('- No unit (including **attached** units) can have more than one');
+    // An all-caps keyword inside running text, or a label that isn't all-caps, stays bold.
+    expect(md).toContain('for **BATTLELINE** and **DEDICATED TRANSPORT** units');
+    expect(md).toContain('**Upgrades:**');
+  });
+
+  it('renders the battle-size table as a Markdown table', () => {
+    const esc = (c: string) => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const row = (...cells: string[]) =>
+      new RegExp(`^\\| ${cells.map(esc).join(' +\\| ')} +\\|$`, 'm');
+    expect(md).toMatch(
+      row(
+        'Battle Size',
+        'Points Total',
+        'Detachment Points (DP)',
+        'Enhancement Limit',
+        'Unit Limit\\*',
+      ),
+    );
+    expect(md).toMatch(row('INCURSION', '1000', '2', '2', '2'));
+    expect(md).toMatch(row('STRIKE FORCE', '2000', '3', '4', '3'));
+  });
+
+  it('emits no raw HTML, no runs of blank lines and no trailing spaces', () => {
+    expect(md).not.toMatch(/<[a-z]/i);
+    expect(md).not.toMatch(/\n{3,}/);
+    expect(md).not.toMatch(/ \n/);
+  });
+
+  it('returns empty string on the HTTP base render (panel closed)', () => {
+    expect(extractMusterMarkdown(fixture('necrons.html'))).toBe('');
   });
 });
 
@@ -242,6 +293,12 @@ describe('parseFaction coverage guard — nothing on the page goes unconsumed', 
     expect(() =>
       parseFaction(fixture('titan-legions.html'), 'titan-legions', 'Titan Legions'),
     ).not.toThrow();
+  });
+
+  it('accounts for the rules panels — their labels, and their bodies when open', () => {
+    // A browser render with both panels open: the "Muster Armies" label is allowlisted
+    // and both panel bodies go to meta.yaml, so neither is unconsumed faction content.
+    expect(() => parseFaction(fixture('necrons-panels.html'), 'necrons', 'Necrons')).not.toThrow();
   });
 
   it('throws, located, when the page has content no selector captured', () => {

@@ -1,6 +1,6 @@
 /**
  * Minimal, polite HTTP fetching. The MFM's base data is server-rendered, so a
- * plain GET covers it (Legends units and the "Welcome…" notes need a browser —
+ * plain GET covers it (Legends units and the rules panels need a browser —
  * see src/browser.ts). Adds a descriptive User-Agent and retry-with-backoff on
  * transient failures. Pacing between pages is the caller's job (the CLI's
  * concurrency pool; `sleep` here is only the inter-retry backoff).

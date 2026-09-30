@@ -62,6 +62,19 @@ describe('emit', () => {
     const meta = { version: '1.0', lastUpdated: '2026-06-17', factions: ['necrons'] };
     expect(metaFromYaml(metaToYaml(meta))).toEqual(meta);
   });
+
+  it('round-trips the rules panels, notes before muster', () => {
+    const meta = {
+      version: '1.5',
+      lastUpdated: '2026-09-30',
+      notes: 'To muster…\n\n## UNITS',
+      muster: '## SELECT BATTLE SIZE\n\n| Battle Size | DP |\n| --- | --- |\n| INCURSION | 2 |',
+      factions: ['necrons'],
+    };
+    const yaml = metaToYaml(meta);
+    expect(metaFromYaml(yaml)).toEqual(meta);
+    expect(yaml.indexOf('notes:')).toBeLessThan(yaml.indexOf('muster:'));
+  });
 });
 
 describe('changelog (ignores firstSeen)', () => {

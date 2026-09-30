@@ -55,12 +55,13 @@ error lists exactly what and where (`unit "…"`, `detachment "…"`, or `page-l
   allowlist (`UNIT_BOILERPLATE` / `DETACHMENT_BOILERPLATE` / `PAGE_BOILERPLATE`) in
   `src/parse.ts`. Keep it tight and specific — a broad entry silently swallows future data.
 
-## Browser path (Legends / notes)
-If the failure is in `src/browser.ts` (Legends or the "Welcome…" notes), the site's
-*interactive* bits drifted, not the markup. Re-check these landmarks against the live page:
-the cookie reject button (`#onetrust-reject-all-handler`), the toggle (`#show-legends-label`,
-**absent on factions with no Legends — that's expected**), the welcome trigger text, and the
-notes anchor phrases (`NOTES_ANCHORS`). Debug with `chromium.launch({ headless: false })`.
+## Browser path (Legends / rules panels)
+If the failure is in `src/browser.ts` (Legends or the "Welcome…"/"Muster Armies" panels),
+the site's *interactive* bits drifted, not the markup. Re-check these landmarks against the
+live page: the cookie reject button (`#onetrust-reject-all-handler`), the toggle
+(`#show-legends-label`, **absent on factions with no Legends — that's expected**), and the
+rules panels' button labels (`RULES_PANELS` in `src/parse.ts`) plus the `aria-controls`
+link from each button to its panel. Debug with `chromium.launch({ headless: false })`.
 
 ## 5. Open a PR
 Reference the failing scrape run / issue. Summarise what the site changed and the

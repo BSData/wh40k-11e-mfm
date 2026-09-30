@@ -131,6 +131,8 @@ export type SiteMeta = {
   lastUpdated: string;
   /** The expandable "Welcome…" help text, when captured via the browser. */
   notes?: string;
+  /** The expandable "Muster Armies" army-building rules, when captured via the browser. */
+  muster?: string;
   factions: string[];
 };
 
@@ -140,6 +142,7 @@ export function metaToYaml(meta: SiteMeta): string {
     version: meta.version,
     lastUpdated: meta.lastUpdated,
     ...(meta.notes ? { notes: meta.notes } : {}),
+    ...(meta.muster ? { muster: meta.muster } : {}),
     factions: [...meta.factions].sort(),
   };
   return stringify(doc, STRINGIFY_OPTS);

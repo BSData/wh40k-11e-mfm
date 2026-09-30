@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "cheerio": "^1.2.0",
+    "node-html-markdown": "^2.0.0",
     "playwright": "^1.63.0",
     "yaml": "^2.9.1",
     "zod": "^4.6.5"

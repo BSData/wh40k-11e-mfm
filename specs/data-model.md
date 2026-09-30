@@ -142,16 +142,26 @@ notes: |-                 # the expandable "Welcome…" help text (browser-captu
   ## UNITS
 
   - **Starting Strength**: The number of models a unit contains can affect its points cost...
+muster: |-                # the expandable "Muster Armies" army-building rules (browser-captured), as Markdown
+  The following rules tell you how to create an army list out of models and units...
+
+  ## SELECT BATTLE SIZE
+  ...
+  | Battle Size  | Points Total | Detachment Points (DP) | Enhancement Limit | Unit Limit\* |
+  | ------------ | ------------ | ---------------------- | ----------------- | ------------ |
+  | INCURSION    | 1000         | 2                      | 2                 | 2            |
 factions:                 # slugs successfully scraped, sorted
   - adepta-sororitas
   - ...
 ```
 `lastUpdated` deliberately avoids a per-run timestamp so an unchanged scrape leaves
-`meta.yaml` byte-identical (no spurious PR). `notes` is present only on browser runs
-(omitted with `--no-legends`). It is **Markdown**: `extractNotesMarkdown` in `src/parse.ts`
-converts the rendered notes block — `<b>` → `**bold**`, all-caps section labels → `##`
-headings, `<ul>/<li>` → bullet lists — so the help text keeps its structure. `src/browser.ts`
-only drives the page (expand + wait) and hands the rendered HTML to that pure function.
+`meta.yaml` byte-identical (no spurious PR). `notes` and `muster` are present only on
+browser runs (omitted with `--no-legends`). Both are **Markdown**: `extractNotesMarkdown` /
+`extractMusterMarkdown` in `src/parse.ts` convert the rendered panel — `<b>` → `**bold**`,
+all-caps section labels → `##` headings, `<ul>/<li>` → bullet lists, `<table>` → GFM
+tables — so the rules keep their structure, and a change to them (e.g. a battle size's DP)
+is a readable line diff. `src/browser.ts` only drives the page (open + wait) and hands the
+rendered HTML to those pure functions.
 
 ## Index (in-memory only, not written)
 `SiteIndex` = `{ version, factions: [{ slug, name }] }`, parsed from the landing page
