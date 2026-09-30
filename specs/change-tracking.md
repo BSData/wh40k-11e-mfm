@@ -19,15 +19,23 @@ audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
      counts, point-change count with ▲/▼ split and net delta, units re-tiered), plus a
      **per-faction table** when two or more factions changed;
    - a **per-faction section** with labelled sub-blocks so it's clear *what* moved and
-     *how*: `Units added/removed`, `Unit points` (magnitude-sorted, bold deltas like
-     `Necron Warriors — 10 models: 80 → 90 pts (**+10**)`), `Unit pricing re-tiered`
-     (see below), `Wargear`, `Unit changes` (role / attachTo), `Detachments
-     added/removed`, `Enhancements`, and `Detachment changes` (dp / objective / unique /
-     per-enhancement leaderTo);
+     *how*: `Units added/removed`, `Unit points` (magnitude-sorted, signed deltas like
+     `Necron Warriors — 10 models: 80 → 90 (+10)`; the block label already says these
+     are points), `Unit pricing re-tiered` (see below), `Wargear`, `Unit changes`
+     (leaderTo / supportTo), `Detachments added/removed`, `Enhancements`, and
+     `Detachment changes` (dp / objectives / unique / per-enhancement leaderTo /
+     supportTo);
    - whole new / removed factions and version / parent changes are called out too.
+
+   A cost option priced per requisition tier names its tier the way the MFM words it —
+   `Land Raider — 1 model (3rd+): 240 → 265 (+25)`, with `1st–2nd`, `1st` and `1st+`
+   alongside — rather than as the raw `[3,)` interval the data model stores.
 
    It is **comprehensive**: every field the model carries is diffed, so a change can't
    slip through unreported (the readable counterpart to the parser's coverage guard).
+   Two things are deliberately *not* repeated, because another line already states
+   them: a change a sub-faction shares with its parent (see *Sub-factions* below), and
+   a Leader/Support target the faction no longer has (next paragraph).
 
    Leader/Support lists on units and enhancements, and detachment Force Dispositions
    (`objectives`), show only membership changes: one nested item per removed (➖) or
@@ -35,6 +43,14 @@ audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
    also changes, or either list contains repeated names, show the complete before
    and after lists on separate nested lines instead, so no order or occurrence is
    lost. The same formatting is used in the persistent changelog.
+
+   A Leader/Support target the faction **lost** is left out of those lists: nothing can
+   lead a unit that isn't there, and `Units removed` already says it's gone. Listed,
+   it is the same fact again under every leader that used to take it — in v1.5, Blood
+   Angels losing the Tactical Squad put `➖ Tactical Squad` under seven leaders, and 152
+   such lines ran across the update. A target the faction *gained* stays: which leaders
+   can take a new unit is news that no other line carries. A leader whose only change
+   was losing such a target is not counted as changed.
 
 ### Example from the v1.4 update
 Selected lines from the changelog for [PR #42](https://github.com/BSData/wh40k-11e-mfm/pull/42),
@@ -101,21 +117,61 @@ priced by a new rule.
 So the **tier ranges a unit is priced over are its pricing scheme's identity**. When they
 differ between snapshots the unit is *re-tiered*: it is kept out of the cost-row diff
 entirely and described in one line instead — the tiers before and after, then every
-option's old price against its new price in each tier:
+option's old price against its new price in each tier, prices in tier order:
 
-    Allarus Custodians — re-tiered [1,) → [1,2] + [3,); 2 models: 110 → 110 / 140 ·
+    Allarus Custodians — re-tiered 1st+ → 1st–2nd / 3rd+; 2 models: 110 → 110 / 140 ·
     3 models: 165 → 165 / 195 · 5 models: 275 → 280 / 310 · 6 models: 330 → 340 / 370
 
 Nothing is lost — the genuine 275 → 280 is right there — and the reader is told what
-actually happened. It counts as a **changed** unit in the tallies and lands under
-**Changed** in `DATA-CHANGELOG.md`. The rule is symmetric, so tiers collapsing back to one
-reads the same way. Genuine additions and removals are untouched by this: v1.3's surviving
-25 lines are 24 real new Leman Russ wargear options and one real removal.
+actually happened. It counts as a **changed** unit in the tallies, in its own `Unit
+pricing re-tiered` block, never among additions or removals. The rule is symmetric, so
+tiers collapsing back to one reads the same way. Genuine additions and removals are
+untouched by this: v1.3's surviving 25 lines are 24 real new Leman Russ wargear options
+and one real removal.
+
+### Sub-factions: a shared change is listed once
+A sub-faction's page (`parent: Space Marines` — Black Templars, Blood Angels, Dark Angels,
+Deathwatch, Space Wolves) carries the parent's whole roster, so a parent reprice arrives
+once per page. Rendered faction by faction, v1.5's `Intercessor Squad — 10 models: 150 →
+175` appeared six times, and 759 of the sub-factions' lines were verbatim copies of a
+Space Marines line: 73% of a 116,568-character body was that one family.
+
+So the sections are rendered per **family** (a parent and the changed factions naming
+it), with each change listed once:
+- a change a sub-faction shares **verbatim** with its parent (same block, same line) is
+  listed only under the parent, whose section says so;
+- a change **every** changed sub-faction shares but the parent doesn't — v1.5 gave all
+  five the same sixteen units the parent already had — is listed once, in a
+  `<Parent> sub-factions — shared` section right after the parent's;
+- each sub-faction's section lists only what is its own, and opens with how many of
+  its changes are listed elsewhere, and where.
+
+This is presentation only. The table and the Discord embed still count every faction's
+changes in full — a Blood Angels player's question is how much of *their* army moved,
+shared or not. A change two or three sub-factions share, but not all of them, stays in
+each of their sections: rendering every subset of a family as its own section would be
+harder to read than the repetition it saves.
 
 ### Folding
 Above 50 lines the per-faction detail is wrapped in a `<details>` block, so the title,
 summary and table stay on one screen. A full MFM revision runs to hundreds of bullets;
 the summary is the thing a reviewer reads first, and the detail is one click away.
+
+### Fitting GitHub's limit
+GitHub caps a PR body at **65,536 characters**, and `create-pull-request` enforces it by
+cutting the body off mid-line with nothing but a warning in the run log. v1.5's body was
+116,568 characters: it ended in the middle of Deathwatch, sixteen factions and the closing
+`</details>` were simply gone, and the page gave no sign of it — while the Discord
+announcement linked to it as *the* changelog. Silently incomplete output is the failure
+this project exists to avoid, so the renderer owns the limit, as `src/discord.ts` owns
+Discord's.
+
+`changelog()` renders the body whole when it fits. When it doesn't, it replaces faction
+sections with a one-line stub — **largest first**, so the most factions keep their
+detail — until it fits. A stub keeps its heading and says how many lines it stands in
+for; a note under the table names every shortened section. The complete entry is
+never shortened: it is the version's changelog file (below), which the same PR commits
+and the body names.
 
 ## Naming an update
 `updateTitle()` names an update `MFM v<version> update — <window>`. The version is the
@@ -142,17 +198,41 @@ resolves back to the committed date instead of looking like a change.
 This is pure code — no LLM. An optional LLM polish step could summarise the changelog
 into prose later, but is not required.
 
-## `DATA-CHANGELOG.md` (the persistent history)
-The PR body is ephemeral; [`DATA-CHANGELOG.md`](../DATA-CHANGELOG.md) is the durable,
-accumulating record, in [Keep a Changelog](https://keepachangelog.com) form (newest
-first). `changelogEntry()` in `src/diff.ts` renders one dated release block — items
-grouped under **Added** / **Changed** / **Removed**, each prefixed by faction and sorted
-— headed `## [YYYY-MM-DD] — MFM v<version>`, the date being the same window as the PR
-title (so a multi-day update reads `## [2026-08-31 → 2026-09-02]`).
-`scripts/update-data-changelog.ts` prepends it just after the `<!-- BEGIN ENTRIES -->`
-marker, so every scrape PR also commits the new entry. No changes → the file is left
-byte-identical (no spurious diff) — and because the heading is dated from the data
-rather than from today, a re-scrape that finds nothing new leaves it byte-identical too.
+## The persistent changelog: one file per MFM version
+The PR body is ephemeral and capped; the durable record is **one Markdown file per MFM
+version** under [`changelog/`](../changelog) — `changelog/v1.5.md` — indexed by
+[`DATA-CHANGELOG.md`](../DATA-CHANGELOG.md).
+
+It used to be that single file, every update prepended. That stopped scaling: v1.5's
+entry alone took it from 122 KB to 278 KB, and the file only ever grows. A file per
+version stays the size of one update, links cleanly from an announcement or a PR, and
+is the unit a player actually asks about ("what changed in v1.5?").
+
+`changelogEntry()` in `src/diff.ts` renders one dated entry, headed
+`## [YYYY-MM-DD] — MFM v<version>` — the date being the same window as the PR title, so a
+multi-day update reads `## [2026-08-31 → 2026-09-02]` — followed by the same summary
+line, table and per-faction sections (at `###`) as the PR body, sub-faction sharing
+included, but never folded or shortened. The PR body is this entry under a size limit.
+
+[`scripts/update-data-changelog.ts`](../scripts/update-data-changelog.ts) writes it:
+1. into `changelog/v<version>.md`, just after its `<!-- BEGIN ENTRIES -->` marker —
+   creating the file from a short header when the version is new. A version usually
+   has one entry; a second arrives only if a later update lands without GW bumping the
+   version (v1.0 has two), and sits above the first, newest first;
+2. then regenerates `DATA-CHANGELOG.md` from the directory: one line per version file,
+   newest version first (compared numerically, so v1.10 follows v1.9), linking the file
+   and listing its entry dates. The index is wholly generated — edit the header in the
+   script, not the file.
+
+No changes → neither file is touched (no spurious diff) — and because the entry is
+dated from the data rather than from today, a re-scrape that finds nothing new leaves
+both byte-identical too. Every scrape runs on `main`, so re-running on a sticky PR
+rewrites the entry from `main`'s copy rather than stacking a second one.
+
+Entries written before this layout keep their original Keep a Changelog shape — items
+under **Added** / **Changed** / **Removed**, each prefixed by faction — moved verbatim into
+their version's file. The `2026-09-02` schema-change note sits in `v1.4.md`, the version
+it was made for.
 
 ## Announcing an update (Discord)
 A merged PR and a changelog file are pull media — someone has to go looking. The
@@ -194,7 +274,7 @@ own `GITHUB_TOKEN`, and that marker is the entire state:
 | present | the update already has a message | **edit** it in place |
 
 So a multi-day update is one Discord message whose contents widen as its window does —
-matching the PR title and the `DATA-CHANGELOG.md` entry, which do the same thing. Day
+matching the PR title and the changelog entry, which do the same thing. Day
 one's thin summary doesn't stay wrong.
 
 That comment also carries the message's **permalink**, so a reviewer on the PR can open
@@ -233,10 +313,11 @@ faction with eight changes can net zero — and the total is not a quantity anyo
 with. The question a reader actually has is "how much of my faction moved", and a count
 answers it.
 
-The changelog link points at the **PR**, not at `DATA-CHANGELOG.md` on `main`. The
-announcement fires when the update is detected, so at that moment `main` still holds the
-previous update and a link there is worse than none. The PR body is this update's
-changelog and stays correct after the merge.
+The changelog link points at the **PR**, not at the version's changelog file on `main`.
+The announcement fires when the update is detected, so at that moment `main` doesn't have
+the file yet and a link there is worse than none. The PR body is this update's changelog
+— shortened only if it had to fit GitHub's limit, and then naming the file that isn't —
+and stays correct after the merge.
 
 Discord's embed limits (title 256, description 4096, field value 1024, 6000 total) are
 enforced by the renderer, which trims the faction lists rather than letting the API
@@ -265,11 +346,11 @@ The scrape GitHub Action:
    PR step, by which point `create-pull-request` has had the working tree,
 4. runs `tsx src/diff.ts <old> data --title-file <path>` to produce the changelog body
    and the matching PR title,
-5. runs `tsx scripts/update-data-changelog.ts <old> data` to prepend the entry to
-   `DATA-CHANGELOG.md`,
+5. runs `tsx scripts/update-data-changelog.ts <old> data` to write the entry into
+   `changelog/v<version>.md` and regenerate the `DATA-CHANGELOG.md` index,
 6. if `data/` changed, opens (or updates) the sticky PR whose title and body are those
    two outputs — the title also being the commit subject, as `data: <title>` — and which
-   commits the updated `DATA-CHANGELOG.md`,
+   commits the changelog file and the index,
 7. reads the Discord marker off the PR, runs `tsx src/discord.ts <old> <new> --send
    --message-id …`, and records a marker comment if that posted a new message (see
    *Announcing an update* above),

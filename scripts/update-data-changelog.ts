@@ -1,28 +1,30 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { changelogIndex, withEntry } from '../src/changelog.js';
 import {
   changelogEntry,
+  changelogFile,
   loadFactionDir,
   loadVersion,
+  updateVersion,
   updateWindow,
   windowLabel,
 } from '../src/diff.js';
 
 /**
- * Prepend a dated Keep-a-Changelog entry to DATA-CHANGELOG.md for the changes
- * between two dataset snapshots. Run by the scrape workflow so each data-update PR
- * carries an accumulating, human-readable history:
+ * Write the changelog entry for the changes between two dataset snapshots into their MFM
+ * version's file (`changelog/v1.5.md`), then regenerate the DATA-CHANGELOG.md index. Run
+ * by the scrape workflow so each data-update PR carries its durable, readable history:
  *
  *   tsx scripts/update-data-changelog.ts <beforeDir> <afterDir> [date]
  *
- * No-ops (leaving the file untouched) when there are no changes, so an unchanged
- * scrape produces no diff. `date` defaults to the update's own window — the days the
- * changed factions were first seen, which is stable across re-scrapes of the sticky
- * update PR and widens to `from → to` when a later day adds more. Pass it explicitly
- * to override.
+ * No-ops (leaving both untouched) when there are no changes, so an unchanged scrape
+ * produces no diff. `date` defaults to the update's own window — the days the changed
+ * factions were first seen, which is stable across re-scrapes of the sticky update PR
+ * and widens to `from → to` when a later day adds more. Pass it explicitly to override.
  */
 
-const FILE = 'DATA-CHANGELOG.md';
-const MARKER = '<!-- BEGIN ENTRIES -->';
+const INDEX = 'DATA-CHANGELOG.md';
 
 const [beforeDir, afterDir, dateArg] = process.argv.slice(2);
 if (!beforeDir || !afterDir) {
@@ -32,19 +34,27 @@ if (!beforeDir || !afterDir) {
 
 const before = loadFactionDir(beforeDir);
 const after = loadFactionDir(afterDir);
-const version = loadVersion(afterDir);
+const siteVersion = loadVersion(afterDir);
 const date = dateArg ?? windowLabel(updateWindow(before, after));
-const entry = changelogEntry(before, after, version ? { date, version } : { date });
+const opts = siteVersion ? { date, version: siteVersion } : { date };
+const entry = changelogEntry(before, after, opts);
 if (!entry) {
-  console.log(`No data changes — ${FILE} left untouched.`);
+  console.log(`No data changes — changelog and ${INDEX} left untouched.`);
   process.exit(0);
 }
 
-const current = readFileSync(FILE, 'utf8');
-const at = current.indexOf(MARKER);
-if (at === -1) throw new Error(`${FILE} is missing the "${MARKER}" insertion marker`);
+const version = updateVersion(after, opts);
+const file = changelogFile(version);
+const dir = dirname(file);
+mkdirSync(dir, { recursive: true });
+writeFileSync(
+  file,
+  withEntry(existsSync(file) ? readFileSync(file, 'utf8') : undefined, version, entry),
+);
 
-const head = current.slice(0, at + MARKER.length);
-const rest = current.slice(at + MARKER.length).replace(/^\s+/, '');
-writeFileSync(FILE, `${head}\n\n${entry.trim()}\n\n${rest}`);
-console.log(`Prepended a ${date} entry to ${FILE}.`);
+const files = readdirSync(dir).map((name) => ({
+  name,
+  text: readFileSync(join(dir, name), 'utf8'),
+}));
+writeFileSync(INDEX, changelogIndex(files));
+console.log(`Wrote a ${date} entry to ${file} and regenerated ${INDEX}.`);

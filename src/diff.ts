@@ -9,9 +9,13 @@ import type { CostOption, Faction, FactionContent, PricingTier, Unit } from './m
  * Turns two dataset snapshots (committed YAML vs. freshly scraped) into readable
  * change reports. One structured diff (`collectChanges`) feeds three renderers here:
  *  - `changelog()` — the rich PR body (dated title, summary line, per-faction table,
- *    and the sections, folded away once they get long);
- *  - `changelogEntry()` — a Keep-a-Changelog release block for `DATA-CHANGELOG.md`;
+ *    and the sections, folded away once they get long and shortened to fit GitHub's
+ *    PR body limit);
+ *  - `changelogEntry()` — the same entry in full, for the version's file under
+ *    `changelog/` (`src/changelog.ts` assembles the files and their index);
  *  - `failuresReport()` — the per-faction parse errors for the workflow's issue.
+ * The first two share `sections()`, which lists each change a sub-faction shares with
+ * its family once.
  * and a fourth next door: `announcement()` in `src/discord.ts` builds the webhook embed
  * from the same `collectChanges`/`tallies`/`totals` — exported for it, so the two
  * summaries cannot drift.
@@ -84,12 +88,32 @@ interface Numeric {
 const costLabel = (c: CostOption): string =>
   `${c.desc ?? `${c.models} model${c.models === 1 ? '' : 's'}`}${c.addon ? ' (add-on)' : ''}`;
 
+const ordinal = (n: number): string => {
+  const teen = n % 100 >= 11 && n % 100 <= 13;
+  const suffix = teen ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th');
+  return `${n}${suffix}`;
+};
+
+/**
+ * A requisition tier as the MFM words it — `[1,2]` → `1st–2nd`, `[3,)` → `3rd+`,
+ * `[1,1]` → `1st` — instead of the interval the data model stores. Anything that isn't
+ * an interval is shown as-is.
+ */
+export function tierLabel(range: string): string {
+  const m = range.match(/^\[(\d+),(\d*)[\])]$/);
+  if (!m) return range;
+  const from = Number(m[1]);
+  if (!m[2]) return `${ordinal(from)}+`;
+  const to = Number(m[2]);
+  return from === to ? ordinal(from) : `${ordinal(from)}–${ordinal(to)}`;
+}
+
 /** Unit cost options keyed by `unit · tier · option`. */
 function costRows(f: FactionContent): Map<string, Numeric> {
   const m = new Map<string, Numeric>();
   for (const u of f.units) {
     for (const t of u.pricing) {
-      const tier = u.pricing.length > 1 ? ` [${t.range}]` : '';
+      const tier = u.pricing.length > 1 ? ` (${tierLabel(t.range)})` : '';
       for (const c of t.costs) {
         const what = costLabel(c);
         m.set(`${u.name} ${t.range} ${what}`, {
@@ -218,7 +242,8 @@ const tierRanges = (u: Unit): string[] => u.pricing.map((t) => t.range);
 
 /**
  * One line describing a re-tiering: the tiers before and after, then each option's old
- * price and its new price in every tier — `5 models: 275 → 280 / 310`.
+ * price and its new price in every tier — `1st+ → 1st–2nd / 3rd+; 5 models: 275 → 280 /
+ * 310`. Tiers and prices are both `/`-separated, so each price sits under its tier.
  */
 function describeRetier(before: Unit, after: Unit): Retier {
   const old = pricesByOption(before.pricing);
@@ -231,7 +256,8 @@ function describeRetier(before: Unit, after: Unit): Retier {
   for (const [label, points] of old) {
     if (!now.has(label)) rows.push(`${label}: ${points.join(' / ')} → —`);
   }
-  const tiers = `${tierRanges(before).join(' + ')} → ${tierRanges(after).join(' + ')}`;
+  const scheme = (u: Unit) => tierRanges(u).map(tierLabel).join(' / ');
+  const tiers = `${scheme(before)} → ${scheme(after)}`;
   return { unit: after.name, text: `${after.name} — re-tiered ${tiers}; ${rows.join(' · ')}` };
 }
 
@@ -241,6 +267,8 @@ export interface FactionChanges {
   name: string;
   /** The scraped snapshot's `firstSeen` — the day this content appeared. */
   firstSeen?: string;
+  /** The parent army a sub-faction's page names — the family its changes are shared in. */
+  parent?: string;
   status: 'added' | 'removed' | 'changed';
   unitCount: number; // for whole-faction added/removed
   detCount: number;
@@ -289,6 +317,16 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
   const wargear = diffNumeric(wargearRows(before), wargearRows(after), bothUnit);
   const enh = diffNumeric(enhRows(before), enhRows(after), bothDet);
 
+  // A Leader/Support target the faction lost is dropped from the old list before
+  // comparing: nothing can lead a unit that isn't there, and "Units removed" already says
+  // so. Kept, it is that one fact again under every leader that used to take it.
+  const gone = new Set(onlyIn(ou, nu));
+  const grantDelta = (was: string[] | undefined, now: string[] | undefined) =>
+    listDelta(
+      was?.filter((name) => !gone.has(name)),
+      now,
+    );
+
   // Non-numeric attribute changes on entities present in both snapshots.
   const unitOther: Attr[] = [];
   const beforeUnits = new Map(before.units.map((u) => [u.name, u]));
@@ -297,7 +335,7 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     if (!p) continue;
     const note = (text: string) => unitOther.push({ entity: u.name, text: `${u.name} — ${text}` });
     for (const grant of ['leaderTo', 'supportTo'] as const) {
-      const delta = listDelta(p[grant], u[grant]);
+      const delta = grantDelta(p[grant], u[grant]);
       if (delta) note(`${grant}:\n${delta}`);
     }
   }
@@ -317,7 +355,7 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
       const x = pe.get(e.name);
       if (!x) continue;
       for (const grant of ['leaderTo', 'supportTo'] as const) {
-        const delta = listDelta(x[grant], e[grant]);
+        const delta = grantDelta(x[grant], e[grant]);
         if (delta) note(`${d.name} · ${e.name} — ${grant}:\n${delta}`);
       }
     }
@@ -384,18 +422,20 @@ export function collectChanges(before: Snapshot[], after: Snapshot[]): FactionCh
   const beforeBySlug = new Map(before.map((f) => [f.slug, f]));
   const afterBySlug = new Map(after.map((f) => [f.slug, f]));
   const out: FactionChanges[] = [];
-  // Carried only when present: bare parser content (tests, one-off diffs) has no stamp.
+  // Carried only when present: bare parser content (tests, one-off diffs) has no stamp,
+  // and only sub-factions have a parent.
   const seen = (f: Snapshot) => (f.firstSeen ? { firstSeen: f.firstSeen } : {});
+  const family = (f: Snapshot) => (f.parent ? { parent: f.parent } : {});
   for (const f of [...after].sort((a, b) => a.name.localeCompare(b.name))) {
     const prev = beforeBySlug.get(f.slug);
-    if (!prev) out.push({ ...wholeFaction(f, 'added'), ...seen(f) });
+    if (!prev) out.push({ ...wholeFaction(f, 'added'), ...seen(f), ...family(f) });
     else {
       const c = computeChanges(prev, f);
-      if (c) out.push({ ...c, ...seen(f) });
+      if (c) out.push({ ...c, ...seen(f), ...family(f) });
     }
   }
   for (const f of [...before].sort((a, b) => a.name.localeCompare(b.name))) {
-    if (!afterBySlug.has(f.slug)) out.push(wholeFaction(f, 'removed'));
+    if (!afterBySlug.has(f.slug)) out.push({ ...wholeFaction(f, 'removed'), ...family(f) });
   }
   return out;
 }
@@ -493,54 +533,207 @@ export function sharedHead(changes: FactionChanges[]): string {
   return heads.length > 1 && heads.every((h) => h !== '' && h === first) ? first : '';
 }
 
-// ---- Rich changelog (PR body) -------------------------------------------------
+// ---- Per-faction sections (the PR body and the changelog file) ----------------
 
-const deltaLine = (d: Delta) => `${d.display}: ${d.from} → ${d.to} pts (**${sgn(d.to - d.from)}**)`;
+// The block label already says these are points; the delta's sign says which way.
+const deltaLine = (d: Delta) => `${d.display}: ${d.from} → ${d.to} (${sgn(d.to - d.from)})`;
 const numericItems = (d: NumericDiff): string[] => [
   ...d.deltas.map(deltaLine),
   ...d.added.map((r) => `➕ ${r.display}: ${r.points} pts`),
   ...d.removed.map((r) => `➖ ${r.display}: was ${r.points} pts`),
 ];
 
-/** Render `**Label:** item, item` (inline) only when there are items. */
-const inlineBlock = (label: string, items: string[]): string | null =>
-  items.length > 0 ? `**${label}:** ${items.join(', ')}` : null;
-/** Render `**Label:**` followed by a bullet list, only when there are items. */
-const listBlock = (label: string, items: string[]): string | null =>
-  items.length > 0 ? `**${label}:**\n${items.map((i) => `- ${i}`).join('\n')}` : null;
+/** One labelled sub-block of a faction section — `**Unit points:**` and its items. */
+interface Block {
+  label: string;
+  /** Names on one line (`**Units added:** A, B`) rather than a bullet list. */
+  inline: boolean;
+  items: string[];
+}
 
-function renderSection(c: FactionChanges): string {
-  if (c.status === 'added')
-    return `## ${c.name}\n\n🆕 **New faction** — ${c.unitCount} units, ${c.detCount} detachments`;
-  if (c.status === 'removed') return `## ${c.name}\n\n🗑 **Removed faction**`;
-
-  const blocks = [
-    inlineBlock('Units added', c.unitsAdded),
-    inlineBlock('Units removed', c.unitsRemoved),
-    listBlock('Unit points', numericItems(c.costs)),
-    listBlock(
+/** A faction's changes as labelled blocks, in reading order. Empty blocks included. */
+function blocksOf(c: FactionChanges): Block[] {
+  const names = (label: string, items: string[]): Block => ({ label, inline: true, items });
+  const list = (label: string, items: string[]): Block => ({ label, inline: false, items });
+  return [
+    names('Units added', c.unitsAdded),
+    names('Units removed', c.unitsRemoved),
+    list('Unit points', numericItems(c.costs)),
+    list(
       'Unit pricing re-tiered',
       c.retiered.map((r) => r.text),
     ),
-    listBlock('Wargear', numericItems(c.wargear)),
-    listBlock(
+    list('Wargear', numericItems(c.wargear)),
+    list(
       'Unit changes',
       c.unitOther.map((o) => o.text),
     ),
-    inlineBlock('Detachments added', c.detsAdded),
-    inlineBlock('Detachments removed', c.detsRemoved),
-    listBlock('Enhancements', numericItems(c.enh)),
-    listBlock(
+    names('Detachments added', c.detsAdded),
+    names('Detachments removed', c.detsRemoved),
+    list('Enhancements', numericItems(c.enh)),
+    list(
       'Detachment changes',
       c.detOther.map((o) => o.text),
     ),
-  ].filter((b): b is string => b !== null);
-  const heading = c.head.length > 0 ? `## ${c.name}  _(${c.head.join(', ')})_` : `## ${c.name}`;
+  ];
+}
+
+const renderBlocks = (blocks: Block[]): string[] =>
+  blocks
+    .filter((b) => b.items.length > 0)
+    .map((b) =>
+      b.inline
+        ? `**${b.label}:** ${b.items.join(', ')}`
+        : `**${b.label}:**\n${b.items.map((i) => `- ${i}`).join('\n')}`,
+    );
+
+/** A heading and its Markdown body: one faction, or the changes a family shares. */
+interface Section {
+  /** Bare name, for naming the section elsewhere. */
+  name: string;
+  /** Heading text — the name, plus any version/parent note. */
+  title: string;
+  body: string;
+}
+
+const renderSection = (s: Section, level: string): string => `${level} ${s.title}\n\n${s.body}`;
+
+const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? '' : 's'}`;
+/** `A`, `A and B`, `A, B and C`. */
+const listing = (names: string[]): string =>
+  names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
+
+/** A listed change's identity: its block and its exact line. */
+const itemKey = (b: Block, item: string): string => `${b.label}\n${item}`;
+const itemKeys = (blocks: Block[]): Set<string> =>
+  new Set(blocks.flatMap((b) => b.items.map((i) => itemKey(b, i))));
+
+/** `blocks` minus the given changes, and how many that took out. */
+function without(blocks: Block[], keys: Set<string>): { blocks: Block[]; dropped: number } {
+  let dropped = 0;
+  const kept = blocks.map((b) => {
+    const items = b.items.filter((i) => !keys.has(itemKey(b, i)));
+    dropped += b.items.length - items.length;
+    return { ...b, items };
+  });
+  return { blocks: kept, dropped };
+}
+
+function factionSection(c: FactionChanges, blocks: Block[], note?: string): Section {
+  if (c.status === 'added')
+    return {
+      name: c.name,
+      title: c.name,
+      body: `🆕 **New faction** — ${c.unitCount} units, ${c.detCount} detachments`,
+    };
+  if (c.status === 'removed') return { name: c.name, title: c.name, body: '🗑 **Removed faction**' };
+  const title = c.head.length > 0 ? `${c.name}  _(${c.head.join(', ')})_` : c.name;
+  const parts = [...(note ? [note] : []), ...renderBlocks(blocks)];
   // A version/parent bump alone leaves nothing to list — say so, rather than emitting
   // a bare heading that reads like a section the renderer forgot to fill in.
-  const body = blocks.length > 0 ? blocks.join('\n\n') : '_No unit or detachment changes._';
-  return `${heading}\n\n${body}`;
+  return {
+    name: c.name,
+    title,
+    body: parts.length > 0 ? parts.join('\n\n') : '_No unit or detachment changes._',
+  };
 }
+
+/**
+ * Every changed faction's section, each change listed once per family: a sub-faction
+ * page carries its parent's whole roster, so a parent reprice arrives once per page —
+ * in v1.5, 759 of the sub-factions' lines were verbatim copies of a Space Marines line.
+ *
+ * - A change a sub-faction shares verbatim with its parent is listed under the parent.
+ * - A change every changed sub-faction shares, but the parent doesn't, is listed once in
+ *   a `<Parent> sub-factions — shared` section, right after the parent's.
+ * - Each sub-faction lists what is its own, and says how many of its changes are listed
+ *   elsewhere.
+ *
+ * Presentation only: the tallies behind the table still count each faction in full.
+ */
+function sections(changes: FactionChanges[]): Section[] {
+  const blocks = new Map(changes.map((c) => [c.name, blocksOf(c)]));
+  const notes = new Map<string, string>();
+  const extra: { anchor: string; after: boolean; section: Section }[] = [];
+
+  const families = new Map<string, string[]>();
+  for (const c of changes)
+    if (c.parent && c.status === 'changed')
+      families.set(c.parent, [...(families.get(c.parent) ?? []), c.name]);
+
+  for (const [parent, kids] of families) {
+    const hasParent = changes.some((c) => c.name === parent && c.status === 'changed');
+    const inParent = new Map<string, number>();
+    const inShared = new Map<string, number>();
+
+    if (hasParent) {
+      const listed = itemKeys(blocks.get(parent) ?? []);
+      for (const kid of kids) {
+        const r = without(blocks.get(kid) ?? [], listed);
+        blocks.set(kid, r.blocks);
+        inParent.set(kid, r.dropped);
+      }
+    }
+
+    const sharedTitle = `${parent} sub-factions — shared`;
+    const [first = [], ...rest] = kids.map((kid) => blocks.get(kid) ?? []);
+    const common = itemKeys(first);
+    for (const bs of rest) {
+      const ks = itemKeys(bs);
+      for (const k of common) if (!ks.has(k)) common.delete(k);
+    }
+    if (kids.length >= 2 && common.size > 0) {
+      const shared = first.map((b) => ({
+        ...b,
+        items: b.items.filter((i) => common.has(itemKey(b, i))),
+      }));
+      for (const kid of kids) {
+        const r = without(blocks.get(kid) ?? [], common);
+        blocks.set(kid, r.blocks);
+        inShared.set(kid, r.dropped);
+      }
+      const note = `_Identical in ${listing(kids)}, and not a change to ${parent} itself — listed once here rather than in each._`;
+      extra.push({
+        anchor: hasParent ? parent : (kids[0] ?? parent),
+        after: hasParent,
+        section: {
+          name: sharedTitle,
+          title: sharedTitle,
+          body: [note, ...renderBlocks(shared)].join('\n\n'),
+        },
+      });
+    }
+
+    const sharers = kids.filter((kid) => (inParent.get(kid) ?? 0) > 0);
+    if (sharers.length > 0)
+      notes.set(
+        parent,
+        `_Where ${listing(sharers)} had the identical change, it is listed only here._`,
+      );
+    for (const kid of kids) {
+      const p = inParent.get(kid) ?? 0;
+      const s = inShared.get(kid) ?? 0;
+      const where = [
+        p ? `${plural(p, 'change')} identical to **${parent}**` : '',
+        s ? `${p ? s : plural(s, 'change')} under **${sharedTitle}**` : '',
+      ].filter(Boolean);
+      if (where.length > 0) notes.set(kid, `_Not repeated here: ${where.join(', and ')}._`);
+    }
+  }
+
+  const out: Section[] = [];
+  const place = (name: string, after: boolean) => {
+    for (const x of extra) if (x.anchor === name && x.after === after) out.push(x.section);
+  };
+  for (const c of changes) {
+    place(c.name, false);
+    out.push(factionSection(c, blocks.get(c.name) ?? [], notes.get(c.name)));
+    place(c.name, true);
+  }
+  return out;
+}
+
+// ---- Rich changelog (PR body) -------------------------------------------------
 
 /** The table's Points cell: "▲3 ▼1 (-25)", or "—" when nothing was repriced. */
 const pointsCell = (t: { up: number; down: number; net: number }): string => {
@@ -591,8 +784,15 @@ function summary(changes: FactionChanges[]): string {
 /** Detail bodies longer than this fold into a collapsed `<details>` block. */
 const FOLD_AFTER_LINES = 50;
 
-const BLURB =
-  '_Automated Munitorum Field Manual scrape. The YAML diff is canonical; this is the readable summary._';
+/**
+ * GitHub's cap on a PR body, in characters. `create-pull-request` enforces it by cutting
+ * the body off mid-line, with only a warning in the run log — v1.5's lost sixteen
+ * factions that way — so the renderer keeps under it instead.
+ */
+export const BODY_LIMIT = 65_536;
+
+const blurb = (file: string): string =>
+  `_Automated Munitorum Field Manual scrape. The YAML diff is canonical; this is the readable summary — the same entry this PR commits to \`${file}\`._`;
 
 /**
  * Collapse a long per-faction detail body behind a `<details>` toggle, so the summary
@@ -606,13 +806,67 @@ function fold(detail: string, factions: number): string {
   return `<details>\n<summary><strong>Per-faction detail</strong> — ${what}</summary>\n\n${detail}\n\n</details>`;
 }
 
+/**
+ * The PR body within `BODY_LIMIT`: whole when it fits, otherwise with faction sections
+ * replaced by a one-line stub, largest first — so the most factions keep their detail —
+ * until it does. A stub keeps its heading; a note under the table names every shortened
+ * section and the file that has them in full.
+ */
+function fitted(
+  head: string,
+  summaryText: string,
+  all: Section[],
+  factions: number,
+  file: string,
+): string {
+  const stub = (s: Section): Section => ({
+    ...s,
+    body: `_${plural(s.body.split('\n').length, 'line')} left out to fit GitHub's PR body limit — the full section is in \`${file}\`._`,
+  });
+  const build = (shown: Section[], cut: string[]): string => {
+    const note =
+      cut.length > 0
+        ? `\n\n> [!NOTE]\n> Shortened to fit GitHub's ${BODY_LIMIT.toLocaleString('en-US')}-character PR body limit: ${listing(cut.map((n) => `**${n}**`))}. The complete entry is in \`${file}\`, committed by this PR.`
+        : '';
+    const detail =
+      shown.length > 0
+        ? `\n\n---\n\n${fold(shown.map((s) => renderSection(s, '##')).join('\n\n'), factions)}`
+        : '';
+    return `${head}\n\n${summaryText}${note}${detail}\n`;
+  };
+
+  let shown = all;
+  let body = build(shown, []);
+  const cut: string[] = [];
+  const largest = [...all].sort(
+    (a, b) => b.body.length - a.body.length || a.name.localeCompare(b.name),
+  );
+  for (const s of largest) {
+    if (body.length <= BODY_LIMIT) return body;
+    cut.push(s.name);
+    shown = shown.map((x) => (x === s ? stub(x) : x));
+    // Named in page order, not in the order they were cut.
+    body = build(
+      shown,
+      all.filter((x) => cut.includes(x.name)).map((x) => x.name),
+    );
+  }
+  // Only reachable with hundreds of factions: even the stubs don't fit.
+  return body.length <= BODY_LIMIT
+    ? body
+    : build(
+        [],
+        all.map((x) => x.name),
+      );
+}
+
 /** Build a full Markdown changelog (the PR body) from two faction snapshots. */
 export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpts = {}): string {
   const changes = collectChanges(before, after);
   if (changes.length === 0) return 'No changes detected.\n';
-  const detail = fold(changes.map(renderSection).join('\n\n'), changes.length);
-  const head = `# ${updateTitle(before, after, opts)}\n\n${BLURB}`;
-  return `${head}\n\n${summary(changes)}\n\n---\n\n${detail}\n`;
+  const file = changelogFile(updateVersion(after, opts));
+  const head = `# ${updateTitle(before, after, opts)}\n\n${blurb(file)}`;
+  return fitted(head, summary(changes), sections(changes), changes.length, file);
 }
 
 // ---- Naming an update: MFM version + dates ------------------------------------
@@ -631,7 +885,7 @@ export interface RenderOpts {
  * faction happens to sort first). Ties go to the higher version, so the answer does not
  * depend on directory order.
  */
-function updateVersion(after: Snapshot[], opts: RenderOpts): string | undefined {
+export function updateVersion(after: Snapshot[], opts: RenderOpts = {}): string | undefined {
   if (opts.version) return opts.version;
   const tally = new Map<string, number>();
   for (const f of after) tally.set(f.version, (tally.get(f.version) ?? 0) + 1);
@@ -689,15 +943,19 @@ export function updateTitle(before: Snapshot[], after: Snapshot[], opts: RenderO
   return `${what} — ${windowLabel(updateWindow(before, after, opts))}`;
 }
 
-// ---- Keep-a-Changelog entry (DATA-CHANGELOG.md) -------------------------------
+// ---- The persistent changelog entry (changelog/v<version>.md) ------------------
+
+/** Where an MFM version's changelog file lives, relative to the repository root. */
+export const changelogFile = (version: string | undefined): string =>
+  `changelog/${version ? `v${version}` : 'unversioned'}.md`;
 
 /**
- * One dated Keep-a-Changelog release block, items grouped under Added / Changed /
- * Removed and prefixed by faction. `''` when nothing changed. Prepended to
- * `DATA-CHANGELOG.md` by `scripts/update-data-changelog.ts` on each scrape PR.
- * `date` defaults to the update's own window (see `updateWindow`), so a re-scrape
- * that finds nothing new rewrites the file byte-identically instead of churning
- * the heading to today and force-pushing the sticky PR.
+ * One dated entry for the version's changelog file: the same summary, table and
+ * per-faction sections as the PR body (sections at `###`), never folded or shortened.
+ * `''` when nothing changed. Written by `scripts/update-data-changelog.ts` on each
+ * scrape PR. `date` defaults to the update's own window (see `updateWindow`), so a
+ * re-scrape that finds nothing new rewrites the file byte-identically instead of
+ * churning the heading to today and force-pushing the sticky PR.
  */
 export function changelogEntry(
   before: Snapshot[],
@@ -706,56 +964,13 @@ export function changelogEntry(
 ): string {
   const changes = collectChanges(before, after);
   if (changes.length === 0) return '';
-
-  const addedItems: string[] = [];
-  const changedItems: string[] = [];
-  const removedItems: string[] = [];
-  for (const c of changes) {
-    const fx = `**${c.name}**`;
-    if (c.status === 'added') {
-      addedItems.push(`${fx}: new faction (${c.unitCount} units, ${c.detCount} detachments)`);
-      continue;
-    }
-    if (c.status === 'removed') {
-      removedItems.push(`${fx}: removed faction`);
-      continue;
-    }
-    for (const u of c.unitsAdded) addedItems.push(`${fx}: new unit ${u}`);
-    for (const d of c.detsAdded) addedItems.push(`${fx}: new detachment ${d}`);
-    for (const r of [...c.costs.added, ...c.wargear.added, ...c.enh.added])
-      addedItems.push(`${fx}: ${r.display} (${r.points} pts)`);
-
-    for (const u of c.unitsRemoved) removedItems.push(`${fx}: removed unit ${u}`);
-    for (const d of c.detsRemoved) removedItems.push(`${fx}: removed detachment ${d}`);
-    for (const r of [...c.costs.removed, ...c.wargear.removed, ...c.enh.removed])
-      removedItems.push(`${fx}: removed ${r.display} (was ${r.points} pts)`);
-
-    for (const d of allDeltas(c))
-      changedItems.push(`${fx}: ${d.display}: ${d.from} → ${d.to} pts (${sgn(d.to - d.from)})`);
-    for (const r of c.retiered) changedItems.push(`${fx}: ${r.text}`);
-    for (const o of [...c.unitOther, ...c.detOther]) changedItems.push(`${fx}: ${o.text}`);
-    for (const h of c.head) changedItems.push(`${fx}: ${h}`);
-  }
-
-  const block = (title: string, items: string[]): string | null =>
-    items.length > 0
-      ? `### ${title}\n${items
-          .sort()
-          .map((i) => `- ${i}`)
-          .join('\n')}`
-      : null;
-  const body = [
-    block('Added', addedItems),
-    block('Changed', changedItems),
-    block('Removed', removedItems),
-  ]
-    .filter((b): b is string => b !== null)
-    .join('\n\n');
-
   const date = opts.date ?? windowLabel(updateWindow(before, after, opts));
   const version = updateVersion(after, opts);
   const heading = version ? `## [${date}] — MFM v${version}` : `## [${date}]`;
-  return `${heading}\n\n${body}\n`;
+  const detail = sections(changes)
+    .map((s) => renderSection(s, '###'))
+    .join('\n\n');
+  return `${heading}\n\n${summary(changes)}\n\n${detail}\n`;
 }
 
 // ---- Failure report (error issue) --------------------------------------------

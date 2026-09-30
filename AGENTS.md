@@ -17,7 +17,10 @@ the AI angle is purely this maintenance harness.
 - `src/browser.ts` — Playwright: Legends units + the rules panels ("Welcome…" notes,
   "Muster Armies") (not in HTTP).
 - `src/emit.ts` — deterministic YAML in/out.
-- `src/diff.ts` — changelog from two snapshots (pure `changelog()` + CLI).
+- `src/diff.ts` — changelog from two snapshots (pure `changelog()` + CLI): the PR body,
+  kept under GitHub's 65,536-character limit, and the entry for the version's file.
+- `src/changelog.ts` — places an entry in `changelog/v<version>.md` and regenerates the
+  `DATA-CHANGELOG.md` index (pure; `scripts/update-data-changelog.ts` does the I/O).
 - `src/discord.ts` — the same diff as a Discord webhook payload, plus the one call that
   sends it (`announcement()` pure, `send()` tested against a stub server). One message
   per update, edited as the update grows.
@@ -25,6 +28,8 @@ the AI angle is purely this maintenance harness.
 - `specs/` — **source-of-truth prose**. Change the spec first, then the code.
 - `test/` — Vitest + saved HTML `fixtures/`. Tests run offline.
 - `data/` — committed output: the dataset and its history. Do not hand-edit.
+- `changelog/` + `DATA-CHANGELOG.md` — committed output: one readable changelog file per
+  MFM version, and their generated index. Do not hand-edit.
 - `.agents/playbooks/` — runbooks for common maintenance tasks.
 
 ## Commands
