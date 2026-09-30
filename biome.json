@@ -17,5 +17,11 @@
       }
     }
   },
-  "javascript": { "formatter": { "quoteStyle": "single", "semicolons": "always" } }
+  "javascript": { "formatter": { "quoteStyle": "single", "semicolons": "always" } },
+  "overrides": [
+    {
+      "includes": ["**/node_modules/playwright-core/types/types.d.ts"],
+      "files": { "maxSize": 2097152 }
+    }
+  ]
 }
