@@ -3,15 +3,17 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parse as parseYaml } from 'yaml';
 import {
+  BODY_LIMIT,
   changelog,
   changelogEntry,
   failuresReport,
+  tierLabel,
   updateTitle,
   updateWindow,
   windowLabel,
 } from '../src/diff.js';
 import { factionFromYaml, factionToYaml, metaFromYaml, metaToYaml } from '../src/emit.js';
-import type { Faction, FactionContent } from '../src/model.js';
+import type { Faction, FactionContent, Unit } from '../src/model.js';
 import { parseFaction } from '../src/parse.js';
 
 const fixture = (name: string) =>
@@ -93,7 +95,7 @@ describe('changelog (ignores firstSeen)', () => {
     const log = changelog([before], [after]);
     expect(log).toContain('## Necrons');
     expect(log).toContain('**Unit points:**');
-    expect(log).toContain('Necron Warriors — 10 models: 80 → 90 pts (**+10**)');
+    expect(log).toContain('Necron Warriors — 10 models: 80 → 90 (+10)');
   });
 
   it('leads with a one-line summary of the totals', () => {
@@ -146,13 +148,13 @@ describe('changelog (ignores firstSeen)', () => {
     const tb = before.units.find((u) => u.name === 'Technomancer');
     if (tb) tb.wargear = [{ item: 'Test Rod', points: 10 }];
     const log = changelog([before], [after]);
-    expect(log).toContain('Technomancer — Test Rod: 10 → 15 pts (**+5**)');
+    expect(log).toContain('Technomancer — Test Rod: 10 → 15 (+5)');
     expect(log).toContain('- Technomancer — leaderTo:\n  - ➕ Immortals\n');
     expect(log).toContain(
       '- Technomancer — supportTo:\n  - ➖ Immortals\n  - ➖ Necron Warriors\n  - ➕ Lychguard\n',
     );
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Technomancer — supportTo:\n  - ➖ Immortals\n  - ➖ Necron Warriors\n  - ➕ Lychguard\n',
+      '- Technomancer — supportTo:\n  - ➖ Immortals\n  - ➖ Necron Warriors\n  - ➕ Lychguard\n',
     );
   });
 
@@ -194,7 +196,7 @@ describe('changelog (ignores firstSeen)', () => {
       '- Annihilation Legion — objectives:\n  - ➖ PURGE THE FOE\n  - ➕ NEW OBJECTIVE\n  - ➕ SECOND DISPOSITION\n',
     );
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Annihilation Legion — objectives:\n  - ➖ PURGE THE FOE\n  - ➕ NEW OBJECTIVE\n  - ➕ SECOND DISPOSITION\n',
+      '- Annihilation Legion — objectives:\n  - ➖ PURGE THE FOE\n  - ➕ NEW OBJECTIVE\n  - ➕ SECOND DISPOSITION\n',
     );
   });
 
@@ -209,7 +211,7 @@ describe('changelog (ignores firstSeen)', () => {
     expect(log).toContain('- Annihilation Legion — objectives:\n  - ➕ TAKE AND HOLD\n');
     expect(log).not.toContain('  - ➕ PURGE THE FOE');
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Annihilation Legion — objectives:\n  - ➕ TAKE AND HOLD\n',
+      '- Annihilation Legion — objectives:\n  - ➕ TAKE AND HOLD\n',
     );
   });
 
@@ -224,7 +226,7 @@ describe('changelog (ignores firstSeen)', () => {
       '- Annihilation Legion — objectives:\n  - ➖ PURGE THE FOE\n',
     );
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Annihilation Legion — objectives:\n  - ➖ PURGE THE FOE\n',
+      '- Annihilation Legion — objectives:\n  - ➖ PURGE THE FOE\n',
     );
   });
 
@@ -242,7 +244,7 @@ describe('changelog (ignores firstSeen)', () => {
       '- Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE, TAKE AND HOLD\n  - **After:** TAKE AND HOLD, PURGE THE FOE\n',
     );
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE, TAKE AND HOLD\n  - **After:** TAKE AND HOLD, PURGE THE FOE\n',
+      '- Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE, TAKE AND HOLD\n  - **After:** TAKE AND HOLD, PURGE THE FOE\n',
     );
   });
 
@@ -260,7 +262,7 @@ describe('changelog (ignores firstSeen)', () => {
       '- Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE, TAKE AND HOLD\n  - **After:** TAKE AND HOLD, PURGE THE FOE, RECONNAISSANCE\n',
     );
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE, TAKE AND HOLD\n  - **After:** TAKE AND HOLD, PURGE THE FOE, RECONNAISSANCE\n',
+      '- Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE, TAKE AND HOLD\n  - **After:** TAKE AND HOLD, PURGE THE FOE, RECONNAISSANCE\n',
     );
   });
 
@@ -275,7 +277,7 @@ describe('changelog (ignores firstSeen)', () => {
       '- Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE\n  - **After:** PURGE THE FOE, TAKE AND HOLD, TAKE AND HOLD\n',
     );
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE\n  - **After:** PURGE THE FOE, TAKE AND HOLD, TAKE AND HOLD\n',
+      '- Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE\n  - **After:** PURGE THE FOE, TAKE AND HOLD, TAKE AND HOLD\n',
     );
   });
 
@@ -317,7 +319,7 @@ describe('changelog (ignores firstSeen)', () => {
       '- Cursed Legion · Murdermind — supportTo:\n  - ➖ Lokhust Destroyers\n  - ➖ Lokhust Heavy Destroyers\n  - ➖ Ophydian Destroyers\n  - ➕ Canoptek Wraiths\n',
     );
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Cursed Legion · Murdermind — leaderTo:\n  - ➕ Lokhust Destroyers\n',
+      '- Cursed Legion · Murdermind — leaderTo:\n  - ➕ Lokhust Destroyers\n',
     );
   });
 
@@ -340,20 +342,19 @@ describe('changelog (ignores firstSeen)', () => {
       '- Cursed Legion · Murdermind — supportTo:\n  - **Before:** Skorpekh Destroyers, Lokhust Destroyers, Ophydian Destroyers, Lokhust Heavy Destroyers\n  - **After:** Lokhust Heavy Destroyers, Ophydian Destroyers, Lokhust Destroyers, Skorpekh Destroyers\n',
     );
     expect(changelogEntry([before], [after])).toContain(
-      '- **Necrons**: Technomancer — supportTo:\n  - **Before:** Canoptek Wraiths, Immortals, Necron Warriors\n  - **After:** Necron Warriors, Immortals, Canoptek Wraiths\n',
+      '- Technomancer — supportTo:\n  - **Before:** Canoptek Wraiths, Immortals, Necron Warriors\n  - **After:** Necron Warriors, Immortals, Canoptek Wraiths\n',
     );
   });
 });
 
-describe('changelogEntry (Keep a Changelog block)', () => {
+describe('changelogEntry (the version file entry)', () => {
   it('is empty when nothing changed', () => {
     expect(changelogEntry([necronsContent()], [necronsContent()], { date: '2026-06-23' })).toBe('');
   });
 
-  it('groups changes under Added / Changed / Removed with a dated, versioned heading', () => {
+  it('heads a dated, versioned entry with the summary, then the faction sections', () => {
     const before = necronsContent();
     const after = structuredClone(before);
-    // Added: a new unit. Removed: an existing unit. Changed: a points value.
     after.units = after.units.filter((u) => u.name !== 'Annihilation Barge');
     after.units.push({
       name: 'Shiny New Lord',
@@ -365,20 +366,25 @@ describe('changelogEntry (Keep a Changelog block)', () => {
     if (opt) opt.points += 10;
 
     const entry = changelogEntry([before], [after], { date: '2026-06-23' });
-    expect(entry).toContain('## [2026-06-23] — MFM v1.1');
-    expect(entry).toContain('### Added\n- **Necrons**: new unit Shiny New Lord');
-    expect(entry).toContain('### Changed');
-    expect(entry).toContain('**Necrons**: Necron Warriors — 10 models: 80 → 90 pts (+10)');
-    expect(entry).toContain('### Removed\n- **Necrons**: removed unit Annihilation Barge');
-    // Added section comes before Changed, which comes before Removed.
-    expect(entry.indexOf('### Added')).toBeLessThan(entry.indexOf('### Changed'));
-    expect(entry.indexOf('### Changed')).toBeLessThan(entry.indexOf('### Removed'));
+    expect(entry.startsWith('## [2026-06-23] — MFM v1.1\n\n**1 faction changed**')).toBe(true);
+    // One level below the entry heading, so a version file holds several entries.
+    expect(entry).toContain('\n### Necrons\n\n**Units added:** Shiny New Lord');
+    expect(entry).toContain('**Units removed:** Annihilation Barge');
+    expect(entry).toContain('- Necron Warriors — 10 models: 80 → 90 (+10)');
   });
 
-  it('records a brand-new faction as a single Added line', () => {
+  it('records a brand-new faction the way the PR body does', () => {
     const entry = changelogEntry([], [necronsContent()], { date: '2026-06-23' });
-    expect(entry).toContain('### Added');
-    expect(entry).toContain('**Necrons**: new faction (52 units, 12 detachments)');
+    expect(entry).toContain('### Necrons\n\n🆕 **New faction** — 52 units, 12 detachments');
+  });
+
+  it('is never folded or shortened, however long', () => {
+    const before = manyFactions(40);
+    const after = manyFactions(40, 5);
+    const entry = changelogEntry(before, after, { date: '2026-06-23' });
+    expect(entry.length).toBeGreaterThan(BODY_LIMIT);
+    expect(entry).not.toContain('<details>');
+    expect(entry).not.toContain('left out');
   });
 });
 
@@ -412,6 +418,20 @@ const asOrks = <T extends FactionContent>(f: T): T => ({
   slug: 'orks',
   name: 'Orks',
 });
+
+/**
+ * `n` unrelated factions (no parent, so nothing is shared between them). With a `bump`,
+ * faction `i` has its first `i + 10` units repriced — every section a different size,
+ * the last the largest.
+ */
+const manyFactions = (n: number, bump = 0): FactionContent[] =>
+  Array.from({ length: n }, (_, i) => {
+    const f = necronsContent();
+    const id = String(i + 1).padStart(2, '0');
+    for (const u of f.units.slice(0, bump ? i + 10 : 0))
+      for (const t of u.pricing) for (const c of t.costs) c.points += bump;
+    return { ...f, slug: `faction-${id}`, name: `Faction ${id}` };
+  });
 
 describe('update dates (the sticky PR keeps its start date)', () => {
   it('dates an update from the firstSeen stamps of the factions that changed', () => {
@@ -452,7 +472,7 @@ describe('update dates (the sticky PR keeps its start date)', () => {
     );
   });
 
-  it('heads the changelog and the DATA-CHANGELOG entry with the same window', () => {
+  it('heads the changelog and the changelog file entry with the same window', () => {
     const after = necrons('2026-08-31');
     reprice(after, 5);
     expect(changelog([necrons('2026-06-17')], [after])).toContain('# MFM v1.1 update — 2026-08-31');
@@ -621,7 +641,7 @@ describe('re-tiered pricing (a scheme change, not an add plus a remove)', () => 
   it('reports one line instead of a row-per-tier wall of additions and removals', () => {
     const log = changelog([necronsContent()], [retier()]);
     expect(log).toContain('**Unit pricing re-tiered:**');
-    expect(log).toContain('Necron Warriors — re-tiered [1,) → [1,2] + [3,)');
+    expect(log).toContain('Necron Warriors — re-tiered 1st+ → 1st–2nd / 3rd+');
     // The old prices and both new tiers are all still there, per option.
     expect(log).toContain('10 models: 80 → 80 / 110');
     // …and none of it is dressed up as an addition or a removal.
@@ -635,12 +655,22 @@ describe('re-tiered pricing (a scheme change, not an add plus a remove)', () => 
     expect(log).toContain('1 unit re-tiered');
   });
 
-  it('files it under Changed in DATA-CHANGELOG.md, never Added or Removed', () => {
+  it('files it as re-tiered in the changelog file too, never as an addition or removal', () => {
     const entry = changelogEntry([necronsContent()], [retier()], { date: '2026-08-31' });
-    expect(entry).toContain('### Changed');
-    expect(entry).not.toContain('### Added');
-    expect(entry).not.toContain('### Removed');
-    expect(entry).toContain('**Necrons**: Necron Warriors — re-tiered');
+    expect(entry).toContain('**Unit pricing re-tiered:**\n- Necron Warriors — re-tiered');
+    expect(entry).not.toContain('➕');
+    expect(entry).not.toContain('➖');
+  });
+
+  it('names a tiered cost option by its tier, as the MFM words it', () => {
+    const before = retier();
+    const after = retier();
+    const top = after.units.find((u) => u.name === 'Necron Warriors')?.pricing[1]?.costs[0];
+    if (!top) throw new Error('fixture changed');
+    top.points += 10;
+    expect(changelog([before], [after])).toContain(
+      '- Necron Warriors — 10 models (3rd+): 110 → 120 (+10)',
+    );
   });
 
   it('still reports a plain reprice normally when the tiers are untouched', () => {
@@ -650,13 +680,13 @@ describe('re-tiered pricing (a scheme change, not an add plus a remove)', () => 
       ?.pricing[0]?.costs.find((c) => c.models === 10);
     if (opt) opt.points += 10;
     const log = changelog([necronsContent()], [after]);
-    expect(log).toContain('Necron Warriors — 10 models: 80 → 90 pts (**+10**)');
+    expect(log).toContain('Necron Warriors — 10 models: 80 → 90 (+10)');
     expect(log).not.toContain('re-tiered');
   });
 
   it('handles tiers collapsing back to one, the reverse of the v1.3 move', () => {
     const log = changelog([retier()], [necronsContent()]);
-    expect(log).toContain('Necron Warriors — re-tiered [1,2] + [3,) → [1,)');
+    expect(log).toContain('Necron Warriors — re-tiered 1st–2nd / 3rd+ → 1st+');
     expect(log).toContain('10 models: 80 / 110 → 80');
     expect(log).not.toContain('➕');
     expect(log).not.toContain('➖');
@@ -683,5 +713,190 @@ describe('the changed-unit count covers everything a unit can change', () => {
     if (cost) cost.points += 5;
     // Two changes, one unit — the tally is of units touched, not of changes.
     expect(changelog([withRod(10)], [after])).toContain('units ~1');
+  });
+});
+
+describe('tierLabel (a requisition tier as the MFM words it)', () => {
+  it.each([
+    ['[1,1]', '1st'],
+    ['[1,2]', '1st–2nd'],
+    ['[3,)', '3rd+'],
+    ['[1,)', '1st+'],
+    ['[11,13]', '11th–13th'],
+    ['[21,22]', '21st–22nd'],
+    ['Legends', 'Legends'],
+  ])('%s → %s', (range, label) => {
+    expect(tierLabel(range)).toBe(label);
+  });
+});
+
+describe('a Leader/Support target the faction lost', () => {
+  /** The fixture without Immortals, dropped from every list that named them, as a scrape would. */
+  const withoutImmortals = (): FactionContent => {
+    const f = necronsContent();
+    f.units = f.units.filter((u) => u.name !== 'Immortals');
+    const drop = (x: Pick<Unit, 'leaderTo' | 'supportTo'>) => {
+      for (const grant of ['leaderTo', 'supportTo'] as const) {
+        const names = x[grant];
+        if (names) x[grant] = names.filter((n) => n !== 'Immortals');
+      }
+    };
+    for (const u of f.units) drop(u);
+    for (const d of f.detachments) for (const e of d.enhancements) drop(e);
+    return f;
+  };
+
+  it('is not repeated under every leader that used to take it', () => {
+    // Eleven Necron leaders list Immortals — eleven lines saying the same thing.
+    const lists = (u: Unit) => [...(u.leaderTo ?? []), ...(u.supportTo ?? [])];
+    expect(necronsContent().units.filter((u) => lists(u).includes('Immortals'))).toHaveLength(11);
+    const log = changelog([necronsContent()], [withoutImmortals()]);
+    expect(log).toContain('**Units removed:** Immortals');
+    expect(log).not.toContain('➖ Immortals');
+    // The leaders didn't change; the unit went away.
+    expect(log).toContain('**1 faction changed** · units -1\n');
+  });
+
+  it('still reports a leader gaining a unit the faction just got', () => {
+    const after = necronsContent();
+    after.units.push({
+      name: 'Test Construct',
+      pricing: [{ range: '[1,)', label: 'x', costs: [{ models: 1, points: 5 }] }],
+    });
+    after.units.find((u) => u.name === 'Technomancer')?.supportTo?.push('Test Construct');
+    expect(changelog([necronsContent()], [after])).toContain(
+      '- Technomancer — supportTo:\n  - ➕ Test Construct\n',
+    );
+  });
+});
+
+describe('sub-factions: a shared change is listed once', () => {
+  /** The fixture posing as another faction, a sub-faction when given a parent. */
+  const as = (name: string, parent?: string): FactionContent => ({
+    ...necronsContent(),
+    slug: name.toLowerCase().replaceAll(' ', '-'),
+    name,
+    ...(parent ? { parent } : {}),
+  });
+  const bump = (f: FactionContent | undefined, unit: string, by: number) => {
+    const cost = f?.units.find((u) => u.name === unit)?.pricing[0]?.costs[0];
+    if (!cost) throw new Error('fixture changed');
+    cost.points += by;
+  };
+  const count = (text: string, part: string) => text.split(part).length - 1;
+  const row = (log: string, name: string) =>
+    log.split('\n').find((l) => l.startsWith(`| ${name} `)) ?? '';
+
+  /** Space Marines and its chapters: a change in all of them, one in every chapter, one own. */
+  const family = (kids = ['Blood Angels', 'Dark Angels']) => {
+    const before = [as('Space Marines'), ...kids.map((k) => as(k, 'Space Marines'))];
+    const after = before.map((f) => structuredClone(f));
+    for (const f of after) bump(f, 'Necron Warriors', 5);
+    for (const f of after.slice(1)) bump(f, 'Lychguard', 10);
+    bump(after[1], 'Immortals', -5);
+    return { before, after };
+  };
+
+  it('lists a change shared with the parent only under the parent, and says so', () => {
+    const { before, after } = family();
+    const log = changelog(before, after);
+    expect(count(log, '- Necron Warriors — 10 models: 80 → 85 (+5)')).toBe(1);
+    expect(log).toContain(
+      '## Space Marines\n\n_Where Blood Angels and Dark Angels had the identical change, it is listed only here._\n\n**Unit points:**\n- Necron Warriors — 10 models: 80 → 85 (+5)',
+    );
+  });
+
+  it('lists a change every sub-faction shares once, right after the parent', () => {
+    const { before, after } = family();
+    const log = changelog(before, after);
+    expect(count(log, '- Lychguard — ')).toBe(1);
+    expect(log).toContain(
+      '## Space Marines sub-factions — shared\n\n_Identical in Blood Angels and Dark Angels, and not a change to Space Marines itself — listed once here rather than in each._\n\n**Unit points:**\n- Lychguard — 5 models: 80 → 90 (+10)',
+    );
+    expect(log.indexOf('## Space Marines sub-factions')).toBeGreaterThan(
+      log.indexOf('## Space Marines\n'),
+    );
+  });
+
+  it("keeps each sub-faction's own changes, and says what it isn't repeating", () => {
+    const { before, after } = family();
+    const log = changelog(before, after);
+    const elsewhere =
+      '_Not repeated here: 1 change identical to **Space Marines**, and 1 under **Space Marines sub-factions — shared**._';
+    expect(log).toContain(
+      `## Blood Angels\n\n${elsewhere}\n\n**Unit points:**\n- Immortals — 5 models: 70 → 65 (-5)`,
+    );
+    // Nothing of its own left: the note is the whole section.
+    expect(log).toContain(`## Dark Angels\n\n${elsewhere}\n\n## Space Marines\n`);
+  });
+
+  it("still counts every faction's changes in full in the table", () => {
+    const { before, after } = family();
+    const log = changelog(before, after);
+    expect(row(log, 'Blood Angels')).toBe('| Blood Angels | ~3 | — | ▲2 ▼1 (+10) |');
+    expect(row(log, 'Dark Angels')).toBe('| Dark Angels | ~2 | — | ▲2 (+15) |');
+    expect(row(log, 'Space Marines')).toBe('| Space Marines | ~1 | — | ▲1 (+5) |');
+  });
+
+  it('repeats a change that only some of the sub-factions share', () => {
+    const { before, after } = family(['Blood Angels', 'Dark Angels', 'Space Wolves']);
+    bump(after[3], 'Lychguard', -10); // Space Wolves: back where it started
+    const log = changelog(before, after);
+    expect(count(log, '- Lychguard — ')).toBe(2);
+    expect(log).not.toContain('sub-factions — shared');
+  });
+
+  it('puts the shared section before the first sub-faction when the parent is unchanged', () => {
+    const { before, after } = family();
+    after[0] = structuredClone(before[0] as FactionContent);
+    const log = changelog(before, after);
+    expect(log.indexOf('## Space Marines sub-factions — shared')).toBeLessThan(
+      log.indexOf('## Blood Angels'),
+    );
+    expect(log).toContain(
+      // With nothing listed under the parent, both shared changes move here.
+      '## Dark Angels\n\n_Not repeated here: 2 changes under **Space Marines sub-factions — shared**._',
+    );
+  });
+
+  it('lists shared changes once in the changelog file entry too', () => {
+    const { before, after } = family();
+    const entry = changelogEntry(before, after, { date: '2026-09-30' });
+    expect(count(entry, '- Necron Warriors — 10 models: 80 → 85 (+5)')).toBe(1);
+    expect(entry).toContain('\n### Space Marines sub-factions — shared\n');
+  });
+});
+
+describe("fitting GitHub's PR body limit", () => {
+  it('stubs the largest sections until the body fits, and says which', () => {
+    const [before, after] = [manyFactions(40), manyFactions(40, 5)];
+    const log = changelog(before, after);
+    // Too long whole — this isn't passing by accident.
+    expect(changelogEntry(before, after).length).toBeGreaterThan(BODY_LIMIT);
+    expect(log.length).toBeLessThanOrEqual(BODY_LIMIT);
+    // Every faction keeps its heading, and the fold still closes.
+    for (let i = 1; i <= 40; i++)
+      expect(log).toContain(`## Faction ${String(i).padStart(2, '0')}\n`);
+    expect(log.trimEnd().endsWith('</details>')).toBe(true);
+    // Largest first: the smallest section is whole, the largest is a stub.
+    expect(log).toContain('## Faction 01\n\n**Unit points:**\n- ');
+    expect(log).toMatch(
+      /## Faction 40\n\n_\d+ lines left out to fit GitHub's PR body limit — the full section is in `changelog\/v1\.1\.md`\._\n/,
+    );
+    // The note under the table names them, in page order, and where the rest is.
+    const note = log.match(/> \[!NOTE\]\n> (.*)\n/)?.[1] ?? '';
+    expect(note).toMatch(
+      /^Shortened to fit GitHub's 65,536-character PR body limit: \*\*Faction \d\d\*\*, .* and \*\*Faction 40\*\*\. The complete entry is in `changelog\/v1\.1\.md`, committed by this PR\.$/,
+    );
+    expect(log.indexOf('> [!NOTE]')).toBeLessThan(log.indexOf('<details>'));
+  });
+
+  it('leaves a body that fits whole, and names the file the entry goes to', () => {
+    const after = necronsContent();
+    reprice(after, 5);
+    const log = changelog([necronsContent()], [after]);
+    expect(log).not.toContain('[!NOTE]');
+    expect(log).not.toContain('left out');
+    expect(log).toContain('the same entry this PR commits to `changelog/v1.1.md`._');
   });
 });

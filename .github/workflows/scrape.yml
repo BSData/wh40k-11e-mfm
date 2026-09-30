@@ -69,7 +69,9 @@ jobs:
           echo "title=$(cat /tmp/title.txt)" >> "$GITHUB_OUTPUT"
           cat /tmp/changelog.md
 
-      - name: Update DATA-CHANGELOG.md
+      # The entry goes into changelog/v<version>.md, and DATA-CHANGELOG.md (the index)
+      # is regenerated; create-pull-request commits both along with data/.
+      - name: Update the changelog
         run: pnpm exec tsx scripts/update-data-changelog.ts /tmp/old-data data
 
       - name: Open pull request on change

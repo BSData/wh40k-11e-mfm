@@ -16,7 +16,7 @@ import {
 
 /**
  * Renders a dataset diff as a Discord webhook message — the push half of change
- * tracking (`specs/change-tracking.md`). The PR body and `DATA-CHANGELOG.md` are pull
+ * tracking (`specs/change-tracking.md`). The PR body and the changelog files are pull
  * media; this is what tells a channel an update landed, without anyone going to look.
  *
  * Built from the same `collectChanges`/`totals` as the Markdown renderers in
@@ -157,11 +157,12 @@ function entityPhrase(
 }
 
 /**
- * The links line under the summary. The changelog link goes to the **PR**, not to
- * `DATA-CHANGELOG.md` on `main`: the announcement fires when the update is detected, so
- * at that moment `main` doesn't contain it yet and the link lands on the previous
- * update. The PR body is this update's changelog, and it stays correct after the merge
- * too. `changelogUrl` is the fallback for a caller with no PR.
+ * The links line under the summary. The changelog link goes to the **PR**, not to the
+ * version's changelog file on `main`: the announcement fires when the update is
+ * detected, so at that moment `main` doesn't have the file yet. The PR body is this
+ * update's changelog — shortened only to fit GitHub's limit, and then naming the file
+ * that isn't — and it stays correct after the merge too. `changelogUrl` is the fallback
+ * for a caller with no PR.
  */
 function linkLine(opts: AnnounceOpts): string {
   const changelog = opts.prUrl ?? opts.changelogUrl;
