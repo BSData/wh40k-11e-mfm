@@ -127,15 +127,44 @@ describe('changelog (ignores firstSeen)', () => {
     if (tech) {
       // Gains a Leader list while keeping its Support one — the v1.4 Judiciar shape.
       tech.leaderTo = ['Immortals'];
-      tech.supportTo = ['Canoptek Wraiths'];
+      tech.supportTo = ['Canoptek Wraiths', 'Lychguard'];
       tech.wargear = [{ item: 'Test Rod', points: 15 }];
     }
     const tb = before.units.find((u) => u.name === 'Technomancer');
     if (tb) tb.wargear = [{ item: 'Test Rod', points: 10 }];
     const log = changelog([before], [after]);
     expect(log).toContain('Technomancer — Test Rod: 10 → 15 pts (**+5**)');
-    expect(log).toContain('Technomancer — leaderTo: — → Immortals');
-    expect(log).toContain('Technomancer — supportTo:');
+    expect(log).toContain('- Technomancer — leaderTo:\n  - ➕ Immortals\n');
+    expect(log).toContain(
+      '- Technomancer — supportTo:\n  - ➖ Immortals\n  - ➖ Necron Warriors\n  - ➕ Lychguard\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Technomancer — supportTo:\n  - ➖ Immortals\n  - ➖ Necron Warriors\n  - ➕ Lychguard\n',
+    );
+  });
+
+  it('reports only the added target when an existing Support list grows', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const tech = after.units.find((u) => u.name === 'Technomancer');
+    if (!tech?.supportTo) throw new Error('fixture changed');
+    tech.supportTo.push('Bladeguard Veteran Squad');
+
+    const log = changelog([before], [after]);
+    expect(log).toContain('- Technomancer — supportTo:\n  - ➕ Bladeguard Veteran Squad\n');
+    expect(log).not.toContain('  - ➕ Canoptek Wraiths');
+  });
+
+  it('reports removing an entire unit Support list', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const tech = after.units.find((u) => u.name === 'Technomancer');
+    if (!tech) throw new Error('fixture changed');
+    delete tech.supportTo;
+
+    expect(changelog([before], [after])).toContain(
+      '- Technomancer — supportTo:\n  - ➖ Canoptek Wraiths\n  - ➖ Immortals\n  - ➖ Necron Warriors\n',
+    );
   });
 
   it('reports detachment DP and objective changes', () => {
@@ -149,7 +178,91 @@ describe('changelog (ignores firstSeen)', () => {
     const log = changelog([before], [after]);
     expect(log).toContain('Annihilation Legion — DP: 2 → 3');
     expect(log).toContain(
-      'Annihilation Legion — objectives: PURGE THE FOE → NEW OBJECTIVE, SECOND DISPOSITION',
+      '- Annihilation Legion — objectives:\n  - ➖ PURGE THE FOE\n  - ➕ NEW OBJECTIVE\n  - ➕ SECOND DISPOSITION\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Annihilation Legion — objectives:\n  - ➖ PURGE THE FOE\n  - ➕ NEW OBJECTIVE\n  - ➕ SECOND DISPOSITION\n',
+    );
+  });
+
+  it('reports only newly added detachment objectives', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const det = after.detachments.find((d) => d.name === 'Annihilation Legion');
+    if (!det) throw new Error('fixture changed');
+    det.objectives.push('TAKE AND HOLD');
+
+    const log = changelog([before], [after]);
+    expect(log).toContain('- Annihilation Legion — objectives:\n  - ➕ TAKE AND HOLD\n');
+    expect(log).not.toContain('  - ➕ PURGE THE FOE');
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Annihilation Legion — objectives:\n  - ➕ TAKE AND HOLD\n',
+    );
+  });
+
+  it('reports removal of the last detachment objective', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const det = after.detachments.find((d) => d.name === 'Annihilation Legion');
+    if (!det) throw new Error('fixture changed');
+    det.objectives = [];
+
+    expect(changelog([before], [after])).toContain(
+      '- Annihilation Legion — objectives:\n  - ➖ PURGE THE FOE\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Annihilation Legion — objectives:\n  - ➖ PURGE THE FOE\n',
+    );
+  });
+
+  it('reports full before/after objective lists when order changes', () => {
+    const before = necronsContent();
+    const det = before.detachments.find((d) => d.name === 'Annihilation Legion');
+    if (!det) throw new Error('fixture changed');
+    det.objectives = ['PURGE THE FOE', 'TAKE AND HOLD'];
+    const after = structuredClone(before);
+    const updated = after.detachments.find((d) => d.name === 'Annihilation Legion');
+    if (!updated) throw new Error('fixture changed');
+    updated.objectives = ['TAKE AND HOLD', 'PURGE THE FOE'];
+
+    expect(changelog([before], [after])).toContain(
+      '- Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE, TAKE AND HOLD\n  - **After:** TAKE AND HOLD, PURGE THE FOE\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE, TAKE AND HOLD\n  - **After:** TAKE AND HOLD, PURGE THE FOE\n',
+    );
+  });
+
+  it('shows full lists when objectives change membership and retained order', () => {
+    const before = necronsContent();
+    const det = before.detachments.find((d) => d.name === 'Annihilation Legion');
+    if (!det) throw new Error('fixture changed');
+    det.objectives = ['PURGE THE FOE', 'TAKE AND HOLD'];
+    const after = structuredClone(before);
+    const updated = after.detachments.find((d) => d.name === 'Annihilation Legion');
+    if (!updated) throw new Error('fixture changed');
+    updated.objectives = ['TAKE AND HOLD', 'PURGE THE FOE', 'RECONNAISSANCE'];
+
+    expect(changelog([before], [after])).toContain(
+      '- Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE, TAKE AND HOLD\n  - **After:** TAKE AND HOLD, PURGE THE FOE, RECONNAISSANCE\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE, TAKE AND HOLD\n  - **After:** TAKE AND HOLD, PURGE THE FOE, RECONNAISSANCE\n',
+    );
+  });
+
+  it('preserves repeated objective names in the before/after lists', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const det = after.detachments.find((d) => d.name === 'Annihilation Legion');
+    if (!det) throw new Error('fixture changed');
+    det.objectives = ['PURGE THE FOE', 'TAKE AND HOLD', 'TAKE AND HOLD'];
+
+    expect(changelog([before], [after])).toContain(
+      '- Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE\n  - **After:** PURGE THE FOE, TAKE AND HOLD, TAKE AND HOLD\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Annihilation Legion — objectives:\n  - **Before:** PURGE THE FOE\n  - **After:** PURGE THE FOE, TAKE AND HOLD, TAKE AND HOLD\n',
     );
   });
 
@@ -179,15 +292,43 @@ describe('changelog (ignores firstSeen)', () => {
     const murdermind = after.detachments
       .find((d) => d.name === 'Cursed Legion')
       ?.enhancements.find((e) => e.name === 'Murdermind');
-    // Murdermind grants Support in v1.1; add a Leader grant and narrow the Support one.
+    // Murdermind grants Support in v1.1; add a Leader grant and trade some Support targets.
     if (murdermind) {
       murdermind.leaderTo = ['Lokhust Destroyers'];
-      murdermind.supportTo = ['Skorpekh Destroyers'];
+      murdermind.supportTo = ['Canoptek Wraiths', 'Skorpekh Destroyers'];
     }
     const log = changelog([before], [after]);
     expect(log).toContain('Awakened Dynasty — unique: Dynasty → Hypercrypt');
-    expect(log).toContain('Cursed Legion · Murdermind — leaderTo:');
-    expect(log).toContain('Cursed Legion · Murdermind — supportTo:');
+    expect(log).toContain('- Cursed Legion · Murdermind — leaderTo:\n  - ➕ Lokhust Destroyers\n');
+    expect(log).toContain(
+      '- Cursed Legion · Murdermind — supportTo:\n  - ➖ Lokhust Destroyers\n  - ➖ Lokhust Heavy Destroyers\n  - ➖ Ophydian Destroyers\n  - ➕ Canoptek Wraiths\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Cursed Legion · Murdermind — leaderTo:\n  - ➕ Lokhust Destroyers\n',
+    );
+  });
+
+  it('reports order-only Leader/Support changes on units and enhancements', () => {
+    const before = necronsContent();
+    const after = structuredClone(before);
+    const tech = after.units.find((u) => u.name === 'Technomancer');
+    const murdermind = after.detachments
+      .find((d) => d.name === 'Cursed Legion')
+      ?.enhancements.find((e) => e.name === 'Murdermind');
+    if (!tech?.supportTo || !murdermind?.supportTo) throw new Error('fixture changed');
+    tech.supportTo.reverse();
+    murdermind.supportTo.reverse();
+
+    const log = changelog([before], [after]);
+    expect(log).toContain(
+      '- Technomancer — supportTo:\n  - **Before:** Canoptek Wraiths, Immortals, Necron Warriors\n  - **After:** Necron Warriors, Immortals, Canoptek Wraiths\n',
+    );
+    expect(log).toContain(
+      '- Cursed Legion · Murdermind — supportTo:\n  - **Before:** Skorpekh Destroyers, Lokhust Destroyers, Ophydian Destroyers, Lokhust Heavy Destroyers\n  - **After:** Lokhust Heavy Destroyers, Ophydian Destroyers, Lokhust Destroyers, Skorpekh Destroyers\n',
+    );
+    expect(changelogEntry([before], [after])).toContain(
+      '- **Necrons**: Technomancer — supportTo:\n  - **Before:** Canoptek Wraiths, Immortals, Necron Warriors\n  - **After:** Necron Warriors, Immortals, Canoptek Wraiths\n',
+    );
   });
 });
 

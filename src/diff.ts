@@ -42,6 +42,37 @@ const unitNames = (f: FactionContent) => new Set(f.units.map((u) => u.name));
 const detNames = (f: FactionContent) => new Set(f.detachments.map((d) => d.name));
 const onlyIn = <T>(a: Set<T>, b: Set<T>) => [...a].filter((x) => !b.has(x)).sort();
 
+/** Changed list members, or full lists when order or repeated entries need preserving. */
+function listDelta(before: string[] | undefined, after: string[] | undefined): string {
+  const previous = before ?? [];
+  const current = after ?? [];
+  if (previous.length === current.length && previous.every((name, i) => name === current[i]))
+    return '';
+
+  const old = new Set(previous);
+  const now = new Set(current);
+  const retainedBefore = previous.filter((name) => now.has(name));
+  const retainedAfter = current.filter((name) => old.has(name));
+  const reordered =
+    retainedBefore.length !== retainedAfter.length ||
+    retainedBefore.some((name, i) => name !== retainedAfter[i]);
+  const removed = onlyIn(old, now);
+  const added = onlyIn(now, old);
+  if (
+    reordered ||
+    previous.length !== old.size ||
+    current.length !== now.size ||
+    (removed.length === 0 && added.length === 0)
+  )
+    return `  - **Before:** ${previous.join(', ') || '—'}\n  - **After:** ${current.join(', ') || '—'}`;
+
+  const changes = [
+    ...removed.map((name) => `  - ➖ ${name}`),
+    ...added.map((name) => `  - ➕ ${name}`),
+  ];
+  return changes.join('\n');
+}
+
 /** A keyed numeric value (a unit cost option, a wargear item, or an enhancement). */
 interface Numeric {
   display: string;
@@ -266,9 +297,8 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     if (!p) continue;
     const note = (text: string) => unitOther.push({ entity: u.name, text: `${u.name} — ${text}` });
     for (const grant of ['leaderTo', 'supportTo'] as const) {
-      const pa = (p[grant] ?? []).join(', ');
-      const na = (u[grant] ?? []).join(', ');
-      if (pa !== na) note(`${grant}: ${pa || '—'} → ${na || '—'}`);
+      const delta = listDelta(p[grant], u[grant]);
+      if (delta) note(`${grant}:\n${delta}`);
     }
   }
   const detOther: Attr[] = [];
@@ -278,9 +308,8 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     if (!p) continue;
     const note = (text: string) => detOther.push({ entity: d.name, text });
     if (p.dp !== d.dp) note(`${d.name} — DP: ${p.dp ?? '—'} → ${d.dp ?? '—'}`);
-    const po = p.objectives.join(', ');
-    const no = d.objectives.join(', ');
-    if (po !== no) note(`${d.name} — objectives: ${po || '—'} → ${no || '—'}`);
+    const objectives = listDelta(p.objectives, d.objectives);
+    if (objectives) note(`${d.name} — objectives:\n${objectives}`);
     if ((p.unique ?? '') !== (d.unique ?? ''))
       note(`${d.name} — unique: ${p.unique ?? '—'} → ${d.unique ?? '—'}`);
     const pe = new Map(p.enhancements.map((e) => [e.name, e]));
@@ -288,9 +317,8 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
       const x = pe.get(e.name);
       if (!x) continue;
       for (const grant of ['leaderTo', 'supportTo'] as const) {
-        const pl = (x[grant] ?? []).join(', ');
-        const nl = (e[grant] ?? []).join(', ');
-        if (pl !== nl) note(`${d.name} · ${e.name} — ${grant}: ${pl || '—'} → ${nl || '—'}`);
+        const delta = listDelta(x[grant], e[grant]);
+        if (delta) note(`${d.name} · ${e.name} — ${grant}:\n${delta}`);
       }
     }
   }
