@@ -253,6 +253,23 @@ describe('parseFaction coverage guard — nothing on the page goes unconsumed', 
     expect(() => parseFaction(injected, 'necrons', 'Necrons')).toThrow(/Unconsumed content/);
     expect(() => parseFaction(injected, 'necrons', 'Necrons')).toThrow(/SURPRISE NEW MFM SECTION/);
   });
+
+  it('accepts the site-wide "Muster Armies" army-builder link as page chrome', () => {
+    const withMuster = fixture('necrons.html').replace(
+      '</body>',
+      '<a href="/en/muster">Muster Armies</a></body>',
+    );
+    expect(withMuster).not.toBe(fixture('necrons.html')); // sanity: the marker was inserted
+    expect(parseFaction(withMuster, 'necrons', 'Necrons')).toEqual(
+      parseFaction(fixture('necrons.html'), 'necrons', 'Necrons'),
+    );
+    // Only the exact string is allowlisted — anything more still fails loudly.
+    const withMore = fixture('necrons.html').replace(
+      '</body>',
+      '<a href="/en/muster">Muster Armies</a><div>Muster Armies 500 pts</div></body>',
+    );
+    expect(() => parseFaction(withMore, 'necrons', 'Necrons')).toThrow(/500 pts/);
+  });
 });
 
 describe('parseFaction (titan-legions) — thousands-separator points', () => {

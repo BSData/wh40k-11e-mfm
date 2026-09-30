@@ -338,6 +338,7 @@ const PAGE_BOILERPLATE: readonly string[] = [
   'Welcome to the Munitorum Field Manual, containing the most up-to-date points values for every Warhammer 40,000 faction.',
   'Show Legends', // the Legends toggle label (sits in the content area, not the nav)
   'Hide Legends', // its toggled state, on browser (Legends) renders
+  'Muster Armies', // site-wide link to the MFM army-builder tool (not faction data)
   'UNITS',
   'DETACHMENTS',
   'LEGENDS', // section heading shown on browser renders with Legends toggled on
