@@ -1,7 +1,7 @@
 name: Chaos Space Marines
 slug: chaos-space-marines
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Cabal Of Chaos
     dp: 1
@@ -22,6 +22,7 @@ detachments:
   - name: Creations Of Bile
     dp: 3
     objectives:
+      - TAKE AND HOLD
       - PURGE THE FOE
     enhancements:
       - { name: Helm of All-Seeing, points: 25 }
@@ -74,6 +75,7 @@ detachments:
   - name: Huron’S Marauders
     dp: 3
     objectives:
+      - DISRUPTION
       - PURGE THE FOE
     enhancements:
       - { name: Dread Reputation, points: 25 }
@@ -101,6 +103,7 @@ detachments:
   - name: Pactbound Zealots
     dp: 3
     objectives:
+      - DISRUPTION
       - PRIORITY ASSETS
     enhancements:
       - { name: Eye of Tzeentch, points: 15 }
@@ -110,6 +113,7 @@ detachments:
   - name: Renegade Raiders
     dp: 3
     objectives:
+      - PRIORITY ASSETS
       - RECONNAISSANCE
     enhancements:
       - { name: Despot’s Claim, points: 15 }
@@ -158,7 +162,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 295 }
+          - { models: 1, points: 300 }
     leaderTo:
       - Chaos Terminator Squad
       - Chosen
@@ -168,12 +172,12 @@ units:
         label: Your 1st To 2nd Units Cost
         costs:
           - { models: 8, points: 90 }
-          - { models: 16, points: 195 }
+          - { models: 16, points: 185 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 8, points: 110 }
-          - { models: 16, points: 215 }
+          - { models: 16, points: 205 }
   - name: Blood Slaughterer
     pricing:
       - range: "[1,)"
@@ -186,8 +190,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 3, points: 70 }
-          - { models: 6, points: 130 }
+          - { models: 3, points: 80 }
+          - { models: 6, points: 150 }
   - name: Chaos Deimos Predator
     pricing:
       - range: "[1,)"
@@ -210,7 +214,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 90 }
+          - { models: 1, points: 95 }
     leaderTo:
       - Chosen
       - Legionaries
@@ -221,7 +225,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 85 }
+          - { models: 1, points: 90 }
     leaderTo:
       - Chaos Terminator Squad
   - name: Chaos Lord On Bike
@@ -276,10 +280,20 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 80 }
+          - { models: 1, points: 85 }
     leaderTo:
       - Raptors
   - name: Chaos Predator Annihilator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Chaos Predator Destructor
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -289,16 +303,6 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 155 }
-  - name: Chaos Predator Destructor
-    pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
-        costs:
-          - { models: 1, points: 150 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
-        costs:
-          - { models: 1, points: 160 }
   - name: Chaos Rhino
     pricing:
       - range: "[1,3]"
@@ -317,11 +321,16 @@ units:
           - { models: 2, points: 60 }
   - name: Chaos Terminator Squad
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 175 }
-          - { models: 10, points: 350 }
+          - { models: 5, points: 185 }
+          - { models: 10, points: 370 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 215 }
+          - { models: 10, points: 400 }
   - name: Chaos Thunderhawk
     pricing:
       - range: "[1,)"
@@ -334,23 +343,23 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 185 }
+          - { models: 1, points: 180 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 195 }
+          - { models: 1, points: 190 }
   - name: Chosen
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 135 }
-          - { models: 10, points: 270 }
+          - { models: 5, points: 140 }
+          - { models: 10, points: 280 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 145 }
-          - { models: 10, points: 280 }
+          - { models: 5, points: 150 }
+          - { models: 10, points: 290 }
   - name: Cultist Firebrand
     pricing:
       - range: "[1,2]"
@@ -386,13 +395,13 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 90 }
+          - { models: 1, points: 95 }
   - name: Dark Apostle
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 3, points: 65 }
+          - { models: 3, points: 70 }
     leaderTo:
       - Accursed Cultists
       - Chosen
@@ -435,8 +444,8 @@ units:
         costs:
           - { models: 1, points: 350 }
     wargear:
-      - { item: Heavy reaper autocannon, points: 15 }
-      - { item: Hades lascannon, points: 15 }
+      - { item: Heavy Reaper Autocannon, points: 15 }
+      - { item: Hades Lascannon, points: 15 }
   - name: Dreadclaw Drop Pod
     pricing:
       - range: "[1,)"
@@ -459,7 +468,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 2, points: 100 }
+          - { models: 2, points: 110 }
     leaderTo:
       - Accursed Cultists
       - Chosen
@@ -479,11 +488,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 160 }
+          - { models: 1, points: 155 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 170 }
+          - { models: 1, points: 165 }
     wargear:
       - { item: Ectoplasma cannon, points: 5 }
   - name: Gellerpox Infected
@@ -512,7 +521,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 90 }
+          - { models: 1, points: 95 }
     leaderTo:
       - Raptors
   - name: Havocs
@@ -520,17 +529,17 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 125 }
+          - { models: 5, points: 135 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 135 }
+          - { models: 5, points: 145 }
   - name: Helbrute
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 125 }
   - name: Heldrake
     pricing:
       - range: "[1,)"
@@ -556,19 +565,19 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 165 }
+          - { models: 1, points: 155 }
   - name: Heretic Astartes Daemon Prince With Wings
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 180 }
+          - { models: 1, points: 170 }
   - name: Huron Blackheart
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 135 }
     leaderTo:
       - Chaos Terminator Squad
       - Chosen
@@ -596,7 +605,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 120 }
+          - { models: 1, points: 130 }
     leaderTo:
       - Chaos Terminator Squad
       - Mutilators
@@ -613,20 +622,20 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 90 }
-          - { models: 10, points: 170 }
+          - { models: 5, points: 95 }
+          - { models: 10, points: 180 }
   - name: Lord Discordant On Helstalker
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 160 }
+          - { models: 1, points: 155 }
   - name: Master Of Executions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 70 }
+          - { models: 1, points: 75 }
     supportTo:
       - Chosen
       - Legionaries
@@ -637,7 +646,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 60 }
+          - { models: 1, points: 65 }
     leaderTo:
       - Chosen
       - Legionaries
@@ -649,7 +658,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 145 }
+          - { models: 5, points: 150 }
     supportTo:
       - Chosen
       - Legionaries
@@ -659,7 +668,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 125 }
   - name: Mutilators
     pricing:
       - range: "[1,2]"
@@ -669,7 +678,7 @@ units:
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 175 }
+          - { models: 3, points: 185 }
   - name: Mutoid Vermin
     pricing:
       - range: "[1,)"
@@ -689,8 +698,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 100 }
-          - { models: 10, points: 180 }
+          - { models: 5, points: 105 }
+          - { models: 10, points: 190 }
   - name: Noctilith Crown
     pricing:
       - range: "[1,)"
@@ -712,43 +721,43 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 120 }
-          - { models: 10, points: 250 }
+          - { models: 5, points: 130 }
+          - { models: 10, points: 260 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 130 }
-          - { models: 10, points: 260 }
+          - { models: 5, points: 150 }
+          - { models: 10, points: 280 }
   - name: Raptors
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 110 }
-          - { models: 10, points: 210 }
+          - { models: 5, points: 115 }
+          - { models: 10, points: 225 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 120 }
-          - { models: 10, points: 220 }
+          - { models: 5, points: 125 }
+          - { models: 10, points: 235 }
   - name: Red Corsairs Raiders
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 110 }
-          - { models: 10, points: 210 }
+          - { models: 5, points: 120 }
+          - { models: 10, points: 220 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 120 }
-          - { models: 10, points: 220 }
+          - { models: 5, points: 130 }
+          - { models: 10, points: 230 }
   - name: Red Corsairs Reave-Captain
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 60 }
+          - { models: 1, points: 65 }
     leaderTo:
       - Chosen
       - Legionaries
@@ -810,7 +819,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 60 }
+          - { models: 1, points: 65 }
     leaderTo:
       - Chosen
       - Legionaries
@@ -821,7 +830,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 80 }
+          - { models: 1, points: 85 }
     leaderTo:
       - Chaos Terminator Squad
   - name: Sorcerer On Bike
@@ -875,7 +884,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 70 }
+          - { models: 10, points: 65 }
   - name: Vashtorr The Arkifane
     pricing:
       - range: "[1,)"
@@ -897,19 +906,19 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 125 }
-          - { models: 10, points: 280 }
+          - { models: 5, points: 130 }
+          - { models: 10, points: 290 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 135 }
-          - { models: 10, points: 290 }
+          - { models: 5, points: 140 }
+          - { models: 10, points: 300 }
   - name: Warpsmith
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 60 }
+          - { models: 1, points: 65 }
     leaderTo:
       - Chosen
       - Havocs

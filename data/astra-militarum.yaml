@@ -1,7 +1,7 @@
 name: Astra Militarum
 slug: astra-militarum
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Abhuman Auxiliaries
     dp: 1
@@ -48,6 +48,7 @@ detachments:
     dp: 3
     objectives:
       - PRIORITY ASSETS
+      - PURGE THE FOE
     unique: Abhuman
     enhancements:
       - { name: Abhuman Detail, points: 20, leaderTo: [ Ogryn Squad, Bullgryn Squad ] }
@@ -214,26 +215,26 @@ units:
           - { models: 1, points: 450 }
   - name: Basilisk
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 1, points: 115 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 135 }
+          - { models: 1, points: 145 }
   - name: Bullgryn Squad
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 90 }
           - { models: 6, points: 200 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 105 }
-          - { models: 6, points: 215 }
+          - { models: 3, points: 120 }
+          - { models: 6, points: 230 }
   - name: Cadian Castellan
     pricing:
       - range: "[1,)"
@@ -325,19 +326,6 @@ units:
         label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 85 }
-  - name: Ciaphas Cain
-    pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
-        costs:
-          - { models: 1, points: 70 }
-    leaderTo:
-      - Cadian Shock Troops
-      - Catachan Jungle Fighters
-      - Death Korps Of Krieg
-      - Kasrkin
-      - Tempestus Scions
-    legends: true
   - name: Colossus
     pricing:
       - range: "[1,)"
@@ -384,7 +372,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 120 }
+          - { models: 1, points: 110 }
     leaderTo:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
@@ -442,14 +430,14 @@ units:
           - { models: 10, points: 110 }
   - name: Deathstrike
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 1, points: 125 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 135 }
+          - { models: 1, points: 145 }
   - name: Dominus Armoured Siege Bombard
     pricing:
       - range: "[1,)"
@@ -568,11 +556,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 125 }
+          - { models: 1, points: 115 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 135 }
+          - { models: 1, points: 125 }
   - name: Hippogriff Afv
     pricing:
       - range: "[1,)"
@@ -751,7 +739,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 75 }
+          - { models: 1, points: 70 }
     leaderTo:
       - Death Riders
   - name: Lord Solar Leontus
@@ -759,7 +747,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 120 }
     leaderTo:
       - Attilan Rough Riders
       - Cadian Shock Troops
@@ -827,14 +815,14 @@ units:
     legends: true
   - name: Manticore
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 1, points: 150 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 170 }
+          - { models: 1, points: 180 }
   - name: Manticore Platform
     pricing:
       - range: "[1,)"
@@ -1258,11 +1246,11 @@ units:
     legends: true
   - name: Wyvern
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 1, points: 95 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 115 }
+          - { models: 1, points: 125 }

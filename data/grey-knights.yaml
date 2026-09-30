@@ -1,7 +1,7 @@
 name: Grey Knights
 slug: grey-knights
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Argent Assault
     dp: 1
@@ -73,6 +73,7 @@ detachments:
     dp: 3
     objectives:
       - TAKE AND HOLD
+      - PURGE THE FOE
     enhancements:
       - { name: Mandulian Reliquary, points: 20 }
       - { name: Paragon of Sanctity, points: 10 }
@@ -84,7 +85,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 95 }
+          - { models: 1, points: 100 }
     leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
@@ -103,7 +104,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 70 }
+          - { models: 1, points: 75 }
     leaderTo:
       - Purgation Squad
       - Strike Squad
@@ -112,7 +113,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 65 }
+          - { models: 1, points: 70 }
     leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
@@ -121,11 +122,11 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 90 }
+          - { models: 1, points: 95 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 100 }
+          - { models: 1, points: 105 }
     leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
@@ -134,7 +135,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 70 }
+          - { models: 1, points: 75 }
     leaderTo:
       - Purgation Squad
       - Purifier Squad
@@ -144,10 +145,10 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 4, points: 140 }
-          - { models: 5, points: 175 }
-          - { models: 8, points: 300 }
-          - { models: 10, points: 360 }
+          - { models: 4, points: 150 }
+          - { models: 5, points: 185 }
+          - { models: 8, points: 315 }
+          - { models: 10, points: 380 }
     wargear:
       - { item: Psycannon, points: 5 }
   - name: Castellan Crowe
@@ -155,7 +156,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 100 }
+          - { models: 1, points: 105 }
     leaderTo:
       - Purifier Squad
   - name: Grand Master
@@ -163,7 +164,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 95 }
+          - { models: 1, points: 100 }
     leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
@@ -172,11 +173,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 200 }
+          - { models: 1, points: 210 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 215 }
+          - { models: 1, points: 225 }
     wargear:
       - { item: Sublimator, points: 15 }
       - { item: Heavy psycannon, points: 15 }
@@ -185,7 +186,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 125 }
+          - { models: 1, points: 130 }
     leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
@@ -218,13 +219,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 125 }
-          - { models: 10, points: 250 }
+          - { models: 5, points: 135 }
+          - { models: 10, points: 270 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 135 }
-          - { models: 10, points: 260 }
+          - { models: 5, points: 145 }
+          - { models: 10, points: 280 }
   - name: Kaldor Draigo
     pricing:
       - range: "[1,)"
@@ -270,11 +271,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 195 }
+          - { models: 1, points: 205 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 210 }
+          - { models: 1, points: 220 }
     wargear:
       - { item: Heavy psycannon, points: 15 }
   - name: Paladin Squad
@@ -282,17 +283,17 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 4, points: 170 }
-          - { models: 5, points: 215 }
-          - { models: 8, points: 360 }
-          - { models: 10, points: 460 }
+          - { models: 4, points: 185 }
+          - { models: 5, points: 230 }
+          - { models: 8, points: 385 }
+          - { models: 10, points: 490 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 4, points: 210 }
-          - { models: 5, points: 255 }
-          - { models: 8, points: 400 }
-          - { models: 10, points: 500 }
+          - { models: 4, points: 225 }
+          - { models: 5, points: 270 }
+          - { models: 8, points: 425 }
+          - { models: 10, points: 530 }
     wargear:
       - { item: Psycannon, points: 5 }
   - name: Purgation Squad
@@ -300,13 +301,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 105 }
-          - { models: 10, points: 210 }
+          - { models: 5, points: 115 }
+          - { models: 10, points: 230 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 115 }
-          - { models: 10, points: 220 }
+          - { models: 5, points: 125 }
+          - { models: 10, points: 240 }
     wargear:
       - { item: Psycannon, points: 5 }
   - name: Purifier Squad
@@ -314,13 +315,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 130 }
-          - { models: 10, points: 260 }
+          - { models: 5, points: 145 }
+          - { models: 10, points: 290 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 140 }
-          - { models: 10, points: 270 }
+          - { models: 5, points: 155 }
+          - { models: 10, points: 300 }
   - name: Razorback
     pricing:
       - range: "[1,3]"
@@ -364,6 +365,8 @@ units:
         label: Your 2nd + Unit Costs
         costs:
           - { models: 1, points: 300 }
+    wargear:
+      - { item: Hurricane Bolter, points: 10 }
   - name: Stormtalon Gunship
     pricing:
       - range: "[1,)"
@@ -375,8 +378,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 115 }
-          - { models: 10, points: 230 }
+          - { models: 5, points: 125 }
+          - { models: 10, points: 250 }
   - name: Venerable Dreadnought
     pricing:
       - range: "[1,2]"

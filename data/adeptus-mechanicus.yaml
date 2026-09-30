@@ -1,7 +1,7 @@
 name: Adeptus Mechanicus
 slug: adeptus-mechanicus
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Cohort Acquisitus
     dp: 1
@@ -11,7 +11,7 @@ detachments:
       - { name: Explorator Dispensation, points: 20 }
       - { name: Stealth-screened Cybercanids (Upgrade), points: 15 }
   - name: Cohort Cybernetica
-    dp: 2
+    dp: 1
     objectives:
       - TAKE AND HOLD
     enhancements:
@@ -30,7 +30,7 @@ detachments:
       - { name: Mechanicus Locum, points: 5 }
       - { name: Temporcopia, points: 20 }
   - name: Eradication Cohort
-    dp: 3
+    dp: 2
     objectives:
       - PURGE THE FOE
     enhancements:
@@ -51,13 +51,14 @@ detachments:
     dp: 3
     objectives:
       - PRIORITY ASSETS
+      - PURGE THE FOE
     enhancements:
       - { name: Cognitive Reinforcement, points: 30 }
       - { name: Inloaded Lethality, points: 15 }
       - { name: Sanctified Ordnance, points: 10 }
       - { name: Transoracular Dyad Wafers, points: 15 }
   - name: Lords Of The Forge
-    dp: 1
+    dp: 2
     objectives:
       - PRIORITY ASSETS
     enhancements:
@@ -119,14 +120,14 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 65 }
-          - { models: 10, points: 130 }
+          - { models: 5, points: 60 }
+          - { models: 10, points: 120 }
   - name: Cybernetica Datasmith
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 25 }
+          - { models: 1, points: 20 }
     supportTo:
       - Kastelan Robots
   - name: Fulgurite Electro-Priests
@@ -134,9 +135,19 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 70 }
-          - { models: 10, points: 140 }
+          - { models: 5, points: 65 }
+          - { models: 10, points: 130 }
   - name: Hastarii Exterminators
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 100 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 115 }
+  - name: Hastarii Fusiliers
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -146,16 +157,6 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 5, points: 120 }
-  - name: Hastarii Fusiliers
-    pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
-        costs:
-          - { models: 5, points: 115 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
-        costs:
-          - { models: 5, points: 130 }
   - name: Ironstrider Ballistarii
     pricing:
       - range: "[1,2]"
@@ -171,16 +172,16 @@ units:
           - { models: 2, points: 175 }
           - { models: 3, points: 265 }
     wargear:
-      - { item: Twin cognis lascannon, points: 10 }
+      - { item: Twin Cognis Lascannon, points: 10 }
   - name: Kastelan Robots
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 2, points: 150 }
           - { models: 4, points: 300 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
           - { models: 2, points: 180 }
           - { models: 4, points: 330 }
@@ -189,8 +190,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 3, points: 150 }
-          - { models: 6, points: 310 }
+          - { models: 3, points: 140 }
+          - { models: 6, points: 290 }
   - name: Kataphron Destroyers
     pricing:
       - range: "[1,)"
@@ -203,7 +204,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 155 }
+          - { models: 1, points: 150 }
   - name: Pteraxii Skystalkers
     pricing:
       - range: "[1,2]"
@@ -250,24 +251,24 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 3, points: 60 }
-          - { models: 6, points: 110 }
+          - { models: 6, points: 105 }
   - name: Serberys Sulphurhounds
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 3, points: 55 }
-          - { models: 6, points: 100 }
+          - { models: 6, points: 95 }
   - name: Servitor Battleclade
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 9, points: 65 }
+          - { models: 9, points: 75 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 9, points: 75 }
+          - { models: 9, points: 85 }
   - name: Sicarian Infiltrators
     pricing:
       - range: "[1,2]"
@@ -341,8 +342,8 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-          - { models: 2, points: 100 }
-          - { models: 3, points: 150 }
+          - { models: 2, points: 95 }
+          - { models: 3, points: 140 }
   - name: Sydonian Dragoons With Taser Lances
     pricing:
       - range: "[1,)"
@@ -356,7 +357,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 50 }
+          - { models: 1, points: 45 }
   - name: Tech-Priest Dominus
     pricing:
       - range: "[1,)"

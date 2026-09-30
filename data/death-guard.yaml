@@ -1,7 +1,7 @@
 name: Death Guard
 slug: death-guard
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Champions Of Contagion
     dp: 2
@@ -73,6 +73,7 @@ detachments:
     dp: 3
     objectives:
       - TAKE AND HOLD
+      - PURGE THE FOE
     enhancements:
       - { name: Arch Contaminator, points: 25 }
       - { name: Daemon Weapon of Nurgle, points: 10 }
@@ -97,12 +98,18 @@ units:
       - Plague Marines
   - name: Blightlord Terminators
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 115 }
-          - { models: 5, points: 180 }
-          - { models: 10, points: 360 }
+          - { models: 5, points: 185 }
+          - { models: 10, points: 370 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 145 }
+          - { models: 5, points: 215 }
+          - { models: 10, points: 400 }
   - name: Chaos Land Raider
     pricing:
       - range: "[1,2]"
@@ -118,21 +125,21 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 135 }
+          - { models: 1, points: 130 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 145 }
+          - { models: 1, points: 140 }
   - name: Chaos Predator Destructor
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 145 }
+          - { models: 1, points: 140 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 155 }
+          - { models: 1, points: 150 }
   - name: Chaos Rhino
     pricing:
       - range: "[1,3]"
@@ -154,13 +161,13 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 195 }
+          - { models: 1, points: 185 }
   - name: Daemon Prince Of Nurgle With Wings
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 170 }
+          - { models: 1, points: 160 }
   - name: Death Guard Chaos Lord
     pricing:
       - range: "[1,)"
@@ -211,12 +218,12 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 160 }
+          - { models: 3, points: 150 }
           - { models: 6, points: 305 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 170 }
+          - { models: 3, points: 160 }
           - { models: 6, points: 315 }
   - name: Defiler
     pricing:
@@ -229,8 +236,8 @@ units:
         costs:
           - { models: 1, points: 350 }
     wargear:
-      - { item: Heavy reaper autocannon, points: 15 }
-      - { item: Hades lascannon, points: 15 }
+      - { item: Heavy Reaper Autocannon, points: 15 }
+      - { item: Hades Lascannon, points: 15 }
   - name: Foetid Bloat-Drone
     pricing:
       - range: "[1,2]"
@@ -275,7 +282,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 110 }
+          - { models: 1, points: 105 }
   - name: Icon Bearer
     pricing:
       - range: "[1,)"
@@ -289,7 +296,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 120 }
+          - { models: 1, points: 110 }
     leaderTo:
       - Blightlord Terminators
       - Deathshroud Terminators
@@ -306,7 +313,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 100 }
+          - { models: 1, points: 90 }
     leaderTo:
       - Blightlord Terminators
       - Deathshroud Terminators
@@ -370,7 +377,7 @@ units:
         costs:
           - { models: 5, points: 90 }
           - { models: 7, points: 125 }
-          - { models: 10, points: 180 }
+          - { models: 10, points: 175 }
   - name: Plague Surgeon
     pricing:
       - range: "[1,)"
@@ -388,12 +395,12 @@ units:
           - { models: 10, points: 115 }
   - name: Plagueburst Crawler
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 1, points: 170 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 200 }
   - name: Poxwalkers
@@ -423,7 +430,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 100 }
+          - { models: 1, points: 90 }
     leaderTo:
       - Blightlord Terminators
       - Deathshroud Terminators

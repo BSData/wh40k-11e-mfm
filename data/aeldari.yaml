@@ -1,7 +1,7 @@
 name: Aeldari
 slug: aeldari
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Armoured Warhost
     dp: 1
@@ -14,6 +14,7 @@ detachments:
     dp: 3
     objectives:
       - PRIORITY ASSETS
+      - RECONNAISSANCE
     enhancements:
       - { name: Aspect of Murder, points: 15 }
       - { name: Mantle of Wisdom, points: 20 }
@@ -117,7 +118,7 @@ detachments:
       - { name: Prelude Performer, points: 20 }
       - { name: Shadowfall Masks (Upgrade), points: 15 }
   - name: Warhost
-    dp: 3
+    dp: 2
     objectives:
       - RECONNAISSANCE
     enhancements:
@@ -155,7 +156,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 75 }
+          - { models: 1, points: 70 }
     leaderTo:
       - Dark Reapers
       - Dire Avengers
@@ -272,14 +273,14 @@ units:
           - { models: 1, points: 160 }
   - name: D-Cannon Platform
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 1, points: 110 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 125 }
+          - { models: 1, points: 130 }
   - name: Dark Reapers
     pricing:
       - range: "[1,)"
@@ -293,7 +294,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 70 }
+          - { models: 1, points: 65 }
   - name: Dire Avengers
     pricing:
       - range: "[1,)"
@@ -303,11 +304,16 @@ units:
           - { models: 10, points: 140 }
   - name: Dragon Knights
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 90 }
+          - { models: 3, points: 85 }
           - { models: 6, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 95 }
+          - { models: 6, points: 190 }
   - name: Eldrad Ulthran
     pricing:
       - range: "[1,)"
@@ -328,7 +334,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 65 }
+          - { models: 1, points: 60 }
     leaderTo:
       - Guardian Defenders
       - Storm Guardians
@@ -346,12 +352,12 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 120 }
+          - { models: 5, points: 110 }
           - { models: 10, points: 240 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 130 }
+          - { models: 5, points: 120 }
           - { models: 10, points: 250 }
   - name: Fire Prism
     pricing:
@@ -440,7 +446,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 85 }
+          - { models: 1, points: 80 }
     leaderTo:
       - Corsair Reaver Band
       - Corsair Voidreavers
@@ -450,7 +456,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 80 }
+          - { models: 1, points: 75 }
   - name: Lhykhis
     pricing:
       - range: "[1,)"
@@ -476,14 +482,14 @@ units:
       - Dark Reapers
   - name: Night Spinner
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 170 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+          - { models: 1, points: 165 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 190 }
+          - { models: 1, points: 195 }
   - name: Nightwing
     pricing:
       - range: "[1,)"
@@ -571,7 +577,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 3, points: 90 }
-          - { models: 6, points: 175 }
+          - { models: 6, points: 165 }
   - name: Skathach Wraithknight
     pricing:
       - range: "[1,)"
@@ -585,15 +591,15 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 2, points: 95 }
-          - { models: 4, points: 190 }
+          - { models: 2, points: 90 }
+          - { models: 4, points: 180 }
   - name: Solitaire
     groupTitle: Harlequins
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 115 }
+          - { models: 1, points: 105 }
   - name: Spiritseer
     pricing:
       - range: "[1,)"
@@ -623,7 +629,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 60 }
+          - { models: 1, points: 55 }
     supportTo:
       - Dragon Knights
   - name: Storm Guardians
@@ -672,7 +678,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 245 }
+          - { models: 1, points: 230 }
   - name: Troupe
     groupTitle: Harlequins
     pricing:
@@ -748,7 +754,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 2, points: 55 }
-          - { models: 4, points: 120 }
+          - { models: 4, points: 110 }
     supportTo:
       - Guardian Defenders
       - Storm Guardians
@@ -940,7 +946,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 100 }
+          - { models: 1, points: 90 }
     leaderTo:
       - Corsair Reaver Band
       - Corsair Voidreavers

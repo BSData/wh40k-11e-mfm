@@ -1,7 +1,7 @@
 name: Genestealer Cults
 slug: genestealer-cults
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Biosanctic Broodsurge
     dp: 2
@@ -42,6 +42,7 @@ detachments:
     dp: 3
     objectives:
       - TAKE AND HOLD
+      - RECONNAISSANCE
     unique: Hosts
     enhancements:
       - { name: A Chink In Their Armour, points: 20 }
@@ -126,8 +127,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 70 }
-          - { models: 10, points: 130 }
+          - { models: 5, points: 65 }
+          - { models: 10, points: 120 }
   - name: Acolyte Hybrids With Hand Flamers
     pricing:
       - range: "[1,)"
@@ -199,11 +200,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 120 }
+          - { models: 1, points: 110 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 120 }
   - name: Goliath Truck
     pricing:
       - range: "[1,3]"
@@ -274,7 +275,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 60 }
+          - { models: 1, points: 50 }
     supportTo:
       - Acolyte Hybrids With Autopistols
       - Acolyte Hybrids With Hand Flamers
@@ -293,7 +294,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 70 }
+          - { models: 1, points: 60 }
     leaderTo:
       - Acolyte Hybrids With Autopistols
       - Acolyte Hybrids With Hand Flamers
@@ -326,7 +327,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 65 }
+          - { models: 1, points: 60 }
   - name: Tectonic Fragdrill
     pricing:
       - range: "[1,)"

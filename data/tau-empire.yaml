@@ -1,7 +1,7 @@
 name: T’au Empire
 slug: tau-empire
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Advanced Acquisition Cadre
     dp: 1
@@ -49,6 +49,7 @@ detachments:
   - name: Mont’Ka
     dp: 3
     objectives:
+      - TAKE AND HOLD
       - PRIORITY ASSETS
     enhancements:
       - { name: Coordinated Exploitation, points: 30 }
@@ -59,6 +60,7 @@ detachments:
     dp: 3
     objectives:
       - PURGE THE FOE
+      - RECONNAISSANCE
     unique: Battlesuit
     enhancements:
       - { name: Internal Grenade Racks, points: 20 }
@@ -107,7 +109,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 90 }
+          - { models: 10, points: 80 }
   - name: Broadside Battlesuits
     pricing:
       - range: "[1,2]"
@@ -123,7 +125,7 @@ units:
           - { models: 2, points: 170 }
           - { models: 3, points: 275 }
     wargear:
-      - { item: High-yield missile pods, points: 5 }
+      - { item: High-yield Missile Pods, points: 5 }
   - name: Cadre Fireblade
     pricing:
       - range: "[1,)"
@@ -417,7 +419,7 @@ units:
         costs:
           - { models: 10, points: 100 }
     wargear:
-      - { item: Ion rifle, points: 5 }
+      - { item: Ion Rifle, points: 5 }
   - name: Piranhas
     pricing:
       - range: "[1,2]"
@@ -470,7 +472,7 @@ units:
         costs:
           - { models: 1, points: 220 }
     wargear:
-      - { item: Ion accelerator, points: 25 }
+      - { item: Ion Accelerator, points: 25 }
   - name: Shas’O R’Alai
     pricing:
       - range: "[1,)"
@@ -541,7 +543,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 2, points: 230 }
+          - { models: 2, points: 240 }
   - name: Tidewall Droneport
     pricing:
       - range: "[1,)"

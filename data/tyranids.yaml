@@ -1,7 +1,7 @@
 name: Tyranids
 slug: tyranids
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Ambush Predators
     dp: 1
@@ -32,6 +32,7 @@ detachments:
     dp: 3
     objectives:
       - TAKE AND HOLD
+      - PRIORITY ASSETS
     enhancements:
       - { name: Adaptive Biology, points: 25 }
       - { name: Alien Cunning, points: 30 }
@@ -41,6 +42,7 @@ detachments:
     dp: 3
     objectives:
       - DISRUPTION
+      - RECONNAISSANCE
     enhancements:
       - { name: Synaptic Strategy, points: 15 }
       - { name: Tremor Senses, points: 20 }
@@ -68,7 +70,7 @@ detachments:
       - TAKE AND HOLD
     enhancements:
       - { name: Adrenalised Onslaught, points: 15 }
-      - { name: Naturalised camouflage, points: 30 }
+      - { name: Naturalised Camouflage, points: 30 }
       - { name: Piercing Talons, points: 25 }
       - { name: Relentless Hunger, points: 20 }
   - name: Vanguard Onslaught
@@ -100,8 +102,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 55 }
-          - { models: 10, points: 110 }
+          - { models: 5, points: 50 }
+          - { models: 10, points: 100 }
   - name: Biovores
     pricing:
       - range: "[1,)"
@@ -153,8 +155,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 80 }
-          - { models: 20, points: 155 }
+          - { models: 10, points: 75 }
+          - { models: 20, points: 150 }
   - name: Genestealers
     pricing:
       - range: "[1,2]"
@@ -278,7 +280,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 135 }
+          - { models: 1, points: 130 }
   - name: Mucolid Spores
     pricing:
       - range: "[1,)"
@@ -308,7 +310,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 120 }
     leaderTo:
       - Neurogaunts
       - Tyrant Guard
@@ -338,7 +340,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 140 }
+          - { models: 1, points: 130 }
     leaderTo:
       - Carnifexes
   - name: Parasite Of Mortrex
@@ -346,7 +348,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 70 }
+          - { models: 1, points: 65 }
   - name: Psychophage
     pricing:
       - range: "[1,)"
@@ -427,20 +429,20 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 60 }
+          - { models: 10, points: 55 }
           - { models: 20, points: 110 }
   - name: Tervigon
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 160 }
+          - { models: 1, points: 150 }
   - name: The Red Terror
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 120 }
   - name: The Swarmlord
     pricing:
       - range: "[1,)"
@@ -460,7 +462,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 140 }
+          - { models: 1, points: 135 }
   - name: Tyranid Prime With Lash Whip
     pricing:
       - range: "[1,)"
@@ -508,7 +510,7 @@ units:
           - { models: 1, points: 180 }
     wargear:
       - { item: Acid spray, points: 10 }
-      - { item: Rupture cannon, points: 20 }
+      - { item: Rupture Cannon, points: 20 }
   - name: Tyrant Guard
     pricing:
       - range: "[1,)"

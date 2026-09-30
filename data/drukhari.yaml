@@ -1,7 +1,7 @@
 name: Drukhari
 slug: drukhari
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Covenite Coterie
     dp: 2
@@ -51,6 +51,7 @@ detachments:
   - name: Reaper’S Wager
     dp: 3
     objectives:
+      - PRIORITY ASSETS
       - PURGE THE FOE
     enhancements:
       - { name: Archraider, points: 15 }
@@ -62,7 +63,7 @@ detachments:
     objectives:
       - RECONNAISSANCE
     enhancements:
-      - { name: Nightmare Shroud, points: 20 }
+      - { name: NIGHTMARE SHROUD, points: 20 }
       - { name: Phantasmal Smoke, points: 15 }
       - { name: Sadistic Fulcrum, points: 15 }
       - { name: Spiteful Raider, points: 10 }
@@ -224,7 +225,7 @@ units:
         costs:
           - { models: 1, points: 110 }
     wargear:
-      - { item: Dark lance, points: 5 }
+      - { item: Dark Lance, points: 5 }
   - name: Raven Strike Fighter
     pricing:
       - range: "[1,)"
@@ -269,7 +270,7 @@ units:
           - { models: 5, points: 120 }
     wargear:
       - { item: Haywire blaster, points: 5 }
-      - { item: Dark lance, points: 5 }
+      - { item: Dark Lance, points: 5 }
   - name: Scourges With Shardcarbines
     pricing:
       - range: "[1,2]"
@@ -293,13 +294,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 75 }
-          - { models: 2, points: 150 }
+          - { models: 1, points: 70 }
+          - { models: 2, points: 140 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 85 }
-          - { models: 2, points: 160 }
+          - { models: 1, points: 80 }
+          - { models: 2, points: 150 }
     wargear:
       - { item: Twin haywire blaster, points: 5 }
   - name: Tantalus
@@ -339,9 +340,9 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 60 }
-          - { models: 8, points: 100 }
-          - { models: 10, points: 120 }
+          - { models: 5, points: 55 }
+          - { models: 8, points: 90 }
+          - { models: 10, points: 110 }
   - name: Wyches
     pricing:
       - range: "[1,)"

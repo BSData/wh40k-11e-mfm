@@ -1,7 +1,7 @@
 name: Leagues of Votann
 slug: leagues-of-votann
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Armoured Trailblazers
     dp: 1
@@ -39,6 +39,7 @@ detachments:
     dp: 3
     objectives:
       - PRIORITY ASSETS
+      - RECONNAISSANCE
     unique: Hearthband
     enhancements:
       - { name: Bastion Shield, points: 25 }
@@ -136,8 +137,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 95 }
-          - { models: 10, points: 190 }
+          - { models: 5, points: 90 }
+          - { models: 10, points: 180 }
   - name: Cthonian Earthshakers
     pricing:
       - range: "[1,)"
@@ -187,19 +188,19 @@ units:
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 265 }
+          - { models: 1, points: 270 }
   - name: Hernkyn Pioneers
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 80 }
-          - { models: 6, points: 160 }
+          - { models: 3, points: 85 }
+          - { models: 6, points: 170 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 90 }
-          - { models: 6, points: 170 }
+          - { models: 3, points: 95 }
+          - { models: 6, points: 180 }
   - name: Hernkyn Yaegirs
     pricing:
       - range: "[1,)"
@@ -254,13 +255,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 70 }
-          - { models: 2, points: 140 }
+          - { models: 1, points: 75 }
+          - { models: 2, points: 150 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 80 }
-          - { models: 2, points: 150 }
+          - { models: 1, points: 95 }
+          - { models: 2, points: 170 }
   - name: Memnyr Strategist
     pricing:
       - range: "[1,)"
@@ -285,7 +286,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 90 }
+          - { models: 1, points: 100 }
     leaderTo:
       - Einhyr Hearthguard
       - Hearthkyn Warriors

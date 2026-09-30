@@ -1,7 +1,7 @@
 name: Imperial Knights
 slug: imperial-knights
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Dominus Foebreakers
     dp: 1
@@ -14,6 +14,7 @@ detachments:
     dp: 3
     objectives:
       - PRIORITY ASSETS
+      - PURGE THE FOE
     enhancements:
       - { name: Bringer of Justice, points: 30 }
       - { name: Hunter’s Eye, points: 25 }
@@ -39,6 +40,7 @@ detachments:
     dp: 3
     objectives:
       - TAKE AND HOLD
+      - RECONNAISSANCE
     enhancements:
       - { name: Crushing Condemnation, points: 10 }
       - { name: Herald of Triumph, points: 15 }
@@ -135,11 +137,11 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 405 }
+          - { models: 1, points: 420 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 425 }
+          - { models: 1, points: 440 }
   - name: Cerastus Knight Castigator
     pricing:
       - range: "[1,1]"
@@ -187,11 +189,11 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 400 }
+          - { models: 1, points: 385 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 420 }
+          - { models: 1, points: 405 }
   - name: Knight Destrier
     pricing:
       - range: "[1,2]"
@@ -247,21 +249,21 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 400 }
+          - { models: 1, points: 390 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 415 }
+          - { models: 1, points: 405 }
   - name: Knight Warden
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 375 }
+          - { models: 1, points: 365 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 390 }
+          - { models: 1, points: 380 }
   - name: Questoris Knight Magaera
     pricing:
       - range: "[1,1]"
