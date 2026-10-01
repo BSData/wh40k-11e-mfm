@@ -1,7 +1,7 @@
 name: Chaos Knights
 slug: chaos-knights
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Bastions Of Tyranny
     dp: 1
@@ -46,6 +46,7 @@ detachments:
     dp: 3
     objectives:
       - PRIORITY ASSETS
+      - PURGE THE FOE
     enhancements:
       - { name: Bestial Aspect, points: 30 }
       - { name: Blasphemous Engine, points: 35 }
@@ -157,7 +158,7 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 355 }
+          - { models: 1, points: 350 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
@@ -167,7 +168,7 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 355 }
+          - { models: 1, points: 350 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
@@ -190,7 +191,7 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 355 }
+          - { models: 1, points: 350 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
@@ -200,21 +201,21 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 340 }
+          - { models: 1, points: 325 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 355 }
+          - { models: 1, points: 345 }
   - name: Knight Tyrant
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 400 }
+          - { models: 1, points: 390 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 420 }
+          - { models: 1, points: 410 }
   - name: War Dog Brigand
     pricing:
       - range: "[1,)"

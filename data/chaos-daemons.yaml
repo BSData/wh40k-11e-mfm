@@ -1,7 +1,7 @@
 name: Chaos Daemons
 slug: chaos-daemons
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Blood Legion
     dp: 2
@@ -23,6 +23,7 @@ detachments:
     dp: 3
     objectives:
       - TAKE AND HOLD
+      - DISRUPTION
     enhancements:
       - { name: "A’rgath, The King of Blades", points: 20 }
       - { name: Soulstealer, points: 15 }
@@ -111,12 +112,12 @@ units:
         label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 95 }
-          - { models: 6, points: 200 }
+          - { models: 6, points: 210 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 3, points: 135 }
-          - { models: 6, points: 240 }
+          - { models: 6, points: 250 }
   - name: Bloodletters
     pricing:
       - range: "[1,)"
@@ -232,8 +233,8 @@ units:
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 105 }
-          - { models: 6, points: 205 }
+          - { models: 3, points: 115 }
+          - { models: 6, points: 215 }
   - name: Flamers
     pricing:
       - range: "[1,)"
@@ -246,7 +247,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 75 }
+          - { models: 5, points: 80 }
           - { models: 10, points: 150 }
   - name: Fluxmaster
     pricing:
@@ -450,7 +451,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 315 }
+          - { models: 1, points: 330 }
   - name: Skull Altar
     pricing:
       - range: "[1,)"

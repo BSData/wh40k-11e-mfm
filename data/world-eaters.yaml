@@ -1,10 +1,10 @@
 name: World Eaters
 slug: world-eaters
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Berzerker Warband
-    dp: 3
+    dp: 2
     objectives:
       - PURGE THE FOE
     enhancements:
@@ -32,7 +32,7 @@ detachments:
       - PRIORITY ASSETS
     enhancements:
       - { name: Brazen Form, points: 25 }
-      - { name: Butcher Lord, points: 10, leaderTo: [ Goremongers, Jakhals ] }
+      - { name: Butcher Lord, points: 10, leaderTo: [ Jakhals, Goremongers ] }
       - { name: Chosen of the Blood God, points: 15 }
       - { name: Strategic Slaughter, points: 20 }
   - name: Goretrack Onslaught
@@ -112,11 +112,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 220 }
+          - { models: 1, points: 200 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 240 }
+          - { models: 1, points: 220 }
   - name: Chaos Predator Annihilator
     pricing:
       - range: "[1,2]"
@@ -158,13 +158,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 165 }
-          - { models: 10, points: 330 }
+          - { models: 5, points: 175 }
+          - { models: 10, points: 350 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 175 }
-          - { models: 10, points: 340 }
+          - { models: 5, points: 185 }
+          - { models: 10, points: 360 }
   - name: Daemon Prince Of Khorne
     pricing:
       - range: "[1,)"
@@ -188,32 +188,32 @@ units:
         costs:
           - { models: 1, points: 310 }
     wargear:
-      - { item: Hades lascannon, points: 15 }
-      - { item: Heavy reaper autocannon, points: 15 }
+      - { item: Hades Lascannon, points: 15 }
+      - { item: Heavy Reaper Autocannon, points: 15 }
   - name: Eightbound
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 125 }
-          - { models: 6, points: 255 }
+          - { models: 6, points: 250 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 3, points: 140 }
-          - { models: 6, points: 270 }
+          - { models: 6, points: 265 }
   - name: Exalted Eightbound
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
           - { models: 3, points: 130 }
-          - { models: 6, points: 265 }
+          - { models: 6, points: 260 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 3, points: 145 }
-          - { models: 6, points: 280 }
+          - { models: 6, points: 275 }
   - name: Flesh Hounds
     groupTitle: Blood Legions
     pricing:
@@ -239,7 +239,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 8, points: 75 }
+          - { models: 8, points: 70 }
   - name: Helbrute
     pricing:
       - range: "[1,)"
@@ -258,7 +258,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 10, points: 65 }
-          - { models: 20, points: 130 }
+          - { models: 20, points: 120 }
   - name: Khârn The Betrayer
     pricing:
       - range: "[1,)"
@@ -272,8 +272,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 160 }
-          - { models: 20, points: 320 }
+          - { models: 10, points: 170 }
+          - { models: 20, points: 330 }
   - name: Khorne Lord Of Skulls
     pricing:
       - range: "[1,1]"
@@ -334,7 +334,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 100 }
+          - { models: 1, points: 90 }
     leaderTo:
       - Eightbound
       - Exalted Eightbound

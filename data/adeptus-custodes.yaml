@@ -1,7 +1,7 @@
 name: Adeptus Custodes
 slug: adeptus-custodes
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Auric Champions
     dp: 2
@@ -16,6 +16,7 @@ detachments:
     dp: 3
     objectives:
       - TAKE AND HOLD
+      - DISRUPTION
     unique: Lions
     enhancements:
       - { name: Admonimortis, points: 30 }
@@ -69,6 +70,7 @@ detachments:
     dp: 3
     objectives:
       - TAKE AND HOLD
+      - PRIORITY ASSETS
     enhancements:
       - { name: Aegis Projector, points: 20 }
       - { name: Champion of the Imperium, points: 25 }
@@ -105,17 +107,17 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 2, points: 110 }
-          - { models: 3, points: 165 }
-          - { models: 5, points: 280 }
-          - { models: 6, points: 340 }
+          - { models: 2, points: 120 }
+          - { models: 3, points: 180 }
+          - { models: 5, points: 300 }
+          - { models: 6, points: 360 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 2, points: 140 }
-          - { models: 3, points: 195 }
-          - { models: 5, points: 310 }
-          - { models: 6, points: 370 }
+          - { models: 2, points: 160 }
+          - { models: 3, points: 220 }
+          - { models: 5, points: 340 }
+          - { models: 6, points: 400 }
   - name: Anathema Psykana Rhino
     pricing:
       - range: "[1,3]"
@@ -205,13 +207,13 @@ units:
       - range: "[1,3]"
         label: Your 1st To 3rd Units Cost
         costs:
-          - { models: 4, points: 170 }
-          - { models: 5, points: 215 }
+          - { models: 4, points: 180 }
+          - { models: 5, points: 225 }
       - range: "[4,)"
         label: Your 4th + Unit Costs
         costs:
-          - { models: 4, points: 180 }
-          - { models: 5, points: 225 }
+          - { models: 4, points: 190 }
+          - { models: 5, points: 235 }
   - name: Custodian Guard With Adrasite And Pyrithite Spears
     pricing:
       - range: "[1,3]"
@@ -227,13 +229,13 @@ units:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 4, points: 200 }
-          - { models: 5, points: 250 }
+          - { models: 4, points: 210 }
+          - { models: 5, points: 260 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 4, points: 220 }
-          - { models: 5, points: 270 }
+          - { models: 4, points: 230 }
+          - { models: 5, points: 280 }
   - name: Knight-Centura
     pricing:
       - range: "[1,)"
@@ -265,10 +267,10 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 4, points: 45 }
-          - { models: 5, points: 50 }
-          - { models: 9, points: 75 }
-          - { models: 10, points: 85 }
+          - { models: 4, points: 50 }
+          - { models: 5, points: 55 }
+          - { models: 9, points: 80 }
+          - { models: 10, points: 90 }
   - name: Sagittarum Custodians
     pricing:
       - range: "[1,)"
@@ -300,7 +302,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 140 }
+          - { models: 1, points: 150 }
     leaderTo:
       - Agamatus Custodians
       - Vertus Praetors
@@ -330,7 +332,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 110 }
+          - { models: 1, points: 120 }
     leaderTo:
       - Custodian Guard
       - Custodian Guard With Adrasite And Pyrithite Spears
@@ -375,13 +377,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 2, points: 145 }
-          - { models: 3, points: 215 }
+          - { models: 2, points: 155 }
+          - { models: 3, points: 230 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 2, points: 170 }
-          - { models: 3, points: 240 }
+          - { models: 2, points: 180 }
+          - { models: 3, points: 255 }
   - name: Vigilators
     pricing:
       - range: "[1,)"

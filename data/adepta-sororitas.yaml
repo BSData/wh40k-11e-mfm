@@ -1,7 +1,7 @@
 name: Adepta Sororitas
 slug: adepta-sororitas
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments:
   - name: Army Of Faith
     dp: 2
@@ -41,6 +41,7 @@ detachments:
   - name: Hallowed Martyrs
     dp: 3
     objectives:
+      - TAKE AND HOLD
       - PRIORITY ASSETS
     enhancements:
       - { name: Chaplet of Sacrifice, points: 25 }
@@ -137,13 +138,13 @@ units:
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 175 }
+          - { models: 1, points: 185 }
   - name: Celestian Insidiants
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 120 }
+          - { models: 10, points: 115 }
   - name: Celestian Sacresant Aveline
     pricing:
       - range: "[1,)"
@@ -226,12 +227,12 @@ units:
       - { item: Meltagun, points: 5 }
   - name: Exorcist
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
           - { models: 1, points: 180 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 220 }
   - name: Hospitaller
@@ -276,7 +277,7 @@ units:
         costs:
           - { models: 1, points: 115 }
     wargear:
-      - { item: Twin multi-melta, points: 15 }
+      - { item: Twin Multi-melta, points: 15 }
   - name: Intranzia Fraye
     pricing:
       - range: "[1,)"
@@ -323,7 +324,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 200 }
+          - { models: 1, points: 215 }
     leaderTo:
       - Paragon Warsuits
   - name: Palatine
@@ -345,11 +346,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 180 }
+          - { models: 3, points: 165 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 190 }
+          - { models: 3, points: 175 }
     wargear:
       - { item: Multi-melta, points: 10 }
   - name: Penitent Engines
@@ -390,7 +391,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 3, points: 150 }
+          - { models: 3, points: 135 }
     leaderTo:
       - Seraphim Squad
       - Zephyrim Squad

@@ -1,7 +1,7 @@
 name: Chaos Titan Legions
 slug: chaos-titan-legions
-version: "1.4"
-firstSeen: 2026-09-02
+version: "1.5"
+firstSeen: 2026-09-30
 detachments: []
 units:
   - name: Chaos Reaver Titan
