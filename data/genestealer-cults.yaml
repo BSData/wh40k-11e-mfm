@@ -1,13 +1,12 @@
 name: Genestealer Cults
 slug: genestealer-cults
 version: "1.5"
-firstSeen: 2026-09-30
+firstSeen: 2026-10-02
 detachments:
   - name: Biosanctic Broodsurge
     dp: 2
     objectives:
       - TAKE AND HOLD
-    unique: Purestrain
     enhancements:
       - { name: Alien Majesty, points: 15 }
       - { name: Biomorph Adaptation, points: 25 }
@@ -62,7 +61,6 @@ detachments:
     dp: 1
     objectives:
       - PRIORITY ASSETS
-    unique: Purestrain
     enhancements:
       - { name: Mark of the Star Children (Upgrade), points: 30 }
       - { name: Talons of the Sire, points: 15 }
