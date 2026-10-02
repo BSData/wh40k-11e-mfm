@@ -1,7 +1,7 @@
 name: World Eaters
 slug: world-eaters
 version: "1.5"
-firstSeen: 2026-09-30
+firstSeen: 2026-10-02
 detachments:
   - name: Berzerker Warband
     dp: 2
@@ -32,7 +32,7 @@ detachments:
       - PRIORITY ASSETS
     enhancements:
       - { name: Brazen Form, points: 25 }
-      - { name: Butcher Lord, points: 10, leaderTo: [ Jakhals, Goremongers ] }
+      - { name: Butcher Lord, points: 10, leaderTo: [ Goremongers, Jakhals ] }
       - { name: Chosen of the Blood God, points: 15 }
       - { name: Strategic Slaughter, points: 20 }
   - name: Goretrack Onslaught

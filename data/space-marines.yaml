@@ -1,7 +1,7 @@
 name: Space Marines
 slug: space-marines
 version: "1.5"
-firstSeen: 2026-09-30
+firstSeen: 2026-10-02
 detachments:
   - name: Assault Brethren
     dp: 1
@@ -220,7 +220,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 45 }
+          - { models: 1, points: 40 }
     supportTo:
       - Assault Intercessor Squad
       - Crusader Squad
@@ -286,19 +286,19 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 90 }
-          - { models: 10, points: 175 }
+          - { models: 5, points: 85 }
+          - { models: 10, points: 170 }
   - name: Assault Intercessors With Jump Packs
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 100 }
+          - { models: 5, points: 95 }
           - { models: 10, points: 190 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 110 }
+          - { models: 5, points: 105 }
           - { models: 10, points: 200 }
   - name: Astraeus
     pricing:
@@ -319,13 +319,13 @@ units:
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 160 }
+          - { models: 1, points: 170 }
   - name: Bladeguard Ancient
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 60 }
+          - { models: 1, points: 70 }
     supportTo:
       - Bladeguard Veteran Squad
   - name: Bladeguard Veteran Squad
@@ -333,13 +333,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 85 }
-          - { models: 6, points: 170 }
+          - { models: 3, points: 90 }
+          - { models: 6, points: 180 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 95 }
-          - { models: 6, points: 180 }
+          - { models: 3, points: 110 }
+          - { models: 6, points: 200 }
   - name: Brutalis Dreadnought
     pricing:
       - range: "[1,2]"
@@ -349,7 +349,7 @@ units:
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 170 }
+          - { models: 1, points: 180 }
   - name: Caanok Var
     groupTitle: Iron Hands
     pricing:
@@ -414,7 +414,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 100 }
+          - { models: 1, points: 90 }
     leaderTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
@@ -498,7 +498,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 70 }
+          - { models: 1, points: 60 }
     leaderTo:
       - Assault Intercessor Squad
       - Bladeguard Veteran Squad
@@ -519,7 +519,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 85 }
+          - { models: 1, points: 75 }
     leaderTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
@@ -532,7 +532,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 80 }
+          - { models: 1, points: 75 }
     leaderTo:
       - Outrider Squad
       - Ravenwing Black Knights
@@ -541,7 +541,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 80 }
+          - { models: 1, points: 75 }
     leaderTo:
       - Assault Intercessors With Jump Packs
       - Death Company Marines With Jump Packs
@@ -567,11 +567,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 4, points: 135 }
+          - { models: 4, points: 125 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 4, points: 150 }
+          - { models: 4, points: 145 }
   - name: Darnath Lysander
     groupTitle: Imperial Fists
     pricing:
@@ -587,11 +587,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 135 }
+          - { models: 5, points: 140 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 145 }
+          - { models: 5, points: 150 }
     wargear:
       - { item: Vengor Launcher, points: 5 }
   - name: Dreadnought
@@ -622,25 +622,25 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 95 }
-          - { models: 6, points: 200 }
+          - { models: 3, points: 100 }
+          - { models: 6, points: 215 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 110 }
-          - { models: 6, points: 215 }
+          - { models: 3, points: 130 }
+          - { models: 6, points: 245 }
   - name: Eradicator Squad With Melta Rifles
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 90 }
-          - { models: 6, points: 190 }
+          - { models: 3, points: 100 }
+          - { models: 6, points: 200 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 105 }
-          - { models: 6, points: 205 }
+          - { models: 3, points: 120 }
+          - { models: 6, points: 220 }
   - name: Falchion
     pricing:
       - range: "[1,)"
@@ -660,11 +660,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 165 }
+          - { models: 1, points: 160 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 175 }
+          - { models: 1, points: 180 }
   - name: Gladiator Reaper
     pricing:
       - range: "[1,2]"
@@ -674,7 +674,7 @@ units:
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 175 }
+          - { models: 1, points: 185 }
   - name: Gladiator Valiant
     pricing:
       - range: "[1,2]"
@@ -684,7 +684,7 @@ units:
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 175 }
+          - { models: 1, points: 185 }
   - name: Hammerfall Bunker
     pricing:
       - range: "[1,)"
@@ -697,20 +697,20 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 110 }
-          - { models: 10, points: 220 }
+          - { models: 5, points: 115 }
+          - { models: 10, points: 230 }
   - name: Hellblaster Squad
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 110 }
-          - { models: 10, points: 220 }
+          - { models: 5, points: 115 }
+          - { models: 10, points: 230 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 125 }
-          - { models: 10, points: 235 }
+          - { models: 5, points: 130 }
+          - { models: 10, points: 245 }
   - name: Impulsor
     pricing:
       - range: "[1,3]"
@@ -728,51 +728,51 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 125 }
-          - { models: 6, points: 250 }
+          - { models: 3, points: 130 }
+          - { models: 6, points: 260 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 140 }
-          - { models: 6, points: 265 }
+          - { models: 3, points: 150 }
+          - { models: 6, points: 280 }
   - name: Incursor Squad
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 95 }
-          - { models: 10, points: 160 }
+          - { models: 5, points: 90 }
+          - { models: 10, points: 170 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 105 }
-          - { models: 10, points: 170 }
+          - { models: 5, points: 100 }
+          - { models: 10, points: 180 }
   - name: Infernus Squad
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 100 }
-          - { models: 10, points: 200 }
+          - { models: 5, points: 95 }
+          - { models: 10, points: 190 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 110 }
-          - { models: 10, points: 210 }
+          - { models: 5, points: 105 }
+          - { models: 10, points: 200 }
   - name: Infiltrator Squad
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 80 }
+          - { models: 5, points: 85 }
           - { models: 10, points: 150 }
   - name: Intercessor Squad
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 95 }
-          - { models: 10, points: 175 }
+          - { models: 5, points: 85 }
+          - { models: 10, points: 170 }
   - name: Invader Atvs
     pricing:
       - range: "[1,2]"
@@ -789,10 +789,14 @@ units:
       - { item: Multi-melta, points: 5 }
   - name: Invictor Tactical Warsuit
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 140 }
+          - { models: 1, points: 135 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 150 }
   - name: Iron Father Feirros
     groupTitle: Iron Hands
     pricing:
@@ -869,24 +873,24 @@ units:
     legends: true
   - name: Land Raider
     pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
         costs:
           - { models: 1, points: 245 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
         costs:
           - { models: 1, points: 265 }
   - name: Land Raider Crusader
     pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 245 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
+          - { models: 1, points: 230 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 265 }
+          - { models: 1, points: 250 }
   - name: Land Raider Excelsior
     pricing:
       - range: "[1,)"
@@ -896,12 +900,12 @@ units:
     legends: true
   - name: Land Raider Redeemer
     pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
         costs:
           - { models: 1, points: 245 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
         costs:
           - { models: 1, points: 265 }
   - name: Land Speeder
@@ -909,7 +913,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 110 }
+          - { models: 1, points: 105 }
   - name: Librarian
     pricing:
       - range: "[1,)"
@@ -947,7 +951,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 85 }
+          - { models: 1, points: 80 }
     leaderTo:
       - Deathwatch Terminator Squad
       - Deathwing Knights
@@ -995,7 +999,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 80 }
+          - { models: 1, points: 85 }
   - name: Marneus Calgar
     groupTitle: Ultramarines
     pricing:
@@ -1031,7 +1035,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 3, points: 85 }
+          - { models: 3, points: 80 }
           - { models: 6, points: 160 }
   - name: Predator Annihilator
     pricing:
@@ -1074,11 +1078,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 180 }
+          - { models: 1, points: 170 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 195 }
+          - { models: 1, points: 190 }
     wargear:
       - { item: Macro plasma incinerator, points: 10 }
   - name: Reiver Squad
@@ -1110,11 +1114,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 275 }
+          - { models: 1, points: 260 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 295 }
+          - { models: 1, points: 280 }
     wargear:
       - { item: Heavy Laser Destroyer, points: 10 }
   - name: Rhino
@@ -1173,8 +1177,8 @@ units:
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 115 }
-          - { models: 10, points: 220 }
+          - { models: 5, points: 120 }
+          - { models: 10, points: 225 }
   - name: Storm Speeder Hailstrike
     pricing:
       - range: "[1,2]"
@@ -1200,11 +1204,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 155 }
+          - { models: 1, points: 140 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 165 }
+          - { models: 1, points: 150 }
   - name: Stormhawk Interceptor
     pricing:
       - range: "[1,)"
@@ -1260,7 +1264,7 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 65 }
+          - { models: 1, points: 55 }
     leaderTo:
       - Assault Intercessor Squad
       - Crusader Squad
@@ -1274,13 +1278,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 175 }
-          - { models: 10, points: 350 }
+          - { models: 5, points: 170 }
+          - { models: 10, points: 340 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 215 }
-          - { models: 10, points: 390 }
+          - { models: 5, points: 210 }
+          - { models: 10, points: 380 }
     wargear:
       - { item: Storm Shield, points: 5 }
   - name: Terminator Squad
@@ -1288,13 +1292,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 195 }
-          - { models: 10, points: 390 }
+          - { models: 5, points: 190 }
+          - { models: 10, points: 380 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 5, points: 235 }
-          - { models: 10, points: 430 }
+          - { models: 5, points: 230 }
+          - { models: 10, points: 420 }
     wargear:
       - { item: Cyclone Missile Launcher, points: 10 }
   - name: Terrax-Pattern Termite
@@ -1346,13 +1350,13 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 5, points: 120 }
-          - { models: 10, points: 240 }
+          - { models: 5, points: 110 }
+          - { models: 10, points: 220 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
           - { models: 5, points: 130 }
-          - { models: 10, points: 250 }
+          - { models: 10, points: 240 }
   - name: Venerable Dreadnought
     pricing:
       - range: "[1,)"
