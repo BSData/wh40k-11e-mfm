@@ -1,7 +1,7 @@
 name: Astra Militarum
 slug: astra-militarum
 version: "1.5"
-firstSeen: 2026-09-30
+firstSeen: 2026-10-02
 detachments:
   - name: Abhuman Auxiliaries
     dp: 1
@@ -9,7 +9,7 @@ detachments:
       - TAKE AND HOLD
     unique: Abhuman
     enhancements:
-      - { name: Exemplar of Duty (Upgrade), points: 10, leaderTo: [ Ogryn Squad, Bullgryn Squad ] }
+      - { name: Exemplar of Duty (Upgrade), points: 10, leaderTo: [ Bullgryn Squad, Ogryn Squad ] }
       - { name: Sharp Eyes (Upgrade), points: 10 }
   - name: Armoured Infantry
     dp: 2

@@ -1,7 +1,7 @@
 name: Necrons
 slug: necrons
 version: "1.5"
-firstSeen: 2026-09-30
+firstSeen: 2026-10-02
 detachments:
   - name: Annihilation Legion
     dp: 2
@@ -49,7 +49,7 @@ detachments:
       - { name: Cursed Circlet, points: 25 }
       - { name: Destroyer Ankh, points: 20 }
       - { name: Mark of the Nekrosor, points: 20 }
-      - { name: Murdermind, points: 15, supportTo: [ Lokhust Heavy Destroyers, Ophydian Destroyers, Skorpekh Destroyers, Lokhust Destroyers ] }
+      - { name: Murdermind, points: 15, supportTo: [ Ophydian Destroyers, Lokhust Destroyers, Skorpekh Destroyers, Lokhust Heavy Destroyers ] }
   - name: Hand Of The Dynasty
     dp: 1
     objectives:

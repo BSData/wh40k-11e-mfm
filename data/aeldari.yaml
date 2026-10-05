@@ -1,7 +1,7 @@
 name: Aeldari
 slug: aeldari
 version: "1.5"
-firstSeen: 2026-09-30
+firstSeen: 2026-10-02
 detachments:
   - name: Armoured Warhost
     dp: 1
@@ -51,7 +51,6 @@ detachments:
     dp: 1
     objectives:
       - DISRUPTION
-    unique: Acrobatic
     enhancements:
       - { name: A Foot in the Future, points: 15 }
       - { name: Mistweave, points: 20 }
@@ -59,7 +58,6 @@ detachments:
     dp: 2
     objectives:
       - DISRUPTION
-    unique: Acrobatic
     enhancements:
       - { name: Cegorach’s Coil, points: 25 }
       - { name: Mask of Secrets, points: 15 }
@@ -94,7 +92,6 @@ detachments:
     dp: 2
     objectives:
       - PURGE THE FOE
-    unique: Acrobatic
     enhancements:
       - { name: Fanged Leer, points: 10 }
       - { name: Key of Ghosts, points: 20 }
@@ -113,7 +110,6 @@ detachments:
     dp: 1
     objectives:
       - TAKE AND HOLD
-    unique: Acrobatic
     enhancements:
       - { name: Prelude Performer, points: 20 }
       - { name: Shadowfall Masks (Upgrade), points: 15 }
