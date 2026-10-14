@@ -1,7 +1,7 @@
 name: World Eaters
 slug: world-eaters
-version: "1.5"
-firstSeen: 2026-09-30
+version: "1.6"
+firstSeen: 2026-10-14
 detachments:
   - name: Berzerker Warband
     dp: 2

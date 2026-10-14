@@ -1,97 +1,110 @@
 name: Adeptus Custodes
 slug: adeptus-custodes
-version: "1.5"
-firstSeen: 2026-09-30
+version: "1.6"
+firstSeen: 2026-10-14
 detachments:
-  - name: Auric Champions
-    dp: 2
-    objectives:
-      - PRIORITY ASSETS
-    enhancements:
-      - { name: Blade Imperator, points: 25 }
-      - { name: Inspirational Exemplar, points: 10 }
-      - { name: Martial Philosopher, points: 30 }
-      - { name: Veiled Blade, points: 25 }
-  - name: Lions Of The Emperor
-    dp: 3
+  - name: Aquilan Shield
+    dp: 1
     objectives:
       - TAKE AND HOLD
-      - DISRUPTION
-    unique: Lions
+    unique: Shield Host
     enhancements:
-      - { name: Admonimortis, points: 30 }
-      - { name: Fierce Conqueror, points: 15 }
-      - { name: Praesidius, points: 25 }
-      - { name: Superior Creation, points: 25 }
+      - { name: Not a Shell Wasted, points: 10 }
+      - { name: Pareldor’s Caducatrix, points: 30 }
+  - name: Auric Champions
+    dp: 1
+    objectives:
+      - PURGE THE FOE
+    enhancements:
+      - { name: Inspirational Exemplar, points: 10 }
+      - { name: Shroud of the Hidden Blade, points: 20 }
+      - { name: Superior Creation, points: 30 }
+  - name: Dread Host
+    dp: 1
+    objectives:
+      - PURGE THE FOE
+    unique: Shield Host
+    enhancements:
+      - { name: Auric Exemplar, points: 15 }
+      - { name: Flawless Bladework, points: 15 }
+  - name: Emissaries Imperatus
+    dp: 1
+    objectives:
+      - PRIORITY ASSETS
+    unique: Shield Host
+    enhancements:
+      - { name: Auriferous Orb, points: 20 }
+      - { name: Edge of the Blade, points: 15 }
+  - name: Emperor’S Chosen
+    dp: 1
+    objectives:
+      - PRIORITY ASSETS
+    unique: Shield Host
+    enhancements:
+      - { name: From the Hall of Armouries, points: 15 }
+      - { name: Radiant Mantle, points: 40 }
+  - name: Grav‑assault Force
+    dp: 1
+    objectives:
+      - RECONNAISSANCE
+    enhancements:
+      - { name: Anti-gravitic Mobility (Upgrade), points: 15 }
+      - { name: Combat Deployment (Upgrade), points: 20 }
+  - name: Guardians Of The Throne
+    dp: 3
+    objectives:
+      - PRIORITY ASSETS
+      - PURGE THE FOE
+    enhancements:
+      - { name: Bane of Abominations, points: 20 }
+      - { name: Castellan’s Mark, points: 25 }
+      - { name: Eagle’s Eye, points: 30 }
+      - { name: Emperor’s Light, points: 15 }
+  - name: Honoured Companions
+    dp: 1
+    objectives:
+      - TAKE AND HOLD
+    enhancements:
+      - { name: Arae-Shrike, points: 20 }
+      - { name: Celeritous Sentries (Upgrade), points: 15 }
+  - name: Lions Of The Emperor
+    dp: 1
+    objectives:
+      - DISRUPTION
+    enhancements:
+      - { name: Leonine Ferocity, points: 20 }
+      - { name: Lightning Descent, points: 20 }
   - name: Might Of The Moritoi
     dp: 1
     objectives:
       - TAKE AND HOLD
-    unique: Armoury
     enhancements:
-      - { name: Auramite Sarcophagus (Upgrade), points: 15 }
-      - { name: Interred Expertise (Upgrade), points: 25 }
+      - { name: Augury Uplink (one per army) (Upgrade), points: 30 }
+      - { name: Memento Moritoi (one per army) (Upgrade), points: 30 }
   - name: Null Maiden Vigil
-    dp: 2
-    objectives:
-      - RECONNAISSANCE
-    enhancements:
-      - { name: Enhanced Voidsheen Cloak, points: 10 }
-      - { name: Huntress’ Eye, points: 15 }
-      - { name: Oblivion Knight, points: 25 }
-      - { name: Raptor Blade, points: 5 }
-  - name: Shield Host
-    dp: 2
-    objectives:
-      - PURGE THE FOE
-    enhancements:
-      - { name: Auric Mantle, points: 15 }
-      - { name: Castellan’s Mark, points: 20 }
-      - { name: From the Hall of Armouries, points: 20 }
-      - { name: Panoptispex, points: 5 }
-  - name: Silent Hunters
-    dp: 1
-    objectives:
-      - RECONNAISSANCE
-    enhancements:
-      - { name: Encircling Hunter, points: 15 }
-      - { name: Psyk-out Grenades (Upgrade), points: 10 }
-  - name: Solar Spearhead
-    dp: 2
-    objectives:
-      - TAKE AND HOLD
-    unique: Armoury
-    enhancements:
-      - { name: Adamantine Talisman, points: 25 }
-      - { name: Augury Uplink, points: 35 }
-      - { name: Honoured Fallen, points: 15 }
-      - { name: Veteran of the Kataphraktoi, points: 10 }
-  - name: Talons Of The Emperor
-    dp: 3
-    objectives:
-      - TAKE AND HOLD
-      - PRIORITY ASSETS
-    enhancements:
-      - { name: Aegis Projector, points: 20 }
-      - { name: Champion of the Imperium, points: 25 }
-      - { name: Gift of Terran Artifice, points: 15 }
-      - { name: Radiant Mantle, points: 30 }
-  - name: Tharanatoi Hammerblow
     dp: 1
     objectives:
       - DISRUPTION
-    unique: Lions
     enhancements:
-      - { name: Efficient Aggression, points: 25 }
-      - { name: Mnemo-locked Shrine Cipher, points: 25 }
+      - { name: Huntress’ Eye, points: 10 }
+      - { name: Oblivion Knight, points: 15 }
+  - name: Shadowkeepers
+    dp: 1
+    objectives:
+      - PURGE THE FOE
+    unique: Shield Host
+    enhancements:
+      - { name: Genalchemic Warding, points: 30 }
+      - { name: Unstoppable Destroyer, points: 25 }
+  - name: Solar Watch
+    dp: 1
+    objectives:
+      - RECONNAISSANCE
+    unique: Shield Host
+    enhancements:
+      - { name: Auric Eagle (Upgrade), points: 15 }
+      - { name: Sally Forth, points: 30 }
 units:
-  - name: Agamatus Custodians
-    pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
-        costs:
-          - { models: 3, points: 225 }
-          - { models: 6, points: 450 }
   - name: Aleya
     pricing:
       - range: "[1,)"
@@ -99,42 +112,53 @@ units:
         costs:
           - { models: 1, points: 55 }
     leaderTo:
-      - Prosecutors
-      - Vigilators
-      - Witchseekers
+      - Prosecutor Squad
+      - Vigilator Squad
+      - Witchseeker Squad
+    legends: true
   - name: Allarus Custodians
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 2, points: 120 }
-          - { models: 3, points: 180 }
-          - { models: 5, points: 300 }
-          - { models: 6, points: 360 }
+          - { models: 2, points: 180 }
+          - { models: 3, points: 270 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 2, points: 160 }
-          - { models: 3, points: 220 }
-          - { models: 5, points: 340 }
-          - { models: 6, points: 400 }
+          - { models: 2, points: 210 }
+          - { models: 3, points: 300 }
   - name: Anathema Psykana Rhino
+    groupTitle: Anathema Psykana
     pricing:
       - range: "[1,3]"
         label: Your 1st To 3rd Units Cost
         costs:
-          - { models: 1, points: 65 }
+          - { models: 1, points: 70 }
       - range: "[4,)"
         label: Your 4th + Unit Costs
         costs:
-          - { models: 1, points: 75 }
-  - name: Aquilon Custodians
+          - { models: 1, points: 80 }
+  - name: Aquilon Terminators With Solarite Power Gauntlets
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 195 }
-          - { models: 6, points: 390 }
+          - { models: 3, points: 285 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 315 }
+  - name: Aquilon Terminators With Solarite Power Talons
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 275 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 305 }
   - name: Ares Gunship
     pricing:
       - range: "[1,1]"
@@ -147,105 +171,125 @@ units:
           - { models: 1, points: 610 }
   - name: Blade Champion
     pricing:
-      - range: "[1,1]"
-        label: Your 1st Unit Costs
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 110 }
-      - range: "[2,)"
-        label: Your 2nd + Unit Costs
+          - { models: 1, points: 175 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 125 }
+          - { models: 1, points: 195 }
     leaderTo:
-      - Custodian Guard
-      - Custodian Guard With Adrasite And Pyrithite Spears
+      - Custodian Guard Sodality
       - Custodian Wardens
-      - Sagittarum Custodians
+      - Sentinel Guard Sodality
+  - name: Caladius Annihilator Grav‑tank
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 250 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 280 }
   - name: Caladius Grav-Tank
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 210 }
+          - { models: 1, points: 230 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 225 }
-    wargear:
-      - { item: Twin arachnus heavy blaze cannon, points: 15 }
+          - { models: 1, points: 260 }
   - name: Contemptor-Achillus Dreadnought
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 155 }
+          - { models: 1, points: 230 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 170 }
+          - { models: 1, points: 260 }
   - name: Contemptor-Galatus Dreadnought
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 165 }
+          - { models: 1, points: 220 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 180 }
+          - { models: 1, points: 250 }
   - name: Coronus Grav-Carrier
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 180 }
+          - { models: 1, points: 225 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 200 }
-  - name: Custodian Guard
+          - { models: 1, points: 245 }
+  - name: Custodian Guard Sodality
     pricing:
       - range: "[1,3]"
         label: Your 1st To 3rd Units Cost
         costs:
-          - { models: 4, points: 180 }
-          - { models: 5, points: 225 }
+          - { models: 3, points: 240 }
       - range: "[4,)"
         label: Your 4th + Unit Costs
         costs:
-          - { models: 4, points: 190 }
-          - { models: 5, points: 235 }
-  - name: Custodian Guard With Adrasite And Pyrithite Spears
+          - { models: 3, points: 270 }
+  - name: Custodian Guard Sodality With Adrasite Spears
     pricing:
-      - range: "[1,3]"
-        label: Your 1st To 3rd Units Cost
+      - range: "[1,)"
+        label: Your Unit Costs
         costs:
-          - { models: 5, points: 250 }
-      - range: "[4,)"
-        label: Your 4th + Unit Costs
+          - { models: 3, points: 200 }
+    legends: true
+  - name: Custodian Guard Sodality With Pyrithite Spears
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
         costs:
-          - { models: 5, points: 260 }
+          - { models: 3, points: 215 }
+    legends: true
   - name: Custodian Wardens
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 4, points: 210 }
-          - { models: 5, points: 260 }
+          - { models: 2, points: 200 }
+          - { models: 3, points: 295 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 4, points: 230 }
-          - { models: 5, points: 280 }
+          - { models: 2, points: 230 }
+          - { models: 3, points: 325 }
+  - name: Gyrfalcon Jetbike Sodality
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 2, points: 260 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 2, points: 280 }
   - name: Knight-Centura
+    groupTitle: Anathema Psykana
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 55 }
-    leaderTo:
-      - Prosecutors
-      - Vigilators
-      - Witchseekers
+    supportTo:
+      - Prosecutor Squad
+      - Vigilator Squad
+      - Witchseeker Squad
   - name: Orion Assault Dropship
     pricing:
       - range: "[1,1]"
@@ -261,130 +305,168 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 100 }
-  - name: Prosecutors
+          - { models: 1, points: 135 }
+  - name: Prosecutor Squad
+    groupTitle: Anathema Psykana
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 4, points: 50 }
-          - { models: 5, points: 55 }
+          - { models: 4, points: 45 }
+          - { models: 5, points: 50 }
           - { models: 9, points: 80 }
           - { models: 10, points: 90 }
-  - name: Sagittarum Custodians
+  - name: Sagittarum Custodians Sodality
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 5, points: 225 }
+          - { models: 3, points: 185 }
+    legends: true
+  - name: Sentinel Guard Sodality
+    pricing:
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 3, points: 240 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
+        costs:
+          - { models: 3, points: 270 }
   - name: Shield-Captain
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 110 }
+          - { models: 1, points: 180 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 200 }
     leaderTo:
-      - Custodian Guard
-      - Custodian Guard With Adrasite And Pyrithite Spears
+      - Custodian Guard Sodality
+      - Custodian Guard Sodality With Adrasite Spears
+      - Custodian Guard Sodality With Pyrithite Spears
       - Custodian Wardens
-      - Sagittarum Custodians
+      - Sagittarum Custodians Sodality
+      - Sentinel Guard Sodality
+    wargear:
+      - { item: Praesidium Shield, points: 25 }
   - name: Shield-Captain In Allarus Terminator Armour
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 130 }
+          - { models: 1, points: 185 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 205 }
     leaderTo:
       - Allarus Custodians
-      - Aquilon Custodians
+      - Aquilon Terminators With Solarite Power Gauntlets
+      - Aquilon Terminators With Solarite Power Talons
   - name: Shield-Captain On Dawneagle Jetbike
     pricing:
-      - range: "[1,)"
-        label: Your Unit Costs
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 150 }
+          - { models: 1, points: 205 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 225 }
     leaderTo:
-      - Agamatus Custodians
+      - Gyrfalcon Jetbike Sodality
       - Vertus Praetors
   - name: Telemon Heavy Dreadnought
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 225 }
+          - { models: 1, points: 280 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 245 }
+          - { models: 1, points: 310 }
   - name: Trajann Valoris
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 135 }
+          - { models: 1, points: 265 }
     leaderTo:
-      - Custodian Guard
-      - Custodian Guard With Adrasite And Pyrithite Spears
+      - Allarus Custodians
+      - Aquilon Terminators With Solarite Power Gauntlets
+      - Aquilon Terminators With Solarite Power Talons
+      - Custodian Guard Sodality
+      - Custodian Guard Sodality With Adrasite Spears
+      - Custodian Guard Sodality With Pyrithite Spears
       - Custodian Wardens
-      - Sagittarum Custodians
+      - Sagittarum Custodians Sodality
+      - Sentinel Guard Sodality
   - name: Valerian
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 1, points: 120 }
+          - { models: 1, points: 130 }
     leaderTo:
-      - Custodian Guard
-      - Custodian Guard With Adrasite And Pyrithite Spears
+      - Custodian Guard Sodality
+      - Custodian Guard Sodality With Adrasite Spears
+      - Custodian Guard Sodality With Pyrithite Spears
       - Custodian Wardens
-      - Sagittarum Custodians
-  - name: Venatari Custodians
+      - Sagittarum Custodians Sodality
+      - Sentinel Guard Sodality
+    legends: true
+  - name: Venatari With Kinetic Destroyers
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 3, points: 150 }
-          - { models: 6, points: 300 }
+          - { models: 3, points: 255 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 3, points: 160 }
-          - { models: 6, points: 310 }
-    wargear:
-      - { item: Venatari lance, points: 5 }
+          - { models: 3, points: 280 }
+  - name: Venatari With Verutum Lances
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 270 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 300 }
   - name: Venerable Contemptor Dreadnought
     pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
+      - range: "[1,)"
+        label: Your Unit Costs
         costs:
-          - { models: 1, points: 170 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
-        costs:
-          - { models: 1, points: 185 }
+          - { models: 1, points: 220 }
+    legends: true
   - name: Venerable Land Raider
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 230 }
+    legends: true
+  - name: Vertus Praetors
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
         costs:
-          - { models: 1, points: 220 }
+          - { models: 2, points: 220 }
+          - { models: 3, points: 330 }
       - range: "[2,)"
         label: Your 2nd + Unit Costs
         costs:
-          - { models: 1, points: 240 }
-  - name: Vertus Praetors
-    pricing:
-      - range: "[1,2]"
-        label: Your 1st To 2nd Units Cost
-        costs:
-          - { models: 2, points: 155 }
-          - { models: 3, points: 230 }
-      - range: "[3,)"
-        label: Your 3rd + Unit Costs
-        costs:
-          - { models: 2, points: 180 }
-          - { models: 3, points: 255 }
-  - name: Vigilators
+          - { models: 2, points: 240 }
+          - { models: 3, points: 350 }
+  - name: Vigilator Squad
+    groupTitle: Anathema Psykana
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -393,12 +475,13 @@ units:
           - { models: 5, points: 55 }
           - { models: 9, points: 90 }
           - { models: 10, points: 100 }
-  - name: Witchseekers
+  - name: Witchseeker Squad
+    groupTitle: Anathema Psykana
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 4, points: 50 }
-          - { models: 5, points: 55 }
-          - { models: 9, points: 90 }
-          - { models: 10, points: 100 }
+          - { models: 4, points: 55 }
+          - { models: 5, points: 60 }
+          - { models: 9, points: 100 }
+          - { models: 10, points: 110 }

@@ -1,7 +1,7 @@
 name: Chaos Daemons
 slug: chaos-daemons
-version: "1.5"
-firstSeen: 2026-09-30
+version: "1.6"
+firstSeen: 2026-10-14
 detachments:
   - name: Blood Legion
     dp: 2

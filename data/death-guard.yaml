@@ -1,7 +1,7 @@
 name: Death Guard
 slug: death-guard
-version: "1.5"
-firstSeen: 2026-09-30
+version: "1.6"
+firstSeen: 2026-10-14
 detachments:
   - name: Champions Of Contagion
     dp: 2
