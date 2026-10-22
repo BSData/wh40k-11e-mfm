@@ -1,0 +1,68 @@
+# Merges Dependabot's minor and patch updates once `build` passes, and leaves the rest for a
+# maintainer. See "Dependabot auto-merge" in specs/change-tracking.md.
+name: Dependabot auto-merge
+
+on:
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  automerge:
+    # The PR's author, not github.actor: the actor is whoever last pushed or re-ran.
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'BSData/wh40k-11e-mfm'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # auto-merge squashes the PR into main
+      pull-requests: write # turn auto-merge on or off, and comment on a held update
+    steps:
+      # Fails unless the PR's author is Dependabot and its commits carry GitHub's signature.
+      - name: Read the update's metadata
+        id: meta
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+
+      - name: Auto-merge a minor or patch update
+        if: steps.meta.outputs.update-type == 'version-update:semver-minor' || steps.meta.outputs.update-type == 'version-update:semver-patch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          BASE: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+          # Auto-merge waits only for the checks the branch's rules require. Without a rule
+          # requiring build it would merge at once, untested, so enable nothing then.
+          required=$(gh api "repos/$GH_REPO/rules/branches/$BASE" --jq \
+            'any(.[]; .type == "required_status_checks" and any(.parameters.required_status_checks[]; .context == "build"))')
+          if [ "$required" != true ]; then
+            echo "::error title=No required build check::$BASE has no rule requiring the build check, so auto-merge would not wait for it. Add it to the ruleset, then re-run this job."
+            exit 1
+          fi
+          gh pr merge "$PR" --auto --squash
+
+      # A major update, or one whose type fetch-metadata couldn't tell.
+      - name: Hold any other update for a maintainer
+        if: steps.meta.outputs.update-type != 'version-update:semver-minor' && steps.meta.outputs.update-type != 'version-update:semver-patch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          UPDATE_TYPE: ${{ steps.meta.outputs.update-type }}
+          NAMES: ${{ steps.meta.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+          # A later push can make a grouped update major after auto-merge was turned on.
+          if [ "$(gh pr view "$PR" --json autoMergeRequest --jq '.autoMergeRequest != null')" = true ]; then
+            gh pr merge "$PR" --disable-auto
+          fi
+          # One comment per PR, however often Dependabot rebases it.
+          held=$(gh pr view "$PR" --json comments \
+            --jq '[.comments[].body | select(contains("<!-- dependabot-automerge: held -->"))] | length')
+          if [ "$held" = 0 ]; then
+            kind="${UPDATE_TYPE#version-update:}"
+            gh pr comment "$PR" --body "Not merged automatically: the update of ${NAMES:-these dependencies} is ${kind:-of unknown type}, and only minor and patch updates merge by themselves. A maintainer reviews and merges this one. <!-- dependabot-automerge: held -->"
+          fi

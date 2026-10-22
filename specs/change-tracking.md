@@ -310,9 +310,9 @@ entry. An old version's PR is final once the site moves on: the site only shows 
 current version, so nothing more can arrive for the old one.
 
 The workflow links the chain as a GitHub stacked PR (`gh stack link`), so it merges
-bottom-up. That step is best-effort, because GitHub doesn't document whether a workflow's
-`GITHUB_TOKEN` may create stacks. The plain base-branch chain works without it: GitHub
-offers to link it, and retargets the PR above when the branch below is deleted on merge.
+bottom-up. That step is best-effort, because nothing depends on it: the plain
+base-branch chain works without it. GitHub offers to link it, and retargets the PR above
+when the branch below is deleted on merge.
 After the bottom PR is squash-merged, the next run finds the next PR based on `main` and
 rebuilds it from `main`. So its diff is right again even if nothing rebased it.
 
@@ -384,8 +384,8 @@ round to the review. That puts it on the wrong side of the sticky PR: an update'
 is force-pushed daily, so "an update" is a branch that accretes over days, not an event.
 
 The PR is therefore the message's identity. Its id is kept in a hidden marker inside a
-comment on the update PR (`<!-- discord-message-id: … -->`), written with the workflow's
-own `GITHUB_TOKEN`, and that marker is the entire state:
+comment on the update PR (`<!-- discord-message-id: … -->`), written with a token from the
+project's GitHub App (see *The App token*), and that marker is the entire state:
 
 | marker on the PR | meaning | announcement |
 | --- | --- | --- |
@@ -479,9 +479,10 @@ The scrape GitHub Action:
    runs `tsx scripts/update-data-changelog.ts <before> data` there. That writes the entry
    into `changelog/v<version>.md` and regenerates the `DATA-CHANGELOG.md` index on top of
    the base's copies,
-6. if `data/` changed, opens (or updates) the PR on the planned branch and base. Its
-   title and body are the two outputs of step 4, the title is also the commit subject
-   (`data: <title>`), and the commit includes the changelog file and the index,
+6. if `data/` changed, opens (or updates) the PR on the planned branch and base, with
+   the App's token (below). Its title and body are the two outputs of step 4, the title
+   is also the commit subject (`data: <title>`), and the commit includes the changelog
+   file and the index,
 7. when the base isn't `main`, links the chain with `gh stack link` (best-effort),
 8. reads the Discord marker off the PR, runs `tsx src/discord.ts <before> <new> --send
    --message-id …`, and records a marker comment if that posted a new message (see
@@ -491,3 +492,84 @@ The scrape GitHub Action:
 
 A human reviews and merges the PR — giving reviewable, auditable history of every
 points change.
+
+The job starts with `step-security/harden-runner` in audit mode. It records the job's
+outbound connections and processes for the run's StepSecurity insights page, and blocks
+nothing. That record is what a block-mode allowlist would be written from.
+
+### The App token
+Events made with a workflow's `GITHUB_TOKEN` start no other workflows. An update PR opened
+with it therefore got no CI at all (#55 ran no checks), and `build` couldn't be made a
+required check without making every update PR unmergeable. So the PR is opened with a
+token from the project's GitHub App, `bsdata-automaton`, and its push starts CI like
+anyone else's.
+
+`actions/create-github-app-token` mints two such tokens from the org variable
+`BSDATA_AUTOMATON_APP_CLIENT_ID` and the org secret `BSDATA_AUTOMATON_APP_PRIVATE_KEY`,
+after the scrape. Both are scoped to this repository, and each has only what its steps
+need:
+
+| token | permissions | used by |
+| --- | --- | --- |
+| update PR | contents: write, pull-requests: write | `create-pull-request`: push the branch, open or update the PR, label it |
+| PR comments | pull-requests: write | `gh stack link`, and reading and writing the Discord marker |
+
+The Discord step runs the repository's own code with its token in the environment, so it
+gets the token that can't push. Both expire within the hour and are revoked when the job
+ends. The job's own `GITHUB_TOKEN` keeps only what the rest needs: reading the repository
+and the open PRs, and `issues: write` for the failure issue. The failure issue is still
+opened with it, so it starts no workflow either; the App's token goes there when something
+needs to react to it.
+
+The App has no Workflows permission, so its token can't push a change to
+`.github/workflows/`. The update commit only ever touches `data/` and the changelog.
+
+### Dry run
+`gh workflow run scrape.yml --ref <branch> -f dry-run=true` runs the scrape, the plan and
+the changelog as a real run would, then publishes nothing. It skips every step that
+publishes: the PR, the stack link, the Discord message and its marker comment, and both
+failure-issue steps, the report on failure included, so a failed dry run is reported by
+its red run alone. What a real run would have published goes to the
+run's summary instead: the plan (branch, base, the PRs below), the title, the files the
+commit would change and the PR body. The Discord payload goes to the log, from
+`tsx src/discord.ts` without `--send`, which makes no request.
+
+A dry run still mints the App's tokens, unused, so it also checks the App's credentials
+and that the installation grants what the tokens ask for. It has its own concurrency
+group: it shares no state with a real run, and in the shared group a queued dry run
+would cancel a queued scheduled one.
+
+## Around the pipeline
+### Live smoke test
+CI's tests parse saved pages, most of them from v1.1, so a parser change can pass every
+test and still misread today's site. `smoke.yml` runs on each PR that touches `src/` (or
+`smoke.yml` itself): it scrapes the live site with the PR's code into `$RUNNER_TEMP`, with
+`--dates-from data` so a faction that matches its committed file keeps its date, and puts
+the `src/diff.ts` changelog from the committed `data/` to that scrape in the job summary.
+
+A difference never fails the job. It is expected when the PR changes the output, and
+when the site has changed since `data/` was last updated (an open `mfm-update` PR holds
+that change). A scrape that fails does fail it, with the failure report in the summary.
+It is not a required check, so neither blocks the merge. The job only reads:
+`contents: read`, no secrets, and nothing written outside the runner, so a PR from a fork
+runs it the same way.
+
+### Dependabot auto-merge
+Dependabot PRs sat green and unmerged (#59 since 2026-10-19). Merging them also keeps
+the repository active, and GitHub disables a public repository's scheduled workflows,
+the daily scrape included, after 60 days without activity.
+
+`dependabot-automerge.yml` reads each Dependabot PR's metadata with
+`dependabot/fetch-metadata`. For a minor or patch update it turns on auto-merge
+(`gh pr merge --auto --squash`), which merges once the required `build` check passes.
+Anything else (a major update, or one whose type it can't tell) waits for a maintainer:
+the PR gets one comment saying so, and auto-merge is turned off, since a later push can
+make a grouped update major. The job runs only for PRs whose author is Dependabot. It
+checks the PR's author, not `github.actor`, which is whoever last pushed or re-ran.
+
+Auto-merge waits only for the checks the branch's rules require, so without the ruleset
+on `main` requiring `build`, it would merge an untested update at once. The job checks for
+that rule first and enables nothing without it. It uses the workflow's `GITHUB_TOKEN`:
+a run Dependabot starts can't read Actions secrets, and the App's key is one. The squash
+commit it lands on `main` is therefore made with that token too, and starts no workflow
+of its own; the PR's `build` is what tested it.

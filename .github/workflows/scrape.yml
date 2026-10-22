@@ -4,23 +4,37 @@ on:
   schedule:
     - cron: '0 16 * * *' # daily 16:00 UTC
   workflow_dispatch: # manual trigger
+    inputs:
+      dry-run:
+        description: Scrape, plan and render the changelog, but publish nothing (no PR, comment, issue or Discord message)
+        type: boolean
+        default: false
 
 permissions: {}
 
+# A dry run writes nothing, so it needn't wait for a real run. In the same group, a queued
+# dry run would also cancel a queued scheduled one.
 concurrency:
-  group: scrape
+  group: ${{ inputs.dry-run && 'scrape-dry-run' || 'scrape' }}
   cancel-in-progress: false
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    # GITHUB_TOKEN only reads, plus the failure issue: the PR, its comments and the stack
+    # use the App's tokens (see the two "Mint the App's token" steps).
     permissions:
-      contents: write # push the update branch
-      pull-requests: write # open the update PR, and comment its Discord marker
+      contents: read # check out the code
+      pull-requests: read # list the open update PRs
       issues: write # open, comment on and close the scrape-failure issue
     steps:
+      # Audit only: records outbound connections and processes, blocks nothing.
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
       # The fetches below need no credentials (the repository is public), and
-      # create-pull-request configures its own token to push.
+      # create-pull-request pushes with the App's token.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -117,10 +131,68 @@ jobs:
           cp -r ../data data
           ../node_modules/.bin/tsx ../scripts/update-data-changelog.ts /tmp/old-data data
 
+      # Every step from here on but the token minting publishes something, so a dry run
+      # shows what they would have published instead.
+      - name: Show the dry run
+        if: inputs.dry-run
+        env:
+          BRANCH: ${{ steps.plan.outputs.branch }}
+          BASE: ${{ steps.plan.outputs.base }}
+          BELOW: ${{ steps.plan.outputs.below }}
+          TITLE: ${{ steps.changelog.outputs.title }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Dry run: nothing was published"
+            echo
+            echo "- Branch: \`$BRANCH\`, based on \`$BASE\`"
+            echo "- PRs below: ${BELOW:-none}"
+            echo "- Title: $TITLE"
+            echo
+            echo "Files the update commit would change, against the base:"
+            echo
+            echo '```'
+            git -C pub status --short | grep . || echo "(none: the scrape matches the base)"
+            echo '```'
+            echo
+            echo "The PR body:"
+            echo
+            cat /tmp/changelog.md
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "The Discord payload (not sent):"
+          node_modules/.bin/tsx src/discord.ts /tmp/old-data /tmp/new-data
+
+      # The PR is opened with the App's token rather than GITHUB_TOKEN, whose events start
+      # no workflows: that way the update PR gets CI. Each token is scoped to this
+      # repository and to what its steps need, and the Discord step, which runs our code
+      # with its token in the environment, gets one that can't push. Minted after the
+      # scrape, since they expire within the hour, and in a dry run too, unused, which
+      # checks the App's credentials. See "The App token" in specs/change-tracking.md.
+      - name: Mint the App's token for the update PR
+        id: pr-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.BSDATA_AUTOMATON_APP_CLIENT_ID }}
+          private-key: ${{ secrets.BSDATA_AUTOMATON_APP_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write # push the update branch
+          permission-pull-requests: write # open or update the PR, and label it
+
+      - name: Mint the App's token for the PR's comments
+        id: comment-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.BSDATA_AUTOMATON_APP_CLIENT_ID }}
+          private-key: ${{ secrets.BSDATA_AUTOMATON_APP_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
+          permission-pull-requests: write # link the stack, read and write the Discord marker
+
       - name: Open pull request on change
         id: pr
+        if: ${{ !inputs.dry-run }}
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
+          token: ${{ steps.pr-token.outputs.token }}
           path: pub
           branch: ${{ steps.plan.outputs.branch }}
           base: ${{ steps.plan.outputs.base }}
@@ -130,15 +202,14 @@ jobs:
           labels: mfm-update
           delete-branch: true
 
-      # Link the chain as a GitHub stacked PR, so it merges bottom-up. Best-effort:
-      # GitHub doesn't document whether GITHUB_TOKEN may create stacks, and the
+      # Link the chain as a GitHub stacked PR, so it merges bottom-up. Best-effort: the
       # base-branch chain stands without it (GitHub retargets the PR above when the
       # branch below is deleted on merge).
       - name: Link the update stack
-        if: steps.pr.outputs.pull-request-number != '' && steps.plan.outputs.below != ''
+        if: ${{ !inputs.dry-run && steps.pr.outputs.pull-request-number != '' && steps.plan.outputs.below != '' }}
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.comment-token.outputs.token }}
           GH_REPO: ${{ github.repository }}
           GH_STACK_NO_UPDATE_NOTIFIER: '1'
           BELOW: ${{ steps.plan.outputs.below }}
@@ -164,11 +235,11 @@ jobs:
       # the failure handler below would then open a "the source markup may have drifted"
       # issue, which would be a lie.
       - name: Announce on Discord
-        if: steps.pr.outputs.pull-request-number != ''
+        if: ${{ !inputs.dry-run && steps.pr.outputs.pull-request-number != '' }}
         continue-on-error: true
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.comment-token.outputs.token }}
           GH_REPO: ${{ github.repository }}
           PR: ${{ steps.pr.outputs.pull-request-number }}
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
@@ -206,8 +277,9 @@ jobs:
 
       # One issue per outage, not per day: a failure while a `scrape-failure` issue is
       # open is reported as a comment on it, and the next successful run (below) closes it.
+      # A dry run touches neither: its own red run is the report.
       - name: Report the failure
-        if: failure()
+        if: ${{ failure() && !inputs.dry-run }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
@@ -242,7 +314,7 @@ jobs:
             }
 
       - name: Close the failure issue
-        if: success()
+        if: ${{ success() && !inputs.dry-run }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
