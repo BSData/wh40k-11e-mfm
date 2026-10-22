@@ -67,8 +67,9 @@ Handle only markup that a saved page shows:
 2. Update the snapshots with `pnpm test -u`, and review what changed in them.
 3. Add a test that fails without your change.
 
-Handling for markup that no fixture shows gets reverted: #18 added some, and #19 took it
-out again.
+Handling for markup that no fixture shows gets reverted:
+[#18](https://github.com/BSData/wh40k-11e-mfm/pull/18) added some, and
+[#19](https://github.com/BSData/wh40k-11e-mfm/pull/19) took it out again.
 
 ## Never hand-edit `data/`
 `data/`, `DATA-CHANGELOG.md` and the update entries in `changelog/` are scraper output. A
@@ -80,6 +81,10 @@ when a change alters the shape of the files, like the 2026-09-02 note in
 If your change alters the output, agree in the issue on how the data gets regenerated
 before you open the PR. A re-scrape stamps today's date as the `firstSeen` of every
 faction whose file changes, and an open update PR writes the same files.
+
+CI's `data-guard` check fails any PR that touches these files, unless it comes from an
+`mfm/*` update branch or has the `regenerated-data` label. A maintainer adds the label to a
+PR that regenerates the data with the scraper or adds a schema-change note.
 
 ## How updates reach `main`
 1. The `Scrape MFM` workflow scrapes the site every day at 16:00 UTC.

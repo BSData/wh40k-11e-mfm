@@ -65,10 +65,10 @@ days: MFM v1.6 was first seen on 2026-10-14, and its update was merged on 2026-1
   They haven't been reviewed. The branch is rewritten whenever a run finds a change and
   deleted when the PR merges, so find it from the open PR rather than hard-coding it. If
   two are open, the newer version's PR is stacked on the older one.
-- [`DATA-CHANGELOG.md`](DATA-CHANGELOG.md) links each version's changelog. The shape of
-  the files has changed once so far, as noted in [`changelog/v1.4.md`](changelog/v1.4.md):
+- [`DATA-CHANGELOG.md`](DATA-CHANGELOG.md) links each version's changelog. The files have
+  had one breaking change so far, noted in [`changelog/v1.4.md`](changelog/v1.4.md):
   `role` and `attachTo` became `leaderTo` and `supportTo`, and `objective` became
-  `objectives`.
+  `objectives`. Every other change, such as `muster` in `meta.yaml`, only added fields.
 
 ## License
 The code is released under the [MIT License](LICENSE).
