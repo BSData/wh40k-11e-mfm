@@ -121,6 +121,14 @@ describe('checkData', () => {
       f.data = f.data.filter((d) => d.name !== 'meta.yaml');
       expect(checkData(f)).toEqual(['data/meta.yaml is missing']);
     });
+
+    it('a faction file not named after its slug', () => {
+      const f = files();
+      f.data.push({ name: 'orks.yaml', text: factionToYaml(necrons) });
+      expect(checkData(f)).toEqual([
+        'data/orks.yaml holds the slug "necrons", so it belongs in data/necrons.yaml',
+      ]);
+    });
   });
 
   describe('fails on a stale DATA-CHANGELOG.md', () => {

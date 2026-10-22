@@ -30,9 +30,11 @@ jobs:
           cache: true
       - run: pnpm verify
 
-      # From the release, checked against its published SHA-256. actionlint runs the
-      # runner's shellcheck over every `run:` script.
+      # The workflow lints run even when verify fails, so one push reports both.
+      # actionlint comes from its release, checked against the published SHA-256, and runs
+      # the runner's shellcheck over every `run:` script.
       - name: actionlint
+        if: ${{ !cancelled() }}
         env:
           VERSION: 1.7.12
           SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
@@ -45,6 +47,7 @@ jobs:
           "$RUNNER_TEMP/actionlint" -color
 
       - uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
+        if: ${{ !cancelled() }}
         with:
           advanced-security: false
           annotations: true
@@ -63,11 +66,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
+          CHANGED_FILES: ${{ github.event.pull_request.changed_files }}
           HEAD_REF: ${{ github.head_ref }}
           SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
           LABELLED: ${{ contains(github.event.pull_request.labels.*.name, 'regenerated-data') }}
         run: |
           set -euo pipefail
+          # The API lists at most 3000 files; past that, data/ could hide in the rest.
+          if [ "$CHANGED_FILES" -gt 3000 ]; then
+            echo "::error title=Too many files::$CHANGED_FILES changed files is more than the API lists, so data/ can't be ruled out. Split the PR."
+            exit 1
+          fi
           # A rename counts at both ends: moving a file out of data/ changes data/ too.
           files=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/files" \
             --jq '.[] | .filename, (.previous_filename // empty)')

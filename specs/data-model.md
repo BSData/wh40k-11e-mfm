@@ -173,16 +173,18 @@ to drive the scrape and supply clean display names.
 ## Integrity of the committed files (`pnpm check-data`)
 `data/`, `changelog/` and `DATA-CHANGELOG.md` are generated, so the committed copies must be
 exactly what the tools would write. `scripts/check-data.ts` fails, naming each file, when:
-- a `data/<slug>.yaml` fails the `Faction` schema, or isn't canonical: reading it with
-  `factionFromYaml()` and writing it back with `factionToYaml()` must reproduce it byte for
-  byte, which catches a hand edit, an unknown key, and an entry out of order;
+- a `data/<slug>.yaml` fails the `Faction` schema, isn't named after its `slug`, or isn't
+  canonical: reading it with `factionFromYaml()` and writing it back with `factionToYaml()`
+  must reproduce it byte for byte, which catches an unknown key, an entry out of order, and
+  any other edit that breaks the writer's formatting;
 - `data/meta.yaml` fails the `SiteMeta` schema, or `metaToYaml()` doesn't reproduce it;
 - `DATA-CHANGELOG.md` differs from what `changelogIndex()` generates from `changelog/`.
 
 `pnpm verify` runs lint, typecheck, the tests and then this check. It is the definition of
 done, and it is what CI runs.
 
-Only the scraper writes these files. CI's `data-guard` job fails a pull request that changes
-any of them unless its head branch is an update branch (`mfm/*`, in this repository) or it
-carries the `regenerated-data` label, which a maintainer adds to a PR that reran the
-scraper, for example to apply a format change.
+A well-formed hand edit, such as one changed points value, is still canonical, so this check
+can't tell it from the scraper's output. Only the scraper writes these files, so CI's
+`data-guard` job fails a pull request that changes any of them unless its head branch is an
+update branch (`mfm/*`, in this repository) or it carries the `regenerated-data` label,
+which a maintainer adds to a PR that reran the scraper, for example to apply a format change.
