@@ -8,6 +8,7 @@ scrape workflow (see [`specs/change-tracking.md`](specs/change-tracking.md)). Th
 `data/*.yaml` git history remains the canonical, line-level record — these are the
 readable summaries.
 
+- [MFM v1.6](changelog/v1.6.md) — 2026-10-14
 - [MFM v1.5](changelog/v1.5.md) — 2026-10-02 → 2026-10-05, 2026-09-30
 - [MFM v1.4](changelog/v1.4.md) — 2026-09-02
 - [MFM v1.3](changelog/v1.3.md) — 2026-08-26

@@ -1,7 +1,7 @@
 name: Adepta Sororitas
 slug: adepta-sororitas
-version: "1.5"
-firstSeen: 2026-09-30
+version: "1.6"
+firstSeen: 2026-10-14
 detachments:
   - name: Army Of Faith
     dp: 2
@@ -230,11 +230,11 @@ units:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
         costs:
-          - { models: 1, points: 180 }
+          - { models: 1, points: 175 }
       - range: "[3,)"
         label: Your 3rd + Unit Costs
         costs:
-          - { models: 1, points: 220 }
+          - { models: 1, points: 215 }
   - name: Hospitaller
     pricing:
       - range: "[1,1]"

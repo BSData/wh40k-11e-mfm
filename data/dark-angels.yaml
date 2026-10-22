@@ -1,7 +1,7 @@
 name: Dark Angels
 slug: dark-angels
-version: "1.5"
-firstSeen: 2026-10-02
+version: "1.6"
+firstSeen: 2026-10-14
 parent: Space Marines
 detachments:
   - name: Assault Brethren
@@ -314,6 +314,7 @@ units:
       - Deathwing Command Squad
       - Deathwing Knights
       - Deathwing Terminator Squad
+      - Terminator Assault Squad
       - Terminator Squad
   - name: Bladeguard Ancient
     groupTitle: Space Marines

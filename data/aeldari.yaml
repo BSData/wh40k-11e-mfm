@@ -1,7 +1,7 @@
 name: Aeldari
 slug: aeldari
-version: "1.5"
-firstSeen: 2026-10-02
+version: "1.6"
+firstSeen: 2026-10-14
 detachments:
   - name: Armoured Warhost
     dp: 1
@@ -836,7 +836,7 @@ units:
         costs:
           - { models: 1, points: 405 }
     wargear:
-      - { item: Heavy wraithcannon, points: 10 }
+      - { item: Heavy Wraithcannon, points: 10 }
   - name: Wraithknight With Ghostglaive
     pricing:
       - range: "[1,1]"
