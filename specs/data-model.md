@@ -75,10 +75,9 @@ costs:
 
 ### `leaderTo` / `supportTo` / `wargear` / `groupTitle` — optional unit extras
 - `leaderTo` / `supportTo`: the units this unit can join, listed separately per ability
-  (from each role block's icon + list). Either may be present, or both — MFM v1.4 gave the
-  Judiciar a Leader list of twelve units and a Support list of five, so a single `role` +
-  `attachTo` pair cannot express what the page says. These are named to match
-  `Enhancement.leaderTo`/`supportTo`, which already modelled exactly this shape.
+  (from each role block's icon + list). Either may be present, or both, as on
+  `Enhancement.leaderTo`/`supportTo` (see
+  [0008](../docs/decisions/0008-leader-and-support-lists.md)).
 - `wargear`: per-item point costs from the unit's "Wargear Options" block (`per` stripped).
 - `legends: true`: marks Legends (deprecated) units — see specs/scraping.md.
 - `groupTitle`: the page sub-group the unit is listed under, Title-Cased from its army-group
@@ -113,8 +112,9 @@ actually changes — so it records when each set of values came into effect, and
 unchanged scrape produces no git diff. Implemented in `src/cli.ts` (`resolveFirstSeen`)
 via the content fingerprint `contentKey()` in `src/emit.ts`, which ignores `firstSeen`.
 
-### Rules & rationale
-- **One file per faction** — minimal, reviewable diffs; git is the change history.
+### Rules
+- **One file per faction**; git is the change history
+  ([0001](../docs/decisions/0001-git-is-the-change-history.md)).
 - **Deterministic ordering** (see `orderContent()` in `src/emit.ts`): top-level keys in a
   fixed order, leaf cost/wargear/enhancement maps rendered in flow style. Entity order
   (units, detachments, enhancements) is selectable via `--order`: `name` (default,
