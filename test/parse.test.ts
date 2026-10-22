@@ -301,6 +301,12 @@ describe('parseFaction coverage guard — nothing on the page goes unconsumed', 
     expect(() => parseFaction(fixture('necrons-panels.html'), 'necrons', 'Necrons')).not.toThrow();
   });
 
+  it('drops the site footer (legal links) as chrome, like the header/nav', () => {
+    // The footer arrived in October 2026 and failed every faction until it was dropped.
+    expect(fixture('necrons-panels.html')).toMatch(/<footer[^>]*>.*Terms of Website Use/s);
+    expect(() => parseFaction(fixture('necrons-panels.html'), 'necrons', 'Necrons')).not.toThrow();
+  });
+
   it('throws, located, when the page has content no selector captured', () => {
     const injected = fixture('necrons.html').replace(
       '</body>',
