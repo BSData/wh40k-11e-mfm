@@ -189,17 +189,19 @@ jobs:
             --pr-number "$PR" \
             --pr-url "$REPO_URL/pull/$PR")
           if [ -n "$posted" ]; then
-            # "<id> [permalink]": $1 drives the next run's edit, $2 is the clickable link
-            # (absent if the webhook wouldn't say which guild and channel it posts to).
-            set -- $posted
+            # "<id> [permalink]": the id drives the next run's edit, the permalink is the
+            # clickable link (absent if the webhook wouldn't say which guild and channel it
+            # posts to). It is the last line: discord.ts prints nothing else to stdout, and
+            # whatever a wrapper printed ahead of it is ignored rather than recorded.
+            read -r msg_id permalink _ <<< "$(printf '%s\n' "$posted" | tail -n 1)"
             # A marker the next run can't read makes it post a second announcement, so
             # refuse to write one: fail the step (it's continue-on-error) and say why.
-            if [[ ! "$1" =~ ^[0-9]+$ ]]; then
+            if [[ ! "${msg_id:-}" =~ ^[0-9]+$ ]]; then
               echo "::error::Expected '<id> [permalink]' from src/discord.ts, got: $posted"
               exit 1
             fi
             gh pr comment "$PR" \
-              --body "Announced on Discord: ${2:-link unavailable} <!-- discord-message-id: $1 -->"
+              --body "Announced on Discord: ${permalink:-link unavailable} <!-- discord-message-id: $msg_id -->"
           fi
 
       # One issue per outage, not per day: a failure while a `scrape-failure` issue is
