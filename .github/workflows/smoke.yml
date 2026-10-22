@@ -1,14 +1,15 @@
 # Scrapes the live site with the PR's code and reports how the result differs from the
 # committed data/. CI's tests parse saved pages, most of them from v1.1, so this is where a
-# parser change meets today's site. A difference never fails the job; a failed scrape
-# does. Not a required check, and read-only: no secrets, nothing written outside the
-# runner. See "Live smoke test" in specs/change-tracking.md.
+# parser change, or a parsing dependency's update, meets today's site. A difference never
+# fails the job; a failed scrape does. Not a required check, and read-only: no secrets.
+# See "Live smoke test" in specs/change-tracking.md.
 name: Live smoke test
 
 on:
   pull_request:
     paths:
       - src/**
+      - pnpm-lock.yaml # cheerio, Playwright and the rest of what parses the page
       - .github/workflows/smoke.yml # a change to this check runs it
 
 permissions: {}
@@ -58,7 +59,7 @@ jobs:
             echo "## Live smoke test"
             echo
             if [ "$SCRAPE" != success ]; then
-              echo "The live scrape failed with this PR's code. The run log has the details."
+              echo "The live scrape failed. The cause can be this PR, or the site: if the scheduled scrape on \`main\` is failing too (an open \`scrape-failure\` issue), the site changed or is down. The run log has the details."
               if [ -s "$RUNNER_TEMP/failures.md" ]; then
                 echo
                 cat "$RUNNER_TEMP/failures.md"

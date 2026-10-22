@@ -515,8 +515,10 @@ need:
 | PR comments | pull-requests: write | `gh stack link`, and reading and writing the Discord marker |
 
 The Discord step runs the repository's own code with its token in the environment, so it
-gets the token that can't push. Both expire within the hour and are revoked when the job
-ends. The job's own `GITHUB_TOKEN` keeps only what the rest needs: reading the repository
+gets the token that can't push. That narrows what a dependency reading its environment
+would find; it doesn't isolate the key, which is a secret of the whole job, and code
+running anywhere in the job could read it from the runner's memory. Both tokens expire
+within the hour and are revoked when the job ends. The job's own `GITHUB_TOKEN` keeps only what the rest needs: reading the repository
 and the open PRs, and `issues: write` for the failure issue. The failure issue is still
 opened with it, so it starts no workflow either; the App's token goes there when something
 needs to react to it.
@@ -542,34 +544,48 @@ would cancel a queued scheduled one.
 ## Around the pipeline
 ### Live smoke test
 CI's tests parse saved pages, most of them from v1.1, so a parser change can pass every
-test and still misread today's site. `smoke.yml` runs on each PR that touches `src/` (or
-`smoke.yml` itself): it scrapes the live site with the PR's code into `$RUNNER_TEMP`, with
+test and still misread today's site, and so can an update of cheerio or Playwright.
+`smoke.yml` runs on each PR that touches `src/` or `pnpm-lock.yaml` (or `smoke.yml`
+itself): it scrapes the live site with the PR's code into `$RUNNER_TEMP`, with
 `--dates-from data` so a faction that matches its committed file keeps its date, and puts
 the `src/diff.ts` changelog from the committed `data/` to that scrape in the job summary.
 
 A difference never fails the job. It is expected when the PR changes the output, and
 when the site has changed since `data/` was last updated (an open `mfm-update` PR holds
 that change). A scrape that fails does fail it, with the failure report in the summary.
-It is not a required check, so neither blocks the merge. The job only reads:
-`contents: read`, no secrets, and nothing written outside the runner, so a PR from a fork
-runs it the same way.
+That can be the site rather than the PR: while the scheduled scrape on `main` is failing
+too, every PR that runs this check fails it. It is not a required check, so neither
+blocks the merge. The job has `contents: read` and no secrets, so a PR from a fork runs it
+the same way. All it leaves behind is its log and summary, the dependency cache (scoped to
+the PR) and harden-runner's telemetry.
 
 ### Dependabot auto-merge
 Dependabot PRs sat green and unmerged (#59 since 2026-10-19). Merging them also keeps
 the repository active, and GitHub disables a public repository's scheduled workflows,
 the daily scrape included, after 60 days without activity.
 
-`dependabot-automerge.yml` reads each Dependabot PR's metadata with
-`dependabot/fetch-metadata`. For a minor or patch update it turns on auto-merge
-(`gh pr merge --auto --squash`), which merges once the required `build` check passes.
-Anything else (a major update, or one whose type it can't tell) waits for a maintainer:
-the PR gets one comment saying so, and auto-merge is turned off, since a later push can
-make a grouped update major. The job runs only for PRs whose author is Dependabot. It
-checks the PR's author, not `github.actor`, which is whoever last pushed or re-ran.
+`dependabot-automerge.yml` runs on each PR whose author is Dependabot. It checks the PR's
+author, not `github.actor`: the actor is whoever caused the event, and Dependabot can be
+made the actor on someone else's PR. It reads the update with `dependabot/fetch-metadata`
+and turns on auto-merge (`gh pr merge --auto --squash`), which merges once the required
+`build` check passes, only when all of these hold:
+- every dependency in it is a minor or patch update. This is checked per dependency,
+  because a group's own update type is the highest type fetch-metadata can tell, and a
+  dependency whose type it can't tell doesn't count towards it;
+- every commit is Dependabot's. fetch-metadata verifies only the first;
+- it changes no workflow file. The job's `GITHUB_TOKEN` may not merge one, so the weekly
+  GitHub Actions group always waits for a maintainer.
+
+Otherwise the PR waits for a maintainer: it gets one comment saying why, and auto-merge is
+turned off, since a later push can turn a minor group major after an earlier run turned
+it on. A run that fails turns auto-merge off too, so it never outlives a decision that
+couldn't be made.
 
 Auto-merge waits only for the checks the branch's rules require, so without the ruleset
 on `main` requiring `build`, it would merge an untested update at once. The job checks for
 that rule first and enables nothing without it. It uses the workflow's `GITHUB_TOKEN`:
 a run Dependabot starts can't read Actions secrets, and the App's key is one. The squash
 commit it lands on `main` is therefore made with that token too, and starts no workflow
-of its own; the PR's `build` is what tested it.
+of its own. The PR's `build` tested it against the `main` it was based on. The ruleset
+doesn't require a PR to be up to date with `main` before it merges, so two updates merged
+the same day land a combination nothing tested until the next push to `main`.

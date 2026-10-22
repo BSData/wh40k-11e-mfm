@@ -13,24 +13,50 @@ concurrency:
 
 jobs:
   automerge:
-    # The PR's author, not github.actor: the actor is whoever last pushed or re-ran.
+    # The PR's author, not github.actor: the actor is whoever caused this event, and
+    # Dependabot can be made the actor on someone else's PR.
     if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'BSData/wh40k-11e-mfm'
     runs-on: ubuntu-latest
     permissions:
       contents: write # auto-merge squashes the PR into main
       pull-requests: write # turn auto-merge on or off, and comment on a held update
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
     steps:
-      # Fails unless the PR's author is Dependabot and its commits carry GitHub's signature.
+      # Fails unless the PR's author is Dependabot and its first commit carries GitHub's
+      # signature. The rest of the commits are checked below.
       - name: Read the update's metadata
         id: meta
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
 
-      - name: Auto-merge a minor or patch update
-        if: steps.meta.outputs.update-type == 'version-update:semver-minor' || steps.meta.outputs.update-type == 'version-update:semver-patch'
+      # One decision, closed by default: an empty reason means merge, anything else holds.
+      - name: Decide
+        id: decide
         env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          PR: ${{ github.event.pull_request.number }}
+          DEPS: ${{ steps.meta.outputs.updated-dependencies-json }}
+        run: |
+          set -euo pipefail
+          pr=$(gh pr view "$PR" --json commits,files)
+          reason=""
+          # Per dependency: a group's own update-type is the highest type it can tell, and
+          # silently passes over one it can't.
+          if ! jq -e 'length > 0 and all(.[]; .updateType == "version-update:semver-minor" or .updateType == "version-update:semver-patch")' \
+            <<< "$DEPS" > /dev/null; then
+            reason="it includes a major update, or one whose type is unknown"
+          elif ! jq -e '[.commits[].authors[].login] | length > 0 and all(. == "dependabot[bot]")' <<< "$pr" > /dev/null; then
+            reason="it has commits that aren't Dependabot's"
+          elif jq -e 'any(.files[].path; startswith(".github/workflows/"))' <<< "$pr" > /dev/null; then
+            # GITHUB_TOKEN may not merge a change to a workflow, and the App's key isn't
+            # readable from a run Dependabot started.
+            reason="it changes workflow files, which this job's token isn't allowed to merge"
+          fi
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+
+      - name: Auto-merge once build passes
+        if: steps.decide.outputs.reason == ''
+        env:
           BASE: ${{ github.event.pull_request.base.ref }}
         run: |
           set -euo pipefail
@@ -44,18 +70,13 @@ jobs:
           fi
           gh pr merge "$PR" --auto --squash
 
-      # A major update, or one whose type fetch-metadata couldn't tell.
-      - name: Hold any other update for a maintainer
-        if: steps.meta.outputs.update-type != 'version-update:semver-minor' && steps.meta.outputs.update-type != 'version-update:semver-patch'
+      - name: Hold for a maintainer
+        if: steps.decide.outputs.reason != ''
         env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          PR: ${{ github.event.pull_request.number }}
-          UPDATE_TYPE: ${{ steps.meta.outputs.update-type }}
-          NAMES: ${{ steps.meta.outputs.dependency-names }}
+          REASON: ${{ steps.decide.outputs.reason }}
         run: |
           set -euo pipefail
-          # A later push can make a grouped update major after auto-merge was turned on.
+          # An earlier run may have turned auto-merge on before a push changed the answer.
           if [ "$(gh pr view "$PR" --json autoMergeRequest --jq '.autoMergeRequest != null')" = true ]; then
             gh pr merge "$PR" --disable-auto
           fi
@@ -63,6 +84,15 @@ jobs:
           held=$(gh pr view "$PR" --json comments \
             --jq '[.comments[].body | select(contains("<!-- dependabot-automerge: held -->"))] | length')
           if [ "$held" = 0 ]; then
-            kind="${UPDATE_TYPE#version-update:}"
-            gh pr comment "$PR" --body "Not merged automatically: the update of ${NAMES:-these dependencies} is ${kind:-of unknown type}, and only minor and patch updates merge by themselves. A maintainer reviews and merges this one. <!-- dependabot-automerge: held -->"
+            gh pr comment "$PR" --body "Not merged automatically: $REASON. A maintainer reviews and merges this one. <!-- dependabot-automerge: held -->"
+          fi
+
+      # Closed on failure too: an auto-merge an earlier run turned on mustn't outlive a
+      # decision this run couldn't make.
+      - name: Turn auto-merge off after a failure
+        if: failure()
+        run: |
+          set -euo pipefail
+          if [ "$(gh pr view "$PR" --json autoMergeRequest --jq '.autoMergeRequest != null')" = true ]; then
+            gh pr merge "$PR" --disable-auto
           fi

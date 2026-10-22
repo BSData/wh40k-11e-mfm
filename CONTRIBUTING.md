@@ -114,9 +114,10 @@ fix it, and re-test. Then open a PR that links the issue.
 - Fill in the checklist in the PR template.
 - CI runs on your PR, and the code owners in [`.github/CODEOWNERS`](.github/CODEOWNERS)
   review it.
-- A PR that touches `src/` also gets a live smoke test: it scrapes today's site with your
-  code and lists, in the job summary, how the result differs from `data/`. A difference
-  doesn't fail it, and it never blocks the merge.
+- A PR that touches `src/` or `pnpm-lock.yaml` also gets a live smoke test: it scrapes
+  today's site with your code and lists, in the job summary, how the result differs from
+  `data/`. A difference doesn't fail it. A failed scrape does, which can also mean the site
+  changed or is down; either way it never blocks the merge.
 - Write commit subjects in the imperative, in plain English, as in `git log`.
 
 ## Coding agents

@@ -164,17 +164,17 @@ jobs:
 
       # The PR is opened with the App's token rather than GITHUB_TOKEN, whose events start
       # no workflows: that way the update PR gets CI. Each token is scoped to this
-      # repository and to what its steps need, and the Discord step, which runs our code
-      # with its token in the environment, gets one that can't push. Minted after the
-      # scrape, since they expire within the hour, and in a dry run too, unused, which
-      # checks the App's credentials. See "The App token" in specs/change-tracking.md.
+      # repository (the default with no `owner` or `repositories`) and to what its steps
+      # need, and the Discord step, which runs our code with its token in the environment,
+      # gets one that can't push. Minted after the scrape, since they expire within the
+      # hour, and in a dry run too, unused, which checks the App's credentials. See "The
+      # App token" in specs/change-tracking.md.
       - name: Mint the App's token for the update PR
         id: pr-token
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.BSDATA_AUTOMATON_APP_CLIENT_ID }}
           private-key: ${{ secrets.BSDATA_AUTOMATON_APP_PRIVATE_KEY }}
-          repositories: ${{ github.event.repository.name }}
           permission-contents: write # push the update branch
           permission-pull-requests: write # open or update the PR, and label it
 
@@ -184,7 +184,6 @@ jobs:
         with:
           client-id: ${{ vars.BSDATA_AUTOMATON_APP_CLIENT_ID }}
           private-key: ${{ secrets.BSDATA_AUTOMATON_APP_PRIVATE_KEY }}
-          repositories: ${{ github.event.repository.name }}
           permission-pull-requests: write # link the stack, read and write the Discord marker
 
       - name: Open pull request on change
