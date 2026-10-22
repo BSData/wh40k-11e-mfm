@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { afterAll, describe, expect, it } from 'vitest';
+import { main } from '../src/bin/mfm.js';
 import { changelog, changelogEntry, loadFactionDir, loadMeta, updateTitle } from '../src/diff.js';
 import { announcement } from '../src/discord.js';
 import { factionToYaml, metaToYaml, type SiteMeta } from '../src/emit.js';
@@ -294,57 +295,69 @@ describe.each(CASES)('golden: $name', (c) => {
 
   // The same outputs from the commands the workflow runs. Today-dated cases are left to
   // the function checks above: the commands take no `--today`.
-  it.skipIf(c.datedToday)('the workflow commands print the same', { timeout: 60_000 }, async () => {
+  it.skipIf(c.datedToday)('the workflow commands print the same', async () => {
     const out = join(scratch, c.name);
-    const [diff, discord, plans, entry] = await Promise.all([
-      run(['src/diff.ts', DATA, dir, '--title-file', join(out, 'title.txt')]),
-      run(['src/discord.ts', DATA, dir, '--pr-number', '78', '--pr-url', PR.prUrl]),
-      Promise.all(
-        OPEN.map(([label, prs], i) => {
-          const file = join(out, `prs-${i}.json`);
-          writeFileSync(file, JSON.stringify(prs));
-          return run(['src/stack.ts', file, dir]).then((r) => ({ label, prs, ...r }));
-        }),
-      ),
-      runChangelog(out, dir),
+    const outputs = join(out, 'outputs.txt');
+    const diff = await mfm([
+      'diff',
+      DATA,
+      dir,
+      '--body-file',
+      join(out, 'body.md'),
+      '--output',
+      outputs,
     ]);
-
     expect(diff.stdout).toBe(readGolden(c, 'pr-body.md'));
+    expect(readFileSync(join(out, 'body.md'), 'utf8')).toBe(readGolden(c, 'pr-body.md'));
     // An update with nothing in it is dated today, and never published.
     if (c.name !== 'unchanged')
-      expect(readFileSync(join(out, 'title.txt'), 'utf8')).toBe(readGolden(c, 'title.txt'));
+      expect(readFileSync(outputs, 'utf8')).toBe(`title=${readGolden(c, 'title.txt')}`);
 
+    const discord = await mfm(['announce', DATA, dir, '--pr-number', '78', '--pr-url', PR.prUrl]);
     const payload = JSON.parse(readGolden(c, 'announcement.json'));
     if (payload === null) {
       expect(discord.stdout).toBe('');
       expect(discord.stderr).toBe('No data changes — nothing to announce.\n');
     } else expect(discord.stdout).toBe(`${JSON.stringify(payload)}\n`);
 
-    for (const p of plans) {
-      const want = planBlock(p.prs, version);
+    for (const [i, [, prs]] of OPEN.entries()) {
+      const file = join(out, `prs-${i}.json`);
+      writeFileSync(file, JSON.stringify(prs));
+      const want = planBlock(prs, version);
       if (want.startsWith('error: ')) {
-        expect(p.code).not.toBe(0);
-        expect(p.stderr).toContain(want.slice('error: '.length).trim());
-      } else expect(p.stdout).toBe(want);
+        await expect(mfm(['plan', file, dir])).rejects.toThrow(want.slice('error: '.length).trim());
+      } else expect((await mfm(['plan', file, dir])).stdout).toBe(want);
     }
 
+    const root = join(out, 'pub');
+    const entry = await mfm(['changelog', DATA, dir, '--root', root]);
     const wanted = readGolden(c, 'changelog-entry.md');
     if (wanted === '') {
       expect(entry.stdout).toBe(
         'No data changes — changelog and DATA-CHANGELOG.md left untouched.\n',
       );
-      expect(existsSync(join(entry.root, 'changelog'))).toBe(false);
+      expect(existsSync(join(root, 'changelog'))).toBe(false);
     } else {
-      const file = readFileSync(join(entry.root, 'changelog', `v${version}.md`), 'utf8');
+      const file = readFileSync(join(root, 'changelog', `v${version}.md`), 'utf8');
       expect(file).toContain(`<!-- BEGIN ENTRIES -->\n\n${wanted}`);
       // The files around the entry, once: they don't vary with the change set.
       if (c.name === 'repriced') {
         await expect(file).toMatchFileSnapshot(golden(c, 'changelog-file.md'));
-        await expect(
-          readFileSync(join(entry.root, 'DATA-CHANGELOG.md'), 'utf8'),
-        ).toMatchFileSnapshot(golden(c, 'DATA-CHANGELOG.md'));
+        await expect(readFileSync(join(root, 'DATA-CHANGELOG.md'), 'utf8')).toMatchFileSnapshot(
+          golden(c, 'DATA-CHANGELOG.md'),
+        );
       }
     }
+  });
+
+  // And once as the workflow starts it: a separate process, through tsx.
+  it.runIf(c.name === 'repriced')('runs as a command', { timeout: 60_000 }, async () => {
+    const { stdout } = await promisify(execFile)(
+      process.execPath,
+      ['--import', TSX, join(ROOT, 'src', 'bin', 'mfm.ts'), 'diff', DATA, dir],
+      { cwd: ROOT, maxBuffer: 16 * 1024 * 1024 },
+    );
+    expect(stdout).toBe(readGolden(c, 'pr-body.md'));
   });
 });
 
@@ -352,32 +365,17 @@ describe.each(CASES)('golden: $name', (c) => {
 
 const TSX = pathToFileURL(join(ROOT, 'node_modules', 'tsx', 'dist', 'loader.mjs')).href;
 
-interface Ran {
-  code: number;
-  stdout: string;
-  stderr: string;
-}
-
-/** Run a TypeScript entrypoint as the workflow does, with tsx, from `cwd`. */
-async function run(args: string[], cwd = ROOT): Promise<Ran> {
-  const [script = '', ...rest] = args;
-  try {
-    const { stdout, stderr } = await promisify(execFile)(
-      process.execPath,
-      ['--import', TSX, join(ROOT, script), ...rest],
-      { cwd, maxBuffer: 64 * 1024 * 1024 },
-    );
-    return { code: 0, stdout, stderr };
-  } catch (err) {
-    const e = err as { code?: number; stdout?: string; stderr?: string };
-    return { code: e.code ?? 1, stdout: e.stdout ?? '', stderr: e.stderr ?? '' };
-  }
-}
-
-/** The changelog step, run in an empty repository root of its own. */
-async function runChangelog(out: string, dir: string): Promise<Ran & { root: string }> {
-  const root = join(out, 'pub');
-  mkdirSync(root, { recursive: true });
-  const ran = await run(['scripts/update-data-changelog.ts', DATA, dir], root);
-  return { ...ran, root };
+/** Run `mfm` in-process, collecting what it prints. */
+async function mfm(argv: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
+  let stdout = '';
+  let stderr = '';
+  const code = await main(argv, {
+    out: (text) => {
+      stdout += text;
+    },
+    err: (text) => {
+      stderr += text;
+    },
+  });
+  return { code, stdout, stderr };
 }

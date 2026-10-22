@@ -10,6 +10,7 @@
   },
   "scripts": {
     "scrape": "tsx src/cli.ts",
+    "mfm": "tsx src/bin/mfm.ts",
     "refresh-fixtures": "tsx scripts/refresh-fixtures.ts",
     "test": "vitest run",
     "test:watch": "vitest",

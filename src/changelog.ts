@@ -2,7 +2,7 @@
  * The persistent changelog's files: one per MFM version under `changelog/`, indexed by
  * `DATA-CHANGELOG.md` (see *The persistent changelog* in `specs/change-tracking.md`).
  * `changelogEntry()` in `src/diff.ts` renders an entry; this places it. Pure text in,
- * text out — `scripts/update-data-changelog.ts` does the reading and writing.
+ * text out — `mfm changelog` (`src/bin/commands.ts`) does the reading and writing.
  */
 
 /** A version file's entries follow this, newest first. */

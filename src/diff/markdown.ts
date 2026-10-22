@@ -187,8 +187,7 @@ export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpt
 /**
  * One dated entry for the version's changelog file: the same summary, table and
  * per-faction sections as the PR body (sections at `###`), never folded or shortened.
- * `''` when nothing changed. Written by `scripts/update-data-changelog.ts` on each
- * scrape PR. `date` defaults to the update's own window (see `updateWindow`), so a
+ * `''` when nothing changed. Written by `mfm changelog` on each scrape PR. `date` defaults to the update's own window (see `updateWindow`), so a
  * re-scrape that finds nothing new rewrites the file byte-identically instead of
  * churning the heading to today and force-pushing the sticky PR. A rules-only update is
  * the exception: it has no stamp to date it by (see `updateWindow`).

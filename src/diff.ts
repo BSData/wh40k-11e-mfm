@@ -1,10 +1,3 @@
-import { writeFileSync } from 'node:fs';
-import { argv } from 'node:process';
-import { fileURLToPath } from 'node:url';
-import { loadFactionDir, loadMeta } from './diff/load.js';
-import { changelog } from './diff/markdown.js';
-import { updateTitle } from './diff/naming.js';
-
 /**
  * Turns two dataset snapshots (committed YAML vs. freshly scraped) into readable
  * change reports. One structured diff (`collectChanges`, plus `collectRules` for
@@ -50,22 +43,3 @@ export { collectRules, type PanelChange, type RulesChanges } from './diff/rules.
 export { sgn } from './diff/sections.js';
 export { sharedHead, tallies, totals } from './diff/tally.js';
 export { tierLabel } from './diff/units.js';
-
-// CLI: tsx src/diff.ts <beforeDir> <afterDir> [--title-file <path>]
-const isMain = argv[1] !== undefined && fileURLToPath(import.meta.url) === argv[1];
-if (isMain) {
-  const args = argv.slice(2);
-  const at = args.indexOf('--title-file');
-  const titleFile = at === -1 ? undefined : args[at + 1];
-  const [beforeDir, afterDir] = at === -1 ? args : [...args.slice(0, at), ...args.slice(at + 2)];
-  if (!beforeDir || !afterDir || (at !== -1 && !titleFile)) {
-    console.error('usage: tsx src/diff.ts <beforeDir> <afterDir> [--title-file <path>]');
-    process.exit(2);
-  }
-  const before = loadFactionDir(beforeDir);
-  const after = loadFactionDir(afterDir);
-  const opts = { meta: { before: loadMeta(beforeDir), after: loadMeta(afterDir) } };
-  // The workflow feeds the title to the PR and the commit alongside the body.
-  if (titleFile) writeFileSync(titleFile, `${updateTitle(before, after, opts)}\n`);
-  process.stdout.write(changelog(before, after, opts));
-}

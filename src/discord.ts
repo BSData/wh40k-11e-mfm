@@ -1,11 +1,7 @@
-import { argv } from 'node:process';
-import { fileURLToPath } from 'node:url';
 import {
   collectChanges,
   collectRules,
   type FactionChanges,
-  loadFactionDir,
-  loadMeta,
   type RenderOpts,
   type RulesChanges,
   type Snapshot,
@@ -397,58 +393,4 @@ export async function send(
     ...(posted.channel_id ? { channel_id: posted.channel_id } : {}),
   });
   return { id: posted.id, ...(url ? { url } : {}) };
-}
-
-// CLI: tsx src/discord.ts <beforeDir> <afterDir> [--send] [--message-id <id>]
-//        [--pr-url <url>] [--pr-number <n>] [--changelog-url <url>] [--today <date>]
-// Without --send it prints the payload, which is how you preview one locally. With it,
-// stdout carries the new message id and nothing else (logs go to stderr), so the caller
-// can record it; an edited message prints nothing.
-const isMain = argv[1] !== undefined && fileURLToPath(import.meta.url) === argv[1];
-if (isMain) {
-  const rest = argv.slice(2);
-  const dirs: string[] = [];
-  const opts: AnnounceOpts = {};
-  let sending = false;
-  let messageId = '';
-  for (let i = 0; i < rest.length; i++) {
-    const flag = rest[i];
-    const value = (): string => {
-      const v = rest[++i];
-      if (v === undefined) throw new Error(`Missing value for ${flag}`);
-      return v;
-    };
-    if (flag === '--send') sending = true;
-    else if (flag === '--message-id') messageId = value();
-    else if (flag === '--pr-url') opts.prUrl = value();
-    else if (flag === '--pr-number') opts.prNumber = Number(value());
-    else if (flag === '--changelog-url') opts.changelogUrl = value();
-    else if (flag === '--today') opts.today = value();
-    else if (flag?.startsWith('--')) throw new Error(`Unknown option: ${flag}`);
-    else if (flag !== undefined) dirs.push(flag);
-  }
-  const [beforeDir, afterDir] = dirs;
-  if (!beforeDir || !afterDir) {
-    console.error('usage: tsx src/discord.ts <beforeDir> <afterDir> [--send] …');
-    process.exit(2);
-  }
-  const message = announcement(loadFactionDir(beforeDir), loadFactionDir(afterDir), {
-    ...opts,
-    meta: { before: loadMeta(beforeDir), after: loadMeta(afterDir) },
-  });
-
-  if (!message) console.error('No data changes — nothing to announce.');
-  else if (!sending) process.stdout.write(`${JSON.stringify(message)}\n`);
-  else {
-    // biome-ignore lint/complexity/useLiteralKeys: tsc's noPropertyAccessFromIndexSignature requires the bracket form on process.env, and the two rules disagree.
-    const raw = process.env['DISCORD_WEBHOOK_URL'];
-    // No secret configured (a fork, or a repo that hasn't set one up) is not a failure.
-    if (!raw) console.error('DISCORD_WEBHOOK_URL is not set — skipping the announcement.');
-    else {
-      const posted = await send(webhookUrl(raw), message, messageId || undefined);
-      // "<id> [permalink]": the id drives the next run's edit, the link is for a reader.
-      if (posted) process.stdout.write(`${posted.id}${posted.url ? ` ${posted.url}` : ''}\n`);
-      console.error(posted ? `Posted message ${posted.id}.` : `Edited message ${messageId}.`);
-    }
-  }
 }
