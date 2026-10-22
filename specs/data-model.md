@@ -172,7 +172,7 @@ to drive the scrape and supply clean display names.
 
 ## Integrity of the committed files (`pnpm check-data`)
 `data/`, `changelog/` and `DATA-CHANGELOG.md` are generated, so the committed copies must be
-exactly what the tools would write. `scripts/check-data.ts` fails, naming each file, when:
+exactly what the tools would write. `mfm check-data` (`src/check-data.ts`) fails, naming each file, when:
 - a `data/<slug>.yaml` fails the `Faction` schema, isn't named after its `slug`, or isn't
   canonical: reading it with `factionFromYaml()` and writing it back with `factionToYaml()`
   must reproduce it byte for byte, which catches an unknown key, an entry out of order, and
