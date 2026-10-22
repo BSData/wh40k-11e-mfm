@@ -89,7 +89,7 @@ header styles (plain and "changed") and whether or not the annotation layer is p
 ## Validation (fail loud)
 Every faction is checked against the `Faction` zod schema before writing. The parser also
 throws on structural surprises. A failure should be loud and located, never silent bad
-data — see [`.agents/playbooks/diagnose-parse.md`](../.agents/playbooks/diagnose-parse.md).
+data — see [`.agents/skills/diagnose-parse/SKILL.md`](../.agents/skills/diagnose-parse/SKILL.md).
 
 | Failure | Reported as |
 |---|---|
