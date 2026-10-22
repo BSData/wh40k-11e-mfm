@@ -38,14 +38,17 @@ goes unnoticed.
 ## 4. Emit: `src/emit.ts`
 `orderUnits()`, `orderDetachments()` and `orderContent()` rebuild every object with a fixed
 key order. A field not copied there is silently dropped from the YAML and from
-`contentKey()`, so `firstSeen` wouldn't move when only that field changes. Keep the output
-deterministic: a one-value change must stay a one-line diff.
+`contentKey()`, so `firstSeen` wouldn't move when only that field changes. `meta.yaml` goes
+through `metaToYaml()`, which lists its keys the same way. Keep the output deterministic: a
+one-value change must stay a one-line diff.
 
 ## 5. Diff: `src/diff.ts`
 Every field the model carries is diffed (see "comprehensive" in
 [`specs/change-tracking.md`](../../../specs/change-tracking.md)). Compare the new field in
 the changelog and give it a readable line, then describe it in the spec. Check whether
-`src/discord.ts` should count it.
+`src/discord.ts` should count it. For a `meta.yaml` field, check what `src/diff.ts` reads
+from `meta.yaml`: if it doesn't read the new field, add it there, or say in the PR that
+changes to it go unreported.
 
 ## 6. JSON Schema
 If the repo has generated JSON Schemas (`schema/*.schema.json`), regenerate them from the
@@ -54,24 +57,29 @@ zod model; `pnpm verify` fails when they are stale.
 ## 7. Tests
 - `test/parse.test.ts`: the field parsed from a fixture, with the snapshot diff reviewed
   before `pnpm test -u`.
-- `test/emit-diff.test.ts`: the YAML round trip (`factionFromYaml(factionToYaml(f))`), and a
-  change to the field producing a changelog line.
+- `test/emit-diff.test.ts`: the YAML round trip (`factionFromYaml(factionToYaml(f))`, or
+  `metaFromYaml(metaToYaml(m))` for `meta.yaml`), and a change to the field producing a
+  changelog line.
 
 ## 8. Migrate `data/` in the same PR
 If the committed files no longer validate against the new schema, the next update can't read
 its "before" snapshot. Reshape them with a throwaway script that reads each file, transforms
-it and writes it back through `factionToYaml()`, never by hand; delete the script afterwards.
+it and writes it back through `factionToYaml()` (`metaToYaml()` for `meta.yaml`), never by
+hand; delete the script afterwards.
 Then check that `git diff --stat data/` touches only the keys you meant, and that no points,
 names or dates moved. Don't do this while an `mfm/*` update PR is open: its branch would
 conflict. Label the PR `regenerated-data` so the CI guard on `data/` lets it through.
 
 ## 9. Changelog note for consumers
 Add a dated `## [YYYY-MM-DD] — Schema change` entry to the current version's
-`changelog/v<version>.md`, just below `<!-- BEGIN ENTRIES -->`, like the one in `v1.4.md`:
-what changed, why, and what a consumer has to do. This is the one hand edit `changelog/`
-takes. `DATA-CHANGELOG.md` lists each file's entry dates, so a new date must appear there
-exactly as `changelogIndex()` in `src/changelog.ts` would generate it. Say "Breaking" in
-the PR description when it is.
+`changelog/v<version>.md`, just below `<!-- BEGIN ENTRIES -->` (entries run newest first).
+Format it like the one in `v1.4.md`: what changed, why, and what a consumer has to do. This
+is the one hand edit `changelog/` takes. `DATA-CHANGELOG.md` lists each file's entry dates,
+so regenerate it rather than editing it:
+```bash
+pnpm exec tsx -e "import {readdirSync as r,readFileSync as f,writeFileSync as w} from 'node:fs';import {changelogIndex} from './src/changelog.ts';w('DATA-CHANGELOG.md',changelogIndex(r('changelog').map(n=>({name:n,text:f('changelog/'+n,'utf8')}))))"
+```
+Say "Breaking" in the PR description when it is.
 
 ## Done
 `pnpm verify` is green, the spec says what the code does, and you have read the snapshot

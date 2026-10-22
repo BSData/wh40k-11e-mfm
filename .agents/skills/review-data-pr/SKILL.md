@@ -53,15 +53,18 @@ git diff origin/<base>...origin/mfm/v<version> -- data/
 - The same units removed and re-added under slightly different names (casing,
   apostrophes): a parser or title-casing change, not a rename by GW.
 - `notes` or `muster` removed from `meta.yaml`: the rules panels failed to render.
-- `legends: true` appearing or disappearing on many units at once: the Legends render
-  failed.
+- A faction's Legends units all removed: `hasLegends()` no longer finds the toggle in the
+  page, so the browser render was skipped. Or many current units newly flagged
+  `legends: true`: the plain page parsed short.
 - Many units re-tiered with identical prices on both sides.
 - A body that says `No changes detected.` while `data/` changed: something the diff
   doesn't report yet. Read the YAML diff.
 
 If you find one, say so on the PR and open an issue for the scraper. Don't push fixes to
-the `mfm/*` branch: the next scheduled run force-pushes over it. Fix the scraper in its
-own PR; the next run then regenerates the update.
+an `mfm/*` branch. The PR at the top of the stack is force-pushed by the next scheduled
+run, so fix the scraper in its own PR and that run regenerates the update. A PR lower in
+the stack is final: its version is gone from the site, so no run will touch it again, and
+what to do with it is the maintainer's call.
 
 ## Merging (maintainer)
 Squash-merge. A stack merges bottom-up: after the lowest PR merges, the next run rebuilds

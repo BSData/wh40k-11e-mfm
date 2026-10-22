@@ -82,7 +82,7 @@ header styles (plain and "changed") and whether or not the annotation layer is p
 Every faction is checked against the `Faction` zod schema before writing. The parser also
 throws on structural surprises (no units found, unreadable model count, unresolved points).
 A failure should be loud and located, never silent bad data — see
-the [`diagnose-parse`](../.agents/skills/diagnose-parse/SKILL.md) skill.
+[`.agents/playbooks/diagnose-parse.md`](../.agents/playbooks/diagnose-parse.md).
 
 ## Completeness coverage (don't silently drop new content)
 The parser is a *pull* parser — it reads the selectors above and ignores everything else —

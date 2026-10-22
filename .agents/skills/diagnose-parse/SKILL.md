@@ -29,7 +29,7 @@ pnpm test                            # which assertions now fail?
 ```
 `pnpm refresh-fixtures` overwrites every fixture. `adepta-sororitas.html` pins the
 "changed since the last MFM" annotation layer, which the live page shows only after an
-update: restore it (`git checkout -- test/fixtures/adepta-sororitas.html`) unless the
+update: restore it (`git restore test/fixtures/adepta-sororitas.html`) unless the
 drift is in that layer. If the failing faction has no fixture, add one with the
 [add-fixture](../add-fixture/SKILL.md) skill.
 

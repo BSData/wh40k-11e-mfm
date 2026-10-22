@@ -28,4 +28,5 @@ jobs:
         with:
           runtime: node@22
           cache: true
+          install: false # scripts/setup installs, so this runs the same setup as everywhere else
       - run: scripts/setup

@@ -2,5 +2,5 @@
 # Amp runs this when it creates a fresh orb. The setup itself is scripts/setup, shared
 # with the devcontainer and Copilot's setup steps; this only makes sure pnpm exists.
 set -eu
-command -v pnpm >/dev/null 2>&1 || corepack enable pnpm
+command -v pnpm >/dev/null 2>&1 || corepack enable pnpm 2>/dev/null || sudo corepack enable pnpm
 exec "$(dirname "$0")/../scripts/setup"
