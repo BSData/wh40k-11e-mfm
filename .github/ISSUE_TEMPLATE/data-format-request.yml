@@ -1,0 +1,40 @@
+name: Data format or field request
+description: You use the data in data/ and need a format, a field, or a guarantee it doesn't offer yet.
+title: 'Data request: '
+labels: [enhancement]
+type: Feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The files, their stable URLs and how often they update are described under [Using the data](https://github.com/BSData/wh40k-11e-mfm#using-the-data) in the README, and every field is documented in [`specs/data-model.md`](https://github.com/BSData/wh40k-11e-mfm/blob/main/specs/data-model.md). Please check there, and search the open issues, first.
+  - type: textarea
+    id: request
+    attributes:
+      label: What you need
+      description: The format, field or guarantee, and what it would let you do.
+    validations:
+      required: true
+  - type: textarea
+    id: project
+    attributes:
+      label: What you're building
+      description: Link it if it's public. Knowing how the data is used helps us shape it.
+  - type: dropdown
+    id: access
+    attributes:
+      label: How you get the data today
+      multiple: true
+      options:
+        - Raw URLs on main
+        - Raw URLs pinned to a commit
+        - A clone or submodule of this repo
+        - The GitHub API
+        - I don't use it yet
+        - Something else
+  - type: textarea
+    id: example
+    attributes:
+      label: Example
+      description: A sketch of the output you'd like, if it helps.
+      render: yaml
