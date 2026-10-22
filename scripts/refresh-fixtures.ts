@@ -50,7 +50,18 @@ const RENDERS = [
   ['necrons-panels.html', renderRulesPanels],
 ] as const;
 
-const only = process.argv.flatMap((a, i, all) => (all[i - 1] === '--only' ? [a] : []));
+// Strict: a typo must not fall back to refreshing everything (which would overwrite the
+// annotated adepta-sororitas.html, no longer reproducible from the live site).
+const only: string[] = [];
+const args = process.argv.slice(2);
+for (let i = 0; i < args.length; i++) {
+  const value = args[i + 1];
+  if (args[i] !== '--only' || value === undefined || value.startsWith('--')) {
+    throw new Error(`Bad argument "${args[i]}". Usage: pnpm refresh-fixtures [--only <name>]...`);
+  }
+  only.push(value);
+  i++;
+}
 const wanted = (name: string) => only.length === 0 || only.includes(name);
 const known = [...FIXTURES.map((fx) => fx.name), ...RENDERS.map(([name]) => name)];
 const unknown = only.filter((name) => !known.includes(name));

@@ -489,6 +489,19 @@ describe('change annotations — the "changed since the last MFM" layer', () => 
 });
 
 describe('loud failures — content the parser cannot read fails, located', () => {
+  it.each([
+    ['an en dash', '▼ (–10) 65 pts'],
+    ['a sign apart from its number', '▼ (- 10) 65 pts'],
+    ['no brackets', '▼ -10 65 pts'],
+    ['a dot separator', '▲ (+1.000) 65 pts'],
+  ])('fails on a delta written with %s rather than counting it as models', (_how, cell) => {
+    const html = fixture('adepta-sororitas.html').replaceAll('▼ (-10) 65 pts', cell);
+    expect(html).not.toBe(fixture('adepta-sororitas.html'));
+    expect(() => parseFaction(html, 'adepta-sororitas', 'Adepta Sororitas')).toThrow(
+      /"adepta-sororitas", unit "HOSPITALLER": unreadable cost row/,
+    );
+  });
+
   it('fails on an unknown change note on a detachment card, naming the card', () => {
     const html = fixture('adepta-sororitas.html').replaceAll(
       'FORCE DISPOSITION(S) CHANGED',

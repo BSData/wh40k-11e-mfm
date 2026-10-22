@@ -78,10 +78,17 @@ function parseRange(label: string): string {
   return `[${from},${from}]`;
 }
 
-// Points are the trailing "NN pts" (see `parsePoints`); everything before is the size
-// text, which the two parts concatenate onto without a separator ("1 model2,200 pts").
-const TRAILING_POINTS_RE = /(?:\d{1,3}(?:,\d{3})+|\d+)\s*pts\s*$/i;
+// Points are the trailing "NN pts" (located here, read by `parsePoints`); everything
+// before is the size text, which the two parts concatenate onto without a separator
+// ("1 model2,200 pts").
+const TRAILING_POINTS_RE = /[\d,]+\s*pts\s*$/i;
 const PLAIN_SIZE_RE = /^\d+ models?$/i;
+/**
+ * What a size never contains but a change delta does: a bracket, a glyph, or a sign
+ * before a number. A delta `DELTA_MARKER_RE` doesn't recognise leaves these behind, and
+ * its digits would otherwise be summed into `models`.
+ */
+const DELTA_LEFTOVER_RE = /[()▲▼]|[-−–]\s*\d/;
 
 /** One cost row. `where` locates the card for the error (see `cardWhere`). */
 function parseCostRow(where: string, raw: string): CostOption {
@@ -91,7 +98,9 @@ function parseCostRow(where: string, raw: string): CostOption {
   const m = text.match(TRAILING_POINTS_RE);
   const size = m ? clean(text.slice(0, m.index)) : '';
   const points = m ? parsePoints(m[0]) : null;
-  if (points === null || !size) throw new Error(`${where}: unreadable cost row "${text}"`);
+  if (points === null || !size || DELTA_LEFTOVER_RE.test(size)) {
+    throw new Error(`${where}: unreadable cost row "${text}"`);
+  }
   const models = (size.match(/\d+/g) ?? []).reduce((sum, n) => sum + Number.parseInt(n, 10), 0);
 
   if (size.startsWith('+')) {
@@ -113,6 +122,7 @@ function parseCostRow(where: string, raw: string): CostOption {
  */
 function parseRole(
   card: ReturnType<CheerioAPI>,
+  where: string,
   consumed: string[],
 ): Pick<Unit, 'leaderTo' | 'supportTo'> {
   const out: Pick<Unit, 'leaderTo' | 'supportTo'> = {};
@@ -120,7 +130,7 @@ function parseRole(
   imgs.each((_i, el) => {
     const img = card.find(el);
     const key = (img.attr('src') ?? '').includes('leader') ? 'leaderTo' : 'supportTo';
-    if (out[key]) throw new Error(`Unexpected repeated ${key} block on one unit`);
+    if (out[key]) throw new Error(`${where}: unexpected repeated ${key} block`);
     const list = clean(img.parent().nextAll('span').first().text());
     const attachTo = list
       .split(',')
@@ -317,7 +327,7 @@ function parseUnit(
   return {
     name,
     pricing,
-    ...parseRole(card, consumed),
+    ...parseRole(card, where, consumed),
     ...(wargear.length > 0 ? { wargear } : {}),
   };
 }

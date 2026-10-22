@@ -95,7 +95,7 @@ data — see [`.agents/playbooks/diagnose-parse.md`](../.agents/playbooks/diagno
 |---|---|
 | No units on a faction page | `No units found for "<slug>"` |
 | A unit card with no pricing tier | `"<slug>", unit "<CARD>": no pricing tiers` |
-| A cost row without a size and a trailing `NN pts` | `"<slug>", unit "<CARD>": unreadable cost row "…"` |
+| A cost row without a size and a trailing `NN pts`, or whose size still holds a bracket, a `▲`/`▼` or a sign before a number (a delta written in a way the parser doesn't recognise) | `"<slug>", unit "<CARD>": unreadable cost row "…"` |
 | A wargear row without an item or whose points aren't `NN pts` (e.g. `FREE`) | `"<slug>", unit "<CARD>": unreadable wargear row "…"` |
 | An enhancement without a name | `"<slug>", detachment "<CARD>": unreadable enhancement row "…"` |
 | An enhancement whose points aren't `NN pts` (e.g. `FREE`) | `"<slug>", detachment "<CARD>": enhancement "<name>" has unreadable points "…"` |
@@ -165,8 +165,10 @@ buttons and the rendered DOM — no dependence on the request/response shape:
 - `markLegends()` then diffs the HTTP base against the rendered full DOM — units present only
   with Legends on get `legends: true`. Units are matched on `groupTitle` + `name` +
   occurrence (the *n*-th unit of that name in that sub-group, in page order), because one
-  page can list two units of the same name. Every base unit must be found in the full
-  render; one that is missing fails the faction rather than being dropped.
+  page can list two units of the same name. This relies on the Legends render listing the
+  Legends after the base roster, under their own `LEGENDS` section heading, so of two
+  same-named units the base one always comes first. Every base unit must be found in the
+  full render; one that is missing fails the faction rather than being dropped.
 - `renderRulesPanels()` clicks each panel's button (`RULES_PANELS` in `src/parse.ts`) and
   waits for the panel that button controls (`aria-controls`) to have content, then hands the
   rendered HTML to the pure `extractNotesMarkdown()` / `extractMusterMarkdown()` in

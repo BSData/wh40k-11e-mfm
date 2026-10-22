@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { BrowserContext } from 'playwright';
@@ -286,8 +286,10 @@ export async function main(argv: string[]): Promise<number> {
   return 0;
 }
 
+// Run only as the entry point, so tests can import `main`. `realpathSync`, because Node
+// resolves symlinks for `import.meta.url` but not for `argv[1]`.
 const entry = process.argv[1];
-if (entry !== undefined && fileURLToPath(import.meta.url) === entry) {
+if (entry && existsSync(entry) && fileURLToPath(import.meta.url) === realpathSync(entry)) {
   main(process.argv.slice(2)).then(
     (code) => {
       process.exitCode = code;
