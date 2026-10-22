@@ -1015,8 +1015,12 @@ const blurb = (file: string): string =>
 function fold(detail: string, factions: number): string {
   const lines = detail.split('\n').length;
   if (lines <= FOLD_AFTER_LINES) return detail;
-  const what = `${factions} faction${factions === 1 ? '' : 's'}, ${lines} lines`;
-  return `<details>\n<summary><strong>Per-faction detail</strong> — ${what}</summary>\n\n${detail}\n\n</details>`;
+  // A rules-only update has no factions to count.
+  const [title, what] =
+    factions > 0
+      ? ['Per-faction detail', `${factions} faction${factions === 1 ? '' : 's'}, ${lines} lines`]
+      : ['Detail', `${lines} lines`];
+  return `<details>\n<summary><strong>${title}</strong> — ${what}</summary>\n\n${detail}\n\n</details>`;
 }
 
 /**
@@ -1136,7 +1140,8 @@ export const loadVersion = (dir: string): string | undefined => loadMeta(dir)?.v
  * stamping "now" on every run keeps the first day stable across re-scrapes that find
  * nothing new, and widens to a range only once a later scrape genuinely adds
  * something. Entries with no stamp (a removed faction, or bare parser content) count
- * as today.
+ * as today, and so does a rules-only update: `meta.yaml` carries no stamp of its own, so
+ * each re-scrape re-dates it until it merges.
  */
 export function updateWindow(
   before: Snapshot[],
@@ -1160,7 +1165,7 @@ export const windowLabel = (w: { from: string; to: string }): string =>
  * What to call this update: `MFM v1.3 update — 2026-08-26`. Used verbatim as the PR
  * title, the changelog's `# ` heading and the commit subject, so the version and the
  * days it covers are legible from the merged history alone. Stable across re-scrapes,
- * widening as days accrue.
+ * widening as days accrue, except for a rules-only update (see `updateWindow`).
  */
 export function updateTitle(before: Snapshot[], after: Snapshot[], opts: RenderOpts = {}): string {
   const version = updateVersion(after, opts);
@@ -1180,7 +1185,8 @@ export const changelogFile = (version: string | undefined): string =>
  * `''` when nothing changed. Written by `scripts/update-data-changelog.ts` on each
  * scrape PR. `date` defaults to the update's own window (see `updateWindow`), so a
  * re-scrape that finds nothing new rewrites the file byte-identically instead of
- * churning the heading to today and force-pushing the sticky PR.
+ * churning the heading to today and force-pushing the sticky PR. A rules-only update is
+ * the exception: it has no stamp to date it by (see `updateWindow`).
  */
 export function changelogEntry(
   before: Snapshot[],

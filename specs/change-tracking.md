@@ -39,7 +39,7 @@ audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
    slip through unreported (the readable counterpart to the parser's coverage guard).
    That includes the fields that aren't points: a unit's `legends` flag (`Necron
    Warriors — moved to Legends`, or `moved out of Legends`), its `groupTitle`
-   (`Inquisitor — group: — → Ordo Malleus`), a tier's `label` (`Technomancer — label
+   (`Anathema Psykana Rhino — group: — → Anathema Psykana`), a tier's `label` (`Technomancer — label
    (1st): Your 1st Unit Costs → Your 1st Unit Cost`), and the faction's display name
    (`renamed from Necrons` beside its heading). It covers `meta.yaml` too: the site
    version and the rules panels. A test mutates every field of every schema in turn and

@@ -1121,6 +1121,24 @@ describe('the rules panels (meta.yaml)', () => {
     expect(log).toContain('**No faction changes** · rules ~1\n');
   });
 
+  it('lists the notes panel before the muster panel', () => {
+    const changed = meta({
+      notes: 'To muster an army…\n\n## UNITS',
+      muster: MUSTER.replace('Fill it.', 'Fill.'),
+    });
+    const log = changelog(same, same, { meta: { before: meta(), after: changed } });
+    expect(log).toContain(
+      '## Rules\n\n**Notes:**\n\n```diff\n- To muster…\n+ To muster an army…\n```\n\n**Muster Armies:**\n\n```diff\n- Fill it.\n+ Fill.\n```\n',
+    );
+    expect(log).toContain('rules ~2');
+  });
+
+  it('folds a long rules-only update without counting factions it has none of', () => {
+    const muster = Array.from({ length: 60 }, (_, i) => `line ${i}`).join('\n');
+    const log = changelog(same, same, { meta: { before: meta(), after: meta({ muster }) } });
+    expect(log).toMatch(/<summary><strong>Detail<\/strong> — \d+ lines<\/summary>/);
+  });
+
   it('adds no Rules section when meta is unchanged', () => {
     const opts = { meta: { before: meta(), after: meta() } };
     expect(changelog(same, same, opts)).toBe('No changes detected.\n');
