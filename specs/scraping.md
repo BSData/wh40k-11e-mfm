@@ -30,10 +30,14 @@ further templates), and an entire unit card can be streamed.
 `<template id>` with the inner HTML of its matching `S:` completion, repeating until
 stable, then removes the consumed hidden blocks. After hydration the DOM matches the
 fully-rendered page, so the rest of the parser reads plain inline text. Within a cost row
-the trailing `NN pts` is the points (commas are thousands separators — `2,200 pts` →
-`2200`) and everything before it is the size text; `models` is the sum of integers in that
-text (with a `desc` kept when it isn't a plain "N models"), and the tier `label` parses
-into the interval `range`. Enhancement points are inline and need no special handling.
+the trailing `NN pts` is the points and everything before it is the size text; `models` is
+the sum of integers in that text (with a `desc` kept when it isn't a plain "N models"), and
+the tier `label` parses into the interval `range`.
+
+Every points value — cost rows, wargear, enhancements — goes through one parser
+(`parsePoints()`): a whole `NN pts`, where commas are thousands separators (`2,200 pts` →
+`2200`). Anything else, such as `FREE`, is not a number of points and fails the parse (see
+[Validation](#validation-fail-loud)).
 
 ## The change-annotation layer (second most important)
 After a points update GW decorates the cards it changed with a **"changed since the last
@@ -44,16 +48,20 @@ shape so a changed card parses identically to an unchanged one:
   into a `span.text-xl` inside a flex-row header, with a small `▲`/`▼`/`▲▼` **direction
   badge** span appended. (A detachment's `NDP` badge likewise becomes `NDP ▼`.)
 - Each moved cost cell reads `▲ (+N) NN pts` / `▼ (-N) NN pts` — the glyph and `(±N)` delta
-  in front of the (already-new) points.
+  in front of the (already-new) points. The delta is read the way points are: it may carry
+  thousands separators (`(+1,000)`), and its minus may be a hyphen or `−` (U+2212).
 - A trailing **`UPDATED`** badge div, optionally followed by a note div
-  (`FORCE DISPOSITION(S) CHANGED`, `REQUISITION THRESHOLDS REMOVED`, `UNIQUE TAG REMOVED`).
+  (`FORCE DISPOSITION(S) CHANGED`, `REQUISITION THRESHOLDS REMOVED`, `UNIQUE TAG REMOVED`), on
+  unit and detachment cards alike.
 
 None of this is data — the current points are the `NN pts` value and the change history is
 the git diff of `data/` — so `deannotate()` removes the `UPDATED`/note badge divs and strips
 the `▲`/`▼` glyphs and `(±N)` deltas from the text. A note string it does **not** recognise
-is left in place so the coverage check surfaces it (add the exact string to `CHANGE_BADGE_TEXT`
-in a reviewed commit). Because the layer restyles headers, the parser keys off the **card
-container**, not the name element (see below).
+is left in place, no parse step consumes it, and the coverage check fails the faction with
+`Unconsumed content` naming the card and the note. To accept a new note, add the exact
+string to `CHANGE_BADGE_TEXT` in [`src/allowlists.ts`](../src/allowlists.ts) in a reviewed
+commit. Because the layer restyles headers, the parser keys off the **card container**, not
+the name element (see below).
 
 ## Selectors (the drift-prone surface)
 Every unit and detachment is one **card** — `div.flex.flex-col.space-y-1.m-1` — parsed whole
@@ -70,9 +78,9 @@ header styles (plain and "changed") and whether or not the annotation layer is p
 | Unit `groupTitle` / faction `parent` | `h3.font-header:not([class*="break-after"])` sub-group headers (the UNITS/DETACHMENTS section headings are `h3.font-header` *with* the break-after class). Walking headers + cards in document order, each unit takes the sub-group header it sits under as `groupTitle`; a section header resets to the base roster. A sub-group header that names another faction from the index is also surfaced as the faction-level `parent` |
 | Unit pricing tier | `div.bg-slate-200` label + following `ul.leaders` (label → `range`) |
 | Unit cost row | `ul.leaders > li` (post-hydration): trailing `NN pts` = points, rest → `models`/`desc` |
-| Unit roles | `img[src$="leader.svg"]`/`img[src$="support.svg"]`; each block's sibling span = its comma-separated list → `leaderTo`/`supportTo`. **Every** block is read: since v1.4 a unit can carry both, with a different list for each |
-| Unit wargear | `img[src$="cog.svg"]` block → `ul li`: `per <item>` + `NN pts` |
-| Detachment DP badge | `span.self-end` in the header (e.g. `2DP`) |
+| Unit roles | `img[src$="leader.svg"]`/`img[src$="support.svg"]`; each block's sibling span = its comma-separated list → `leaderTo`/`supportTo`. **Every** block is read: since v1.4 a unit can carry both, with a different list for each. The block labels (`LEADER`, `SUPPORT`) are allowlisted |
+| Unit wargear | `img[src$="cog.svg"]` block → `ul li`: `per <item>` + `NN pts`. The block label (`WARGEAR OPTIONS`) is allowlisted |
+| Detachment DP badge | `span.self-end` in the header, the whole of it `NDP` (e.g. `2DP`) |
 | Detachment objectives | `div[style]` (styled banner) under the header — **all** of them, since v1.4 a detachment can grant two Force Dispositions |
 | Detachment `unique` | direct-child `div.bg-slate-200` whose text starts `UNIQUE:` (prefix stripped) |
 | Enhancement | `ul.leaders li`: last `div`'s two spans = name, points |
@@ -80,24 +88,48 @@ header styles (plain and "changed") and whether or not the annotation layer is p
 
 ## Validation (fail loud)
 Every faction is checked against the `Faction` zod schema before writing. The parser also
-throws on structural surprises (no units found, unreadable model count, unresolved points).
-A failure should be loud and located, never silent bad data — see
-[`.agents/playbooks/diagnose-parse.md`](../.agents/playbooks/diagnose-parse.md).
+throws on structural surprises. A failure should be loud and located, never silent bad
+data — see [`.agents/playbooks/diagnose-parse.md`](../.agents/playbooks/diagnose-parse.md).
+
+| Failure | Reported as |
+|---|---|
+| No units on a faction page | `No units found for "<slug>"` |
+| A unit card with no pricing tier | `"<slug>", unit "<CARD>": no pricing tiers` |
+| A cost row without a size and a trailing `NN pts` | `"<slug>", unit "<CARD>": unreadable cost row "…"` |
+| A wargear row without an item or whose points aren't `NN pts` (e.g. `FREE`) | `"<slug>", unit "<CARD>": unreadable wargear row "…"` |
+| An enhancement without a name | `"<slug>", detachment "<CARD>": unreadable enhancement row "…"` |
+| An enhancement whose points aren't `NN pts` (e.g. `FREE`) | `"<slug>", detachment "<CARD>": enhancement "<name>" has unreadable points "…"` |
+| Any visible string no parse step consumed (an unknown change note, a new field, a DP badge that isn't `NDP`) | `Unconsumed content on "<slug>"`, one line per card: `unit "<CARD>": "<leftover>"` (see below) |
+| A base unit missing from the Legends render | `"<slug>": base units missing from the Legends render: …` |
+| The rules panels failing to render, or rendering without text, on a full browser run | A failure named `rules panels` (see below) |
+
+`<CARD>` is the card's name as the page shows it (upper case), so it can be searched for in
+the fixture or the live page. Each failure fails that faction (or, for the rules panels,
+`meta.yaml`): the CLI carries on with the rest, lists every failure in the `--report` file,
+and exits 1.
 
 ## Completeness coverage (don't silently drop new content)
 The parser is a *pull* parser — it reads the selectors above and ignores everything else —
 so a new section, field, badge, or row that GW adds would otherwise vanish with no error and
 no diff. `assertFactionCovered()` (run last in `parseFaction`, after units/detachments are
-built) closes that gap by **accounting for every visible string on the page**:
-- **Per unit card** — the name + every pricing tier (label + rows) + role + wargear must add
-  up to the whole card's text. Any leftover throws.
-- **Per detachment card** — name + DP + every objective + `unique` + enhancements (each with its
-  optional `leaderTo`/`supportTo` grant) must add up to the whole card, give or take the
-  `ENHANCEMENTS` heading.
+built) closes that gap by **accounting for every visible string on the page**.
+
+Coverage means **consumed strings**: as each parse step turns part of a card into data it
+records the exact text it read, and only that text counts as covered. A string a parse step
+looked at but did not keep (an unparseable value, an unrecognised note, a label it doesn't
+interpret) is not consumed, so it is left over and fails the parse.
+- **Per unit card** — the name, each pricing tier's label and cost rows, each role block's
+  list, and each wargear row, plus `UNIT_BOILERPLATE` (the `LEADER`/`SUPPORT`/`WARGEAR
+  OPTIONS` block labels), must add up to the whole card's text. Any leftover throws.
+- **Per detachment card** — the name, the DP badge, every objective, the `UNIQUE:` banner,
+  each enhancement's name and points, and each grant's `LEADER:`/`SUPPORT:` keyword and
+  list, plus `DETACHMENT_BOILERPLATE` (the `ENHANCEMENTS` heading), must add up to the whole
+  card.
 
 The coverage runs on the **de-annotated** DOM, so the change-annotation layer (see above) is
-already gone; an *unrecognised* `UPDATED` note, however, survives `deannotate()` and so is
-caught here as unconsumed — exactly the loud failure we want for a new note variant.
+already gone; an *unrecognised* `UPDATED` note, however, survives `deannotate()`, no parse
+step consumes it, and so it is caught here — exactly the loud failure we want for a new
+note variant, on a unit card or a detachment card.
 - **Page level** — after dropping the parsed cards, the site chrome (`header`/`nav`, the
   `footer` of legal links, the OneTrust cookie dialog on browser renders, the open rules
   panels captured into `meta.notes`/`meta.muster`), the army-group title (`parent`), the
@@ -105,8 +137,9 @@ caught here as unconsumed — exactly the loud failure we want for a new note va
   button labels (shown whether open or not), *nothing* may remain.
 
 The allowlists (`UNIT_BOILERPLATE`, `DETACHMENT_BOILERPLATE`, `PAGE_BOILERPLATE`, and the
-`CHANGE_BADGE_TEXT` notes stripped by `deannotate()` — all in `src/parse.ts`) are the
-**deliberate-change surface**: when GW adds genuinely-new chrome you add the exact string
+`CHANGE_BADGE_TEXT` notes stripped by `deannotate()`) live on their own in
+[`src/allowlists.ts`](../src/allowlists.ts), so code owners can guard them: they are the
+**deliberate-change surface**. When GW adds genuinely-new chrome you add the exact string
 there in a reviewed commit; when they add new *data* you teach the parser to capture it.
 Either way the change is forced through human review rather than lost.
 Keep the allowlists tight — a too-broad entry is how a real addition gets swallowed.
@@ -123,11 +156,17 @@ buttons and the rendered DOM — no dependence on the request/response shape:
   `show-legends` toggle markup, which the server ships only for factions that have Legends.
   So base data is parsed from plain HTTP, and **only Legends factions open the browser**.
 - `renderWithLegends()` loads the page, declines cookies (`#onetrust-reject-all-handler`),
-  clicks `#show-legends-label`, and waits for the unit count to exceed the current one.
-  The Legends render in a single React commit (the count jumps straight to the full total),
-  so this wait is exact and deterministic under concurrency. `markLegends()` then diffs the
-  HTTP base against the rendered full DOM — units present only with Legends on get
-  `legends: true`.
+  clicks `#show-legends-label`, and waits for the number of **unit cards** to exceed the
+  current one. A unit card is counted the way the parser recognises one — the card
+  container holding a `div.bg-slate-200` label matching `/COST/` — not by the plain
+  `div.bg-slate-500.text-xl` header, which "changed"-style headers don't have. The Legends
+  render in a single React commit (the count jumps straight to the full total), so this wait
+  is exact and deterministic under concurrency.
+- `markLegends()` then diffs the HTTP base against the rendered full DOM — units present only
+  with Legends on get `legends: true`. Units are matched on `groupTitle` + `name` +
+  occurrence (the *n*-th unit of that name in that sub-group, in page order), because one
+  page can list two units of the same name. Every base unit must be found in the full
+  render; one that is missing fails the faction rather than being dropped.
 - `renderRulesPanels()` clicks each panel's button (`RULES_PANELS` in `src/parse.ts`) and
   waits for the panel that button controls (`aria-controls`) to have content, then hands the
   rendered HTML to the pure `extractNotesMarkdown()` / `extractMusterMarkdown()` in
@@ -137,6 +176,13 @@ buttons and the rendered DOM — no dependence on the request/response shape:
   `<ul>/<li>` → bullets, `<table>` → GFM tables. The one project-specific step: the site marks
   section labels up as a plain `<b>` alone on its line, so an all-caps one is promoted to a
   `##` heading first. Identical across pages, rendered once → `meta.notes` and `meta.muster`.
+- On a full browser run, the rules panels are required. If the render fails, or either
+  panel yields no text, after one retry, the run records a failure named `rules panels` (in
+  the `--report` file, exit code 1) and does **not** write `meta.yaml`, so a flaky render
+  can never publish a `meta.yaml` without its rules text. The factions are still scraped
+  and written. A `--faction` run and a `--no-legends` run don't render the panels and never
+  write them (the former writes no `meta.yaml`; the latter writes one without `notes` and
+  `muster`).
 
 `pnpm scrape` renders Legends factions in the browser at `--concurrency` (default 4) in
 parallel; `--no-legends` skips the browser entirely. CI installs Chromium via

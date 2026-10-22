@@ -190,6 +190,36 @@ describe('parseFaction (black-templars) — streamed cards & composite sizes', (
   });
 });
 
+describe('parseFaction (space-marines, v1.6) — the v1.4 structures', () => {
+  const faction = parseFaction(fixture('space-marines.html'), 'space-marines', 'Space Marines');
+  const unit = (name: string) => faction.units.find((u) => u.name === name);
+
+  it('passes the schema', () => {
+    expect(() => FactionContent.parse(faction)).not.toThrow();
+    expect(faction.version).toBe('1.6');
+  });
+
+  it('reads both role blocks of a unit that has a Leader and a Support list', () => {
+    // Two blocks with the same list: each is consumed, so neither is left over.
+    expect(unit('Cato Sicarius')).toMatchObject({
+      groupTitle: 'Ultramarines',
+      leaderTo: ['Victrix Honour Guard'],
+      supportTo: ['Victrix Honour Guard'],
+    });
+  });
+
+  it('reads every Force Disposition of a detachment that grants two', () => {
+    const gladius = faction.detachments.find((d) => d.name === 'Gladius Task Force');
+    expect(gladius?.objectives).toEqual(['TAKE AND HOLD', 'PRIORITY ASSETS']);
+  });
+
+  it('strips the "BODYGUARD UNITS UPDATED" note and keeps the list it annotates', () => {
+    expect(fixture('space-marines.html')).toContain('BODYGUARD UNITS UPDATED');
+    expect(unit('Judiciar')?.supportTo).toContain('Sword Brethren Squad');
+    expect(JSON.stringify(faction)).not.toMatch(/UPDATED|BODYGUARD/);
+  });
+});
+
 describe('markLegends (necrons base vs legends-on render)', () => {
   const base = parseFaction(fixture('necrons.html'), 'necrons', 'Necrons');
   const full = parseFaction(fixture('necrons-legends.html'), 'necrons', 'Necrons');
@@ -210,6 +240,39 @@ describe('markLegends (necrons base vs legends-on render)', () => {
   it('leaves current units unflagged', () => {
     const marked = markLegends(base, full);
     expect(marked.units.find((u) => u.name === 'Necron Warriors')?.legends).toBeUndefined();
+  });
+});
+
+describe('markLegends — same-named units', () => {
+  const unit = (name: string, points: number, groupTitle?: string) => ({
+    name,
+    ...(groupTitle ? { groupTitle } : {}),
+    pricing: [{ range: '[1,)', label: 'Your Unit Costs', costs: [{ models: 1, points }] }],
+  });
+  const faction = (units: ReturnType<typeof unit>[]) => ({
+    slug: 'space-wolves',
+    name: 'Space Wolves',
+    version: '1.6',
+    detachments: [],
+    units,
+  });
+
+  it('tells same-named units apart by sub-group and by occurrence', () => {
+    const base = faction([
+      unit('Venerable Dreadnought', 130),
+      unit('Venerable Dreadnought', 165),
+      unit('Venerable Dreadnought', 140, 'Space Marines'),
+    ]);
+    // The Legends render lists the same three, then a Legends unit of the same name.
+    const full = faction([...base.units, unit('Venerable Dreadnought', 150)]);
+    const marked = markLegends(base, full);
+    expect(marked.units.map((u) => u.legends ?? false)).toEqual([false, false, false, true]);
+  });
+
+  it('throws when a base unit is missing from the Legends render', () => {
+    const base = faction([unit('Venerable Dreadnought', 130), unit('Venerable Dreadnought', 165)]);
+    const full = faction([unit('Venerable Dreadnought', 130), unit('Bjorn the Fell-Handed', 170)]);
+    expect(() => markLegends(base, full)).toThrow(/"space-wolves".*Venerable Dreadnought/);
   });
 });
 
@@ -293,6 +356,9 @@ describe('parseFaction coverage guard — nothing on the page goes unconsumed', 
     expect(() =>
       parseFaction(fixture('titan-legions.html'), 'titan-legions', 'Titan Legions'),
     ).not.toThrow();
+    expect(() =>
+      parseFaction(fixture('space-marines.html'), 'space-marines', 'Space Marines'),
+    ).not.toThrow();
   });
 
   it('accounts for the rules panels — their labels, and their bodies when open', () => {
@@ -340,7 +406,7 @@ describe('change annotations — the "changed since the last MFM" layer', () => 
     'Adepta Sororitas',
   );
   // ▲/▼ glyphs, (±N) deltas, and every known UPDATED note.
-  const MARKER = /[▲▼]|\([+-]\d+\)|UPDATED|FORCE DISPOSITION|REQUISITION THRESHOLDS|UNIQUE TAG/;
+  const MARKER = /[▲▼]|\([-+−][\d,]+\)|UPDATED|FORCE DISPOSITION|REQUISITION THRESHOLDS|UNIQUE TAG/;
 
   it('finds a unit whose header was restyled by a points change', () => {
     // Canoptek Reanimator's points went up, so its card renders in the "changed"
@@ -377,5 +443,75 @@ describe('change annotations — the "changed since the last MFM" layer', () => 
     for (const faction of [necrons, sisters]) {
       expect(JSON.stringify(faction)).not.toMatch(MARKER);
     }
+  });
+
+  it('strips deltas with a Unicode minus or a thousands separator', () => {
+    // `(−10)` uses U+2212, and `(+1,000)` a comma: neither may leak into `models`
+    // or cut the points short.
+    const html = fixture('adepta-sororitas.html')
+      .replaceAll('▼ (-10) 65 pts', '▼ (−10) 65 pts')
+      .replaceAll('▼ (-10) 75 pts', '▲ (+1,000) 1,075 pts')
+      .replaceAll('▼ (-5) 15 pts', '▲ (+1,005) 1,015 pts');
+    const faction = parseFaction(html, 'adepta-sororitas', 'Adepta Sororitas');
+    expect(faction.units.find((u) => u.name === 'Hospitaller')?.pricing).toEqual([
+      { range: '[1,1]', label: 'Your 1st Unit Costs', costs: [{ models: 1, points: 65 }] },
+      { range: '[2,)', label: 'Your 2nd + Unit Costs', costs: [{ models: 1, points: 1075 }] },
+    ]);
+    const host = faction.detachments.find((d) => d.name === 'Penitent Host');
+    expect(host?.enhancements).toContainEqual({
+      name: 'Catechism of Divine Penitence',
+      points: 1015,
+      leaderTo: ['Repentia Squad'],
+    });
+  });
+});
+
+describe('loud failures — content the parser cannot read fails, located', () => {
+  it('fails on an unknown change note on a detachment card, naming the card', () => {
+    const html = fixture('adepta-sororitas.html').replaceAll(
+      'FORCE DISPOSITION(S) CHANGED',
+      'DETACHMENT POINTS REVISED',
+    );
+    const parse = () => parseFaction(html, 'adepta-sororitas', 'Adepta Sororitas');
+    expect(parse).toThrow(/Unconsumed content/);
+    expect(parse).toThrow(/detachment "BRINGERS OF FLAME": "DETACHMENT POINTS REVISED"/);
+  });
+
+  it('fails on an unknown change note on a unit card, naming the card', () => {
+    // The UPDATED badge plus a note div, the shape a unit card's note takes.
+    const note =
+      '<div class="m-0 px-1 py-0.5 bg-slate-300 dark:bg-slate-700 font-bold"><span>UPDATED</span></div>' +
+      '<div class="m-0 px-1 py-0.5 bg-slate-200 dark:bg-slate-600 font-bold"><span>UNIT POINTS REVISED</span></div>';
+    const anchor = 'CANOPTEK WRAITHS, IMMORTALS, NECRON WARRIORS</span></div>';
+    const html = fixture('necrons.html').replace(anchor, anchor + note);
+    expect(html).not.toBe(fixture('necrons.html'));
+    const parse = () => parseFaction(html, 'necrons', 'Necrons');
+    expect(parse).toThrow(/Unconsumed content/);
+    expect(parse).toThrow(/unit "TECHNOMANCER": "UNIT POINTS REVISED"/);
+  });
+
+  it('fails on an enhancement whose points are not a number, naming faction, detachment and enhancement', () => {
+    const html = fixture('adepta-sororitas.html').replace(
+      '<span>Fire and Fury</span><span>30 pts</span>',
+      '<span>Fire and Fury</span><span>FREE</span>',
+    );
+    expect(html).not.toBe(fixture('adepta-sororitas.html'));
+    const parse = () => parseFaction(html, 'adepta-sororitas', 'Adepta Sororitas');
+    expect(parse).toThrow(/"adepta-sororitas"/);
+    expect(parse).toThrow(/detachment "BRINGERS OF FLAME"/);
+    expect(parse).toThrow(/enhancement "Fire and Fury".*"FREE"/);
+  });
+
+  it('fails on a wargear row it cannot read, naming faction, unit and row', () => {
+    // The Redemptor's wargear points arrive as a streamed completion.
+    const html = fixture('black-templars.html').replace(
+      '<div hidden id="S:128"><span>10 pts</span></div>',
+      '<div hidden id="S:128"><span>FREE</span></div>',
+    );
+    expect(html).not.toBe(fixture('black-templars.html'));
+    const parse = () => parseFaction(html, 'black-templars', 'Black Templars');
+    expect(parse).toThrow(/"black-templars"/);
+    expect(parse).toThrow(/unit "REDEMPTOR DREADNOUGHT"/);
+    expect(parse).toThrow(/wargear row "per Macro plasma incinerator.*FREE"/);
   });
 });

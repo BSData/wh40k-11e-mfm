@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { BrowserContext } from 'playwright';
 import {
   createScrapeContext,
@@ -18,6 +19,7 @@ import {
   markLegends,
   parseFaction,
   parseIndex,
+  RULES_PANELS,
 } from './parse.js';
 
 /**
@@ -38,8 +40,13 @@ import {
  * for meta.yaml. `--no-legends` falls back to plain, faster HTTP.
  *
  * One faction failing does not abort the run; the process exits 1 at the end so CI
- * fails loudly, while still writing the factions that did parse.
+ * fails loudly, while still writing the factions that did parse. On a browser run the
+ * rules panels are required too: if they fail, that is reported the same way (as
+ * `RULES_PANELS_FAILURE`) and meta.yaml is not written.
  */
+
+/** The name the rules panels' failure goes by in the failures report. */
+const RULES_PANELS_FAILURE = 'rules panels';
 
 interface Args {
   faction?: string;
@@ -153,8 +160,37 @@ async function scrapeFaction(
   throw lastError;
 }
 
-async function main(): Promise<void> {
-  const args = parseArgs(process.argv.slice(2));
+/**
+ * Render the rules panels and convert them to Markdown for meta.yaml. Throws if the
+ * render fails or either panel has no text, after one retry: a run that cannot capture
+ * them must fail rather than write a meta.yaml without them.
+ */
+async function scrapeRulesPanels(
+  ctx: BrowserContext,
+  url: string,
+): Promise<{ notes: string; muster: string }> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const html = await renderRulesPanels(ctx, url);
+      const panels = { notes: extractNotesMarkdown(html), muster: extractMusterMarkdown(html) };
+      const empty = (Object.keys(RULES_PANELS) as (keyof typeof RULES_PANELS)[]).filter(
+        (key) => !panels[key],
+      );
+      if (empty.length === 0) return panels;
+      throw new Error(
+        `no text in rules panel ${empty.map((key) => `"${RULES_PANELS[key]}"`).join(', ')}`,
+      );
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
+
+/** Run the pipeline on `argv` (the arguments after the script); resolves to the exit code. */
+export async function main(argv: string[]): Promise<number> {
+  const args = parseArgs(argv);
   console.log(`Fetching index: ${BASE_URL}`);
   const index = parseIndex(await fetchText(BASE_URL));
   const mode = args.legends ? `browser+Legends ×${args.concurrency}` : `HTTP ×${args.concurrency}`;
@@ -180,12 +216,19 @@ async function main(): Promise<void> {
   const ctx = browser ? await createScrapeContext(browser) : null;
   try {
     // The rules panels are identical across pages — render them once for a full run.
-    let panels = '';
+    // A browser run needs them: if they fail, meta.yaml is left as it is.
+    let panels: { notes: string; muster: string } | undefined;
+    let panelsFailed = false;
     if (ctx && !args.faction && targets[0]) {
-      panels = await renderRulesPanels(ctx, factionUrl(targets[0].slug)).catch(() => '');
+      try {
+        panels = await scrapeRulesPanels(ctx, factionUrl(targets[0].slug));
+      } catch (err) {
+        const error = err instanceof Error ? err.message : String(err);
+        failures.push({ slug: RULES_PANELS_FAILURE, error });
+        panelsFailed = true;
+        console.error(`  ✗ ${RULES_PANELS_FAILURE.padEnd(22)} ${error}`);
+      }
     }
-    const notes = extractNotesMarkdown(panels);
-    const muster = extractMusterMarkdown(panels);
 
     await mapPool(targets, args.concurrency, async (f) => {
       try {
@@ -212,7 +255,7 @@ async function main(): Promise<void> {
     });
 
     // Only rewrite meta on a full run, so a single-faction smoke test stays honest.
-    if (!args.faction && scraped.length > 0) {
+    if (!args.faction && scraped.length > 0 && !panelsFailed) {
       const lastUpdated = scraped
         .map((s) => s.firstSeen)
         .sort()
@@ -222,8 +265,7 @@ async function main(): Promise<void> {
         metaToYaml({
           version: index.version,
           lastUpdated,
-          ...(notes ? { notes } : {}),
-          ...(muster ? { muster } : {}),
+          ...panels,
           factions: scraped.map((s) => s.slug),
         }),
       );
@@ -239,11 +281,20 @@ async function main(): Promise<void> {
     // Persist a located, per-faction report for the workflow's error issue. Written
     // before exit so it survives the non-zero exit that triggers the issue step.
     if (args.report) writeFileSync(args.report, failuresReport(failures));
-    process.exitCode = 1;
+    return 1;
   }
+  return 0;
 }
 
-main().catch((err) => {
-  console.error(err instanceof Error ? err.stack : err);
-  process.exit(1);
-});
+const entry = process.argv[1];
+if (entry !== undefined && fileURLToPath(import.meta.url) === entry) {
+  main(process.argv.slice(2)).then(
+    (code) => {
+      process.exitCode = code;
+    },
+    (err) => {
+      console.error(err instanceof Error ? err.stack : err);
+      process.exit(1);
+    },
+  );
+}

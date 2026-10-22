@@ -1,5 +1,11 @@
 import { type CheerioAPI, load } from 'cheerio';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
+import {
+  CHANGE_BADGE_TEXT,
+  DETACHMENT_BOILERPLATE,
+  PAGE_BOILERPLATE,
+  UNIT_BOILERPLATE,
+} from './allowlists.js';
 import type {
   CostOption,
   Detachment,
@@ -14,6 +20,11 @@ import type {
  * HTML parsing for the Munitorum Field Manual. Pure functions: HTML string in,
  * domain objects out — no network or filesystem. See specs/scraping.md for the
  * selector contract and the React-streaming detail these functions rely on.
+ *
+ * Each card parser takes a `consumed` list and pushes onto it the exact text of every
+ * element it turned into data, as it reads it. That list, not a second pass over the
+ * selectors, is what the coverage check counts as covered, so anything a parse step
+ * looks at but drops is left over and fails the parse.
  */
 
 const VERSION_RE = /v(\d+\.\d+)/;
@@ -30,11 +41,20 @@ function titleCase(s: string): string {
     .replace(/(^|[\s'’(-])([a-z])/g, (_, sep, ch) => sep + ch.toUpperCase());
 }
 
-/** Leading integer from strings like "10 models", "2DP". */
-function leadingInt(s: string): number | null {
-  const m = s.match(/-?\d+/);
-  return m ? Number.parseInt(m[0], 10) : null;
+/** A whole points value: "NN pts", where commas are thousands separators. */
+const POINTS_RE = /^(\d{1,3}(?:,\d{3})+|\d+)\s*pts$/i;
+
+/**
+ * The one parser for points, wherever they appear (cost rows, wargear, enhancements):
+ * "65 pts" → 65, "2,200 pts" → 2200. Anything else ("FREE", a leftover delta) is null.
+ */
+function parsePoints(s: string): number | null {
+  const m = clean(s).match(POINTS_RE);
+  return m ? Number.parseInt((m[1] as string).replace(/,/g, ''), 10) : null;
 }
+
+/** A detachment's DP badge, the whole of it ("2DP"). */
+const DP_RE = /^(\d+)\s*DP$/i;
 
 const ORDINAL_RE = /(\d+)(?:st|nd|rd|th)/gi;
 
@@ -58,20 +78,20 @@ function parseRange(label: string): string {
   return `[${from},${from}]`;
 }
 
-// Points are the trailing "NN pts" (commas are thousands separators, e.g.
-// "2,200 pts"); everything before is the size text, which the two parts
-// concatenate onto without a separator (e.g. "1 model2,200 pts").
-const TRAILING_POINTS_RE = /([\d,]+)\s*pts\s*$/i;
+// Points are the trailing "NN pts" (see `parsePoints`); everything before is the size
+// text, which the two parts concatenate onto without a separator ("1 model2,200 pts").
+const TRAILING_POINTS_RE = /(?:\d{1,3}(?:,\d{3})+|\d+)\s*pts\s*$/i;
 const PLAIN_SIZE_RE = /^\d+ models?$/i;
 
-function parseCostRow(unitName: string, raw: string): CostOption {
+/** One cost row. `where` locates the card for the error (see `cardWhere`). */
+function parseCostRow(where: string, raw: string): CostOption {
   // Belt-and-braces: strip any `▲`/`▼ (±N)` change marker that survived `deannotate`
   // so a delta can never be miscounted as a model or leak into `desc`.
   const text = clean(raw.replace(DELTA_MARKER_RE, ''));
   const m = text.match(TRAILING_POINTS_RE);
   const size = m ? clean(text.slice(0, m.index)) : '';
-  if (!m || !size) throw new Error(`Unit "${unitName}": unreadable cost row "${text}"`);
-  const points = Number.parseInt((m[1] as string).replace(/,/g, ''), 10);
+  const points = m ? parsePoints(m[0]) : null;
+  if (points === null || !size) throw new Error(`${where}: unreadable cost row "${text}"`);
   const models = (size.match(/\d+/g) ?? []).reduce((sum, n) => sum + Number.parseInt(n, 10), 0);
 
   if (size.startsWith('+')) {
@@ -91,24 +111,36 @@ function parseCostRow(unitName: string, raw: string): CostOption {
  * keyed by ability rather than picking a single role. Two blocks of the *same* ability
  * have never appeared and would be a genuine surprise, so that still throws.
  */
-function parseRole(card: ReturnType<CheerioAPI>): Pick<Unit, 'leaderTo' | 'supportTo'> {
+function parseRole(
+  card: ReturnType<CheerioAPI>,
+  consumed: string[],
+): Pick<Unit, 'leaderTo' | 'supportTo'> {
   const out: Pick<Unit, 'leaderTo' | 'supportTo'> = {};
   const imgs = card.find('img[src$="leader.svg"], img[src$="support.svg"]');
   imgs.each((_i, el) => {
     const img = card.find(el);
     const key = (img.attr('src') ?? '').includes('leader') ? 'leaderTo' : 'supportTo';
     if (out[key]) throw new Error(`Unexpected repeated ${key} block on one unit`);
-    const attachTo = clean(img.parent().nextAll('span').first().text())
+    const list = clean(img.parent().nextAll('span').first().text());
+    const attachTo = list
       .split(',')
       .map((s) => titleCase(s))
       .filter(Boolean);
-    if (attachTo.length > 0) out[key] = attachTo;
+    if (attachTo.length > 0) {
+      out[key] = attachTo;
+      consumed.push(list);
+    }
   });
   return out;
 }
 
 /** Parse the "Wargear Options" block (cog icon + per-item costs), if present. */
-function parseWargear($: CheerioAPI, card: ReturnType<CheerioAPI>): Wargear[] {
+function parseWargear(
+  $: CheerioAPI,
+  card: ReturnType<CheerioAPI>,
+  where: string,
+  consumed: string[],
+): Wargear[] {
   const cog = card.find('img[src$="cog.svg"]').first();
   if (cog.length === 0) return [];
   return cog
@@ -117,12 +149,20 @@ function parseWargear($: CheerioAPI, card: ReturnType<CheerioAPI>): Wargear[] {
     .find('ul li')
     .map((_i, li) => {
       const spans = $(li).find('span');
-      const item = clean(spans.first().text()).replace(/^per\s+/i, '');
-      const points = leadingInt(clean(spans.last().text()).replace(DELTA_MARKER_RE, ''));
-      return item && points !== null ? { item, points } : null;
+      const itemText = clean(spans.first().text());
+      const pointsText = spans.length > 1 ? clean(spans.last().text()) : '';
+      const item = itemText.replace(/^per\s+/i, '');
+      const points = parsePoints(pointsText.replace(DELTA_MARKER_RE, ''));
+      if (!item || points === null) {
+        const row = spans.map((_j, s) => clean($(s).text())).get();
+        throw new Error(
+          `${where}: unreadable wargear row "${row.join(' ') || clean($(li).text())}"`,
+        );
+      }
+      consumed.push(itemText, pointsText);
+      return { item, points };
     })
-    .get()
-    .filter((w): w is Wargear => w !== null);
+    .get();
 }
 
 function parseVersion($: CheerioAPI): string {
@@ -169,7 +209,14 @@ function hydrate($: CheerioAPI): void {
  * walks these rather than the name element, so a card is handled whole and in
  * isolation regardless of whether its header is in the plain or "changed" style.
  */
-const CARD_SELECTOR = 'div.flex.flex-col.space-y-1.m-1';
+export const CARD_SELECTOR = 'div.flex.flex-col.space-y-1.m-1';
+
+/**
+ * A unit card's pricing-tier label ("YOUR … COST(S)"): a `TIER_LABEL_SELECTOR` element
+ * whose text matches `TIER_LABEL_RE`. Detachment cards have none (see `isUnitCard`).
+ */
+export const TIER_LABEL_SELECTOR = 'div.bg-slate-200';
+export const TIER_LABEL_RE = /COST/i;
 
 /**
  * The "changed since the last MFM" annotation layer. After a points update GW
@@ -178,16 +225,12 @@ const CARD_SELECTOR = 'div.flex.flex-col.space-y-1.m-1';
  * the new points, and a trailing `UPDATED` badge (optionally with a note). None of
  * it is data — the current points are the `NN pts` value and the change history is
  * the git diff of `data/` — and it disappears at the next update, so we strip it
- * back to the plain shape before parsing. A note string we do *not* recognise is
- * left in place so the coverage check surfaces it rather than silently dropping it.
+ * back to the plain shape before parsing. A note string we do *not* recognise (see
+ * `CHANGE_BADGE_TEXT` in src/allowlists.ts) is left in place so the coverage check
+ * surfaces it rather than silently dropping it. The delta is written like points, so
+ * it may carry thousands separators, and its minus may be `−` (U+2212).
  */
-const DELTA_MARKER_RE = /[▲▼]\s*(?:\([+-]\d+\)\s*)?/g;
-const CHANGE_BADGE_TEXT: readonly string[] = [
-  'UPDATED',
-  'FORCE DISPOSITION(S) CHANGED',
-  'REQUISITION THRESHOLDS REMOVED',
-  'UNIQUE TAG REMOVED',
-];
+const DELTA_MARKER_RE = /[▲▼]\s*(?:\([-+−]\d[\d,]*\)\s*)?/g;
 
 function deannotate($: CheerioAPI): void {
   // Drop the standalone `UPDATED` / note badge divs (each a small div of one span).
@@ -221,7 +264,14 @@ function cardName(card: ReturnType<CheerioAPI>): string {
  * objective). This holds in both header styles and with the annotation layer off.
  */
 function isUnitCard($: CheerioAPI, card: ReturnType<CheerioAPI>): boolean {
-  return card.find('div.bg-slate-200').filter((_, el) => /COST/i.test($(el).text())).length > 0;
+  return (
+    card.find(TIER_LABEL_SELECTOR).filter((_, el) => TIER_LABEL_RE.test($(el).text())).length > 0
+  );
+}
+
+/** A card's location for error messages: `"necrons", unit "TECHNOMANCER"`. */
+function cardWhere(slug: string, kind: 'unit' | 'detachment', card: ReturnType<CheerioAPI>) {
+  return `"${slug}", ${kind} "${cardName(card)}"`;
 }
 
 /** Top-level cards only (a card is never nested in another, but guard regardless). */
@@ -229,29 +279,45 @@ function topCards($: CheerioAPI): ReturnType<CheerioAPI> {
   return $(CARD_SELECTOR).filter((_, el) => $(el).parents(CARD_SELECTOR).length === 0);
 }
 
-function parseUnit($: CheerioAPI, card: ReturnType<CheerioAPI>): Unit {
+function parseUnit(
+  $: CheerioAPI,
+  card: ReturnType<CheerioAPI>,
+  slug: string,
+  consumed: string[],
+): Unit {
+  const where = cardWhere(slug, 'unit', card);
   const name = titleCase(cardName(card));
+  consumed.push(cardName(card));
   const pricing: PricingTier[] = [];
 
   // Each tier = a `div.bg-slate-200` label followed by a `ul.leaders` of rows. The
   // role block's `div.bg-slate-200` label (LEADER/SUPPORT) has no `ul.leaders`, so
   // it contributes no costs and is skipped.
-  card.find('div.bg-slate-200').each((_, labelEl) => {
-    const label = titleCase($(labelEl).text());
+  card.find(TIER_LABEL_SELECTOR).each((_, labelEl) => {
+    const labelText = clean($(labelEl).text());
+    const label = titleCase(labelText);
     const ul = $(labelEl).nextAll('ul.leaders').first();
     const costs = ul
       .find('li')
-      .map((_i, li) => parseCostRow(name, clean($(li).text())))
+      .map((_i, li) => {
+        const row = clean($(li).text());
+        const cost = parseCostRow(where, row);
+        consumed.push(row);
+        return cost;
+      })
       .get();
-    if (costs.length > 0) pricing.push({ range: parseRange(label), label, costs });
+    if (costs.length > 0) {
+      pricing.push({ range: parseRange(label), label, costs });
+      consumed.push(labelText);
+    }
   });
 
-  if (pricing.length === 0) throw new Error(`Unit "${name}" has no pricing tiers`);
-  const wargear = parseWargear($, card);
+  if (pricing.length === 0) throw new Error(`${where}: no pricing tiers`);
+  const wargear = parseWargear($, card, where, consumed);
   return {
     name,
     pricing,
-    ...parseRole(card),
+    ...parseRole(card, consumed),
     ...(wargear.length > 0 ? { wargear } : {}),
   };
 }
@@ -261,8 +327,9 @@ function enhancementGrant(
   $: CheerioAPI,
   li: ReturnType<CheerioAPI>,
   keyword: 'LEADER:' | 'SUPPORT:',
+  consumed: string[],
 ): string[] {
-  return clean(
+  const list = clean(
     li
       .parent()
       .find('span')
@@ -271,16 +338,30 @@ function enhancementGrant(
       .nextAll('span')
       .first()
       .text(),
-  )
+  );
+  const units = list
     .split(',')
     .map((s) => titleCase(s))
     .filter(Boolean);
+  if (units.length > 0) consumed.push(keyword, list);
+  return units;
 }
 
-function parseDetachment($: CheerioAPI, card: ReturnType<CheerioAPI>): Detachment {
+function parseDetachment(
+  $: CheerioAPI,
+  card: ReturnType<CheerioAPI>,
+  slug: string,
+  consumed: string[],
+): Detachment {
+  const where = cardWhere(slug, 'detachment', card);
   const header = card.children().first();
   const name = titleCase(cardName(card));
-  const dp = leadingInt(clean(header.find('span.self-end').last().text()));
+  consumed.push(cardName(card));
+  // A badge that isn't a whole "NDP" is left unconsumed, so the coverage check reports it.
+  const dpText = clean(header.find('span.self-end').last().text());
+  const dpMatch = dpText.match(DP_RE);
+  if (dpMatch) consumed.push(dpText);
+  const dp = dpMatch ? Number.parseInt(dpMatch[1] as string, 10) : null;
   // Force Dispositions are the styled banner divs directly under the header — plural
   // since v1.4, where Orks' WAR HORDE grants both TAKE AND HOLD and PURGE THE FOE.
   const objectives = card
@@ -288,30 +369,36 @@ function parseDetachment($: CheerioAPI, card: ReturnType<CheerioAPI>): Detachmen
     .map((_i, el) => clean($(el).text()))
     .get()
     .filter(Boolean);
+  consumed.push(...objectives);
   // "UNIQUE: X" restriction banner — a direct-child slate-200 div (same class units
   // use for tier labels, here repurposed). Match on the literal prefix so the change
   // badge/note divs (also direct children) are never mistaken for it.
-  const unique = titleCase(
-    clean(
-      card
-        .children('div.bg-slate-200')
-        .filter((_j, el) => UNIQUE_RE.test(clean($(el).text())))
-        .first()
-        .text(),
-    ).replace(UNIQUE_RE, ''),
+  const banner = clean(
+    card
+      .children('div.bg-slate-200')
+      .filter((_j, el) => UNIQUE_RE.test(clean($(el).text())))
+      .first()
+      .text(),
   );
+  const unique = titleCase(banner.replace(UNIQUE_RE, ''));
+  if (unique) consumed.push(banner);
   const enhancements = card
     .find('ul.leaders li')
     .map((_i, el) => {
       const li = $(el);
       const spans = li.find('div').last().find('span');
       const enhName = clean(spans.first().text());
-      const points = leadingInt(clean(spans.last().text()));
-      if (!enhName || points === null) return null;
+      const pointsText = spans.length > 1 ? clean(spans.last().text()) : '';
+      const points = parsePoints(pointsText);
+      if (!enhName) throw new Error(`${where}: unreadable enhancement row "${clean(li.text())}"`);
+      if (points === null) {
+        throw new Error(`${where}: enhancement "${enhName}" has unreadable points "${pointsText}"`);
+      }
+      consumed.push(enhName, pointsText);
       // A "LEADER:"/"SUPPORT:" block sits beside the enhancement it belongs to (a
       // sibling of the <li> in the same wrapper): buying it unlocks those units.
-      const leaderTo = enhancementGrant($, li, 'LEADER:');
-      const supportTo = enhancementGrant($, li, 'SUPPORT:');
+      const leaderTo = enhancementGrant($, li, 'LEADER:', consumed);
+      const supportTo = enhancementGrant($, li, 'SUPPORT:', consumed);
       return {
         name: enhName,
         points,
@@ -319,20 +406,10 @@ function parseDetachment($: CheerioAPI, card: ReturnType<CheerioAPI>): Detachmen
         ...(supportTo.length > 0 ? { supportTo } : {}),
       };
     })
-    .get()
-    .filter((e): e is NonNullable<typeof e> => e !== null);
+    .get();
 
   return { name, dp, objectives, ...(unique ? { unique } : {}), enhancements };
 }
-
-/**
- * Boilerplate the parser deliberately does not turn into data. These are the
- * *only* strings allowed to go unconsumed; anything else surfacing in the
- * coverage pass is treated as new content and fails the parse. Keep each list
- * tight — a too-broad entry here is how a real addition gets silently swallowed.
- */
-const UNIT_BOILERPLATE: readonly string[] = [];
-const DETACHMENT_BOILERPLATE: readonly string[] = ['ENHANCEMENTS'];
 
 /**
  * The page's collapsible rules panels, keyed by where they land in `meta.yaml`, each
@@ -344,18 +421,6 @@ export const RULES_PANELS = {
   muster: 'Muster Armies',
 } as const;
 
-// Page chrome is mostly removed by container (header/nav/footer/cookie dialog/rules panels)
-// in the page-level pass; these are the few content-area headings that remain.
-const PAGE_BOILERPLATE: readonly string[] = [
-  // The rules panels' button labels — always shown, open or not.
-  'Welcome to the Munitorum Field Manual, containing the most up-to-date points values for every Warhammer 40,000 faction.',
-  RULES_PANELS.muster,
-  'Show Legends', // the Legends toggle label (sits in the content area, not the nav)
-  'Hide Legends', // its toggled state, on browser (Legends) renders
-  'UNITS',
-  'DETACHMENTS',
-  'LEGENDS', // section heading shown on browser renders with Legends toggled on
-];
 /**
  * The open panel of the rules collapsible whose button label starts with `label`:
  * the element the button's `aria-controls` names. `null` when the panel is closed
@@ -373,15 +438,22 @@ function findPanel($: CheerioAPI, label: string): ReturnType<CheerioAPI> | null 
 const PARENT_TITLE_SELECTOR = 'h3.font-header:not([class*="break-after"])';
 
 /**
- * Subtract every `claimed` fragment from `text` (longest first, all occurrences)
- * and return what is left. Used by the coverage check: if a card's whole text
- * minus everything the parser read is empty, the parser consumed all of it.
+ * What is left of `text` once the `consumed` strings are subtracted — one occurrence
+ * each, as each stands for one element a parse step read — and then every occurrence
+ * of each `boilerplate` string, longest first within each. Used by the coverage
+ * check: if a card's whole text minus everything the parser read is empty, the
+ * parser consumed all of it.
  */
-function residue(text: string, claimed: Iterable<string>): string {
+function residue(
+  text: string,
+  consumed: Iterable<string>,
+  boilerplate: Iterable<string> = [],
+): string {
+  const longestFirst = (xs: Iterable<string>) =>
+    [...xs].filter(Boolean).sort((a, b) => b.length - a.length);
   let rest = clean(text);
-  for (const c of [...claimed].filter(Boolean).sort((a, b) => b.length - a.length)) {
-    rest = rest.split(c).join(' ');
-  }
+  for (const c of longestFirst(consumed)) rest = rest.replace(c, ' ');
+  for (const b of longestFirst(boilerplate)) rest = rest.split(b).join(' ');
   return clean(rest);
 }
 
@@ -389,77 +461,28 @@ function residue(text: string, claimed: Iterable<string>): string {
  * Completeness guard. The parser is a *pull* parser — it reads specific selectors
  * and ignores everything else — so a new section, field, badge, or row that Games
  * Workshop adds would otherwise be dropped with no error and no diff. This pass
- * inverts that: it re-reads every unit card, every detachment card, and the page
- * chrome, subtracts everything the parser claimed, and throws if anything visible
- * is left over (beyond the explicit boilerplate allowlists above). New content
- * fails loudly and locatedly instead of vanishing. Mutates `$` (page-level pass
- * strips parsed cards), so it must run last, after units/detachments are built.
+ * inverts that: for every unit and detachment card it subtracts the strings the
+ * card's parse step consumed (`consumed`, keyed by card element) plus the card
+ * allowlist, then does the same for the page chrome, and throws if anything visible
+ * is left over. New content fails loudly and locatedly instead of vanishing. Mutates
+ * `$` (page-level pass strips parsed cards), so it must run last, after
+ * units/detachments are built.
  */
-function assertFactionCovered($: CheerioAPI, slug: string, name: string, version: string): void {
+function assertFactionCovered(
+  $: CheerioAPI,
+  slug: string,
+  name: string,
+  version: string,
+  consumed: ReadonlyMap<unknown, readonly string[]>,
+): void {
   const leftovers: string[] = [];
 
   topCards($).each((_i, el) => {
     const card = $(el);
-    if (isUnitCard($, card)) {
-      // (a) Unit card: name + every pricing tier (label + rows) + each role block's
-      // attach list + wargear must account for the entire card.
-      const claimed = [...UNIT_BOILERPLATE, cardName(card)];
-      card.find('div.bg-slate-200').each((_j, l) => {
-        claimed.push(clean($(l).text()));
-        $(l)
-          .nextAll('ul.leaders')
-          .first()
-          .find('li')
-          .each((_k, li) => {
-            claimed.push(clean($(li).text()));
-          });
-      });
-      card.find('img[src$="leader.svg"], img[src$="support.svg"]').each((_j, im) => {
-        claimed.push(clean($(im).parent().nextAll('span').first().text()));
-      });
-      const cog = card.find('img[src$="cog.svg"]').first();
-      if (cog.length)
-        cog
-          .parent()
-          .parent()
-          .find('ul li')
-          .each((_j, li) => {
-            claimed.push(clean($(li).text()));
-          });
-      const left = residue(card.text(), claimed);
-      if (left) leftovers.push(`unit "${cardName(card)}": ${JSON.stringify(left)}`);
-    } else {
-      // (b) Detachment card: name + DP + every Force Disposition + unique +
-      // leaderTo/supportTo grants + enhancements.
-      const header = card.children().first();
-      const claimed = [
-        ...DETACHMENT_BOILERPLATE,
-        cardName(card),
-        clean(header.find('span.self-end').last().text()),
-        ...card
-          .children('div[style]')
-          .map((_j, el) => clean($(el).text()))
-          .get(),
-        ...card
-          .children('div.bg-slate-200')
-          .map((_j, l) => clean($(l).text()))
-          .get(),
-      ];
-      for (const kw of ['LEADER:', 'SUPPORT:'] as const) {
-        card
-          .find('span')
-          .filter((_j, s) => clean($(s).text()) === kw)
-          .each((_j, s) => {
-            claimed.push(kw, clean($(s).nextAll('span').first().text()));
-          });
-      }
-      card.find('ul.leaders li').each((_j, li) => {
-        const spans = $(li).find('div').last().find('span');
-        claimed.push(clean(spans.first().text()), clean(spans.last().text()));
-      });
-      const left = residue(card.text(), claimed);
-      if (left) leftovers.push(`detachment "${cardName(card)}": ${JSON.stringify(left)}`);
-    }
+    const kind = isUnitCard($, card) ? 'unit' : 'detachment';
+    const boilerplate = kind === 'unit' ? UNIT_BOILERPLATE : DETACHMENT_BOILERPLATE;
+    const left = residue(card.text(), consumed.get(el) ?? [], boilerplate);
+    if (left) leftovers.push(`${kind} "${cardName(card)}": ${JSON.stringify(left)}`);
   });
 
   // (c) Page level: drop the parsed cards, the site chrome (header/nav/footer, the cookie
@@ -472,17 +495,21 @@ function assertFactionCovered($: CheerioAPI, slug: string, name: string, version
   $('script, style, noscript, svg, head, link').remove();
   // The rules panels (open only) are captured into meta.yaml, not faction data.
   for (const label of Object.values(RULES_PANELS)) findPanel($, label)?.remove();
-  const pageLeft = residue($('body').text(), [
-    ...PAGE_BOILERPLATE,
-    name,
-    name.toUpperCase(),
-    `v${version}`,
-    // Sub-group / parent-army titles, each claimed on its own (a page can carry more
-    // than one, e.g. Aeldari's "Harlequins" and "Ynnari").
-    ...$(PARENT_TITLE_SELECTOR)
-      .map((_j, el) => clean($(el).text()))
-      .get(),
-  ]);
+  const pageLeft = residue(
+    $('body').text(),
+    [],
+    [
+      ...PAGE_BOILERPLATE,
+      name,
+      name.toUpperCase(),
+      `v${version}`,
+      // Sub-group / parent-army titles, each claimed on its own (a page can carry more
+      // than one, e.g. Aeldari's "Harlequins" and "Ynnari").
+      ...$(PARENT_TITLE_SELECTOR)
+        .map((_j, el) => clean($(el).text()))
+        .get(),
+    ],
+  );
   if (pageLeft) leftovers.push(`page-level: ${JSON.stringify(pageLeft)}`);
 
   if (leftovers.length > 0) {
@@ -529,17 +556,21 @@ export function parseFaction(
     }
   });
 
-  // Each card is a unit or a detachment; parse it whole, in document order.
+  // Each card is a unit or a detachment; parse it whole, in document order, keeping
+  // the strings each card's parse consumed for the coverage check.
   const units: Unit[] = [];
   const detachments: Detachment[] = [];
+  const consumed = new Map<unknown, string[]>();
   topCards($).each((_i, el) => {
     const card = $(el);
+    const seen: string[] = [];
+    consumed.set(el, seen);
     if (isUnitCard($, card)) {
-      const unit = parseUnit($, card);
+      const unit = parseUnit($, card, slug, seen);
       const group = groupByCard.get(el);
       units.push(group ? { ...unit, groupTitle: group } : unit);
     } else {
-      detachments.push(parseDetachment($, card));
+      detachments.push(parseDetachment($, card, slug, seen));
     }
   });
   if (units.length === 0) {
@@ -555,7 +586,7 @@ export function parseFaction(
   );
 
   // Last: prove we left nothing on the page unread (mutates $).
-  assertFactionCovered($, slug, name, version);
+  assertFactionCovered($, slug, name, version, consumed);
 
   return { slug, name, version, ...(parent ? { parent } : {}), detachments, units };
 }
@@ -617,15 +648,42 @@ export const extractMusterMarkdown = (pageHtml: string): string =>
   extractPanelMarkdown(pageHtml, RULES_PANELS.muster);
 
 /**
+ * Each unit's identity on its page: sub-group + name + which unit of that name in that
+ * sub-group it is, in page order — a page can list two units of the same name.
+ */
+function unitKeys(units: readonly Unit[]): string[] {
+  const seen = new Map<string, number>();
+  return units.map((u) => {
+    const id = u.groupTitle ? `${u.groupTitle} / ${u.name}` : u.name;
+    const n = (seen.get(id) ?? 0) + 1;
+    seen.set(id, n);
+    return `${id} (#${n})`;
+  });
+}
+
+/**
  * Mark units that appear only in the legends-on render (`full`) as legends.
  * `base` is the default render (no legends); both are parser output of the same
- * faction. Returns `full` with `legends: true` on the units `base` doesn't have.
+ * faction. Returns `full` with `legends: true` on the units `base` doesn't have,
+ * matching units by `unitKeys`. Throws if a base unit is missing from `full`, rather
+ * than dropping it.
  */
 export function markLegends(base: FactionContent, full: FactionContent): FactionContent {
-  const baseNames = new Set(base.units.map((u) => u.name));
+  const baseKeys = unitKeys(base.units);
+  const fullKeys = unitKeys(full.units);
+  const inFull = new Set(fullKeys);
+  const missing = baseKeys.filter((k) => !inFull.has(k));
+  if (missing.length > 0) {
+    throw new Error(
+      `"${base.slug}": base units missing from the Legends render: ${missing.join(', ')}`,
+    );
+  }
+  const inBase = new Set(baseKeys);
   return {
     ...full,
-    units: full.units.map((u) => (baseNames.has(u.name) ? u : { ...u, legends: true })),
+    units: full.units.map((u, i) =>
+      inBase.has(fullKeys[i] as string) ? u : { ...u, legends: true },
+    ),
   };
 }
 
