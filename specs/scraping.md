@@ -99,10 +99,10 @@ The coverage runs on the **de-annotated** DOM, so the change-annotation layer (s
 already gone; an *unrecognised* `UPDATED` note, however, survives `deannotate()` and so is
 caught here as unconsumed — exactly the loud failure we want for a new note variant.
 - **Page level** — after dropping the parsed cards, the site chrome (`header`/`nav`, the
-  OneTrust cookie dialog on browser renders, the open rules panels captured into
-  `meta.notes`/`meta.muster`), the army-group title (`parent`), the known content-area
-  headings (`UNITS`/`DETACHMENTS`/`LEGENDS`), and the rules panels' button labels (shown
-  whether open or not), *nothing* may remain.
+  `footer` of legal links, the OneTrust cookie dialog on browser renders, the open rules
+  panels captured into `meta.notes`/`meta.muster`), the army-group title (`parent`), the
+  known content-area headings (`UNITS`/`DETACHMENTS`/`LEGENDS`), and the rules panels'
+  button labels (shown whether open or not), *nothing* may remain.
 
 The allowlists (`UNIT_BOILERPLATE`, `DETACHMENT_BOILERPLATE`, `PAGE_BOILERPLATE`, and the
 `CHANGE_BADGE_TEXT` notes stripped by `deannotate()` — all in `src/parse.ts`) are the

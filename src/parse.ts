@@ -344,7 +344,7 @@ export const RULES_PANELS = {
   muster: 'Muster Armies',
 } as const;
 
-// Page chrome is mostly removed by container (header/nav/cookie dialog/rules panels)
+// Page chrome is mostly removed by container (header/nav/footer/cookie dialog/rules panels)
 // in the page-level pass; these are the few content-area headings that remain.
 const PAGE_BOILERPLATE: readonly string[] = [
   // The rules panels' button labels — always shown, open or not.
@@ -462,13 +462,13 @@ function assertFactionCovered($: CheerioAPI, slug: string, name: string, version
     }
   });
 
-  // (c) Page level: drop the parsed cards, the site chrome (header/nav, the cookie
+  // (c) Page level: drop the parsed cards, the site chrome (header/nav/footer, the cookie
   // dialog present on browser renders, the open rules panels captured into
   // meta.notes/meta.muster), then assert only known content-area headings (plus the faction
   // name, sub-group/parent-army titles and version) remain. Catches a brand-new
   // top-level section that sits outside any card.
   $(CARD_SELECTOR).remove();
-  $('header, nav, [id^="onetrust"], .onetrust-pc-dark-filter').remove();
+  $('header, nav, footer, [id^="onetrust"], .onetrust-pc-dark-filter').remove();
   $('script, style, noscript, svg, head, link').remove();
   // The rules panels (open only) are captured into meta.yaml, not faction data.
   for (const label of Object.values(RULES_PANELS)) findPanel($, label)?.remove();
