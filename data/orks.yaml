@@ -1,7 +1,7 @@
 name: Orks
 slug: orks
-version: "1.5"
-firstSeen: 2026-10-05
+version: "1.6"
+firstSeen: 2026-10-14
 detachments:
   - name: Blitz Brigade
     dp: 1
@@ -379,8 +379,8 @@ units:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
-          - { models: 10, points: 45, desc: 10 Gretchin }
-          - { models: 20, points: 80, desc: 20 Gretchin }
+          - { models: 10, points: 45 }
+          - { models: 20, points: 80 }
   - name: Grot Mega-Tank
     pricing:
       - range: "[1,)"

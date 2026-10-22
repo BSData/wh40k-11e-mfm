@@ -1,7 +1,7 @@
 name: Emperor’s Children
 slug: emperors-children
-version: "1.5"
-firstSeen: 2026-09-30
+version: "1.6"
+firstSeen: 2026-10-14
 detachments:
   - name: Carnival Of Excess
     dp: 3

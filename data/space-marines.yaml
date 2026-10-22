@@ -1,7 +1,7 @@
 name: Space Marines
 slug: space-marines
-version: "1.5"
-firstSeen: 2026-10-02
+version: "1.6"
+firstSeen: 2026-10-14
 detachments:
   - name: Assault Brethren
     dp: 1
@@ -1018,7 +1018,6 @@ units:
       - Infernus Squad
       - Intercessor Squad
       - Sternguard Veteran Squad
-      - Sternguard Veteran Squad Terminator Squad
       - Terminator Assault Squad
       - Terminator Squad
       - Vanguard Veteran Squad
