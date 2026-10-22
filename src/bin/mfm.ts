@@ -79,6 +79,13 @@ if (
     },
     (err: unknown) => {
       console.error(err instanceof Error ? err.stack : err);
+      // In Actions, also as an annotation, so a failed step (even a continue-on-error one,
+      // like the announcement) says why on the run's summary page.
+      // biome-ignore lint/complexity/useLiteralKeys: tsc's noPropertyAccessFromIndexSignature requires the bracket form on process.env, and the two rules disagree.
+      if (process.env['GITHUB_ACTIONS'] === 'true') {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(`::error::mfm ${process.argv[2] ?? ''}: ${message.replace(/\r?\n/g, ' ')}`);
+      }
       process.exitCode = 1;
     },
   );
