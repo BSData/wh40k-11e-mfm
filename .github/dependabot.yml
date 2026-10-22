@@ -7,6 +7,10 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 10
+    # Wait a week before proposing a release, so a compromised or yanked one is
+    # usually caught before it reaches us. Security updates are not delayed.
+    cooldown:
+      default-days: 7
     labels:
       - dependencies
     groups:
@@ -16,12 +20,15 @@ updates:
           - minor
           - patch
 
-  # GitHub Actions used in .github/workflows
+  # GitHub Actions used in .github/workflows. They are pinned to commit SHAs with a
+  # `# vX.Y.Z` comment; Dependabot bumps both.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: monday
+    cooldown:
+      default-days: 7
     labels:
       - dependencies
     groups:

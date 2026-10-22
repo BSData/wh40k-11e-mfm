@@ -15,7 +15,9 @@
     "test:watch": "vitest",
     "check": "biome check .",
     "format": "biome format --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check-data": "tsx scripts/check-data.ts",
+    "verify": "pnpm check && pnpm typecheck && pnpm test && pnpm check-data"
   },
   "dependencies": {
     "cheerio": "^1.2.0",

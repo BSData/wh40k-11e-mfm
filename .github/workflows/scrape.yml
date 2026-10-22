@@ -5,10 +5,7 @@ on:
     - cron: '0 16 * * *' # daily 16:00 UTC
   workflow_dispatch: # manual trigger
 
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
+permissions: {}
 
 concurrency:
   group: scrape
@@ -17,9 +14,17 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the update branch
+      pull-requests: write # open the update PR, and comment its Discord marker
+      issues: write # open, comment on and close the scrape-failure issue
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/setup@v3
+      # The fetches below need no credentials (the repository is public), and
+      # create-pull-request configures its own token to push.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           runtime: node@22
           cache: true
@@ -94,10 +99,11 @@ jobs:
       # files plus this update's entry: changelog/v<version>.md and the regenerated
       # DATA-CHANGELOG.md index. The tools still run from main's checkout.
       - name: Check out the base
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ steps.plan.outputs.base }}
           path: pub
+          persist-credentials: false
 
       - name: Stage the update on the base
         working-directory: pub
@@ -108,7 +114,7 @@ jobs:
 
       - name: Open pull request on change
         id: pr
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           path: pub
           branch: ${{ steps.plan.outputs.branch }}
@@ -188,7 +194,7 @@ jobs:
       # open is reported as a comment on it, and the next successful run (below) closes it.
       - name: Report the failure
         if: failure()
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const fs = require('fs');
@@ -223,7 +229,7 @@ jobs:
 
       - name: Close the failure issue
         if: success()
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { owner, repo } = context.repo;

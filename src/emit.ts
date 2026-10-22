@@ -4,6 +4,7 @@ import {
   type Detachment,
   Faction,
   type FactionContent,
+  SiteMeta,
   type Unit,
 } from './model.js';
 
@@ -133,15 +134,8 @@ export function factionFromYaml(text: string): Faction {
   return { ...orderContent(f), firstSeen: f.firstSeen };
 }
 
-export type SiteMeta = {
-  version: string;
-  lastUpdated: string;
-  /** The expandable "Welcome…" help text, when captured via the browser. */
-  notes?: string;
-  /** The expandable "Muster Armies" army-building rules, when captured via the browser. */
-  muster?: string;
-  factions: string[];
-};
+// The schema lives in model.ts; the type stays importable from here, beside its reader/writer.
+export type { SiteMeta } from './model.js';
 
 /** Metadata index. `lastUpdated` is stable on no-op scrapes (max of firstSeen). */
 export function metaToYaml(meta: SiteMeta): string {
@@ -155,6 +149,7 @@ export function metaToYaml(meta: SiteMeta): string {
   return stringify(doc, STRINGIFY_OPTS);
 }
 
+/** Parse `meta.yaml`, validated against `SiteMeta`. */
 export function metaFromYaml(text: string): SiteMeta {
-  return parse(text) as SiteMeta;
+  return SiteMeta.parse(parse(text));
 }
