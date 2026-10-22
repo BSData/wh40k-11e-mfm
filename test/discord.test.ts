@@ -4,6 +4,7 @@ import type { AddressInfo } from 'node:net';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import { announcement, type DiscordMessage, send, webhookUrl } from '../src/discord.js';
+import type { SiteMeta } from '../src/emit.js';
 import type { FactionContent } from '../src/model.js';
 import { parseFaction } from '../src/parse.js';
 
@@ -180,6 +181,23 @@ describe('announcement', () => {
     expect(e.fields[0]?.value).toMatch(/…and \d+ more\n```$/);
   });
 
+  it('mentions a rules change, even when no faction moved', () => {
+    const meta = (muster: string): SiteMeta => ({
+      version: '1.1',
+      lastUpdated: '2026-08-31',
+      muster,
+      factions: ['necrons'],
+    });
+    const rules = { before: meta('| INCURSION | 2 |'), after: meta('| INCURSION | 3 |') };
+    const e = embedOf(announcement([necrons()], [necrons()], { today: '2026-08-31', meta: rules }));
+    expect(e.description).toContain('**No faction changes**');
+    expect(e.description).toContain('Rules: Muster Armies changed');
+    expect(e.fields).toEqual([]);
+
+    const same = { before: rules.before, after: rules.before };
+    expect(announcement([necrons()], [necrons()], { meta: same })).toBeNull();
+  });
+
   it('never lets a faction name become a ping', () => {
     const shouty = as('@everyone');
     const message = announcement([as('@everyone')], [reprice(shouty, 5)], { today: '2026-08-31' });
@@ -307,6 +325,22 @@ describe('send', () => {
       'POST',
     ]);
   });
+
+  it.each([429, 500])(
+    'throws on an edit answered %i, rather than posting a duplicate',
+    async (status) => {
+      const stub = await stubDiscord((call) =>
+        call.method === 'PATCH'
+          ? { status, body: '{"message":"try later"}' }
+          : { status: 200, body: '{"id":"1000"}' },
+      );
+      running = stub.server;
+
+      // The message is still there; posting anew would announce the update twice.
+      await expect(send(stub.hook, payload, '555')).rejects.toThrow(`HTTP ${status}`);
+      expect(stub.calls.map((c) => c.method)).toEqual(['PATCH']);
+    },
+  );
 
   it('throws when Discord rejects the post, rather than reporting success', async () => {
     const stub = await stubDiscord(() => ({

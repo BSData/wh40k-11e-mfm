@@ -1,19 +1,35 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { parse as parseYaml } from 'yaml';
 import {
   BODY_LIMIT,
   changelog,
   changelogEntry,
   failuresReport,
+  loadMeta,
   tierLabel,
   updateTitle,
   updateWindow,
   windowLabel,
 } from '../src/diff.js';
-import { factionFromYaml, factionToYaml, metaFromYaml, metaToYaml } from '../src/emit.js';
-import type { Faction, FactionContent, Unit } from '../src/model.js';
+import {
+  factionFromYaml,
+  factionToYaml,
+  metaFromYaml,
+  metaToYaml,
+  type SiteMeta,
+} from '../src/emit.js';
+import {
+  CostOption,
+  Detachment,
+  Enhancement,
+  type Faction,
+  FactionContent,
+  PricingTier,
+  Unit,
+  Wargear,
+} from '../src/model.js';
 import { parseFaction } from '../src/parse.js';
 
 const fixture = (name: string) =>
@@ -46,7 +62,7 @@ describe('emit', () => {
     // 'page' keeps the parsed (source) order; 'name' (default) sorts alphabetically.
     expect(unitNames(factionToYaml(necrons(), 'page'))).toEqual(sourceOrder);
     expect(unitNames(factionToYaml(necrons()))).toEqual(
-      [...sourceOrder].sort((a, b) => a.localeCompare(b)),
+      [...sourceOrder].sort((a, b) => a.localeCompare(b, 'en')),
     );
     // The two modes genuinely differ for this faction (guards against a no-op test).
     expect(unitNames(factionToYaml(necrons(), 'page'))).not.toEqual(
@@ -864,6 +880,359 @@ describe('sub-factions: a shared change is listed once', () => {
     const entry = changelogEntry(before, after, { date: '2026-09-30' });
     expect(count(entry, '- Necron Warriors — 10 models: 80 → 85 (+5)')).toBe(1);
     expect(entry).toContain('\n### Space Marines sub-factions — shared\n');
+  });
+});
+
+/** A committed faction file — the realistic corpus, duplicate names and all. */
+const committed = (slug: string): Faction =>
+  factionFromYaml(
+    readFileSync(fileURLToPath(new URL(`../data/${slug}.yaml`, import.meta.url)), 'utf8'),
+  );
+const committedSlugs = readdirSync(fileURLToPath(new URL('../data/', import.meta.url)))
+  .filter((f) => f.endsWith('.yaml') && f !== 'meta.yaml')
+  .map((f) => f.replace(/\.yaml$/, ''));
+
+describe('unit identity (names are not unique within a faction)', () => {
+  it.each(committedSlugs)('reports nothing for two identical %s snapshots', (slug) => {
+    expect(changelog([committed(slug)], [committed(slug)])).toBe('No changes detected.\n');
+  });
+
+  it('reprices the right one of two same-named units, once', () => {
+    const before = committed('imperial-agents');
+    const after = committed('imperial-agents');
+    // Imperial Agents lists "Inquisitor" twice: on the base roster, and again under a
+    // sub-group, at a different price.
+    const inquisitors = after.units.filter((u) => u.name === 'Inquisitor');
+    expect(inquisitors.map((u) => u.groupTitle)).toEqual([
+      undefined,
+      'Every Model Has The Imperium Keyword',
+    ]);
+    const cost = inquisitors[0]?.pricing[0]?.costs[0];
+    if (!cost) throw new Error('data changed');
+    cost.points += 25;
+
+    const log = changelog([before], [after]);
+    expect(log).toContain('- Inquisitor — 1 model: 55 → 80 (+25)\n');
+    expect(log.match(/Inquisitor/g)).toHaveLength(1);
+  });
+
+  it('names the sub-group when two units would otherwise read the same', () => {
+    const before = committed('imperial-agents');
+    const after = committed('imperial-agents');
+    const cost = after.units.filter((u) => u.name === 'Inquisitor')[1]?.pricing[0]?.costs[0];
+    if (!cost) throw new Error('data changed');
+    cost.points += 5;
+    expect(changelog([before], [after])).toContain(
+      '- Inquisitor (Every Model Has The Imperium Keyword) — 1 model: 65 → 70 (+5)\n',
+    );
+  });
+
+  it('numbers two same-named units in the same sub-group', () => {
+    const before = committed('space-wolves');
+    const after = committed('space-wolves');
+    const cost = after.units.filter((u) => u.name === 'Venerable Dreadnought')[1]?.pricing[0]
+      ?.costs[0];
+    if (!cost) throw new Error('data changed');
+    cost.points += 5;
+    const log = changelog([before], [after]);
+    expect(log).toContain('- Venerable Dreadnought (#2) — 1 model: 165 → 170 (+5)\n');
+    expect(log).toContain('**1 faction changed** · units ~1 · 1 point change');
+    expect(log).not.toContain('re-tiered');
+  });
+
+  it('reports a unit moving to Legends, and back', () => {
+    const legends = necronsContent();
+    const warriors = legends.units.find((u) => u.name === 'Necron Warriors');
+    if (!warriors) throw new Error('fixture changed');
+    warriors.legends = true;
+
+    const moved = changelog([necronsContent()], [legends]);
+    expect(moved).toContain('**Unit changes:**\n- Necron Warriors — moved to Legends\n');
+    expect(moved).toContain('**1 faction changed** · units ~1\n');
+    expect(changelog([legends], [necronsContent()])).toContain(
+      '- Necron Warriors — moved out of Legends\n',
+    );
+  });
+});
+
+describe('every field the model carries is diffed', () => {
+  /** The fixture with wargear on its Technomancer, so `Wargear` has something to change. */
+  const base = (): FactionContent => {
+    const f = necronsContent();
+    const tech = f.units.find((u) => u.name === 'Technomancer');
+    if (!tech) throw new Error('fixture changed');
+    tech.wargear = [{ item: 'Test Rod', points: 10 }];
+    return f;
+  };
+  const must = <T>(x: T | undefined): T => {
+    if (x === undefined) throw new Error('fixture changed');
+    return x;
+  };
+  const unit = (f: FactionContent) => must(f.units.find((u) => u.name === 'Technomancer'));
+  const tier = (f: FactionContent) => must(unit(f).pricing[0]);
+  const cost = (f: FactionContent) => must(tier(f).costs[0]);
+  const gear = (f: FactionContent) => must(unit(f).wargear?.[0]);
+  const det = (f: FactionContent) => must(f.detachments.find((d) => d.name === 'Cursed Legion'));
+  const enh = (f: FactionContent) => must(det(f).enhancements.find((e) => e.name === 'Murdermind'));
+
+  /** Set `key` on what `pick` finds in a faction, or delete it when `value` is undefined. */
+  const set =
+    <T extends object, K extends keyof T>(
+      pick: (f: FactionContent) => T,
+      key: K,
+      value: T[K] | undefined,
+    ) =>
+    (f: FactionContent) => {
+      const target = pick(f);
+      if (value === undefined) Reflect.deleteProperty(target, key);
+      else target[key] = value;
+    };
+  const self = (f: FactionContent) => f;
+
+  /** One change per schema field. A field missing here fails the test below. */
+  const mutations: Record<string, Record<string, (f: FactionContent) => void>> = {
+    FactionContent: {
+      slug: set(self, 'slug', 'necrons-2'),
+      name: set(self, 'name', 'Necrontyr'),
+      version: set(self, 'version', '9.9'),
+      parent: set(self, 'parent', 'Space Marines'),
+      detachments: set(self, 'detachments', []),
+      units: (f) => {
+        f.units.pop();
+      },
+    },
+    Unit: {
+      name: set(unit, 'name', 'Technomancer Prime'),
+      groupTitle: set(unit, 'groupTitle', 'Test Group'),
+      pricing: set(unit, 'pricing', [
+        { range: '[1,)', label: 'Your Unit Costs', costs: [{ models: 1, points: 85 }] },
+      ]),
+      leaderTo: set(unit, 'leaderTo', ['Immortals']),
+      supportTo: set(unit, 'supportTo', undefined),
+      wargear: set(unit, 'wargear', undefined),
+      legends: set(unit, 'legends', true),
+    },
+    PricingTier: {
+      range: set(tier, 'range', '[1,2]'),
+      label: set(tier, 'label', 'Your 1st Unit Cost'),
+      costs: set(tier, 'costs', [{ models: 2, points: 160 }]),
+    },
+    CostOption: {
+      models: set(cost, 'models', 2),
+      points: set(cost, 'points', 85),
+      desc: set(cost, 'desc', 'Test option'),
+      addon: set(cost, 'addon', true),
+    },
+    Wargear: {
+      item: set(gear, 'item', 'Test Staff'),
+      points: set(gear, 'points', 15),
+    },
+    Detachment: {
+      name: set(det, 'name', 'Cursed Legion II'),
+      dp: set(det, 'dp', 9),
+      objectives: set(det, 'objectives', ['TAKE AND HOLD']),
+      unique: set(det, 'unique', 'Test Tag'),
+      enhancements: set(det, 'enhancements', []),
+    },
+    Enhancement: {
+      name: set(enh, 'name', 'Murdermind II'),
+      points: set(enh, 'points', 20),
+      leaderTo: set(enh, 'leaderTo', ['Immortals']),
+      supportTo: set(enh, 'supportTo', undefined),
+    },
+  };
+  const schemas = {
+    FactionContent,
+    Unit,
+    PricingTier,
+    CostOption,
+    Wargear,
+    Detachment,
+    Enhancement,
+  };
+  const fields = Object.entries(schemas).flatMap(([schema, s]) =>
+    Object.keys(s.shape).map((field) => [schema, field] as const),
+  );
+
+  it.each(fields)('reports a change to %s.%s', (schema, field) => {
+    const mutate = mutations[schema]?.[field];
+    // A field with no mutation is a field nobody has checked the diff reports.
+    if (!mutate) throw new Error(`add a mutation for ${schema}.${field}`);
+    const after = base();
+    mutate(after);
+    expect(FactionContent.safeParse(after).success).toBe(true);
+    expect(changelog([base()], [after])).not.toBe('No changes detected.\n');
+  });
+
+  it('reports a sub-group change as a change, not a removal plus an addition', () => {
+    const after = necronsContent();
+    unit(after).groupTitle = 'Test Group';
+    const log = changelog([necronsContent()], [after]);
+    expect(log).toContain('- Technomancer — group: — → Test Group\n');
+    expect(log).toContain('**1 faction changed** · units ~1\n');
+  });
+
+  it('reports a tier label change', () => {
+    const after = necronsContent();
+    tier(after).label = 'Your 1st Unit Cost';
+    expect(changelog([necronsContent()], [after])).toContain(
+      '- Technomancer — label (1st): Your 1st Unit Costs → Your 1st Unit Cost\n',
+    );
+  });
+
+  it('reports a faction renamed in place', () => {
+    const after = { ...necronsContent(), name: 'Necrontyr' };
+    expect(changelog([necronsContent()], [after])).toContain(
+      '## Necrontyr  _(renamed from Necrons)_\n\n_No unit or detachment changes._',
+    );
+  });
+});
+
+describe('the rules panels (meta.yaml)', () => {
+  const MUSTER = [
+    '## SELECT BATTLE SIZE',
+    '',
+    '| Battle Size | Points Total | DP |',
+    '| --- | --- | --- |',
+    '| INCURSION | 1000 | 2 |',
+    '| STRIKE FORCE | 2000 | 3 |',
+    '',
+    '## FILL YOUR ARMY ROSTER',
+    '',
+    'Fill it.',
+  ].join('\n');
+  const meta = (over: Partial<SiteMeta> = {}): SiteMeta => ({
+    version: '1.1',
+    lastUpdated: '2026-06-17',
+    notes: 'To muster…\n\n## UNITS',
+    muster: MUSTER,
+    factions: ['necrons'],
+    ...over,
+  });
+  const same = [necronsContent()];
+
+  it('lists only the changed lines of a panel, in a Rules section', () => {
+    const muster = MUSTER.replace('| 1000 | 2 |', '| 1000 | 3 |').replace('Fill it.', 'Fill.');
+    const log = changelog(same, same, { meta: { before: meta(), after: meta({ muster }) } });
+    expect(log).toContain(
+      '## Rules\n\n**Muster Armies:**\n\n```diff\n- | INCURSION | 1000 | 2 |\n+ | INCURSION | 1000 | 3 |\n…\n- Fill it.\n+ Fill.\n```\n',
+    );
+    // Counted in the summary, though no faction moved.
+    expect(log).toContain('**No faction changes** · rules ~1\n');
+  });
+
+  it('lists the notes panel before the muster panel', () => {
+    const changed = meta({
+      notes: 'To muster an army…\n\n## UNITS',
+      muster: MUSTER.replace('Fill it.', 'Fill.'),
+    });
+    const log = changelog(same, same, { meta: { before: meta(), after: changed } });
+    expect(log).toContain(
+      '## Rules\n\n**Notes:**\n\n```diff\n- To muster…\n+ To muster an army…\n```\n\n**Muster Armies:**\n\n```diff\n- Fill it.\n+ Fill.\n```\n',
+    );
+    expect(log).toContain('rules ~2');
+  });
+
+  it('folds a long rules-only update without counting factions it has none of', () => {
+    const muster = Array.from({ length: 60 }, (_, i) => `line ${i}`).join('\n');
+    const log = changelog(same, same, { meta: { before: meta(), after: meta({ muster }) } });
+    expect(log).toMatch(/<summary><strong>Detail<\/strong> — \d+ lines<\/summary>/);
+  });
+
+  it('adds no Rules section when meta is unchanged', () => {
+    const opts = { meta: { before: meta(), after: meta() } };
+    expect(changelog(same, same, opts)).toBe('No changes detected.\n');
+    const after = necronsContent();
+    reprice(after, 5);
+    const log = changelog(same, [after], opts);
+    expect(log).not.toContain('Rules');
+    expect(log).not.toContain('rules');
+  });
+
+  it('says a panel was lost, rather than listing every line of it', () => {
+    const { notes: _, ...lost } = meta();
+    const log = changelog(same, same, { meta: { before: meta(), after: lost } });
+    expect(log).toContain('## Rules\n\n**Notes:** removed — it had 3 lines\n');
+    expect(log).toContain('rules -1');
+  });
+
+  it('names a site version change no faction already states', () => {
+    const log = changelog(same, same, {
+      meta: { before: meta(), after: meta({ version: '1.2' }) },
+    });
+    expect(log).toContain('**No faction changes** · site v1.1 → v1.2\n');
+    expect(log).not.toContain('## Rules');
+
+    // Every faction bumping with it already says so: `all v1.1 → v1.2`.
+    const before = [necronsContent(), asOrks(necronsContent())];
+    const after = before.map((f) => ({ ...f, version: '1.2' }));
+    const bumped = changelog(before, after, {
+      meta: { before: meta(), after: meta({ version: '1.2' }) },
+    });
+    expect(bumped).toContain('**2 factions changed** · all v1.1 → v1.2\n');
+    expect(bumped).not.toContain('site v');
+  });
+
+  it('records the Rules section in the changelog file entry too', () => {
+    const muster = MUSTER.replace('| 1000 | 2 |', '| 1000 | 3 |');
+    const entry = changelogEntry(same, same, {
+      date: '2026-10-22',
+      meta: { before: meta(), after: meta({ muster }) },
+    });
+    expect(entry).toContain('\n### Rules\n\n**Muster Armies:**\n');
+  });
+
+  it('loads a snapshot directory’s meta.yaml', () => {
+    const data = loadMeta(fileURLToPath(new URL('../data/', import.meta.url)));
+    expect(data?.version).toMatch(/^\d+\.\d+$/);
+    expect(data?.muster).toContain('## SELECT BATTLE SIZE');
+    expect(loadMeta(fileURLToPath(new URL('./fixtures/', import.meta.url)))).toBeUndefined();
+  });
+});
+
+describe('sort order (independent of the process locale)', () => {
+  /**
+   * Run `fn` as if the process locale were POSIX, where "Big’Ed Bossbunka" sorts before
+   * "Big Mek" — the opposite of the committed (English) order.
+   */
+  const underPosix = <T>(fn: () => T): T => {
+    const compare = String.prototype.localeCompare;
+    const spy = vi.spyOn(String.prototype, 'localeCompare').mockImplementation(function (
+      this: string,
+      that,
+      locales,
+      options,
+    ) {
+      return compare.call(this, that, locales ?? 'en-US-u-va-posix', options);
+    });
+    try {
+      return fn();
+    } finally {
+      spy.mockRestore();
+    }
+  };
+
+  it('writes the committed order back byte for byte', () => {
+    for (const slug of committedSlugs) {
+      const path = fileURLToPath(new URL(`../data/${slug}.yaml`, import.meta.url));
+      const text = readFileSync(path, 'utf8');
+      expect(
+        underPosix(() => factionToYaml(factionFromYaml(text))),
+        slug,
+      ).toBe(text);
+    }
+  });
+
+  it('orders the report the same way', () => {
+    const names = ['Big’Ed Bossbunka', 'Big Mek'];
+    const before = names.map((name) => ({ ...asOrks(necronsContent()), slug: name, name }));
+    const after = before.map((f) => {
+      const g = structuredClone(f);
+      reprice(g, 5);
+      return g;
+    });
+    const log = underPosix(() => changelog(before, after));
+    expect(log.indexOf('| Big Mek |')).toBeLessThan(log.indexOf('| Big’Ed Bossbunka |'));
   });
 });
 
