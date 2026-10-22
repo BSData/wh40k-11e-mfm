@@ -127,6 +127,9 @@ export function factionFromYaml(text: string): Faction {
   return { ...orderContent(f), firstSeen: f.firstSeen };
 }
 
+// The schema lives in model.ts; the type stays importable from here, beside its reader/writer.
+export type { SiteMeta } from './model.js';
+
 /** Metadata index. `lastUpdated` is stable on no-op scrapes (max of firstSeen). */
 export function metaToYaml(meta: SiteMeta): string {
   const doc = {
