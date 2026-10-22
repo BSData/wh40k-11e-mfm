@@ -24,6 +24,8 @@ the AI angle is purely this maintenance harness.
 - `src/discord.ts` — the same diff as a Discord webhook payload, plus the one call that
   sends it (`announcement()` pure, `send()` tested against a stub server). One message
   per update, edited as the update grows.
+- `src/stack.ts` — plans the update PR: one per MFM version (`mfm/v<version>`), a new
+  version stacked on the open one rather than folded into it (`planUpdate()` pure).
 - `src/cli.ts` — the pipeline entrypoint (`pnpm scrape`).
 - `specs/` — **source-of-truth prose**. Change the spec first, then the code.
 - `test/` — Vitest + saved HTML `fixtures/`. Tests run offline.

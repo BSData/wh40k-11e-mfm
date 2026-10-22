@@ -26,34 +26,38 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Snapshot current data
-        run: |
-          mkdir -p /tmp/old-data
-          cp -r data/. /tmp/old-data/ 2>/dev/null || true
-
-      # The update PR is sticky: its branch is force-pushed on every run. Its data/
-      # already carries the `firstSeen` stamps of the changes it captured, so the
-      # scrape matches against it as well as against main — a run that finds nothing
-      # new re-stamps nothing and so reproduces the branch byte for byte (no
-      # force-push, and the PR keeps its start date), while a later change widens the
-      # reported date range instead of resetting it to today.
-      - name: Fetch the open update PR's dates
+      # Update PRs are sticky: each one's branch is force-pushed on every run while its
+      # version is live. Their data/ already carries the `firstSeen` stamps of the changes
+      # they captured, so the scrape matches against every open one as well as against
+      # main — a run that finds nothing new re-stamps nothing and so reproduces the branch
+      # byte for byte (no force-push, and the PR keeps its start date), while a later
+      # change widens the reported date range instead of resetting it to today.
+      # Branch names reach the shell through env and word splitting only, never ${{ }}.
+      - name: Fetch the open update PRs' dates
+        id: open
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          BRANCH: mfm/auto-update
         run: |
-          mkdir -p /tmp/pr-data
-          if [ "$(gh pr view "$BRANCH" --json state --jq .state 2>/dev/null)" = "OPEN" ]; then
-            git fetch --depth=1 origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
-            git archive "origin/$BRANCH" data | tar -x -C /tmp/pr-data --strip-components=1
-            echo "Matching dates against the open $BRANCH PR."
-          else
-            echo "No open update PR — dates start fresh."
-          fi
+          gh pr list --label mfm-update --state open \
+            --json number,headRefName,baseRefName,isCrossRepository \
+            --jq '[.[] | select(.isCrossRepository | not) | select(.headRefName | startswith("mfm/"))]' \
+            > /tmp/update-prs.json
+          dates=""
+          for branch in $(jq -r '.[].headRefName' /tmp/update-prs.json); do
+            git fetch --depth=1 origin "+refs/heads/$branch:refs/remotes/origin/$branch"
+            mkdir -p "/tmp/pr-data/$branch"
+            git archive "origin/$branch" data | tar -x -C "/tmp/pr-data/$branch" --strip-components=1
+            dates="$dates --dates-from /tmp/pr-data/$branch"
+            echo "Matching dates against the open $branch PR."
+          done
+          echo "dates=$dates" >> "$GITHUB_OUTPUT"
 
       - name: Scrape
-        run: pnpm scrape --report /tmp/failures.md --dates-from /tmp/pr-data
+        env:
+          DATES: ${{ steps.open.outputs.dates }}
+        # $DATES is unquoted on purpose: one `--dates-from <dir>` pair per open PR.
+        run: pnpm scrape --report /tmp/failures.md $DATES
 
       # The announcement is rendered after the PR step (it links to the PR), by which
       # point create-pull-request has had the working tree. Keep it a copy.
@@ -62,6 +66,23 @@ jobs:
           mkdir -p /tmp/new-data
           cp -r data/. /tmp/new-data/
 
+      # One PR per MFM version, stacked: the live version's open PR is updated on its own
+      # base, and a new version gets a new PR on top of the open one instead of
+      # rebuilding it. See "One PR per version, stacked" in specs/change-tracking.md.
+      - name: Plan the update PR
+        id: plan
+        run: pnpm exec tsx src/stack.ts /tmp/update-prs.json data >> "$GITHUB_OUTPUT"
+
+      # The PR is diffed against its base, not main: body, changelog entry and
+      # announcement all compare the base's data/ with the scrape.
+      - name: Snapshot the base's data
+        env:
+          BASE: ${{ steps.plan.outputs.base }}
+        run: |
+          git fetch --depth=1 origin "+refs/heads/$BASE:refs/remotes/origin/$BASE"
+          mkdir -p /tmp/old-data
+          git archive "origin/$BASE" data | tar -x -C /tmp/old-data --strip-components=1
+
       - name: Generate changelog
         id: changelog
         run: |
@@ -69,22 +90,52 @@ jobs:
           echo "title=$(cat /tmp/title.txt)" >> "$GITHUB_OUTPUT"
           cat /tmp/changelog.md
 
-      # The entry goes into changelog/v<version>.md, and DATA-CHANGELOG.md (the index)
-      # is regenerated; create-pull-request commits both along with data/.
-      - name: Update the changelog
-        run: pnpm exec tsx scripts/update-data-changelog.ts /tmp/old-data data
+      # The commit is built on a checkout of the base, so it carries the base's changelog
+      # files plus this update's entry: changelog/v<version>.md and the regenerated
+      # DATA-CHANGELOG.md index. The tools still run from main's checkout.
+      - name: Check out the base
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.plan.outputs.base }}
+          path: pub
+
+      - name: Stage the update on the base
+        working-directory: pub
+        run: |
+          rm -rf data
+          cp -r ../data data
+          ../node_modules/.bin/tsx ../scripts/update-data-changelog.ts /tmp/old-data data
 
       - name: Open pull request on change
         id: pr
         uses: peter-evans/create-pull-request@v8
         with:
-          branch: mfm/auto-update
-          base: main
+          path: pub
+          branch: ${{ steps.plan.outputs.branch }}
+          base: ${{ steps.plan.outputs.base }}
           title: ${{ steps.changelog.outputs.title }}
           body-path: /tmp/changelog.md
           commit-message: 'data: ${{ steps.changelog.outputs.title }}'
           labels: mfm-update
           delete-branch: true
+
+      # Link the chain as a GitHub stacked PR, so it merges bottom-up. Best-effort:
+      # GitHub doesn't document whether GITHUB_TOKEN may create stacks, and the
+      # base-branch chain stands without it (GitHub retargets the PR above when the
+      # branch below is deleted on merge).
+      - name: Link the update stack
+        if: steps.pr.outputs.pull-request-number != '' && steps.plan.outputs.below != ''
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          GH_STACK_NO_UPDATE_NOTIFIER: '1'
+          BELOW: ${{ steps.plan.outputs.below }}
+          PR: ${{ steps.pr.outputs.pull-request-number }}
+        run: |
+          gh extension install github/gh-stack --pin v0.2.1
+          # $BELOW is unquoted on purpose: the PRs below, bottom first, as separate args.
+          gh stack link $BELOW "$PR"
 
       # One Discord message per MFM update, not per scrape run. The sticky PR is the
       # update's identity, and the hidden marker on one of its comments is the whole of
@@ -133,29 +184,59 @@ jobs:
               --body "Announced on Discord: ${2:-link unavailable} <!-- discord-message-id: $1 -->"
           fi
 
-      - name: Open issue on failure
+      # One issue per outage, not per day: a failure while a `scrape-failure` issue is
+      # open is reported as a comment on it, and the next successful run (below) closes it.
+      - name: Report the failure
         if: failure()
         uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
-            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const { owner, repo } = context.repo;
+            const run = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
             let details = '';
             try { details = fs.readFileSync('/tmp/failures.md', 'utf8').trim(); } catch {}
-            const body = [
-              'The scheduled MFM scrape failed — the source site markup may have drifted, or a faction stopped parsing.',
-              '',
+            const report = [
               `**Run log:** ${run}`,
               '',
-              details || '_No per-faction detail was captured — the run likely failed before parsing (network, browser launch, or the index page itself). Check the run log._',
+              details || '_No per-faction detail was captured — the run likely failed outside parsing (network, browser launch, the index page itself, or a later step such as planning the update PR). Check the run log._',
               '',
               '---',
               'To fix, follow `.agents/playbooks/diagnose-parse.md`. Each block above is the located parser error (including any unconsumed-content report from the completeness check).',
             ].join('\n');
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Scrape failed (${new Date().toISOString().slice(0, 10)})`,
-              labels: ['scrape-failure'],
-              body,
+            const { data: [open] } = await github.rest.issues.listForRepo({
+              owner, repo, labels: 'scrape-failure', state: 'open', sort: 'created', direction: 'asc', per_page: 1,
             });
+            if (open) {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: open.number,
+                body: `The scheduled MFM scrape failed again.\n\n${report}`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner, repo,
+                title: `Scrape failed (${new Date().toISOString().slice(0, 10)})`,
+                labels: ['scrape-failure'],
+                body: `The scheduled MFM scrape failed — the source site markup may have drifted, or a faction stopped parsing.\n\n${report}`,
+              });
+            }
+
+      - name: Close the failure issue
+        if: success()
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const run = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner, repo, labels: 'scrape-failure', state: 'open',
+            });
+            for (const issue of open) {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: issue.number,
+                body: `The scheduled scrape succeeded again: ${run}`,
+              });
+              await github.rest.issues.update({
+                owner, repo, issue_number: issue.number, state: 'closed', state_reason: 'completed',
+              });
+            }
