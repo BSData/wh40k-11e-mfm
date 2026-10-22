@@ -4,12 +4,12 @@ import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterAll, afterEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import type { DiscordMessage } from '../src/discord.js';
 import { announceOnPr, markerComment, recordedMessageId } from '../src/ops/announce.js';
 import { failureReport, reportFailure, resolveFailure } from '../src/ops/failure-issue.js';
 import { type GitHub, githubFromEnv, paginate, runUrl } from '../src/ops/github.js';
-import { exportBranchData, exportOpenPrs, listUpdatePrs } from '../src/ops/open-prs.js';
+import { exportBranchData, exportOpenPrs, gitEnv, listUpdatePrs } from '../src/ops/open-prs.js';
 import { stepOutputs } from '../src/ops/outputs.js';
 
 interface Call {
@@ -179,6 +179,7 @@ describe('listUpdatePrs', () => {
 const scratch = mkdtempSync(join(tmpdir(), 'mfm-ops-'));
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
+/** git in `cwd`, never in a repository an inherited `GIT_DIR` names (a hook sets one). */
 const git = (cwd: string, ...args: string[]) =>
   execFileSync(
     'git',
@@ -191,7 +192,7 @@ const git = (cwd: string, ...args: string[]) =>
       'init.defaultBranch=main',
       ...args,
     ],
-    { cwd, stdio: 'pipe' },
+    { cwd, env: gitEnv(), stdio: 'pipe' },
   ).toString();
 
 /**
@@ -257,6 +258,36 @@ describe('exportBranchData', () => {
     await exportBranchData('mfm/v1.7', dir, checkout);
     expect(readFileSync(join(dir, 'sub', 'deep.yaml'), 'utf8')).toBe('a: “x”\n');
     expect(readFileSync(join(dir, 'plain.yaml'), 'utf8')).toBe('b: 1\n\n');
+  });
+
+  it('leaves the enclosing repository alone when run from a git hook', async () => {
+    // A git hook (lefthook's pre-push runs this suite) exports GIT_DIR, GIT_WORK_TREE and
+    // GIT_INDEX_FILE. Once, the `git init --bare` in `originWithBranch` inherited them and
+    // set `core.bare = true` on the developer's own checkout. Stand one in for it here.
+    const parent = join(scratch, 'parent');
+    mkdirSync(parent);
+    git(parent, 'init');
+    writeFileSync(join(parent, 'file.txt'), 'parent\n');
+    git(parent, 'add', '.');
+    git(parent, 'commit', '-m', 'parent');
+    const config = readFileSync(join(parent, '.git', 'config'), 'utf8');
+    const refs = git(parent, 'for-each-ref');
+
+    vi.stubEnv('GIT_DIR', join(parent, '.git'));
+    vi.stubEnv('GIT_WORK_TREE', parent);
+    vi.stubEnv('GIT_INDEX_FILE', join(parent, '.git', 'index'));
+    try {
+      const checkout = originWithBranch('mfm/v1.6', { 'a.yaml': 'a: 1\n' });
+      await exportBranchData('mfm/v1.6', join(scratch, 'out-hook'), checkout);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+
+    expect(readFileSync(join(scratch, 'out-hook', 'a.yaml'), 'utf8')).toBe('a: 1\n');
+    expect(readFileSync(join(parent, '.git', 'config'), 'utf8')).toBe(config);
+    expect(git(parent, 'config', 'core.bare').trim()).toBe('false');
+    expect(git(parent, 'for-each-ref')).toBe(refs);
+    expect(git(parent, 'status', '--porcelain')).toBe('');
   });
 
   it('throws for a branch origin does not have', async () => {
