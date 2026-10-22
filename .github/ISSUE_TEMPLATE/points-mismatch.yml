@@ -11,11 +11,12 @@ body:
 
         Before you file:
         - **Wrong in New Recruit or BattleScribe?** That data comes from another repo: report it at [BSData/wh40k-11e](https://github.com/BSData/wh40k-11e/issues).
-        - **Did the MFM just update?** `main` lags the site until the update pull request is merged. If an [open update PR](https://github.com/BSData/wh40k-11e-mfm/pulls?q=is%3Apr+is%3Aopen+label%3Amfm-update) already has the site's value, there's nothing to report.
+        - **Did the MFM just update?** `main` lags the site until the update pull request is merged. If an [open update PR](https://github.com/BSData/wh40k-11e-mfm/pulls?q=is%3Apr+is%3Aopen+label%3Amfm-update) already has the site's value (its description lists what changed), there's nothing to report.
   - type: dropdown
     id: faction
     attributes:
       label: Faction
+      # The `name` of each data/<slug>.yaml. Add a new faction here when the MFM gains one.
       options:
         - Adepta Sororitas
         - Adeptus Custodes
@@ -53,10 +54,10 @@ body:
   - type: input
     id: entry
     attributes:
-      label: Unit, detachment or enhancement
+      label: Unit, detachment, enhancement or wargear
       description: >-
         The name as the MFM shows it. For a unit, add the model count, and the tier if the unit
-        has more than one (such as "Your 2nd + Unit Costs").
+        has more than one (such as "Your 2nd + Unit Costs"). For wargear, name the unit too.
       placeholder: Necron Warriors, 20 models
     validations:
       required: true

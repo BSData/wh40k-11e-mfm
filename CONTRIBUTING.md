@@ -21,12 +21,12 @@ New Recruit or BattleScribe belong to [BSData/wh40k-11e](https://github.com/BSDa
   already tracks it (see [When the scrape fails](#when-the-scrape-fails)). Comment there.
 
 ## Setup
-You need Node 22 or later and pnpm, at the version pinned in `package.json`'s
-`packageManager` (`corepack enable` provides it).
+You need Node 22 or later and pnpm, at the version in the `packageManager` field of
+`package.json` (see [pnpm's installation guide](https://pnpm.io/installation)).
 
 ```bash
 pnpm install                            # also installs the git hooks (lefthook)
-pnpm exec playwright install chromium   # only for live scrapes with Legends and the rules panels
+pnpm exec playwright install chromium   # for live scrapes with Legends and pnpm refresh-fixtures
 ```
 
 The hooks run Biome on commit, and the typecheck and the tests on push.
@@ -37,11 +37,8 @@ The tests run against saved MFM pages in `test/fixtures/` and need no network:
 ```bash
 pnpm test         # once
 pnpm test:watch   # again on every save
-pnpm verify       # before you push: what CI runs
+pnpm verify       # before you push: lint, types, tests and data checks
 ```
-
-`pnpm verify` is `pnpm check && pnpm typecheck && pnpm test`, plus checks that `data/` is
-valid and canonical.
 
 A live scrape checks your change against the real site:
 
@@ -63,27 +60,39 @@ Change the spec first, in the same PR, then the code.
 
 ## Parser changes need fixture evidence
 The MFM site changes its markup without notice; that is the failure this project expects.
-Handle only markup that a saved page shows. Refresh or add the fixture with
-`pnpm refresh-fixtures`, and add a test that fails without your change. Handling for
-markup that no fixture shows gets reverted: #18 added some, and #19 took it out again.
+Handle only markup that a saved page shows:
+1. `pnpm refresh-fixtures` re-downloads every fixture from the live site (it needs
+   Chromium). To save a page the set doesn't cover yet, add it to `FIXTURES` in
+   `scripts/refresh-fixtures.ts` first.
+2. Update the snapshots with `pnpm test -u`, and review what changed in them.
+3. Add a test that fails without your change.
+
+Handling for markup that no fixture shows gets reverted: #18 added some, and #19 took it
+out again.
 
 ## Never hand-edit `data/`
-`data/`, `changelog/` and `DATA-CHANGELOG.md` are scraper output. A wrong value is either a
-parser bug (fix the parser, with a fixture) or what the MFM says. If your change alters the
-output, regenerate it with `pnpm scrape` and say so in the PR. Check for an open update PR
-first, because it writes the same files.
+`data/`, `DATA-CHANGELOG.md` and the update entries in `changelog/` are scraper output. A
+wrong value is either a parser bug (fix the parser, with a fixture) or what the MFM says.
+The one hand-written exception is a dated note in the version's `changelog/v<version>.md`
+when a change alters the shape of the files, like the 2026-09-02 note in
+[`changelog/v1.4.md`](changelog/v1.4.md).
+
+If your change alters the output, agree in the issue on how the data gets regenerated
+before you open the PR. A re-scrape stamps today's date as the `firstSeen` of every
+faction whose file changes, and an open update PR writes the same files.
 
 ## How updates reach `main`
 1. The `Scrape MFM` workflow scrapes the site every day at 16:00 UTC.
 2. When anything changed, it opens a PR for that MFM version on the branch
-   `mfm/v<version>`, labelled `mfm-update`. The PR body is the changelog, and the commit
-   adds the same entry to `changelog/v<version>.md`.
-3. While that version is live, every run force-pushes the same branch. Don't push to
-   `mfm/*` branches: the next run overwrites them.
+   `mfm/v<version>`, labelled `mfm-update`. The PR body is the changelog (shortened if
+   it's over GitHub's size limit), and the commit adds the full entry to
+   `changelog/v<version>.md`.
+3. While that version is live, each run that finds a change force-pushes the same branch.
+   Don't push to `mfm/*` branches: the next change overwrites your commits.
 4. If GW publishes a new version before the open PR is merged, the new version's PR is
    stacked on the open one (based on its branch). They merge bottom-up.
-5. A maintainer checks the changes against the site and merges. Until then, `main` is
-   behind the site.
+5. A maintainer checks the changes against the site and merges, which deletes the branch.
+   Until then, `main` is behind the site.
 
 The details, and the reasons for them, are in
 [`specs/change-tracking.md`](specs/change-tracking.md).
@@ -91,21 +100,21 @@ The details, and the reasons for them, are in
 ## When the scrape fails
 A failed run opens an issue labelled `scrape-failure`, with each failing faction's error.
 Further failures add comments to that issue rather than opening new ones, and the next
-successful run closes it. To fix it, follow the "When a scrape breaks" runbook linked from
-[`AGENTS.md`](AGENTS.md): refresh the fixture, find the selector that drifted, fix it, and
-re-test. Then open a PR that links the issue.
+successful run closes it. To fix it, follow the diagnose-parse runbook
+([`AGENTS.md`](AGENTS.md) links it): refresh the fixture, find the selector that drifted,
+fix it, and re-test. Then open a PR that links the issue.
 
 ## Pull requests
 - One change per PR, linked to the issue it closes.
 - Fill in the checklist in the PR template.
-- CI runs on every PR, and the code owners in [`.github/CODEOWNERS`](.github/CODEOWNERS)
+- CI runs on your PR, and the code owners in [`.github/CODEOWNERS`](.github/CODEOWNERS)
   review it.
 - Write commit subjects in the imperative, in plain English, as in `git log`.
 
 ## Coding agents
 [`AGENTS.md`](AGENTS.md) is the entry point for coding agents: the project map, the
 commands, the conventions and the runbooks. Everything on this page applies to
-agent-written PRs too, including a review by someone who reads the diff.
+agent-written PRs too, and a person reviews them like any other PR.
 
 ## Conduct and license
 The [BSData Code of Conduct](https://github.com/BSData/.github/blob/main/CODE_OF_CONDUCT.md)

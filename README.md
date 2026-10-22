@@ -23,7 +23,8 @@ faction's URL slug on the MFM site: `data/necrons.yaml` is
 <https://mfm.warhammer-community.com/en/necrons>.
 
 ### Stable URLs
-Read the files from `raw.githubusercontent.com`. Their paths don't change:
+Read the files from `raw.githubusercontent.com`. A file's path follows the faction's slug on
+the MFM site, and no slug has changed so far:
 
 ```text
 https://raw.githubusercontent.com/BSData/wh40k-11e-mfm/main/data/meta.yaml
@@ -47,24 +48,27 @@ const factions = await Promise.all(meta.factions.map((slug) => get(`${slug}.yaml
 To pin a snapshot that never changes, put a commit SHA in place of `main`.
 
 `version` is a quoted string (`"1.6"`). `firstSeen` and `lastUpdated` are unquoted dates
-(`2026-10-14`): YAML 1.1 parsers, such as PyYAML, read them as dates, and YAML 1.2
-parsers read them as strings.
+(`2026-10-14`): some parsers, such as PyYAML and js-yaml, return them as dates, and others,
+such as the `yaml` package, as strings.
 
 ### Updates, and why `main` lags the site
 A scheduled job scrapes the MFM every day at 16:00 UTC. When anything has changed, it opens
 or updates a pull request for that MFM version, labelled
 [`mfm-update`](https://github.com/BSData/wh40k-11e-mfm/pulls?q=is%3Apr+is%3Aopen+label%3Amfm-update),
 and the data reaches `main` only when a maintainer has reviewed and merged it. That can take
-days: MFM v1.6 was first seen on 2026-10-14 and merged on 2026-10-22. So:
+days: MFM v1.6 was first seen on 2026-10-14, and its update was merged on 2026-10-22. So:
 - `main` holds reviewed data, which may be behind the site. `meta.yaml`'s `version` says
   which MFM version it is, and each faction's `firstSeen` says when its current values were
   first seen.
-- The newest values are on the open update PR's branch, `mfm/v<version>` (for example
-  `https://raw.githubusercontent.com/BSData/wh40k-11e-mfm/mfm/v1.6/data/necrons.yaml`).
-  They haven't been reviewed, and the branch is force-pushed on every run.
-- [`DATA-CHANGELOG.md`](DATA-CHANGELOG.md) links each version's changelog. A change to the
-  shape of the files is noted there too, as when v1.4 replaced `role` and `attachTo` with
-  `leaderTo` and `supportTo`.
+- The newest values are on the open update PR's branch, `mfm/v<version>`, at
+  `https://raw.githubusercontent.com/BSData/wh40k-11e-mfm/mfm/v<version>/data/<slug>.yaml`.
+  They haven't been reviewed. The branch is rewritten whenever a run finds a change and
+  deleted when the PR merges, so find it from the open PR rather than hard-coding it. If
+  two are open, the newer version's PR is stacked on the older one.
+- [`DATA-CHANGELOG.md`](DATA-CHANGELOG.md) links each version's changelog. The shape of
+  the files has changed once so far, as noted in [`changelog/v1.4.md`](changelog/v1.4.md):
+  `role` and `attachTo` became `leaderTo` and `supportTo`, and `objective` became
+  `objectives`.
 
 ## License
 The code is released under the [MIT License](LICENSE).
@@ -111,8 +115,9 @@ pnpm scrape --no-legends       # fast HTTP-only run (no browser)
 pnpm scrape                    # full run, all factions (with Legends + notes)
 ```
 
-See [`AGENTS.md`](AGENTS.md) for the project map, the commands and the runbooks (notably
-what to do when a scrape breaks), and [`specs/`](specs/) for the source-of-truth contracts.
+See [`AGENTS.md`](AGENTS.md) for the project map and the commands,
+[`.agents/skills/`](.agents/skills/) for the runbooks (notably what to do when a scrape
+breaks), and [`specs/`](specs/) for the source-of-truth contracts.
 
 ## Disclaimer
 Unofficial. Warhammer 40,000 and the Munitorum Field Manual are © Games Workshop. This
