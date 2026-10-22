@@ -101,9 +101,8 @@ is the first that names a faction.
   list shown beside it (source order preserved). Buying the enhancement is what grants the
   association, so it is modelled per enhancement. Each omitted when absent.
 
-`parent`, `unique`, `leaderTo`, and `supportTo` were all surfaced by the completeness coverage check in
-`src/parse.ts` (see specs/scraping.md) — they were being silently dropped before it forced
-them into the model.
+`parent`, `unique`, `leaderTo` and `supportTo` were all found by the completeness coverage
+check (see specs/scraping.md and [0019](../docs/decisions/0019-account-for-every-visible-string.md)).
 
 ### `firstSeen` — when this content took effect
 The date the file's *current content* was first observed. The scraper keeps it **stable
@@ -157,7 +156,7 @@ factions:                 # slugs successfully scraped, sorted
 `lastUpdated` deliberately avoids a per-run timestamp so an unchanged scrape leaves
 `meta.yaml` byte-identical (no spurious PR). `notes` and `muster` are present only on
 browser runs (omitted with `--no-legends`). Both are **Markdown**: `extractNotesMarkdown` /
-`extractMusterMarkdown` in `src/parse.ts` convert the rendered panel — `<b>` → `**bold**`,
+`extractMusterMarkdown` in `src/parse/panels.ts` convert the rendered panel — `<b>` → `**bold**`,
 all-caps section labels → `##` headings, `<ul>/<li>` → bullet lists, `<table>` → GFM
 tables — so the rules keep their structure, and a change to them (e.g. a battle size's DP)
 is a readable line diff. `src/browser.ts` only drives the page (open + wait) and hands the

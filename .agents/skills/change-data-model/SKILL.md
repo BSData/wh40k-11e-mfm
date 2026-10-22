@@ -30,9 +30,9 @@ Edit the zod schema, with a doc comment that matches the spec (for `meta.yaml` i
 `.optional()` and are omitted when absent rather than written as `null` or `[]`, unless the
 spec says otherwise (`dp` is nullable, `objectives` is always a list).
 
-## 3. Parser: `src/parse.ts`
-Fill the field, and make the completeness check (`assertFactionCovered()`) claim the strings
-the new field consumes. Otherwise the check reports them as unconsumed, or a dropped value
+## 3. Parser: `src/parse/`
+Fill the field (a card's fields are read in `src/parse/cards.ts`), and make the completeness
+check (`assertFactionCovered()`) claim the strings the new field consumes. Otherwise the check reports them as unconsumed, or a dropped value
 goes unnoticed.
 
 ## 4. Emit: `src/emit.ts`

@@ -4,7 +4,7 @@ Why the project works the way it does. The specs under [`specs/`](../../specs) s
 the contract is; each record here says why one part of it was chosen, what it replaced,
 and what it costs. A spec links the records behind it.
 
-One file per decision, numbered in the order the decisions were made:
+One file per decision, numbered in the order they were written up: change tracking first, then scraping.
 
 | # | Decision | Spec |
 | --- | --- | --- |
@@ -24,6 +24,10 @@ One file per decision, numbered in the order the decisions were made:
 | [0014](0014-unit-identity.md) | A unit is its group, name and position | change tracking |
 | [0015](0015-diff-the-rules-panels.md) | Diff the rules panels | change tracking |
 | [0016](0016-one-english-collation.md) | One English collation | change tracking |
+| [0017](0017-http-first-a-browser-only-where-needed.md) | Plain HTTP first, a browser only where the page needs one | scraping |
+| [0018](0018-the-change-layer-is-not-data.md) | The "changed since the last MFM" layer is not data | scraping |
+| [0019](0019-account-for-every-visible-string.md) | Account for every visible string on the page | scraping, data model |
+| [0020](0020-fail-loud-and-located.md) | Fail loud and located, one faction at a time | scraping |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and

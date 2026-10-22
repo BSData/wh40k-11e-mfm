@@ -64,7 +64,8 @@ Check the selector table in the spec against what the new markup actually uses
 (class names, the `$RS(...)` swap function, the `P:`/`S:` id prefixes).
 
 ## 4. Fix, then re-baseline
-- Update the selector in `src/parse.ts` **and** the table in `specs/scraping.md`.
+- Update the selector in `src/parse/` (`page.ts` finds the cards, `cards.ts` reads them)
+  **and** the table in `specs/scraping.md`.
 - If the data shape changed, follow the [change-data-model](../change-data-model/SKILL.md)
   skill: `specs/data-model.md` and `src/model.ts` first.
 - Re-run and update snapshots intentionally:
@@ -91,7 +92,7 @@ If the failure is in `src/browser.ts` (Legends or the "Welcome…"/"Muster Armie
 the site's *interactive* bits drifted, not the markup. Re-check these landmarks against the
 live page: the cookie reject button (`#onetrust-reject-all-handler`), the toggle
 (`#show-legends-label`, **absent on factions with no Legends — that's expected**), and the
-rules panels' button labels (`RULES_PANELS` in `src/parse.ts`) plus the `aria-controls`
+rules panels' button labels (`RULES_PANELS` in `src/parse/panels.ts`) plus the `aria-controls`
 link from each button to its panel. Debug with `chromium.launch({ headless: false })`.
 
 ## 5. Open a PR

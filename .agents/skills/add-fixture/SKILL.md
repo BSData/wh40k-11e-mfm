@@ -13,7 +13,7 @@ coverage of a faction whose layout differs from Necrons (the default fixture).
 - A faction uses a structure the existing fixtures don't exercise (unusual pricing tiers,
   no detachments, special characters in names).
 - A parser bug only reproduces on a specific faction.
-- You are about to handle a markup variant in `src/parse.ts`. A fixture must show it
+- You are about to handle a markup variant in `src/parse/`. A fixture must show it
   first: handling for markup no fixture shows is how #18 had to be reverted in #19.
 
 ## Steps

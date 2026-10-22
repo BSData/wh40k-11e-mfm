@@ -6,7 +6,7 @@
 ## Context
 A failed scrape opened an issue saying only that the run failed, so finding *which*
 faction broke, and why, meant reading the run log. And it opened one per failed run: a site
-change that took two days to fix opened two identical issues (#60 and #61).
+change that took two days to fix opened two identical issues ([#60](https://github.com/BSData/wh40k-11e-mfm/issues/60) and [#61](https://github.com/BSData/wh40k-11e-mfm/issues/61)).
 
 ## Decision
 The scrape writes a per-faction report of the located errors (`--report`), and the issue
