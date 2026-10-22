@@ -208,7 +208,7 @@ jobs:
               details || '_No per-faction detail was captured — the run likely failed outside parsing (network, browser launch, the index page itself, or a later step such as planning the update PR). Check the run log._',
               '',
               '---',
-              'To fix, follow `.agents/playbooks/diagnose-parse.md`. Each block above is the located parser error (including any unconsumed-content report from the completeness check).',
+              'To fix, follow `.agents/skills/diagnose-parse/SKILL.md`. Each block above is the located parser error (including any unconsumed-content report from the completeness check).',
             ].join('\n');
             const { data: [open] } = await github.rest.issues.listForRepo({
               owner, repo, labels: 'scrape-failure', state: 'open', sort: 'created', direction: 'asc', per_page: 1,

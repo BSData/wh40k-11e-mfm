@@ -1,0 +1,7 @@
+{
+  "name": "wh40k-mfm",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+  "containerEnv": { "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0" },
+  "postCreateCommand": "sudo corepack enable pnpm && scripts/setup",
+  "customizations": { "vscode": { "extensions": ["biomejs.biome"] } }
+}
