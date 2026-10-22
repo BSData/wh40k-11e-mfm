@@ -69,19 +69,23 @@ export function gitEnv(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv 
 }
 
 /** Run git in `cwd`, feeding it `input`; its stdout, or a throw with its stderr. */
-function git(cwd: string, args: string[], input = ''): Promise<Buffer> {
+function git(cwd: string, args: string[], input?: string): Promise<Buffer> {
   return new Promise((done, fail) => {
-    const child = spawn('git', args, { cwd, env: gitEnv(), stdio: ['pipe', 'pipe', 'pipe'] });
+    const stdin = input === undefined ? 'ignore' : 'pipe';
+    const child = spawn('git', args, { cwd, env: gitEnv(), stdio: [stdin, 'pipe', 'pipe'] });
     const out: Buffer[] = [];
     const err: Buffer[] = [];
-    child.stdout.on('data', (b: Buffer) => out.push(b));
-    child.stderr.on('data', (b: Buffer) => err.push(b));
+    child.stdout?.on('data', (b: Buffer) => out.push(b));
+    child.stderr?.on('data', (b: Buffer) => err.push(b));
     child.on('error', fail);
     child.on('close', (code) => {
       if (code === 0) done(Buffer.concat(out));
       else fail(new Error(`git ${args.join(' ')}: ${Buffer.concat(err).toString().trim()}`));
     });
-    child.stdin.end(input);
+    // A git that exits before reading all of it closes the pipe: the write fails with
+    // EPIPE, and the exit code above is what reports why.
+    child.stdin?.on('error', () => {});
+    child.stdin?.end(input);
   });
 }
 
@@ -109,7 +113,9 @@ export async function exportBranchData(branch: string, dir: string, cwd = '.'): 
   let at = 0;
   for (const b of blobs) {
     const eol = batch.indexOf(0x0a, at);
-    const size = Number(batch.subarray(at, eol).toString().split(' ')[2]);
+    const [, type, length] = batch.subarray(at, eol).toString().split(' ');
+    if (type !== 'blob') throw new Error(`git cat-file: no blob for ${b.path} on ${branch}`);
+    const size = Number(length);
     const file = join(dir, b.path.slice('data/'.length));
     mkdirSync(dirname(file), { recursive: true });
     writeFileSync(file, batch.subarray(eol + 1, eol + 1 + size));
