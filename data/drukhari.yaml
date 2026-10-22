@@ -1,13 +1,12 @@
 name: Drukhari
 slug: drukhari
 version: "1.5"
-firstSeen: 2026-09-30
+firstSeen: 2026-10-02
 detachments:
   - name: Covenite Coterie
     dp: 2
     objectives:
       - TAKE AND HOLD
-    unique: Covens
     enhancements:
       - { name: Master Artisan, points: 20 }
       - { name: Master Nemesine, points: 5 }
@@ -17,7 +16,6 @@ detachments:
     dp: 1
     objectives:
       - RECONNAISSANCE
-    unique: Wych Cult
     enhancements:
       - { name: Hyperstimm Trafficker, points: 20 }
       - { name: Periapt of Torments, points: 20 }
@@ -25,7 +23,6 @@ detachments:
     dp: 1
     objectives:
       - DISRUPTION
-    unique: Kabal
     enhancements:
       - { name: Contempt for Rivals, points: 20 }
       - { name: Towering Arrogance, points: 15 }
@@ -33,7 +30,6 @@ detachments:
     dp: 2
     objectives:
       - DISRUPTION
-    unique: Kabal
     enhancements:
       - { name: Informant Network, points: 30 }
       - { name: Leechbite Plate, points: 5 }
@@ -71,7 +67,6 @@ detachments:
     dp: 2
     objectives:
       - PURGE THE FOE
-    unique: Wych Cult
     enhancements:
       - { name: Chronoshard, points: 15 }
       - { name: Morghenna’s Curse, points: 20 }
@@ -81,7 +76,6 @@ detachments:
     dp: 1
     objectives:
       - TAKE AND HOLD
-    unique: Covens
     enhancements:
       - { name: Elixir of the Corpse Courts (Upgrade), points: 15 }
       - { name: Gnarlskin Experimentor, points: 20 }
