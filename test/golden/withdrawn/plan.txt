@@ -1,0 +1,17 @@
+## no update PR open
+branch=mfm/v1.6
+base=main
+below=
+
+## v1.6 open on main, beside a Dependabot PR
+branch=mfm/v1.6
+base=main
+below=
+
+## v1.5 open, v1.6 stacked on it
+branch=mfm/v1.6
+base=mfm/v1.5
+below=63
+
+## two update PRs on main
+error: Update PRs #63, #70 are all based on main: the update stack forks, so there is no single top to put this scrape on. Close or retarget all but one.
