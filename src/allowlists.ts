@@ -41,4 +41,6 @@ export const CHANGE_BADGE_TEXT: readonly string[] = [
   'UNIQUE TAG REMOVED',
   // v1.6, on units whose Leader/Support list changed (test/fixtures/space-marines.html).
   'BODYGUARD UNITS UPDATED',
+  // v1.6, on units whose wargear costs were dropped (test/fixtures/adeptus-custodes.html).
+  'WARGEAR COSTS REMOVED',
 ];

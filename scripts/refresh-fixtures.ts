@@ -39,6 +39,8 @@ const FIXTURES: { name: string; url: string }[] = [
   // space-marines (v1.6): the v1.4 structures — a unit with both a Leader and a Support
   // list (Cato Sicarius) and detachments granting two Force Dispositions.
   { name: 'space-marines.html', url: factionUrl('space-marines') },
+  // adeptus-custodes (v1.6): the "WARGEAR COSTS REMOVED" change note.
+  { name: 'adeptus-custodes.html', url: factionUrl('adeptus-custodes') },
 ];
 
 // Browser renders: necrons-legends (legends toggled on) pins legends detection;

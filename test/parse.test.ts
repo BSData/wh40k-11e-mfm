@@ -220,6 +220,25 @@ describe('parseFaction (space-marines, v1.6) — the v1.4 structures', () => {
   });
 });
 
+describe('parseFaction (adeptus-custodes, v1.6) — the "WARGEAR COSTS REMOVED" note', () => {
+  const faction = parseFaction(
+    fixture('adeptus-custodes.html'),
+    'adeptus-custodes',
+    'Adeptus Custodes',
+  );
+
+  it('strips the note and reads the card it sits on', () => {
+    expect(fixture('adeptus-custodes.html')).toContain('WARGEAR COSTS REMOVED');
+    const caladius = faction.units.find((u) => u.name === 'Caladius Grav-Tank');
+    expect(caladius?.pricing.map((t) => t.costs)).toEqual([
+      [{ models: 1, points: 230 }],
+      [{ models: 1, points: 260 }],
+    ]);
+    expect(caladius?.wargear).toBeUndefined();
+    expect(JSON.stringify(faction)).not.toMatch(/UPDATED|WARGEAR COSTS/);
+  });
+});
+
 describe('markLegends (necrons base vs legends-on render)', () => {
   const base = parseFaction(fixture('necrons.html'), 'necrons', 'Necrons');
   const full = parseFaction(fixture('necrons-legends.html'), 'necrons', 'Necrons');
@@ -358,6 +377,9 @@ describe('parseFaction coverage guard — nothing on the page goes unconsumed', 
     ).not.toThrow();
     expect(() =>
       parseFaction(fixture('space-marines.html'), 'space-marines', 'Space Marines'),
+    ).not.toThrow();
+    expect(() =>
+      parseFaction(fixture('adeptus-custodes.html'), 'adeptus-custodes', 'Adeptus Custodes'),
     ).not.toThrow();
   });
 

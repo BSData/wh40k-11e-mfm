@@ -51,8 +51,8 @@ shape so a changed card parses identically to an unchanged one:
   in front of the (already-new) points. The delta is read the way points are: it may carry
   thousands separators (`(+1,000)`), and its minus may be a hyphen or `−` (U+2212).
 - A trailing **`UPDATED`** badge div, optionally followed by a note div
-  (`FORCE DISPOSITION(S) CHANGED`, `REQUISITION THRESHOLDS REMOVED`, `UNIQUE TAG REMOVED`), on
-  unit and detachment cards alike.
+  (`FORCE DISPOSITION(S) CHANGED`, `REQUISITION THRESHOLDS REMOVED`, `UNIQUE TAG REMOVED`,
+  `BODYGUARD UNITS UPDATED`, `WARGEAR COSTS REMOVED`), on unit and detachment cards alike.
 
 None of this is data — the current points are the `NN pts` value and the change history is
 the git diff of `data/` — so `deannotate()` removes the `UPDATED`/note badge divs and strips
