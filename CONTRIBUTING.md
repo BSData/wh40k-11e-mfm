@@ -63,7 +63,7 @@ The MFM site changes its markup without notice; that is the failure this project
 Handle only markup that a saved page shows:
 1. `pnpm refresh-fixtures` re-downloads every fixture from the live site (it needs
    Chromium). To save a page the set doesn't cover yet, add it to `FIXTURES` in
-   `scripts/refresh-fixtures.ts` first.
+   `src/fixtures.ts` first.
 2. Update the snapshots with `pnpm test -u`, and review what changed in them.
 3. Add a test that fails without your change.
 

@@ -109,7 +109,7 @@ them into the model.
 The date the file's *current content* was first observed. The scraper keeps it **stable
 across no-op scrapes** and only advances it (to the run date) when the rest of the content
 actually changes — so it records when each set of values came into effect, and an
-unchanged scrape produces no git diff. Implemented in `src/cli.ts` (`resolveFirstSeen`)
+unchanged scrape produces no git diff. Implemented in `src/scrape.ts` (`resolveFirstSeen`)
 via the content fingerprint `contentKey()` in `src/emit.ts`, which ignores `firstSeen`.
 
 ### Rules

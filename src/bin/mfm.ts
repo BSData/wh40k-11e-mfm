@@ -4,8 +4,9 @@ import { parseArgs } from 'node:util';
 import { COMMANDS, type Io, UsageError } from './commands.js';
 
 /**
- * `mfm`, the one command line for everything but the scrape itself (`pnpm scrape`):
- * the reports an update publishes, and the GitHub chores the scrape workflow runs.
+ * `mfm`, the project's one command line: the scrape, the reports an update publishes,
+ * the data and fixture chores, and the GitHub chores the scrape workflow runs. The
+ * `pnpm` scripts (`pnpm scrape`, `pnpm check-data`, `pnpm refresh-fixtures`) run it too.
  *
  *   pnpm mfm --help
  *   pnpm mfm <command> --help

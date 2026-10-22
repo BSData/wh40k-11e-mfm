@@ -17,7 +17,7 @@ coverage of a faction whose layout differs from Necrons (the default fixture).
   first: handling for markup no fixture shows is how #18 had to be reverted in #19.
 
 ## Steps
-1. Add the fixture download to `FIXTURES` in `scripts/refresh-fixtures.ts`, with a comment
+1. Add the fixture download to `FIXTURES` in `src/fixtures.ts`, with a comment
    saying which case it covers:
    ```ts
    // orks: a detachment granting two Force Dispositions ("War Horde").

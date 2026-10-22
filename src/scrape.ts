@@ -1,6 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { BrowserContext } from 'playwright';
 import {
   createScrapeContext,
@@ -23,15 +22,8 @@ import {
 } from './parse.js';
 
 /**
- * Scrape pipeline: index → faction pages → validated YAML.
- *
- *   pnpm scrape                     # all factions, with Legends (uses a browser)
- *   pnpm scrape --faction necrons   # one faction
- *   pnpm scrape --no-legends        # HTTP-only, skip Legends (fast; no browser)
- *   pnpm scrape --concurrency 6     # faction pages in flight at once (default 4)
- *   pnpm scrape --out /tmp/data     # custom output dir (default: data/)
- *   pnpm scrape --order page        # entity order: 'name' (default, alphabetical) or 'page'
- *   pnpm scrape --dates-from <dir>  # extra snapshot to match `firstSeen` against (repeatable)
+ * Scrape pipeline: index → faction pages → validated YAML. Run as `pnpm scrape`
+ * (`mfm scrape`; its `--help` lists the options, which map onto `ScrapeOptions`).
  *
  * Legends units and the rules panels ("Welcome…" notes, "Muster Armies") aren't in
  * the server HTML, so capturing them needs a headless browser (Playwright). Without
@@ -48,40 +40,20 @@ import {
 /** The name the rules panels' failure goes by in the failures report. */
 const RULES_PANELS_FAILURE = 'rules panels';
 
-interface Args {
+/** What to scrape, and where to: `mfm scrape`'s options. */
+export interface ScrapeOptions {
+  /** One faction's slug; a full run when absent. */
   faction?: string;
   out: string;
+  /** Faction pages in flight at once. */
   concurrency: number;
+  /** Render Legends and the rules panels in a browser. */
   legends: boolean;
   order: OrderMode;
+  /** Where to write the per-faction failure report, if anywhere. */
   report?: string;
+  /** More snapshots to match `firstSeen` against. */
   datesFrom: string[];
-}
-
-function parseArgs(argv: string[]): Args {
-  const args: Args = { out: 'data', concurrency: 4, legends: true, order: 'name', datesFrom: [] };
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a === '--faction') {
-      const v = argv[++i];
-      if (v !== undefined) args.faction = v;
-    } else if (a === '--out') args.out = argv[++i] ?? args.out;
-    else if (a === '--concurrency') args.concurrency = Number(argv[++i]) || args.concurrency;
-    else if (a === '--no-legends') args.legends = false;
-    else if (a === '--order') {
-      const v = argv[++i];
-      if (v !== 'name' && v !== 'page')
-        throw new Error(`--order must be "name" or "page", got: ${v ?? '(missing)'}`);
-      args.order = v;
-    } else if (a === '--report') {
-      const v = argv[++i];
-      if (v !== undefined) args.report = v;
-    } else if (a === '--dates-from') {
-      const v = argv[++i];
-      if (v !== undefined) args.datesFrom.push(v);
-    }
-  }
-  return args;
 }
 
 /** Run `fn` over `items` with at most `limit` in flight at once. */
@@ -188,9 +160,8 @@ async function scrapeRulesPanels(
   throw lastError;
 }
 
-/** Run the pipeline on `argv` (the arguments after the script); resolves to the exit code. */
-export async function main(argv: string[]): Promise<number> {
-  const args = parseArgs(argv);
+/** Run the pipeline; resolves to the exit code (1 when any faction or the panels failed). */
+export async function scrape(args: ScrapeOptions): Promise<number> {
   console.log(`Fetching index: ${BASE_URL}`);
   const index = parseIndex(await fetchText(BASE_URL));
   const mode = args.legends ? `browser+Legends ×${args.concurrency}` : `HTTP ×${args.concurrency}`;
@@ -284,19 +255,4 @@ export async function main(argv: string[]): Promise<number> {
     return 1;
   }
   return 0;
-}
-
-// Run only as the entry point, so tests can import `main`. `realpathSync`, because Node
-// resolves symlinks for `import.meta.url` but not for `argv[1]`.
-const entry = process.argv[1];
-if (entry && existsSync(entry) && fileURLToPath(import.meta.url) === realpathSync(entry)) {
-  main(process.argv.slice(2)).then(
-    (code) => {
-      process.exitCode = code;
-    },
-    (err) => {
-      console.error(err instanceof Error ? err.stack : err);
-      process.exit(1);
-    },
-  );
 }

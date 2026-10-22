@@ -57,10 +57,11 @@ the AI angle is purely this maintenance harness.
   per update, edited as the update grows.
 - `src/stack.ts` — plans the update PR: one per MFM version (`mfm/v<version>`), a new
   version stacked on the open one rather than folded into it (`planUpdate()` pure).
-- `src/cli.ts` — the pipeline entrypoint (`pnpm scrape`).
-- `src/bin/mfm.ts` — `pnpm mfm <command>`: the reports (`diff`, `announce`, `plan`,
-  `changelog`) and the workflow's GitHub chores, which live in `src/ops/` (tested
-  against stub servers). `pnpm mfm --help` lists them.
+- `src/scrape.ts` — the scrape pipeline (`pnpm scrape`, which is `mfm scrape`).
+- `src/bin/mfm.ts` — `pnpm mfm <command>`, the one command line: the scrape, the reports
+  (`diff`, `announce`, `plan`, `changelog`), `check-data`, `refresh-fixtures`, and the
+  workflow's GitHub chores, which live in `src/ops/` (tested against stub servers).
+  `pnpm mfm --help` lists them.
 - `specs/` — **source-of-truth prose**. Change the spec first, then the code.
 - `docs/decisions/` — why the specs say what they do: one record per decision, linked
   from the spec section it explains.

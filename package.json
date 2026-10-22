@@ -9,9 +9,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "scrape": "tsx src/cli.ts",
+    "scrape": "tsx src/bin/mfm.ts scrape",
     "mfm": "tsx src/bin/mfm.ts",
-    "refresh-fixtures": "tsx scripts/refresh-fixtures.ts",
+    "refresh-fixtures": "tsx src/bin/mfm.ts refresh-fixtures",
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "biome check .",

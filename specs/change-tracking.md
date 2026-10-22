@@ -327,7 +327,7 @@ A Discord outage must not fail the scrape job, whose failure handler reports tha
 source markup may have drifted. Secret-less runs (forks) simply skip it.
 
 ## Failure reporting
-On a parse failure the scrape exits non-zero (no PR) and opens an issue. `src/cli.ts`
+On a parse failure the scrape exits non-zero (no PR) and opens an issue. `src/scrape.ts`
 collects each faction's located error and, with `--report <path>`, writes
 `failuresReport()` (from `src/diff.ts`) — a Markdown block per failed faction with the
 exact error (including any unconsumed-content report from the completeness check).

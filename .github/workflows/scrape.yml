@@ -32,11 +32,12 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       # Every step below with logic in it runs one `mfm` command (src/bin/mfm.ts; see
-      # `--help` on each), called as node_modules/.bin/tsx rather than `pnpm exec tsx`:
-      # pnpm can print its own status lines ("Already up to date", "Done in …") to stdout,
-      # which is how #78's Discord marker came to record "Already" instead of the message
-      # id. Results a later step reads go to files (--output "$GITHUB_OUTPUT",
-      # --body-file), never through a captured stdout.
+      # `--help` on each). `pnpm scrape` is `mfm scrape`; the rest are called as
+      # node_modules/.bin/tsx rather than `pnpm exec tsx`, because pnpm can print its own
+      # status lines ("Already up to date", "Done in …") to stdout, which is how #78's
+      # Discord marker came to record "Already" instead of the message id. Results a later
+      # step reads go to files (--output "$GITHUB_OUTPUT", --body-file), never through a
+      # captured stdout.
 
       # Update PRs are sticky: the scrape matches `firstSeen` dates against each open
       # one's data/ as well as main's, so a run that finds nothing new reproduces its

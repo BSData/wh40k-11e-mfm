@@ -3,12 +3,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { main } from '../src/bin/mfm.js';
 import { renderRulesPanels, renderWithLegends } from '../src/browser.js';
-import { main } from '../src/cli.js';
 import { BASE_URL, fetchText } from '../src/fetch.js';
 
-// The pipeline end to end, offline: the network and the browser are stubbed with saved
-// fixtures, so what runs is the real parse → validate → write path.
+// The pipeline end to end, offline, as `mfm scrape` runs it: the network and the browser
+// are stubbed with saved fixtures, so what runs is the real parse → validate → write path.
 vi.mock('../src/fetch.js', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../src/fetch.js')>()),
   fetchText: vi.fn(),
@@ -28,7 +28,7 @@ const fixture = (name: string) =>
 const INDEX = '<html><body><p>v1.1</p><a href="/en/necrons">Necrons</a></body></html>';
 const OLD_META = 'version: "1.0"\nlastUpdated: 2026-01-01\nnotes: kept\nfactions:\n  - necrons\n';
 
-describe('scrape CLI — the rules panels on a full run', () => {
+describe('mfm scrape — the rules panels on a full run', () => {
   let out: string;
   const meta = () => readFileSync(join(out, 'meta.yaml'), 'utf8');
 
@@ -49,7 +49,7 @@ describe('scrape CLI — the rules panels on a full run', () => {
 
   it('writes notes and muster to meta.yaml when the panels render', async () => {
     vi.mocked(renderRulesPanels).mockResolvedValue(fixture('necrons-panels.html'));
-    expect(await main(['--out', out])).toBe(0);
+    expect(await main(['scrape', '--out', out])).toBe(0);
     expect(meta()).toContain('## SELECT BATTLE SIZE');
     expect(meta()).toContain('## UNITS');
   });
@@ -57,7 +57,7 @@ describe('scrape CLI — the rules panels on a full run', () => {
   it('fails the run and leaves meta.yaml untouched when the panels fail to render', async () => {
     vi.mocked(renderRulesPanels).mockRejectedValue(new Error('Timeout 15000ms exceeded'));
     const report = join(out, 'failures.md');
-    expect(await main(['--out', out, '--report', report])).toBe(1);
+    expect(await main(['scrape', '--out', out, '--report', report])).toBe(1);
     expect(meta()).toBe(OLD_META);
     expect(readFileSync(report, 'utf8')).toMatch(/rules panels[\s\S]*Timeout 15000ms exceeded/);
     // The factions themselves still parse and are written.
@@ -68,8 +68,33 @@ describe('scrape CLI — the rules panels on a full run', () => {
     // The HTTP page has both panels closed, so neither panel's text can be extracted.
     vi.mocked(renderRulesPanels).mockResolvedValue(fixture('necrons.html'));
     const report = join(out, 'failures.md');
-    expect(await main(['--out', out, '--report', report])).toBe(1);
+    expect(await main(['scrape', '--out', out, '--report', report])).toBe(1);
     expect(meta()).toBe(OLD_META);
     expect(readFileSync(report, 'utf8')).toMatch(/rules panels[\s\S]*Welcome to the Munitorum/);
+  });
+});
+
+describe('mfm scrape — its options', () => {
+  beforeEach(() => {
+    vi.mocked(fetchText).mockClear();
+  });
+
+  it.each([
+    [['--order', 'alphabetical'], /--order must be "name" or "page", got: alphabetical/],
+    [['--concurrency', '0'], /--concurrency must be a whole number above 0, got: 0/],
+    [['--concurrency', 'four'], /--concurrency must be a whole number above 0, got: four/],
+    [['--faction'], /--faction/],
+    [['--legends'], /Unknown option '--legends'/],
+  ])('refuses %j before fetching anything', async (args, message) => {
+    let stderr = '';
+    const io = {
+      out: () => {},
+      err: (text: string) => {
+        stderr += text;
+      },
+    };
+    expect(await main(['scrape', ...args], io)).toBe(2);
+    expect(stderr).toMatch(message);
+    expect(fetchText).not.toHaveBeenCalled();
   });
 });
