@@ -1,0 +1,99 @@
+name: Points don't match the MFM
+description: A value in data/ differs from the Munitorum Field Manual site. No coding needed.
+title: 'Points mismatch: '
+labels: [bug]
+type: Bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form when a value in this repo's [`data/`](https://github.com/BSData/wh40k-11e-mfm/tree/main/data) files differs from what the [Munitorum Field Manual](https://mfm.warhammer-community.com/en) shows now.
+
+        Before you file:
+        - **Wrong in New Recruit or BattleScribe?** That data comes from another repo: report it at [BSData/wh40k-11e](https://github.com/BSData/wh40k-11e/issues).
+        - **Did the MFM just update?** `main` lags the site until the update pull request is merged. If an [open update PR](https://github.com/BSData/wh40k-11e-mfm/pulls?q=is%3Apr+is%3Aopen+label%3Amfm-update) already has the site's value, there's nothing to report.
+  - type: dropdown
+    id: faction
+    attributes:
+      label: Faction
+      options:
+        - Adepta Sororitas
+        - Adeptus Custodes
+        - Adeptus Mechanicus
+        - Aeldari
+        - Astra Militarum
+        - Black Templars
+        - Blood Angels
+        - Chaos Daemons
+        - Chaos Knights
+        - Chaos Space Marines
+        - Chaos Titan Legions
+        - Dark Angels
+        - Death Guard
+        - Deathwatch
+        - Drukhari
+        - Emperor’s Children
+        - Genestealer Cults
+        - Grey Knights
+        - Imperial Agents
+        - Imperial Knights
+        - Leagues of Votann
+        - Necrons
+        - Orks
+        - Space Marines
+        - Space Wolves
+        - T’au Empire
+        - Thousand Sons
+        - Titan Legions
+        - Tyranids
+        - World Eaters
+        - Other (not listed)
+    validations:
+      required: true
+  - type: input
+    id: entry
+    attributes:
+      label: Unit, detachment or enhancement
+      description: >-
+        The name as the MFM shows it. For a unit, add the model count, and the tier if the unit
+        has more than one (such as "Your 2nd + Unit Costs").
+      placeholder: Necron Warriors, 20 models
+    validations:
+      required: true
+  - type: input
+    id: value-here
+    attributes:
+      label: Value in this repo
+      description: >-
+        What the faction's file in `data/` says. To find it, open the file on GitHub and search
+        for the name.
+      placeholder: 190 pts
+    validations:
+      required: true
+  - type: input
+    id: value-site
+    attributes:
+      label: Value on the MFM site
+      placeholder: 200 pts
+    validations:
+      required: true
+  - type: input
+    id: mfm-link
+    attributes:
+      label: MFM page link
+      description: The faction's page on the MFM site.
+      placeholder: https://mfm.warhammer-community.com/en/necrons
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: >-
+        A screenshot of the entry on the MFM site. Paste it, or drag and drop the image here. The
+        site changes, so a screenshot shows what it said when you looked.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: For example, a link to the line in `data/`, or when you first noticed it.

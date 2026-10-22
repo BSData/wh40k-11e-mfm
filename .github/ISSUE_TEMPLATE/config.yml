@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Wrong in New Recruit or BattleScribe?
+    url: https://github.com/BSData/wh40k-11e/issues
+    about: >-
+      List-builder data (units, options, rules, the points in your roster) lives in
+      BSData/wh40k-11e. This repo only scrapes the Munitorum Field Manual.
+  - name: Questions and chat
+    url: https://www.bsdata.net/discord
+    about: Ask on the BSData Discord rather than opening an issue.

@@ -1,0 +1,43 @@
+name: Scraper or tooling bug
+description: The scraper, the tests, a workflow, or a generated changelog or announcement misbehaves.
+labels: [bug]
+type: Bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        - For a wrong value in `data/`, use the **Points don't match the MFM** form instead.
+        - If the scheduled scrape failed, an open [`scrape-failure` issue](https://github.com/BSData/wh40k-11e-mfm/issues?q=is%3Aissue+is%3Aopen+label%3Ascrape-failure) already tracks it. Comment there rather than opening a new one.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What went wrong, and where you saw it.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The command you ran, or a link to the workflow run, pull request or issue.
+      placeholder: pnpm scrape --faction necrons --no-legends
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output
+      description: The error or the relevant part of the output. It's formatted as code.
+      render: text
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Only if you ran it yourself. Your OS, Node and pnpm versions, and the commit.
+      placeholder: Windows 11, Node 22.12, pnpm 11.20, commit f941177

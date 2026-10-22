@@ -1,0 +1,4 @@
+# Code owners are asked to review every pull request.
+# TODO: add a backup owner (a second maintainer or a BSData team), so that reviews and
+# update PRs don't wait on one person.
+* @amis92
