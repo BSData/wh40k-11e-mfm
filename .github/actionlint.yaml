@@ -1,0 +1,6 @@
+paths:
+  .github/workflows/scrape.yml:
+    ignore:
+      # $DATES, $BELOW and $posted are word-split on purpose, as the comments beside each
+      # one say: one argument per open update PR, and the two fields of the Discord reply.
+      - 'SC2086:'
