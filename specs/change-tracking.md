@@ -180,23 +180,61 @@ factions carry — they move together, but a page can lag a revision behind, so 
 majority is the update's version rather than whichever faction happens to sort first,
 and ties go to the higher version so the answer doesn't depend on directory order.
 
-The window is the days. The scrape PR is **sticky**: `mfm/auto-update` is force-pushed
-on every run, so an update is not a single day's event. Dates therefore come out of the
-data — the `firstSeen` stamps of the factions in the change set — never from "now":
-`updateWindow()` takes the earliest and latest of them, and `windowLabel()` renders
-`2026-08-31`, or `2026-08-31 → 2026-09-02` once the PR has accumulated changes across
-several days.
+The window is the days. An update PR is **sticky**: its branch, `mfm/v<version>`, is
+force-pushed on every run while that version is live, so an update is not a single day's
+event. Dates therefore come out of the data — the `firstSeen` stamps of the factions in
+the change set — never from "now": `updateWindow()` takes the earliest and latest of
+them, and `windowLabel()` renders `2026-08-31`, or `2026-08-31 → 2026-09-02` once the PR
+has accumulated changes across several days.
 
-For that to hold, a re-scrape must not re-stamp what the open PR already captured. The
-workflow hands the scrape the PR branch's `data/` via `--dates-from`, and `firstSeen`
-resolves to the date of the **oldest** snapshot (committed or PR) whose content matches
-what was just scraped. So: a run that finds nothing new reproduces the branch byte for
-byte — no force-push, and the PR keeps its start date; a later change stamps only the
-factions that moved, widening the window; and a value that reverts to the committed one
-resolves back to the committed date instead of looking like a change.
+For that to hold, a re-scrape must not re-stamp what the open PRs already captured. The
+workflow hands the scrape every open update branch's `data/` via `--dates-from`, and
+`firstSeen` resolves to the date of the **oldest** snapshot (committed or PR) whose
+content matches what was just scraped. So: a run that finds nothing new reproduces the
+branch byte for byte — no force-push, and the PR keeps its start date; a later change
+stamps only the factions that moved, widening the window; and a value that reverts to the
+committed one resolves back to the committed date instead of looking like a change.
 
 This is pure code — no LLM. An optional LLM polish step could summarise the changelog
 into prose later, but is not required.
+
+## One PR per version, stacked
+Until v1.6 there was one sticky branch, `mfm/auto-update`, rebuilt from `main` on every
+run. That held only while each update merged before GW published the next version.
+v1.6 broke it. The late v1.5 update (2026-10-02 → 2026-10-05) was still open when v1.6
+went live on 2026-10-14, and that day's run rebuilt the branch as one `main` → v1.6 diff.
+The v1.5 entry vanished from `changelog/v1.5.md`, and its 457 point changes were filed
+under v1.6. They were split back apart by hand, as two stacked PRs.
+
+So the branch is named for the version, and a new version stacks on the open PR instead
+of overwriting it. `planUpdate()` in [`src/stack.ts`](../src/stack.ts) decides where the
+scrape goes, from the open update PRs (label `mfm-update`, branches `mfm/…`) and the
+scraped site version:
+
+| open update PRs | live version | the run writes |
+| --- | --- | --- |
+| none | v1.6 | a new `mfm/v1.6`, based on `main` |
+| top of the stack is `mfm/v1.6` | v1.6 | `mfm/v1.6`, force-pushed on its current base |
+| top of the stack is `mfm/v1.5` | v1.6 | a new `mfm/v1.6`, based on `mfm/v1.5`; v1.5's PR is left alone |
+
+The stack is the chain of update PRs from `main` up, each based on the branch of the one
+below. The plan fails loud on what it can't place, rather than guessing:
+- two update PRs on the same base;
+- a live version whose PR sits below the top (the site going back a version);
+- a scrape with no site version at all.
+
+A PR is diffed against its **base**, not `main`. The PR body, the version file's entry
+and the Discord announcement all compare the base's `data/` with the scrape. The commit
+is built on a checkout of the base, so it carries the base's changelog files plus its own
+entry. An old version's PR is final once the site moves on: the site only shows the
+current version, so nothing more can arrive for the old one.
+
+The workflow links the chain as a GitHub stacked PR (`gh stack link`), so it merges
+bottom-up. That step is best-effort, because GitHub doesn't document whether a workflow's
+`GITHUB_TOKEN` may create stacks. The plain base-branch chain works without it: GitHub
+offers to link it, and retargets the PR above when the branch below is deleted on merge.
+After the bottom PR is squash-merged, the next run finds the next PR based on `main` and
+rebuilds it from `main`. So its diff is right again even if nothing rebased it.
 
 ## The persistent changelog: one file per MFM version
 The PR body is ephemeral and capped; the durable record is **one Markdown file per MFM
@@ -226,8 +264,9 @@ included, but never folded or shortened. The PR body is this entry under a size 
 
 No changes → neither file is touched (no spurious diff) — and because the entry is
 dated from the data rather than from today, a re-scrape that finds nothing new leaves
-both byte-identical too. Every scrape runs on `main`, so re-running on a sticky PR
-rewrites the entry from `main`'s copy rather than stacking a second one.
+both byte-identical too. Each run writes the entry into a checkout of the PR's base, so
+re-running on a sticky PR rewrites the entry from the base's copy rather than stacking a
+second one.
 
 Entries written before this layout keep their original Keep a Changelog shape — items
 under **Added** / **Changed** / **Removed**, each prefixed by faction — moved verbatim into
@@ -261,7 +300,7 @@ CLI, record a new marker. Roughly ten lines, no branching.
 ### One message per update, edited as the update grows
 The announcement fires when the scrape **detects** the change, not when the PR is
 merged — the channel hears about an update the day it lands, not whenever a human gets
-round to the review. That puts it on the wrong side of the sticky PR: `mfm/auto-update`
+round to the review. That puts it on the wrong side of the sticky PR: an update's branch
 is force-pushed daily, so "an update" is a branch that accretes over days, not an event.
 
 The PR is therefore the message's identity. Its id is kept in a hidden marker inside a
@@ -285,7 +324,8 @@ the announcement, and the marker is still written.
 
 The PR is the natural carrier because it lives exactly as long as the update does: once
 merged and its branch deleted, the next update opens a fresh PR with no marker and gets a
-fresh message. No PAT, no cache, and no state committed to `data/` — which has to stay
+fresh message. A new version stacks a new PR, so it gets its own message rather than
+editing the previous version's. No PAT, no cache, and no state committed to `data/` — which has to stay
 byte-reproducible (see *Naming an update*). Deleting the comment forces a repost, which
 is the manual escape hatch.
 
@@ -337,24 +377,34 @@ exact error (including any unconsumed-content report from the completeness check
 workflow folds that file into the issue body, so the issue says *which* factions broke
 and *why*, not just that something did.
 
+There is one issue per outage, not one per day. A failed run comments on the open
+`scrape-failure` issue when there is one, and opens a new issue only when there isn't.
+The next successful run closes it, with a link to that run. Before this, a site change
+that took two days to fix opened two identical issues.
+
 ## Workflow integration
 The scrape GitHub Action:
-1. snapshots the committed `data/` to a temp dir,
-2. exports the open update PR's `data/` (if there is one) to a second temp dir,
-3. runs `pnpm scrape --report /tmp/failures.md --dates-from <pr-data>`, then copies the
-   freshly scraped `data/` to a third temp dir — the announcement is rendered after the
-   PR step, by which point `create-pull-request` has had the working tree,
-4. runs `tsx src/diff.ts <old> data --title-file <path>` to produce the changelog body
+1. lists the open update PRs and exports each one's `data/` to its own temp dir,
+2. runs `pnpm scrape --report /tmp/failures.md` with a `--dates-from` for each of those
+   dirs, then copies the freshly scraped `data/` to a temp dir,
+3. runs `tsx src/stack.ts` to plan the PR (its branch, its base, and the PRs below it; see
+   *One PR per version, stacked*), and exports the base's `data/` as the "before"
+   snapshot,
+4. runs `tsx src/diff.ts <before> data --title-file <path>` to produce the changelog body
    and the matching PR title,
-5. runs `tsx scripts/update-data-changelog.ts <old> data` to write the entry into
-   `changelog/v<version>.md` and regenerate the `DATA-CHANGELOG.md` index,
-6. if `data/` changed, opens (or updates) the sticky PR whose title and body are those
-   two outputs — the title also being the commit subject, as `data: <title>` — and which
-   commits the changelog file and the index,
-7. reads the Discord marker off the PR, runs `tsx src/discord.ts <old> <new> --send
+5. checks out the base in a second directory, copies the scraped `data/` into it, and
+   runs `tsx scripts/update-data-changelog.ts <before> data` there. That writes the entry
+   into `changelog/v<version>.md` and regenerates the `DATA-CHANGELOG.md` index on top of
+   the base's copies,
+6. if `data/` changed, opens (or updates) the PR on the planned branch and base. Its
+   title and body are the two outputs of step 4, the title is also the commit subject
+   (`data: <title>`), and the commit includes the changelog file and the index,
+7. when the base isn't `main`, links the chain with `gh stack link` (best-effort),
+8. reads the Discord marker off the PR, runs `tsx src/discord.ts <before> <new> --send
    --message-id …`, and records a marker comment if that posted a new message (see
    *Announcing an update* above),
-8. if the scrape fails, opens an issue whose body includes the per-faction failures file.
+9. if the scrape fails, reports it on the open `scrape-failure` issue: a comment if one
+   is open, a new issue if not. After a successful run, it closes any open one.
 
 A human reviews and merges the PR — giving reviewable, auditable history of every
 points change.
