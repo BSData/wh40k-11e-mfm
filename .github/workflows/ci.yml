@@ -4,16 +4,93 @@ on:
   push:
     branches: [main]
   pull_request:
+    # labeled/unlabeled re-run the data guard when `regenerated-data` is added or removed.
+    # They re-run build too: skipping it would post a skipped `build`, which counts as passing.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read # check out the code
+
+# A newer push to a PR supersedes its running checks; every push to main is checked.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/setup@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          runtime: node@22
+          persist-credentials: false
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          runtime: node
+          node-version-file: .node-version
           cache: true
-      - run: pnpm check
-      - run: pnpm typecheck
-      - run: pnpm test
+      - run: pnpm verify
+
+      # The workflow lints run even when verify fails, so one push reports both.
+      # actionlint comes from its release, checked against the published SHA-256, and runs
+      # the runner's shellcheck over every `run:` script.
+      - name: actionlint
+        if: ${{ !cancelled() }}
+        env:
+          VERSION: 1.7.12
+          SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          tarball="$RUNNER_TEMP/actionlint.tar.gz"
+          curl -sSfL -o "$tarball" \
+            "https://github.com/rhysd/actionlint/releases/download/v$VERSION/actionlint_${VERSION}_linux_amd64.tar.gz"
+          echo "$SHA256  $tarball" | sha256sum --check --strict
+          tar -xzf "$tarball" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -color
+
+      - uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
+        if: ${{ !cancelled() }}
+        with:
+          advanced-security: false
+          annotations: true
+
+  # data/, changelog/ and DATA-CHANGELOG.md are written by the scraper, never by hand: only
+  # an update branch may change them, or a PR a maintainer has labelled `regenerated-data`
+  # because it reran the scraper. See specs/data-model.md.
+  data-guard:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read # list the PR's changed files
+    steps:
+      - name: Only the scraper writes the data
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          CHANGED_FILES: ${{ github.event.pull_request.changed_files }}
+          HEAD_REF: ${{ github.head_ref }}
+          SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          LABELLED: ${{ contains(github.event.pull_request.labels.*.name, 'regenerated-data') }}
+        run: |
+          set -euo pipefail
+          # The API lists at most 3000 files; past that, data/ could hide in the rest.
+          if [ "$CHANGED_FILES" -gt 3000 ]; then
+            echo "::error title=Too many files::$CHANGED_FILES changed files is more than the API lists, so data/ can't be ruled out. Split the PR."
+            exit 1
+          fi
+          # A rename counts at both ends: moving a file out of data/ changes data/ too.
+          files=$(gh api --paginate "repos/$GH_REPO/pulls/$PR/files" \
+            --jq '.[] | .filename, (.previous_filename // empty)')
+          changed=$(grep -E '^(data/|changelog/|DATA-CHANGELOG\.md$)' <<< "$files" | sort -u || true)
+          if [ -z "$changed" ]; then
+            echo "No generated files changed."
+          elif [ "$SAME_REPO" = true ] && [[ "$HEAD_REF" == mfm/* ]]; then
+            echo "Update branch $HEAD_REF may change the generated files:"
+            echo "$changed"
+          elif [ "$LABELLED" = true ]; then
+            echo "Labelled regenerated-data, so these generated files may change:"
+            echo "$changed"
+          else
+            echo "::error title=Hand-edited data::This PR changes files only the scraper writes. Revert them, or regenerate them with the scraper and ask a maintainer for the regenerated-data label."
+            echo "$changed"
+            exit 1
+          fi

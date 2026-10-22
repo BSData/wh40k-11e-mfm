@@ -57,7 +57,7 @@ function newestFirst(a: string | undefined, b: string | undefined): number {
     const d = Number(y[i] ?? 0) - Number(x[i] ?? 0);
     if (d) return d;
   }
-  return b.localeCompare(a);
+  return b.localeCompare(a, 'en');
 }
 
 const INDEX_HEADER = `# Data changelog

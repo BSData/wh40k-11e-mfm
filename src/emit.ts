@@ -4,6 +4,7 @@ import {
   type Detachment,
   Faction,
   type FactionContent,
+  SiteMeta,
   type Unit,
 } from './model.js';
 
@@ -24,7 +25,14 @@ export type OrderMode = 'name' | 'page';
 
 const STRINGIFY_OPTS = { lineWidth: 0, sortMapEntries: false } as const;
 
-const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name);
+/**
+ * The one name order, for the dataset and the reports alike: English collation, never
+ * the process locale. Under POSIX, `localeCompare` without a locale sorts Orks'
+ * "Big’Ed Bossbunka" before "Big Mek", the reverse of the committed files.
+ */
+export const compareNames = new Intl.Collator('en').compare;
+
+const byName = (a: { name: string }, b: { name: string }) => compareNames(a.name, b.name);
 
 /** Order a named list by `OrderMode`: alphabetical for `'name'`, source order for `'page'`. */
 const ordered = <T extends { name: string }>(items: T[], order: OrderMode): T[] =>
@@ -126,15 +134,8 @@ export function factionFromYaml(text: string): Faction {
   return { ...orderContent(f), firstSeen: f.firstSeen };
 }
 
-export type SiteMeta = {
-  version: string;
-  lastUpdated: string;
-  /** The expandable "Welcome…" help text, when captured via the browser. */
-  notes?: string;
-  /** The expandable "Muster Armies" army-building rules, when captured via the browser. */
-  muster?: string;
-  factions: string[];
-};
+// The schema lives in model.ts; the type stays importable from here, beside its reader/writer.
+export type { SiteMeta } from './model.js';
 
 /** Metadata index. `lastUpdated` is stable on no-op scrapes (max of firstSeen). */
 export function metaToYaml(meta: SiteMeta): string {
@@ -148,6 +149,7 @@ export function metaToYaml(meta: SiteMeta): string {
   return stringify(doc, STRINGIFY_OPTS);
 }
 
+/** Parse `meta.yaml`, validated against `SiteMeta`. */
 export function metaFromYaml(text: string): SiteMeta {
-  return parse(text) as SiteMeta;
+  return SiteMeta.parse(parse(text));
 }
