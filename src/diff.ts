@@ -2,12 +2,13 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { argv } from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { factionFromYaml, metaFromYaml } from './emit.js';
+import { compareNames, factionFromYaml, metaFromYaml, type SiteMeta } from './emit.js';
 import type { CostOption, Faction, FactionContent, PricingTier, Unit } from './model.js';
 
 /**
  * Turns two dataset snapshots (committed YAML vs. freshly scraped) into readable
- * change reports. One structured diff (`collectChanges`) feeds three renderers here:
+ * change reports. One structured diff (`collectChanges`, plus `collectRules` for
+ * `meta.yaml`) feeds three renderers here:
  *  - `changelog()` — the rich PR body (dated title, summary line, per-faction table,
  *    and the sections, folded away once they get long and shortened to fit GitHub's
  *    PR body limit);
@@ -44,7 +45,8 @@ const counts = (added: number, removed: number, changed = 0): string => {
 
 const unitNames = (f: FactionContent) => new Set(f.units.map((u) => u.name));
 const detNames = (f: FactionContent) => new Set(f.detachments.map((d) => d.name));
-const onlyIn = <T>(a: Set<T>, b: Set<T>) => [...a].filter((x) => !b.has(x)).sort();
+const onlyIn = (a: Set<string>, b: Set<string>) =>
+  [...a].filter((x) => !b.has(x)).sort(compareNames);
 
 /** Changed list members, or full lists when order or repeated entries need preserving. */
 function listDelta(before: string[] | undefined, after: string[] | undefined): string {
@@ -108,18 +110,97 @@ export function tierLabel(range: string): string {
   return from === to ? ordinal(from) : `${ordinal(from)}–${ordinal(to)}`;
 }
 
+/**
+ * A unit as the diff sees it. A name is not unique within a faction: Imperial Agents
+ * lists 29 twice (on the base roster and again under a sub-group), and Space Wolves has
+ * two different "Venerable Dreadnought"s in one group. So `id` is the unit's group, its
+ * name, and which of the units sharing both it is, in page order. `label` is what the
+ * report calls it.
+ */
+interface Listed {
+  id: string;
+  label: string;
+  unit: Unit;
+}
+
+/** A unit's group and name: what its identity shares with any namesake in that group. */
+const groupedName = (u: Unit): string => JSON.stringify([u.groupTitle ?? '', u.name]);
+
+/** Names that more than one unit carries in either snapshot, by `pick`. */
+function repeated(snapshots: Unit[][], pick: (u: Unit) => string): Set<string> {
+  const out = new Set<string>();
+  for (const units of snapshots) {
+    const seen = new Set<string>();
+    for (const u of units) {
+      if (seen.has(pick(u))) out.add(pick(u));
+      seen.add(pick(u));
+    }
+  }
+  return out;
+}
+
+/**
+ * Both snapshots' units, identified, labelled and matched up. A unit is matched by its
+ * identity first. One that changed sub-group, and so identity, is then matched by name
+ * among the units left over, in page order, so it reads as changed rather than as one
+ * unit removed and another added.
+ *
+ * A label is the bare name unless another unit in either snapshot carries it; then it
+ * adds the group, `Inquisitor (Every Model Has The Imperium Keyword)`, and, if that
+ * still doesn't tell them apart, the position: `Venerable Dreadnought (#2)`.
+ */
+function matchUnits(before: Unit[], after: Unit[]) {
+  const sameName = repeated([before, after], (u) => u.name);
+  const sameGroup = repeated([before, after], groupedName);
+  const listed = (units: Unit[]): Listed[] => {
+    const seen = new Map<string, number>();
+    return units.map((unit) => {
+      const index = seen.get(groupedName(unit)) ?? 0;
+      seen.set(groupedName(unit), index + 1);
+      const tags = [
+        sameName.has(unit.name) ? unit.groupTitle : undefined,
+        sameGroup.has(groupedName(unit)) ? `#${index + 1}` : undefined,
+      ].filter((t): t is string => t !== undefined);
+      const label = tags.length > 0 ? `${unit.name} (${tags.join(', ')})` : unit.name;
+      return { id: `${groupedName(unit)}#${index}`, label, unit };
+    });
+  };
+  const now = listed(after);
+  const left = new Map(listed(before).map((l) => [l.id, l]));
+  const partner = new Map<Listed, Listed>();
+  for (const l of now) {
+    const was = left.get(l.id);
+    if (!was) continue;
+    partner.set(l, was);
+    left.delete(was.id);
+  }
+  for (const l of now) {
+    if (partner.has(l)) continue;
+    const was = [...left.values()].find((x) => x.unit.name === l.unit.name);
+    if (!was) continue;
+    partner.set(l, was);
+    left.delete(was.id);
+  }
+  // The old side takes its partner's id, so the two key their rows alike.
+  const pairs = now.flatMap((l) => {
+    const was = partner.get(l);
+    return was ? [{ was: { ...was, id: l.id }, now: l }] : [];
+  });
+  return { pairs, added: now.filter((l) => !partner.has(l)), removed: [...left.values()] };
+}
+
 /** Unit cost options keyed by `unit · tier · option`. */
-function costRows(f: FactionContent): Map<string, Numeric> {
+function costRows(units: Listed[]): Map<string, Numeric> {
   const m = new Map<string, Numeric>();
-  for (const u of f.units) {
+  for (const { id, label, unit: u } of units) {
     for (const t of u.pricing) {
       const tier = u.pricing.length > 1 ? ` (${tierLabel(t.range)})` : '';
       for (const c of t.costs) {
         const what = costLabel(c);
-        m.set(`${u.name} ${t.range} ${what}`, {
-          entity: u.name,
+        m.set(`${id}\n${t.range}\n${what}`, {
+          entity: id,
           points: c.points,
-          display: `${u.name} — ${what}${tier}`,
+          display: `${label} — ${what}${tier}`,
         });
       }
     }
@@ -128,14 +209,14 @@ function costRows(f: FactionContent): Map<string, Numeric> {
 }
 
 /** Wargear items keyed by `unit · item`. */
-function wargearRows(f: FactionContent): Map<string, Numeric> {
+function wargearRows(units: Listed[]): Map<string, Numeric> {
   const m = new Map<string, Numeric>();
-  for (const u of f.units) {
+  for (const { id, label, unit: u } of units) {
     for (const w of u.wargear ?? []) {
-      m.set(`${u.name} ${w.item}`, {
-        entity: u.name,
+      m.set(`${id}\n${w.item}`, {
+        entity: id,
         points: w.points,
-        display: `${u.name} — ${w.item}`,
+        display: `${label} — ${w.item}`,
       });
     }
   }
@@ -197,9 +278,9 @@ function diffNumeric(
   }
   deltas.sort(
     (a, b) =>
-      Math.abs(b.to - b.from) - Math.abs(a.to - a.from) || a.display.localeCompare(b.display),
+      Math.abs(b.to - b.from) - Math.abs(a.to - a.from) || compareNames(a.display, b.display),
   );
-  const byName = (a: Numeric, b: Numeric) => a.display.localeCompare(b.display);
+  const byName = (a: Numeric, b: Numeric) => compareNames(a.display, b.display);
   return { deltas, added: addedRows.sort(byName), removed: removedRows.sort(byName) };
 }
 
@@ -221,6 +302,7 @@ interface Attr {
  * to one line per unit that says what actually happened, and filed under *changed*.
  */
 interface Retier {
+  /** The unit's identity (see `Listed`), so the tallies count it once. */
   unit: string;
   text: string;
 }
@@ -245,7 +327,7 @@ const tierRanges = (u: Unit): string[] => u.pricing.map((t) => t.range);
  * price and its new price in every tier — `1st+ → 1st–2nd / 3rd+; 5 models: 275 → 280 /
  * 310`. Tiers and prices are both `/`-separated, so each price sits under its tier.
  */
-function describeRetier(before: Unit, after: Unit): Retier {
+function describeRetier(before: Unit, { id, label, unit: after }: Listed): Retier {
   const old = pricesByOption(before.pricing);
   const now = pricesByOption(after.pricing);
   const rows: string[] = [];
@@ -258,7 +340,7 @@ function describeRetier(before: Unit, after: Unit): Retier {
   }
   const scheme = (u: Unit) => tierRanges(u).map(tierLabel).join(' / ');
   const tiers = `${scheme(before)} → ${scheme(after)}`;
-  return { unit: after.name, text: `${after.name} — re-tiered ${tiers}; ${rows.join(' · ')}` };
+  return { unit: id, text: `${label} — re-tiered ${tiers}; ${rows.join(' · ')}` };
 }
 
 /** The structured diff of one faction, shared by all renderers. */
@@ -293,34 +375,34 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
   if (before.version !== after.version) head.push(`v${before.version} → v${after.version}`);
   if (before.parent !== after.parent)
     head.push(`parent ${before.parent ?? '—'} → ${after.parent ?? '—'}`);
+  if (before.name !== after.name) head.push(`renamed from ${before.name}`);
 
-  const ou = unitNames(before);
-  const nu = unitNames(after);
+  // Units are compared by identity, not by name — see `matchUnits`.
+  const { pairs, added, removed } = matchUnits(before.units, after.units);
   const od = detNames(before);
   const nd = detNames(after);
-  const bothUnit = (n: string) => ou.has(n) && nu.has(n);
   const bothDet = (n: string) => od.has(n) && nd.has(n);
 
   // Units whose tier structure changed are described whole, and kept out of the cost
   // diff — every one of their keys moved, so row-by-row it is all noise.
-  const beforeByName = new Map(before.units.map((u) => [u.name, u]));
   const retiered: Retier[] = [];
-  for (const u of after.units) {
-    const p = beforeByName.get(u.name);
-    if (p && tierRanges(p).join('|') !== tierRanges(u).join('|'))
-      retiered.push(describeRetier(p, u));
+  for (const { was, now } of pairs) {
+    if (tierRanges(was.unit).join('|') !== tierRanges(now.unit).join('|'))
+      retiered.push(describeRetier(was.unit, now));
   }
   const wasRetiered = new Set(retiered.map((r) => r.unit));
-  const costUnit = (n: string) => bothUnit(n) && !wasRetiered.has(n);
 
-  const costs = diffNumeric(costRows(before), costRows(after), costUnit);
-  const wargear = diffNumeric(wargearRows(before), wargearRows(after), bothUnit);
+  const olds = pairs.map((p) => p.was);
+  const nows = pairs.map((p) => p.now);
+  const costs = diffNumeric(costRows(olds), costRows(nows), (id) => !wasRetiered.has(id));
+  const wargear = diffNumeric(wargearRows(olds), wargearRows(nows), () => true);
   const enh = diffNumeric(enhRows(before), enhRows(after), bothDet);
 
   // A Leader/Support target the faction lost is dropped from the old list before
   // comparing: nothing can lead a unit that isn't there, and "Units removed" already says
-  // so. Kept, it is that one fact again under every leader that used to take it.
-  const gone = new Set(onlyIn(ou, nu));
+  // so. Kept, it is that one fact again under every leader that used to take it. The
+  // lists hold bare names, so a name is lost only when no unit carries it any more.
+  const gone = new Set(onlyIn(unitNames(before), unitNames(after)));
   const grantDelta = (was: string[] | undefined, now: string[] | undefined) =>
     listDelta(
       was?.filter((name) => !gone.has(name)),
@@ -329,14 +411,23 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
 
   // Non-numeric attribute changes on entities present in both snapshots.
   const unitOther: Attr[] = [];
-  const beforeUnits = new Map(before.units.map((u) => [u.name, u]));
-  for (const u of after.units) {
-    const p = beforeUnits.get(u.name);
-    if (!p) continue;
-    const note = (text: string) => unitOther.push({ entity: u.name, text: `${u.name} — ${text}` });
+  for (const { was, now } of pairs) {
+    const [p, u] = [was.unit, now.unit];
+    const note = (text: string) =>
+      unitOther.push({ entity: now.id, text: `${now.label} — ${text}` });
+    if (p.legends !== u.legends) note(u.legends ? 'moved to Legends' : 'moved out of Legends');
+    if (p.groupTitle !== u.groupTitle)
+      note(`group: ${p.groupTitle ?? '—'} → ${u.groupTitle ?? '—'}`);
     for (const grant of ['leaderTo', 'supportTo'] as const) {
       const delta = grantDelta(p[grant], u[grant]);
       if (delta) note(`${grant}:\n${delta}`);
+    }
+    // A tier's heading, where the tier itself is kept; a new or dropped tier is a re-tier.
+    const labels = new Map(p.pricing.map((t) => [t.range, t.label]));
+    for (const t of u.pricing) {
+      const label = labels.get(t.range);
+      if (label !== undefined && label !== t.label)
+        note(`label (${tierLabel(t.range)}): ${label} → ${t.label}`);
     }
   }
   const detOther: Attr[] = [];
@@ -368,8 +459,8 @@ function computeChanges(before: FactionContent, after: FactionContent): FactionC
     unitCount: after.units.length,
     detCount: after.detachments.length,
     head,
-    unitsAdded: onlyIn(nu, ou),
-    unitsRemoved: onlyIn(ou, nu),
+    unitsAdded: added.map((l) => l.label).sort(compareNames),
+    unitsRemoved: removed.map((l) => l.label).sort(compareNames),
     detsAdded: onlyIn(nd, od),
     detsRemoved: onlyIn(od, nd),
     costs,
@@ -426,7 +517,7 @@ export function collectChanges(before: Snapshot[], after: Snapshot[]): FactionCh
   // and only sub-factions have a parent.
   const seen = (f: Snapshot) => (f.firstSeen ? { firstSeen: f.firstSeen } : {});
   const family = (f: Snapshot) => (f.parent ? { parent: f.parent } : {});
-  for (const f of [...after].sort((a, b) => a.name.localeCompare(b.name))) {
+  for (const f of [...after].sort((a, b) => compareNames(a.name, b.name))) {
     const prev = beforeBySlug.get(f.slug);
     if (!prev) out.push({ ...wholeFaction(f, 'added'), ...seen(f), ...family(f) });
     else {
@@ -434,10 +525,97 @@ export function collectChanges(before: Snapshot[], after: Snapshot[]): FactionCh
       if (c) out.push({ ...c, ...seen(f), ...family(f) });
     }
   }
-  for (const f of [...before].sort((a, b) => a.name.localeCompare(b.name))) {
+  for (const f of [...before].sort((a, b) => compareNames(a.name, b.name))) {
     if (!afterBySlug.has(f.slug)) out.push({ ...wholeFaction(f, 'removed'), ...family(f) });
   }
   return out;
+}
+
+// ---- The rules panels (meta.yaml) ---------------------------------------------
+
+/** A rules panel that changed between two snapshots' `meta.yaml`. */
+export interface PanelChange {
+  label: string;
+  status: 'added' | 'removed' | 'changed';
+  /** The panel's line count: as it is now, or as it was when removed. */
+  size: number;
+  /** For a changed panel, its changed lines (see `lineDiff`); otherwise empty. */
+  diff: string[];
+}
+
+/** What changed in `meta.yaml`: the site-wide version and the rules panels. */
+export interface RulesChanges {
+  /** `v1.5 → v1.6` when the site version moved, `''` when it didn't. */
+  version: string;
+  panels: PanelChange[];
+}
+
+/** The rules panels, in the order the report lists them. */
+const PANELS = [
+  ['notes', 'Notes'],
+  ['muster', 'Muster Armies'],
+] as const;
+
+/**
+ * The lines only one side has, from a longest common subsequence: `- ` for a line only
+ * in `a`, `+ ` for one only in `b`, and `…` between hunks that aren't adjacent. No
+ * context lines: the reader has the panel itself in `meta.yaml`.
+ */
+function lineDiff(a: string[], b: string[]): string[] {
+  const w = b.length + 1;
+  // lcs[i * w + j]: the length of the longest common subsequence of a[i..] and b[j..].
+  const lcs = new Array<number>((a.length + 1) * w).fill(0);
+  const at = (i: number, j: number) => lcs[i * w + j] ?? 0;
+  for (let i = a.length - 1; i >= 0; i--)
+    for (let j = b.length - 1; j >= 0; j--)
+      lcs[i * w + j] = a[i] === b[j] ? at(i + 1, j + 1) + 1 : Math.max(at(i + 1, j), at(i, j + 1));
+
+  const out: string[] = [];
+  const line = (sign: string, text = '') => (text ? `${sign} ${text}` : sign);
+  let gap = false;
+  let i = 0;
+  let j = 0;
+  while (i < a.length || j < b.length) {
+    if (i < a.length && j < b.length && a[i] === b[j]) {
+      gap = out.length > 0;
+      i++;
+      j++;
+      continue;
+    }
+    if (gap) out.push('…');
+    gap = false;
+    if (i < a.length && (j === b.length || at(i + 1, j) >= at(i, j + 1)))
+      out.push(line('-', a[i++]));
+    else out.push(line('+', b[j++]));
+  }
+  return out;
+}
+
+/**
+ * The `meta.yaml` diff, or `null` when there is nothing to report — including when
+ * either snapshot has no meta to compare. `lastUpdated` and `factions` are derived from
+ * the faction files, which are diffed in their own right.
+ */
+export function collectRules(
+  before: SiteMeta | undefined,
+  after: SiteMeta | undefined,
+): RulesChanges | null {
+  if (!before || !after) return null;
+  const version = before.version === after.version ? '' : `v${before.version} → v${after.version}`;
+  const panels: PanelChange[] = [];
+  for (const [field, label] of PANELS) {
+    const was = before[field];
+    const now = after[field];
+    if (was === now) continue;
+    if (!was) panels.push({ label, status: 'added', size: now?.split('\n').length ?? 0, diff: [] });
+    else if (!now)
+      panels.push({ label, status: 'removed', size: was.split('\n').length, diff: [] });
+    else {
+      const diff = lineDiff(was.split('\n'), now.split('\n'));
+      panels.push({ label, status: 'changed', size: now.split('\n').length, diff });
+    }
+  }
+  return version || panels.length > 0 ? { version, panels } : null;
 }
 
 const countDeltas = (deltas: Delta[]) => {
@@ -495,14 +673,20 @@ export function tallies(c: FactionChanges) {
 }
 
 /**
- * Every faction's tallies summed — the numbers a whole-update summary is built from.
- * Shared by the changelog's summary line and the Discord embed so the two can't report
- * different totals for the same update.
+ * Every faction's tallies summed — the numbers a whole-update summary is built from —
+ * plus the rules panels added, removed and changed (`rA`/`rR`/`rC`). Shared by the
+ * changelog's summary line and the Discord embed so the two can't report different
+ * totals for the same update.
  */
-export function totals(changes: FactionChanges[]) {
+export function totals(changes: FactionChanges[], rules: RulesChanges | null = null) {
   const t = changes.map(tallies);
   const sum = (pick: (x: (typeof t)[number]) => number) => t.reduce((s, x) => s + pick(x), 0);
+  const panels = (status: PanelChange['status']) =>
+    rules?.panels.filter((p) => p.status === status).length ?? 0;
   return {
+    rA: panels('added'),
+    rR: panels('removed'),
+    rC: panels('changed'),
     factions: changes.length,
     news: changes.filter((c) => c.status === 'added').length,
     gone: changes.filter((c) => c.status === 'removed').length,
@@ -733,6 +917,26 @@ function sections(changes: FactionChanges[]): Section[] {
   return out;
 }
 
+/** A code fence longer than any run of backticks in `lines`, so none of them closes it. */
+const fenceFor = (lines: string[]): string =>
+  '`'.repeat(Math.max(3, ...lines.flatMap((l) => (l.match(/`+/g) ?? []).map((r) => r.length + 1))));
+
+/**
+ * The Rules section, listed before the factions: each changed panel as its changed lines,
+ * and a panel that came or went as one line rather than all of its lines. None when no
+ * panel changed — a site version change alone is in the summary line.
+ */
+function rulesSection(rules: RulesChanges | null): Section[] {
+  if (!rules || rules.panels.length === 0) return [];
+  const blocks = rules.panels.map((p) => {
+    if (p.status === 'added') return `**${p.label}:** added — ${plural(p.size, 'line')}`;
+    if (p.status === 'removed') return `**${p.label}:** removed — it had ${plural(p.size, 'line')}`;
+    const fence = fenceFor(p.diff);
+    return `**${p.label}:**\n\n${fence}diff\n${p.diff.join('\n')}\n${fence}`;
+  });
+  return [{ name: 'Rules', title: 'Rules', body: blocks.join('\n\n') }];
+}
+
 // ---- Rich changelog (PR body) -------------------------------------------------
 
 /** The table's Points cell: "▲3 ▼1 (-25)", or "—" when nothing was repriced. */
@@ -745,17 +949,26 @@ const LEGEND =
   '_`+` added · `-` removed · `~` changed in place · ▲ raised · ▼ cut (net in brackets)_';
 
 /** The summary line + per-faction table shown at the top of the changelog. */
-function summary(changes: FactionChanges[]): string {
-  const { news, gone, uA, uR, uC, dA, dR, dC, up, down, net, changed, retiered } = totals(changes);
+function summary(changes: FactionChanges[], rules: RulesChanges | null): string {
+  const t = totals(changes, rules);
+  const { news, gone, rA, rR, rC, uA, uR, uC, dA, dR, dC, up, down, net, changed, retiered } = t;
   // An MFM revision bumps every faction's version at once. That is a fact about the
   // update, not about any one faction, so when the note is universal it belongs in this
   // line — tagging it onto rows instead would read as "these are the ones that bumped".
   const shared = sharedHead(changes);
 
-  const clauses = [`**${changes.length} faction${changes.length === 1 ? '' : 's'} changed**`];
+  const clauses = [
+    changes.length > 0
+      ? `**${changes.length} faction${changes.length === 1 ? '' : 's'} changed**`
+      : '**No faction changes**',
+  ];
   if (shared) clauses.push(`all ${shared}`);
+  // The site version, unless the factions' shared note has already said it.
+  if (rules?.version && !shared.split(', ').includes(rules.version))
+    clauses.push(`site ${rules.version}`);
   if (news) clauses.push(`${news} new`);
   if (gone) clauses.push(`${gone} removed`);
+  if (rA || rR || rC) clauses.push(`rules ${counts(rA, rR, rC)}`);
   if (uA || uR || uC) clauses.push(`units ${counts(uA, uR, uC)}`);
   if (dA || dR || dC) clauses.push(`detachments ${counts(dA, dR, dC)}`);
   if (changed)
@@ -839,7 +1052,7 @@ function fitted(
   let body = build(shown, []);
   const cut: string[] = [];
   const largest = [...all].sort(
-    (a, b) => b.body.length - a.body.length || a.name.localeCompare(b.name),
+    (a, b) => b.body.length - a.body.length || compareNames(a.name, b.name),
   );
   for (const s of largest) {
     if (body.length <= BODY_LIMIT) return body;
@@ -863,10 +1076,12 @@ function fitted(
 /** Build a full Markdown changelog (the PR body) from two faction snapshots. */
 export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpts = {}): string {
   const changes = collectChanges(before, after);
-  if (changes.length === 0) return 'No changes detected.\n';
+  const rules = collectRules(opts.meta?.before, opts.meta?.after);
+  if (changes.length === 0 && !rules) return 'No changes detected.\n';
   const file = changelogFile(updateVersion(after, opts));
   const head = `# ${updateTitle(before, after, opts)}\n\n${blurb(file)}`;
-  return fitted(head, summary(changes), sections(changes), changes.length, file);
+  const all = [...rulesSection(rules), ...sections(changes)];
+  return fitted(head, summary(changes, rules), all, changes.length, file);
 }
 
 // ---- Naming an update: MFM version + dates ------------------------------------
@@ -874,8 +1089,13 @@ export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpt
 export interface RenderOpts {
   /** Today, `YYYY-MM-DD` UTC. Defaults to the real clock; pass it for determinism. */
   today?: string;
-  /** The MFM version this update lands on; `loadVersion()` reads it from `meta.yaml`. */
+  /** The MFM version this update lands on; defaults to `meta.after`'s. */
   version?: string;
+  /**
+   * Both snapshots' `meta.yaml` (`loadMeta()`), so the site version and the rules panels
+   * are diffed too. Without both, they aren't compared.
+   */
+  meta?: { before?: SiteMeta | undefined; after?: SiteMeta | undefined };
 }
 
 /**
@@ -886,23 +1106,28 @@ export interface RenderOpts {
  * depend on directory order.
  */
 export function updateVersion(after: Snapshot[], opts: RenderOpts = {}): string | undefined {
-  if (opts.version) return opts.version;
+  const site = opts.version ?? opts.meta?.after?.version;
+  if (site) return site;
   const tally = new Map<string, number>();
   for (const f of after) tally.set(f.version, (tally.get(f.version) ?? 0) + 1);
-  const ranked = [...tally].sort((a, b) => b[1] - a[1] || b[0].localeCompare(a[0]));
+  const ranked = [...tally].sort((a, b) => b[1] - a[1] || compareNames(b[0], a[0]));
   return ranked[0]?.[0];
 }
 
-/** The site-wide MFM version recorded in a snapshot's `meta.yaml`, when it has one. */
-export function loadVersion(dir: string): string | undefined {
+/** A snapshot's `meta.yaml` (the site version and the rules panels), when it has one. */
+export function loadMeta(dir: string): SiteMeta | undefined {
   const path = join(dir, 'meta.yaml');
   if (!existsSync(path)) return undefined;
   try {
-    return metaFromYaml(readFileSync(path, 'utf8')).version;
+    const meta: SiteMeta | null = metaFromYaml(readFileSync(path, 'utf8'));
+    return meta?.version ? meta : undefined;
   } catch {
     return undefined; // A snapshot without usable meta just goes unnamed.
   }
 }
+
+/** The site-wide MFM version recorded in a snapshot's `meta.yaml`, when it has one. */
+export const loadVersion = (dir: string): string | undefined => loadMeta(dir)?.version;
 
 /**
  * The days a change set spans, read from the `firstSeen` stamps of the factions in it.
@@ -963,14 +1188,15 @@ export function changelogEntry(
   opts: RenderOpts & { date?: string } = {},
 ): string {
   const changes = collectChanges(before, after);
-  if (changes.length === 0) return '';
+  const rules = collectRules(opts.meta?.before, opts.meta?.after);
+  if (changes.length === 0 && !rules) return '';
   const date = opts.date ?? windowLabel(updateWindow(before, after, opts));
   const version = updateVersion(after, opts);
   const heading = version ? `## [${date}] — MFM v${version}` : `## [${date}]`;
-  const detail = sections(changes)
+  const detail = [...rulesSection(rules), ...sections(changes)]
     .map((s) => renderSection(s, '###'))
     .join('\n\n');
-  return `${heading}\n\n${summary(changes)}\n\n${detail}\n`;
+  return `${heading}\n\n${summary(changes, rules)}${detail ? `\n\n${detail}` : ''}\n`;
 }
 
 // ---- Failure report (error issue) --------------------------------------------
@@ -979,7 +1205,7 @@ export function changelogEntry(
 export function failuresReport(failures: { slug: string; error: string }[]): string {
   if (failures.length === 0) return '';
   const blocks = [...failures]
-    .sort((a, b) => a.slug.localeCompare(b.slug))
+    .sort((a, b) => compareNames(a.slug, b.slug))
     .map((f) => `### ${f.slug}\n\n\`\`\`\n${f.error.trim()}\n\`\`\``);
   const n = failures.length;
   return `## ${n} faction${n === 1 ? '' : 's'} failed to parse\n\n${blocks.join('\n\n')}`;
@@ -1005,8 +1231,7 @@ if (isMain) {
   }
   const before = loadFactionDir(beforeDir);
   const after = loadFactionDir(afterDir);
-  const version = loadVersion(afterDir);
-  const opts = version ? { version } : {};
+  const opts = { meta: { before: loadMeta(beforeDir), after: loadMeta(afterDir) } };
   // The workflow feeds the title to the PR and the commit alongside the body.
   if (titleFile) writeFileSync(titleFile, `${updateTitle(before, after, opts)}\n`);
   process.stdout.write(changelog(before, after, opts));

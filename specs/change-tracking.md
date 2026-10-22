@@ -22,10 +22,14 @@ audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
      *how*: `Units added/removed`, `Unit points` (magnitude-sorted, signed deltas like
      `Necron Warriors — 10 models: 80 → 90 (+10)`; the block label already says these
      are points), `Unit pricing re-tiered` (see below), `Wargear`, `Unit changes`
-     (leaderTo / supportTo), `Detachments added/removed`, `Enhancements`, and
+     (leaderTo / supportTo, a move to or out of Legends, a sub-group change, a tier
+     label change), `Detachments added/removed`, `Enhancements`, and
      `Detachment changes` (dp / objectives / unique / per-enhancement leaderTo /
      supportTo);
-   - whole new / removed factions and version / parent changes are called out too.
+   - whole new / removed factions, and version / parent / name changes, are called out
+     too;
+   - a **Rules** section when the rules panels in `meta.yaml` changed (see *The rules
+     panels* below).
 
    A cost option priced per requisition tier names its tier the way the MFM words it —
    `Land Raider — 1 model (3rd+): 240 → 265 (+25)`, with `1st–2nd`, `1st` and `1st+`
@@ -33,9 +37,17 @@ audit trail. Implemented by [`src/diff.ts`](../src/diff.ts) plus git itself.
 
    It is **comprehensive**: every field the model carries is diffed, so a change can't
    slip through unreported (the readable counterpart to the parser's coverage guard).
-   Two things are deliberately *not* repeated, because another line already states
-   them: a change a sub-faction shares with its parent (see *Sub-factions* below), and
-   a Leader/Support target the faction no longer has (next paragraph).
+   That includes the fields that aren't points: a unit's `legends` flag (`Necron
+   Warriors — moved to Legends`, or `moved out of Legends`), its `groupTitle`
+   (`Inquisitor — group: — → Ordo Malleus`), a tier's `label` (`Technomancer — label
+   (1st): Your 1st Unit Costs → Your 1st Unit Cost`), and the faction's display name
+   (`renamed from Necrons` beside its heading). It covers `meta.yaml` too: the site
+   version and the rules panels. A test mutates every field of every schema in turn and
+   fails if the changelog stays empty, so a field added to the model later can't be
+   forgotten here. Two things are deliberately *not* repeated, because another line
+   already states them: a change a sub-faction shares with its parent (see
+   *Sub-factions* below), and a Leader/Support target the faction no longer has (next
+   paragraph).
 
    Leader/Support lists on units and enhancements, and detachment Force Dispositions
    (`objectives`), show only membership changes: one nested item per removed (➖) or
@@ -89,6 +101,28 @@ For an order-only change, the two complete lists would instead appear as:
   - **After:** Necron Warriors, Immortals, Canoptek Wraiths
 ```
 
+### Which unit is which
+A unit's name is not unique within its faction. Imperial Agents lists 29 names twice,
+once on the base roster and again under the `Every Model Has The Imperium Keyword`
+sub-group, and 14 of those pairs differ in content. Space Wolves has two different
+`Venerable Dreadnought` entries in the same group. Keyed by name, the second entry
+overwrote the first: repricing the first Inquisitor reported `No changes detected.`, and
+two identical Space Wolves snapshots reported a phantom re-tier. That phantom is in
+`changelog/v1.5.md` and `changelog/v1.6.md`, which stay as published.
+
+So a unit's **identity** is its `groupTitle`, its `name`, and its occurrence index among
+the units with the same group and name, in page order. Every comparison uses it: cost
+rows, wargear, re-tiering, attribute changes, and the added and removed lists. A unit
+that keeps its name but changes sub-group has no identity in common with its old self,
+so the units left unmatched are paired by name, in page order, and such a pair is a
+**changed** unit (`group: A → B`), not a removal plus an addition.
+
+A unit is named as it always was unless another unit in either snapshot has the same
+name. Then the report adds its group, `Inquisitor (Every Model Has The Imperium
+Keyword)`, and, if the group doesn't tell them apart either, its position: `Venerable
+Dreadnought (#2)`. Leader/Support lists hold bare names, so a target counts as lost
+only when no unit of that name is left.
+
 ### The table must explain every row
 The Units and Detachments columns count entities **added (`+`), removed (`-`) and
 changed in place (`~`)**; Points shows the `▲`/`▼` split with the net swing. A routine
@@ -106,7 +140,8 @@ bumped", which is exactly backwards. The per-faction sections keep their own not
 way, so a section read on its own is still true.
 
 ### A re-tiering is a modification, not an add plus a remove
-Cost rows are keyed `unit · tier · option`, so when GW changes how a unit is costed —
+Cost rows are keyed `unit · tier · option` (the unit by its identity, above), so when GW
+changes how a unit is costed —
 adding a requisition threshold, so one tier becomes `1st–2nd` / `3rd+` — every key that
 unit owns is rewritten. Diffed row by row, one unchanged unit becomes a wall of removals
 and additions. In MFM v1.3 eight units picked up a `3rd+` threshold and generated **45 of
@@ -151,6 +186,51 @@ changes in full — a Blood Angels player's question is how much of *their* army
 shared or not. A change two or three sub-factions share, but not all of them, stays in
 each of their sections: rendering every subset of a family as its own section would be
 harder to read than the repetition it saves.
+
+### The rules panels
+`meta.yaml` carries the site version and two rules panels: `notes` (the "Welcome…" text)
+and `muster` (Muster Armies: battle sizes, DP, unit limits). They were not diffed at all,
+so a change to a battle size's DP produced an update PR whose body said `No changes
+detected.` `loadMeta()` reads a snapshot's `meta.yaml`, and the three entry points (the
+`src/diff.ts` and `src/discord.ts` CLIs and `scripts/update-data-changelog.ts`) pass both
+snapshots' to the renderers. `lastUpdated` and `factions` are derived from the faction
+files, so they aren't compared.
+
+A changed panel is listed in a **Rules** section, ahead of the factions, as a compact
+line diff: the changed lines only, `-` before `+`, with `…` between hunks that aren't
+adjacent, in a `diff` code block.
+
+````markdown
+## Rules
+
+**Muster Armies:**
+
+```diff
+- | INCURSION | 1000 | 2 | 2 | 2 |
++ | INCURSION | 1000 | 3 | 2 | 2 |
+```
+````
+
+A panel that appears or disappears is one line, `**Notes:** removed — it had 12 lines`,
+rather than every line of it. The panels count in the summary line as `rules`, with the
+same `+`/`-`/`~` marks as units (`**No faction changes** · rules ~1` when nothing else
+moved), and the Discord summary names them (`Rules: Muster Armies changed`). They have no
+row in the table, which is per faction.
+
+The site version is named in the summary line (`site v1.5 → v1.6`) unless the factions
+already say it (`all v1.5 → v1.6`), which is the case for every MFM revision so far. So
+a version change is never lost, and a routine revision doesn't say it twice.
+
+A rules-only change has no `firstSeen` of its own, so its window falls back to today,
+like a removed faction's.
+
+### Order
+Wherever the report or the dataset orders names (factions, units, the added and removed
+lists, a magnitude tie, the YAML's entity order), it uses one English collator,
+`compareNames` in `src/emit.ts`, never the process locale. The committed files are in
+English order. Under a POSIX locale, `localeCompare` without a locale put Orks' `Big’Ed
+Bossbunka` before `Big Mek`, so the same data would have come out in a different order
+on a differently configured machine.
 
 ### Folding
 Above 50 lines the per-faction detail is wrapped in a `<details>` block, so the title,
@@ -336,8 +416,11 @@ succeeded. The cost is a PATCH on each run while the PR is open, even when the p
 unchanged — one request a day, against an update going unannounced because one HTTP call
 failed once.
 
-An edit that fails because the message is gone (deleted in Discord, or a stale id) falls
-back to posting a new one rather than dropping the announcement.
+An edit that fails because the message is gone (a 404: deleted in Discord, or a stale
+id) falls back to posting a new one rather than dropping the announcement. Any other
+failed edit (a 429 rate limit, a 5xx outage) throws instead: the message is still
+there, so posting anew would announce the update twice. The step is
+`continue-on-error`, and the next run edits again.
 
 ### What the message says
 `announcement()` renders the same `collectChanges()` diff the other renderers use, as a

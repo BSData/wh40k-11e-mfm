@@ -5,7 +5,7 @@ import {
   changelogEntry,
   changelogFile,
   loadFactionDir,
-  loadVersion,
+  loadMeta,
   updateVersion,
   updateWindow,
   windowLabel,
@@ -34,9 +34,9 @@ if (!beforeDir || !afterDir) {
 
 const before = loadFactionDir(beforeDir);
 const after = loadFactionDir(afterDir);
-const siteVersion = loadVersion(afterDir);
+const meta = { before: loadMeta(beforeDir), after: loadMeta(afterDir) };
 const date = dateArg ?? windowLabel(updateWindow(before, after));
-const opts = siteVersion ? { date, version: siteVersion } : { date };
+const opts = { date, meta };
 const entry = changelogEntry(before, after, opts);
 if (!entry) {
   console.log(`No data changes — changelog and ${INDEX} left untouched.`);

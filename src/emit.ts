@@ -24,7 +24,14 @@ export type OrderMode = 'name' | 'page';
 
 const STRINGIFY_OPTS = { lineWidth: 0, sortMapEntries: false } as const;
 
-const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name);
+/**
+ * The one name order, for the dataset and the reports alike: English collation, never
+ * the process locale. Under POSIX, `localeCompare` without a locale sorts Orks'
+ * "Big’Ed Bossbunka" before "Big Mek", the reverse of the committed files.
+ */
+export const compareNames = new Intl.Collator('en').compare;
+
+const byName = (a: { name: string }, b: { name: string }) => compareNames(a.name, b.name);
 
 /** Order a named list by `OrderMode`: alphabetical for `'name'`, source order for `'page'`. */
 const ordered = <T extends { name: string }>(items: T[], order: OrderMode): T[] =>

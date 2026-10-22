@@ -2,10 +2,12 @@ import { argv } from 'node:process';
 import { fileURLToPath } from 'node:url';
 import {
   collectChanges,
+  collectRules,
   type FactionChanges,
   loadFactionDir,
-  loadVersion,
+  loadMeta,
   type RenderOpts,
+  type RulesChanges,
   type Snapshot,
   sharedHead,
   tallies,
@@ -13,6 +15,7 @@ import {
   updateTitle,
   updateWindow,
 } from './diff.js';
+import { compareNames } from './emit.js';
 
 /**
  * Renders a dataset diff as a Discord webhook message — the push half of change
@@ -175,6 +178,7 @@ function linkLine(opts: AnnounceOpts): string {
 /** The summary block: what changed, how much of it moved, and where to read the rest. */
 function describe(
   changes: FactionChanges[],
+  rules: RulesChanges | null,
   t: ReturnType<typeof totals>,
   opts: AnnounceOpts,
 ): string {
@@ -183,14 +187,25 @@ function describe(
   // otherwise the single faction that changed is never named in the summary at all.
   const note = only ? only.head.join(', ') : sharedHead(changes);
 
-  const lead = [only ? `**${only.name}** changed` : `**${t.factions} factions changed**`];
+  const lead = [
+    only
+      ? `**${only.name}** changed`
+      : changes.length > 0
+        ? `**${t.factions} factions changed**`
+        : '**No faction changes**',
+  ];
   if (note) lead.push(only ? note : `all ${note}`);
+  // The site version, unless the factions' note has already said it.
+  if (rules?.version && !note.split(', ').includes(rules.version))
+    lead.push(`site ${rules.version}`);
   if (t.news) lead.push(`🆕 ${t.news} new`);
   if (t.gone) lead.push(`🗑 ${t.gone} removed`);
 
+  const panels = rules?.panels.map((p) => `${p.label} ${p.status}`) ?? [];
   const entities = [
     entityPhrase(t.uA, t.uR, t.uC, 'Units'),
     entityPhrase(t.dA, t.dR, t.dC, 'Detachments'),
+    panels.length > 0 ? `Rules: ${panels.join(', ')}` : null,
   ]
     .filter((e): e is string => e !== null)
     .join(' · ');
@@ -226,7 +241,7 @@ function buildFields(changes: FactionChanges[]): EmbedField[] {
   // non-monotonic (a 7 below a 6) and so reads as unsorted to anyone scanning it.
   const moved = rows
     .filter((r) => r.units > 0 || r.dets > 0)
-    .sort((a, b) => b.units - a.units || b.dets - a.dets || a.name.localeCompare(b.name));
+    .sort((a, b) => b.units - a.units || b.dets - a.dets || compareNames(a.name, b.name));
   const untouched = rows.filter((r) => r.units === 0 && r.dets === 0).map((r) => r.name);
 
   const fields: EmbedField[] = [];
@@ -262,8 +277,9 @@ function fitToBudget(embed: Embed): Embed {
 }
 
 /**
- * The webhook message for an update, or `null` when the snapshots are identical — the
- * caller then posts nothing, rather than announcing that nothing happened.
+ * The webhook message for an update, or `null` when the snapshots (and their `meta.yaml`,
+ * when given) are identical — the caller then posts nothing, rather than announcing that
+ * nothing happened.
  */
 export function announcement(
   before: Snapshot[],
@@ -271,7 +287,8 @@ export function announcement(
   opts: AnnounceOpts = {},
 ): DiscordMessage | null {
   const changes = collectChanges(before, after);
-  if (changes.length === 0) return null;
+  const rules = collectRules(opts.meta?.before, opts.meta?.after);
+  if (changes.length === 0 && !rules) return null;
 
   // Dated from the update's own window, like the title and the changelog heading, so
   // re-rendering an unchanged update yields a byte-identical message to edit with.
@@ -279,7 +296,7 @@ export function announcement(
   const embed: Embed = {
     title: clip(updateTitle(before, after, opts), LIMIT.title),
     url: opts.prUrl ?? opts.changelogUrl ?? SOURCE_URL,
-    description: clip(describe(changes, totals(changes), opts), LIMIT.description),
+    description: clip(describe(changes, rules, totals(changes, rules), opts), LIMIT.description),
     color: COLOR,
     fields: buildFields(changes),
     footer: { text: clip(FOOTER, LIMIT.footer) },
@@ -356,9 +373,15 @@ export async function send(
   if (messageId) {
     const edit = await fetch(`${hook}/messages/${messageId}`, { method: 'PATCH', headers, body });
     if (edit.ok) return undefined;
+    // Anything but "gone" (a 429, a 5xx) means the message is still there, and posting
+    // anew would announce the update twice. Fail instead: the step is continue-on-error,
+    // and the next run edits again.
+    if (edit.status !== 404) {
+      throw new Error(`Discord rejected the edit: HTTP ${edit.status} ${await edit.text()}`);
+    }
     // The message is gone — deleted in Discord, or the id went stale. Post a fresh one
     // rather than dropping the announcement.
-    console.error(`Editing message ${messageId} failed (HTTP ${edit.status}) — posting anew.`);
+    console.error(`Message ${messageId} is gone (HTTP 404) — posting anew.`);
   }
 
   // `wait=true` makes Discord return the message it created, which is where the id for
@@ -409,12 +432,10 @@ if (isMain) {
     console.error('usage: tsx src/discord.ts <beforeDir> <afterDir> [--send] …');
     process.exit(2);
   }
-  const version = loadVersion(afterDir);
-  const message = announcement(
-    loadFactionDir(beforeDir),
-    loadFactionDir(afterDir),
-    version ? { ...opts, version } : opts,
-  );
+  const message = announcement(loadFactionDir(beforeDir), loadFactionDir(afterDir), {
+    ...opts,
+    meta: { before: loadMeta(beforeDir), after: loadMeta(afterDir) },
+  });
 
   if (!message) console.error('No data changes — nothing to announce.');
   else if (!sending) process.stdout.write(`${JSON.stringify(message)}\n`);
