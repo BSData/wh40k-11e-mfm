@@ -64,6 +64,20 @@ describe('usage errors exit 2 and say why', () => {
   });
 });
 
+describe('the `--` pnpm passes through', () => {
+  it('is dropped before the command', async () => {
+    const { code, stdout } = await mfm('--', '--help');
+    expect(code).toBe(0);
+    expect(stdout).toMatch(/^usage: mfm <command>/);
+  });
+
+  it('is dropped right after it', async () => {
+    const { code, stdout } = await mfm('diff', '--', DATA, DATA);
+    expect(code).toBe(0);
+    expect(stdout).toBe('No changes detected.\n');
+  });
+});
+
 describe('step outputs', () => {
   it('mfm plan appends them to --output, and prints nothing', async () => {
     const prs = join(scratch, 'prs.json');

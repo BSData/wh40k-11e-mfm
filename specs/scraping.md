@@ -56,8 +56,8 @@ shape so a changed card parses identically to an unchanged one:
   (`FORCE DISPOSITION(S) CHANGED`, `REQUISITION THRESHOLDS REMOVED`, `UNIQUE TAG REMOVED`,
   `BODYGUARD UNITS UPDATED`, `WARGEAR COSTS REMOVED`), on unit and detachment cards alike.
 
-`deannotate()` removes the `UPDATED`/note badge divs and strips the `▲`/`▼` glyphs and
-`(±N)` deltas from the text. A note string it does **not** recognise is left in place, no
+None of this is data. `deannotate()` removes the `UPDATED`/note badge divs and strips the
+`▲`/`▼` glyphs and `(±N)` deltas from the text. A note string it does **not** recognise is left in place, no
 parse step consumes it, and the coverage check fails the faction with `Unconsumed content`
 naming the card and the note. To accept a new note, add the exact string to
 `CHANGE_BADGE_TEXT` in [`src/allowlists.ts`](../src/allowlists.ts) in a reviewed commit.
@@ -150,7 +150,7 @@ Two things are **not** in any HTTP response — they're rendered client-side:
   "Muster Armies" (the army-building rules, including the battle-size table).
 
 `src/browser.ts` (Playwright, headless Chromium) handles both, interacting only with the
-buttons and the rendered DOM. See
+buttons and the rendered DOM, never with the request/response shape. See
 [0017](../docs/decisions/0017-http-first-a-browser-only-where-needed.md).
 - **Detecting Legends** is done from the *raw HTML*: `hasLegends(html)` checks for the
   `show-legends` toggle markup, which the server ships only for factions that have Legends.

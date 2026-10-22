@@ -3,7 +3,8 @@ import type { ParseArgsOptionsConfig } from 'node:util';
 /**
  * What a subcommand of `mfm` (`src/bin/mfm.ts`) is: its options, its `--help`, and a
  * thin `run` over the modules that do the work. What a command prints on stdout is its
- * result; progress and notes go to stderr. The commands themselves are in
+ * result; progress and notes go to stderr. (`scrape` and `refresh-fixtures` log their
+ * progress to stdout, as they always have: nothing reads their output.) The commands themselves are in
  * `report-commands.ts`, `workflow-commands.ts` and `data-commands.ts`, listed in
  * `commands.ts`.
  */

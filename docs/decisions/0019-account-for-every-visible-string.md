@@ -13,7 +13,8 @@ introduced it found three things the parser had been dropping all along: a sub-f
 The first version counted a card as covered by matching its selectors a second time, so a
 string the parser looked at but didn't keep still counted as covered. That is how, on the
 live v1.6 site, two change notes nobody had listed (`BODYGUARD UNITS UPDATED`, `WARGEAR
-COSTS REMOVED`) and non-numeric enhancement points went unreported.
+COSTS REMOVED`) went unreported, and how a value such as `FREE` in place of points would
+have been dropped too.
 
 ## Decision
 Every visible string on a faction page must be accounted for, or the faction fails. A

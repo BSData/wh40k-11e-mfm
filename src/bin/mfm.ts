@@ -28,9 +28,13 @@ function overview(): string {
   return `usage: mfm <command> [options]\n\nCommands:\n${lines.join('\n')}\n\nRun \`mfm <command> --help\` for a command's options.\n`;
 }
 
+/** `argv` without a `--` at `at`: pnpm passes one through as is (`pnpm scrape -- --out x`). */
+const dropSeparator = (argv: readonly string[], at: number): string[] =>
+  argv[at] === '--' ? [...argv.slice(0, at), ...argv.slice(at + 1)] : [...argv];
+
 /** Run one command line; resolves to the exit code (2 for a usage error). */
 export async function main(argv: readonly string[], io: Io = stdio): Promise<number> {
-  const [name, ...args] = argv;
+  const [name, ...args] = dropSeparator(dropSeparator(argv, 0), 1);
   if (name === '--help' || name === '-h') {
     io.out(overview());
     return 0;

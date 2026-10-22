@@ -4,7 +4,12 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { main } from '../src/bin/mfm.js';
-import { renderRulesPanels, renderWithLegends } from '../src/browser.js';
+import {
+  createScrapeContext,
+  launchBrowser,
+  renderRulesPanels,
+  renderWithLegends,
+} from '../src/browser.js';
 import { BASE_URL, fetchText } from '../src/fetch.js';
 
 // The pipeline end to end, offline, as `mfm scrape` runs it: the network and the browser
@@ -96,5 +101,25 @@ describe('mfm scrape — its options', () => {
     expect(await main(['scrape', ...args], io)).toBe(2);
     expect(stderr).toMatch(message);
     expect(fetchText).not.toHaveBeenCalled();
+  });
+});
+
+describe('mfm scrape — a browser that fails to open a page context', () => {
+  it('is closed, so the run ends instead of hanging on it', async () => {
+    const close = vi.fn(async () => {});
+    vi.mocked(launchBrowser).mockResolvedValueOnce({ close } as never);
+    vi.mocked(createScrapeContext).mockRejectedValueOnce(new Error('context failed'));
+    vi.mocked(fetchText).mockImplementation(async (url) =>
+      url === BASE_URL ? INDEX : fixture('necrons.html'),
+    );
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const out = mkdtempSync(join(tmpdir(), 'mfm-cli-'));
+    try {
+      await expect(main(['scrape', '--out', out])).rejects.toThrow('context failed');
+      expect(close).toHaveBeenCalledOnce();
+    } finally {
+      rmSync(out, { recursive: true, force: true });
+      vi.restoreAllMocks();
+    }
   });
 });

@@ -184,8 +184,11 @@ export async function scrape(args: ScrapeOptions): Promise<number> {
   const failures: { slug: string; error: string }[] = [];
 
   const browser = args.legends ? await launchBrowser() : null;
-  const ctx = browser ? await createScrapeContext(browser) : null;
+  let ctx: BrowserContext | null = null;
   try {
+    // Inside the `try`, so a context that fails to open still closes the browser: a
+    // browser left running would keep the process from exiting.
+    ctx = browser ? await createScrapeContext(browser) : null;
     // The rules panels are identical across pages — render them once for a full run.
     // A browser run needs them: if they fail, meta.yaml is left as it is.
     let panels: { notes: string; muster: string } | undefined;

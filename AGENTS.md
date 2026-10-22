@@ -44,8 +44,9 @@ the AI angle is purely this maintenance harness.
 ## Project map
 - `src/model.ts` — zod schemas; the **data-model contract** (and TS types).
 - `src/parse.ts` — cheerio HTML → model. Pure. The drift-prone surface. Modules under
-  `src/parse/`: `page.ts` (hydrate, de-annotate, the cards), `cards.ts`, `coverage.ts`,
-  `panels.ts`, `names.ts` (`titleCase()`).
+  `src/parse/`: `page.ts` (hydrate, de-annotate, the cards), `cards.ts`, `values.ts`
+  (points, DP, ranges, cost rows), `coverage.ts`, `panels.ts`, `faction.ts` (a faction page,
+  the index, the Legends), `names.ts` (`titleCase()`) and `text.ts`.
 - `src/fetch.ts` — polite HTTP (retry/backoff).
 - `src/browser.ts` — Playwright: Legends units + the rules panels ("Welcome…" notes,
   "Muster Armies") (not in HTTP).

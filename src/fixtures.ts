@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { BrowserContext } from 'playwright';
 import {
   createScrapeContext,
   launchBrowser,
@@ -73,15 +74,17 @@ export async function refreshFixtures(only: readonly string[], dir = FIXTURES_DI
   const renders = RENDERS.filter(([name]) => wanted(name));
   if (renders.length > 0) {
     const browser = await launchBrowser();
-    const ctx = await createScrapeContext(browser);
+    let ctx: BrowserContext | undefined;
     try {
+      // Inside the `try`, so a context that fails to open still closes the browser.
+      ctx = await createScrapeContext(browser);
       for (const [name, render] of renders) {
         const html = await render(ctx, factionUrl('necrons'));
         writeFileSync(join(dir, name), html);
         console.log(`saved ${name} (${html.length} bytes, browser render)`);
       }
     } finally {
-      await ctx.close();
+      await ctx?.close();
       await browser.close();
     }
   }
