@@ -74,9 +74,14 @@ jobs:
       # One PR per MFM version, stacked: the live version's open PR is updated on its own
       # base, and a new version gets a new PR on top of the open one instead of
       # rebuilding it. See "One PR per version, stacked" in specs/change-tracking.md.
+      #
+      # tsx runs as node_modules/.bin/tsx, not `pnpm exec tsx`, wherever its stdout is
+      # captured: pnpm can print its own status lines ("Already up to date", "Done in …")
+      # to stdout first. Once `pub/` holds the base's package.json it does, and that is
+      # how #78's Discord marker came to record "Already" instead of the message id.
       - name: Plan the update PR
         id: plan
-        run: pnpm exec tsx src/stack.ts /tmp/update-prs.json data >> "$GITHUB_OUTPUT"
+        run: node_modules/.bin/tsx src/stack.ts /tmp/update-prs.json data >> "$GITHUB_OUTPUT"
 
       # The PR is diffed against its base, not main: body, changelog entry and
       # announcement all compare the base's data/ with the scrape.
@@ -91,7 +96,7 @@ jobs:
       - name: Generate changelog
         id: changelog
         run: |
-          pnpm exec tsx src/diff.ts /tmp/old-data data --title-file /tmp/title.txt > /tmp/changelog.md
+          node_modules/.bin/tsx src/diff.ts /tmp/old-data data --title-file /tmp/title.txt > /tmp/changelog.md
           echo "title=$(cat /tmp/title.txt)" >> "$GITHUB_OUTPUT"
           cat /tmp/changelog.md
 
@@ -178,7 +183,8 @@ jobs:
             ] | last // ""')
           # No --changelog-url: at announce time main has yesterday's changelog, not this
           # update's. The PR body is the changelog, so that is what the embed links to.
-          posted=$(pnpm exec tsx src/discord.ts /tmp/old-data /tmp/new-data --send \
+          # Called directly, not through `pnpm exec`: see "Plan the update PR".
+          posted=$(node_modules/.bin/tsx src/discord.ts /tmp/old-data /tmp/new-data --send \
             --message-id "$id" \
             --pr-number "$PR" \
             --pr-url "$REPO_URL/pull/$PR")
@@ -186,6 +192,12 @@ jobs:
             # "<id> [permalink]": $1 drives the next run's edit, $2 is the clickable link
             # (absent if the webhook wouldn't say which guild and channel it posts to).
             set -- $posted
+            # A marker the next run can't read makes it post a second announcement, so
+            # refuse to write one: fail the step (it's continue-on-error) and say why.
+            if [[ ! "$1" =~ ^[0-9]+$ ]]; then
+              echo "::error::Expected '<id> [permalink]' from src/discord.ts, got: $posted"
+              exit 1
+            fi
             gh pr comment "$PR" \
               --body "Announced on Discord: ${2:-link unavailable} <!-- discord-message-id: $1 -->"
           fi
