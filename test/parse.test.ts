@@ -493,6 +493,8 @@ describe('loud failures — content the parser cannot read fails, located', () =
     ['an en dash', '▼ (–10) 65 pts'],
     ['a sign apart from its number', '▼ (- 10) 65 pts'],
     ['no brackets', '▼ -10 65 pts'],
+    ['a plus and no brackets', '▲ +10 65 pts'],
+    ['a plus and no glyph', '+10 65 pts'],
     ['a dot separator', '▲ (+1.000) 65 pts'],
   ])('fails on a delta written with %s rather than counting it as models', (_how, cell) => {
     const html = fixture('adepta-sororitas.html').replaceAll('▼ (-10) 65 pts', cell);

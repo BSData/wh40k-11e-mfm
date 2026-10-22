@@ -84,11 +84,12 @@ function parseRange(label: string): string {
 const TRAILING_POINTS_RE = /[\d,]+\s*pts\s*$/i;
 const PLAIN_SIZE_RE = /^\d+ models?$/i;
 /**
- * What a size never contains but a change delta does: a bracket, a glyph, or a sign
- * before a number. A delta `DELTA_MARKER_RE` doesn't recognise leaves these behind, and
- * its digits would otherwise be summed into `models`.
+ * What a size never contains but a change delta does: a bracket, a glyph, a minus before
+ * a number, or a plus before a number anywhere but the start (where it marks an add-on,
+ * "+ 1 Invader ATV"). A delta `DELTA_MARKER_RE` doesn't recognise leaves these behind,
+ * and its digits would otherwise be summed into `models`.
  */
-const DELTA_LEFTOVER_RE = /[()▲▼]|[-−–]\s*\d/;
+const DELTA_LEFTOVER_RE = /[()▲▼]|[-−–]\s*\d|\S\s*\+\s*\d/;
 
 /** One cost row. `where` locates the card for the error (see `cardWhere`). */
 function parseCostRow(where: string, raw: string): CostOption {

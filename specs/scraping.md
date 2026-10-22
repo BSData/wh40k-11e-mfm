@@ -95,7 +95,7 @@ data — see [`.agents/skills/diagnose-parse/SKILL.md`](../.agents/skills/diagno
 |---|---|
 | No units on a faction page | `No units found for "<slug>"` |
 | A unit card with no pricing tier | `"<slug>", unit "<CARD>": no pricing tiers` |
-| A cost row without a size and a trailing `NN pts`, or whose size still holds a bracket, a `▲`/`▼` or a sign before a number (a delta written in a way the parser doesn't recognise) | `"<slug>", unit "<CARD>": unreadable cost row "…"` |
+| A cost row without a size and a trailing `NN pts`, or whose size still holds a bracket, a `▲`/`▼`, a minus before a number, or a plus before a number anywhere but the start (a delta written in a way the parser doesn't recognise; a leading `+` marks an add-on) | `"<slug>", unit "<CARD>": unreadable cost row "…"` |
 | A wargear row without an item or whose points aren't `NN pts` (e.g. `FREE`) | `"<slug>", unit "<CARD>": unreadable wargear row "…"` |
 | An enhancement without a name | `"<slug>", detachment "<CARD>": unreadable enhancement row "…"` |
 | An enhancement whose points aren't `NN pts` (e.g. `FREE`) | `"<slug>", detachment "<CARD>": enhancement "<name>" has unreadable points "…"` |
