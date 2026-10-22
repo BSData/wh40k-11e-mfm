@@ -75,7 +75,8 @@ pnpm install
 pnpm exec playwright install chromium   # once, for Legends/notes capture
 scripts/setup                  # containers + cloud agents: both of the above, frozen lockfile,
                                # and Chromium's system packages (Debian/Ubuntu, sudo)
-pnpm verify                    # the definition of done: check + typecheck + test + data checks
+pnpm verify                    # the definition of done: check + typecheck + test + check-data
+pnpm check-data                # data/ valid and canonical, DATA-CHANGELOG.md up to date
 pnpm test                      # offline parser/emit/diff tests (start here)
 pnpm scrape --faction necrons  # live run for one faction (with Legends) → data/
 pnpm scrape --no-legends       # fast HTTP-only run, no browser/Legends

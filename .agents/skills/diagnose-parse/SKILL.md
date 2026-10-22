@@ -21,17 +21,23 @@ pnpm test            # do the fixture-based tests fail, or only the live scrape?
 - **Tests fail** → someone changed the parser/model. Read the failing assertion and the
   snapshot diff (`test/__snapshots__/`).
 
-## 2. Refresh the fixture and see what moved
+## 2. Refresh, reproduce, then keep only the page that shows the drift
 ```bash
-pnpm refresh-fixtures
+pnpm refresh-fixtures                # overwrites every fixture with today's pages
+pnpm test                            # which assertions now fail, on which fixture?
 git diff --stat test/fixtures        # how much changed?
-pnpm test                            # which assertions now fail?
 ```
-`pnpm refresh-fixtures` overwrites every fixture. `adepta-sororitas.html` pins the
-"changed since the last MFM" annotation layer, which the live page shows only after an
-update: restore it (`git restore test/fixtures/adepta-sororitas.html`) unless the
-drift is in that layer. If the failing faction has no fixture, add one with the
-[add-fixture](../add-fixture/SKILL.md) skill.
+A refresh is for finding the drift, not for committing. The saved fixtures are old on
+purpose: most are v1.1 pages whose tests assert v1.1 data (`test/parse.test.ts` expects
+version `'1.1'`), and `adepta-sororitas.html` pins the "changed since the last MFM" layer,
+which the live page shows only after an update. Committing them all would rewrite
+unrelated assertions. Once you know which refreshed page shows the drift, keep that one:
+```bash
+git add test/fixtures/<page>.html    # the one page that shows the drift
+git restore test/fixtures            # every other fixture back as it was
+```
+#62 kept only `necrons-panels.html`, the page that carried the new footer. If the failing
+faction has no fixture, add one with the [add-fixture](../add-fixture/SKILL.md) skill.
 
 Re-read [`specs/scraping.md`](../../../specs/scraping.md), especially the selector
 table and the **streaming-points** detail (`<template id="P:N">` ↔ `<div hidden id="S:N">`,
@@ -46,8 +52,11 @@ const $=load(readFileSync("test/fixtures/necrons.html","utf8"));
 console.log("cards (units + detachments):", $("div.flex.flex-col.space-y-1.m-1").length);
 console.log("templates:", $("template[id]").length, "completions:", $("div[hidden][id]").length);'
 ```
-The card count should equal the parsed units plus detachments (Necrons: 52 + 12 = 64).
-Don't count unit headers (`div.bg-slate-500.text-xl`): "changed"-style headers don't carry
+The card count should equal the parsed units plus detachments: 52 + 12 = 64 on the saved
+(v1.1) Necrons page. On a refreshed page, compare it with `data/<slug>.yaml`: its
+detachments plus its units without `legends: true` for an HTTP page (`<slug>.html`), or
+plus all its units for a browser render, which includes the Legends cards
+(`necrons-panels.html` at v1.6: 64 + 12 = 76). Don't count unit headers (`div.bg-slate-500.text-xl`): "changed"-style headers don't carry
 that class. Templates and completions pair up one to one; a mismatch means the streaming
 swap changed.
 
@@ -87,5 +96,6 @@ link from each button to its panel. Debug with `chromium.launch({ headless: fals
 
 ## 5. Open a PR
 Reference the failing scrape run / issue. Summarise what the site changed and the
-selector fix. Keep the fixture refresh in the same PR so CI is green, and run
+selector fix. Commit the one refreshed fixture with the fix, with an assertion that covers
+the drift, so CI tests the new markup; the other fixtures stay as they were. Run
 `pnpm verify` before asking for review.

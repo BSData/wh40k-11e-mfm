@@ -26,7 +26,7 @@ fixture before handling it (see the [add-fixture](../add-fixture/SKILL.md) skill
 
 ## 2. Schema: `src/model.ts`
 Edit the zod schema, with a doc comment that matches the spec (for `meta.yaml` it is
-`SiteMeta`; `grep -rn SiteMeta src` finds it). Optional fields use
+`SiteMeta`, in the same file; `metaFromYaml()` validates against it). Optional fields use
 `.optional()` and are omitted when absent rather than written as `null` or `[]`, unless the
 spec says otherwise (`dp` is nullable, `objectives` is always a list).
 
@@ -46,9 +46,10 @@ one-value change must stay a one-line diff.
 Every field the model carries is diffed (see "comprehensive" in
 [`specs/change-tracking.md`](../../../specs/change-tracking.md)). Compare the new field in
 the changelog and give it a readable line, then describe it in the spec. Check whether
-`src/discord.ts` should count it. For a `meta.yaml` field, check what `src/diff.ts` reads
-from `meta.yaml`: if it doesn't read the new field, add it there, or say in the PR that
-changes to it go unreported.
+`src/discord.ts` should count it. A `meta.yaml` field goes in `collectRules()`, which
+compares `version`, `notes` and `muster` and skips `lastUpdated` and `factions` because
+they are derived from the faction files; a new field is either compared there or derived
+the same way, and the spec says which.
 
 ## 6. JSON Schema
 If the repo has generated JSON Schemas (`schema/*.schema.json`), regenerate them from the
@@ -65,17 +66,19 @@ zod model; `pnpm verify` fails when they are stale.
 If the committed files no longer validate against the new schema, the next update can't read
 its "before" snapshot. Reshape them with a throwaway script that reads each file, transforms
 it and writes it back through `factionToYaml()` (`metaToYaml()` for `meta.yaml`), never by
-hand; delete the script afterwards.
+hand; delete the script afterwards. `pnpm check-data` (part of `pnpm verify`) fails on any
+file that doesn't validate or isn't in canonical form.
 Then check that `git diff --stat data/` touches only the keys you meant, and that no points,
 names or dates moved. Don't do this while an `mfm/*` update PR is open: its branch would
-conflict. Label the PR `regenerated-data` so the CI guard on `data/` lets it through.
+conflict. CI's data guard fails a PR that edits `data/`, `changelog/` or `DATA-CHANGELOG.md`
+until a maintainer labels it `regenerated-data`, so ask for the label in the PR.
 
 ## 9. Changelog note for consumers
 Add a dated `## [YYYY-MM-DD] — Schema change` entry to the current version's
 `changelog/v<version>.md`, just below `<!-- BEGIN ENTRIES -->` (entries run newest first).
 Format it like the one in `v1.4.md`: what changed, why, and what a consumer has to do. This
 is the one hand edit `changelog/` takes. `DATA-CHANGELOG.md` lists each file's entry dates,
-so regenerate it rather than editing it:
+so regenerate it rather than editing it (`pnpm check-data` fails while it is stale):
 ```bash
 pnpm exec tsx -e "import {readdirSync as r,readFileSync as f,writeFileSync as w} from 'node:fs';import {changelogIndex} from './src/changelog.ts';w('DATA-CHANGELOG.md',changelogIndex(r('changelog').map(n=>({name:n,text:f('changelog/'+n,'utf8')}))))"
 ```
