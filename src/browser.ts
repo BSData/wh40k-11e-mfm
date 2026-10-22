@@ -1,5 +1,5 @@
 import { type Browser, type BrowserContext, chromium, type Page } from 'playwright';
-import { RULES_PANELS } from './parse.js';
+import { CARD_SELECTOR, RULES_PANELS, TIER_LABEL_RE, TIER_LABEL_SELECTOR } from './parse.js';
 
 /**
  * Headless-browser access for the bits that aren't in the server HTML:
@@ -14,7 +14,6 @@ import { RULES_PANELS } from './parse.js';
  * once persists, and image/font/media requests are blocked so pages settle fast.
  */
 
-const UNIT_SELECTOR = 'div.bg-slate-500.text-xl';
 const LEGENDS_TOGGLE = '#show-legends-label';
 const NAV_TIMEOUT = 45_000;
 const ACTION_TIMEOUT = 15_000;
@@ -50,9 +49,11 @@ async function dismissCookies(page: Page): Promise<void> {
  *
  * We only interact with the button and read the rendered DOM — no dependence on
  * the request/response shape. The Legends render in a single React commit, so the
- * unit count jumps straight to its full total; waiting for it to exceed the
+ * unit-card count jumps straight to its full total; waiting for it to exceed the
  * current count is therefore exact (and deterministic under concurrency), not a
- * timed guess.
+ * timed guess. Unit cards are counted the way the parser tells them apart
+ * (`isUnitCard` in src/parse.ts): a card holding a pricing-tier label. Header styles
+ * vary with the annotation layer, so they are no signal.
  */
 export async function renderWithLegends(ctx: BrowserContext, url: string): Promise<string> {
   const page = await ctx.newPage();
@@ -61,16 +62,16 @@ export async function renderWithLegends(ctx: BrowserContext, url: string): Promi
     await dismissCookies(page);
     const toggle = page.locator(LEGENDS_TOGGLE);
     await toggle.waitFor({ timeout: NAV_TIMEOUT }); // appears once React hydrates
-    const before = await page.locator(UNIT_SELECTOR).count();
+    const unitCards = page
+      .locator(CARD_SELECTOR)
+      .filter({ has: page.locator(TIER_LABEL_SELECTOR, { hasText: TIER_LABEL_RE }) });
+    const before = await unitCards.count();
     await toggle.click({ timeout: ACTION_TIMEOUT }).catch(async () => {
       await dismissCookies(page); // a lingering overlay can intercept — clear + force.
       await toggle.click({ force: true, timeout: ACTION_TIMEOUT });
     });
-    await page.waitForFunction(
-      ([sel, n]) => document.querySelectorAll(sel as string).length > (n as number),
-      [UNIT_SELECTOR, before] as const,
-      { timeout: NAV_TIMEOUT },
-    );
+    // The (before + 1)-th unit card exists once the count exceeds `before`.
+    await unitCards.nth(before).waitFor({ state: 'attached', timeout: NAV_TIMEOUT });
     return await page.content();
   } finally {
     await page.close();
