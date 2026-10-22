@@ -1,22 +1,13 @@
-# Backlog / known follow-ups
+# Backlog
 
-Lightweight, tool-agnostic task list. Keep it short; move anything substantial to a
-GitHub issue.
+Open work is tracked in GitHub issues, not in this file:
+<https://github.com/BSData/wh40k-11e-mfm/issues?q=is%3Aissue%20is%3Aopen%20label%3Aenhancement>
 
-## Ideas / nice-to-haves
-- [ ] Optional LLM step to summarise the generated changelog into prose for PR bodies.
-- [ ] Consider emitting a combined `data/all.json` for consumers who want one file.
-- [ ] Confirm the per-battle-size max-DP rule (global, not on these pages) if ever needed.
-- [ ] Tune `--concurrency` if the daily run needs to be faster/gentler.
-
-## Done
-- [x] Core scrape → validate → YAML pipeline.
-- [x] React-Suspense hydration in the parser (handles fully-streamed cards).
-- [x] Deterministic YAML + changelog generator.
-- [x] CI + scheduled scrape workflow.
-- [x] Fixtures: necrons(+legends), black-templars (composite/add-on), titan-legions (thousands).
-- [x] `range` interval + numeric `models` + `desc`/`addon`; thousands-separator points fix.
-- [x] `firstSeen` date, stable across no-op scrapes (`dp` = detachment's point cost).
-- [x] Leader/Support roles + `attachTo`; Wargear options.
-- [x] Legends units + "Welcome…" notes via Playwright (legends detected from HTML).
-- [x] Parallel scrape (`--concurrency`); base over HTTP, browser only for Legends factions.
+Where the items once listed here went (2026-10-23):
+- An optional LLM summary of the changelog for PR bodies:
+  [#79](https://github.com/BSData/wh40k-11e-mfm/issues/79).
+- A combined `data/all.json`: part of
+  [#75](https://github.com/BSData/wh40k-11e-mfm/issues/75), as a release asset.
+- Tuning `--concurrency`: [#80](https://github.com/BSData/wh40k-11e-mfm/issues/80).
+- The per-battle-size DP limits: done. `data/meta.yaml`'s `muster` carries the battle-size
+  table, DP column included.

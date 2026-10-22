@@ -1,0 +1,33 @@
+# Prepares the environment for the GitHub Copilot coding agent before it starts: Node (from
+# .node-version, as in CI) and pnpm, then the shared scripts/setup. Copilot picks up only a job named
+# copilot-setup-steps, and reads only its steps, permissions, runs-on, services, snapshot
+# and timeout-minutes. A PR that changes the setup runs it here, so a broken setup shows
+# up in review rather than in an agent session.
+name: Copilot setup steps
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+      - scripts/setup
+
+permissions: {}
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30 # a cold run took 10 minutes, mostly apt fetching Chromium's packages
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          runtime: node
+          node-version-file: .node-version
+          cache: true
+          install: false # scripts/setup installs, so this runs the same setup as everywhere else
+      - run: scripts/setup

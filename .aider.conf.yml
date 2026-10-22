@@ -1,0 +1,2 @@
+# Aider: load the repo's agent instructions read-only into every session.
+read: [AGENTS.md]
