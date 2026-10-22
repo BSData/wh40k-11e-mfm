@@ -62,6 +62,8 @@ the AI angle is purely this maintenance harness.
   `changelog`) and the workflow's GitHub chores, which live in `src/ops/` (tested
   against stub servers). `pnpm mfm --help` lists them.
 - `specs/` — **source-of-truth prose**. Change the spec first, then the code.
+- `docs/decisions/` — why the specs say what they do: one record per decision, linked
+  from the spec section it explains.
 - `test/` — Vitest + saved HTML `fixtures/`. Tests run offline.
 - `data/` — committed output: the dataset and its history. Do not hand-edit.
 - `changelog/` + `DATA-CHANGELOG.md` — committed output: one readable changelog file per

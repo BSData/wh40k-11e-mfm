@@ -42,10 +42,11 @@ key order. A field not copied there is silently dropped from the YAML and from
 through `metaToYaml()`, which lists its keys the same way. Keep the output deterministic: a
 one-value change must stay a one-line diff.
 
-## 5. Diff: `src/diff.ts`
+## 5. Diff: `src/diff/`
 Every field the model carries is diffed (see "comprehensive" in
 [`specs/change-tracking.md`](../../../specs/change-tracking.md)). Compare the new field in
-the changelog and give it a readable line, then describe it in the spec. Check whether
+`computeChanges()` (`src/diff/collect.ts`) and give it a readable line, then describe it
+in the spec. Check whether
 `src/discord.ts` should count it. A `meta.yaml` field goes in `collectRules()`, which
 compares `version`, `notes` and `muster` and skips `lastUpdated` and `factions` because
 they are derived from the faction files; a new field is either compared there or derived
