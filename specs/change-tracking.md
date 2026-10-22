@@ -216,7 +216,9 @@ once the PR has accumulated changes across several days.
 A re-scrape must not re-stamp what the open PRs already captured. The workflow hands the
 scrape every open update branch's `data/` via `--dates-from`, and `firstSeen` resolves to
 the date of the **oldest** snapshot (committed or PR) whose content matches what was just
-scraped. See [0002](../docs/decisions/0002-name-and-date-an-update-from-the-data.md).
+scraped. So a run that finds nothing new reproduces the branch byte for byte (no
+force-push, and the PR keeps its start date), and a later change stamps only the factions
+that moved, widening the window. See [0002](../docs/decisions/0002-name-and-date-an-update-from-the-data.md).
 
 This is pure code — no LLM.
 
@@ -272,7 +274,8 @@ included, but never folded or shortened. The PR body is this entry under a size 
 
 No changes → neither file is touched (no spurious diff), and a re-scrape that finds
 nothing new leaves both byte-identical too. Each run writes the entry into a checkout of
-the PR's base. Entries written before this layout keep their original Keep a Changelog
+the PR's base, so re-running on a sticky PR rewrites its entry rather than stacking a
+second one. Entries written before this layout keep their original Keep a Changelog
 shape (**Added** / **Changed** / **Removed**).
 
 ## Announcing an update (Discord)
@@ -298,7 +301,9 @@ The last marker among the PR's comments wins. The marker is written only for a m
 that is all digits (a Discord snowflake). The comment also carries the message's
 permalink (`https://discord.com/channels/<guild>/<channel>/<message>`), or `link
 unavailable` when the webhook won't say where it posts; resolving it is best-effort and
-never stops the marker. Deleting the comment forces a repost.
+never stops the marker. Deleting the comment forces a repost. Each run edits the message
+while the PR is open, even when nothing changed, and a new version's PR, which starts
+with no marker, gets a message of its own.
 
 An edit that fails because the message is gone (a 404) falls back to posting a new one.
 Any other failed edit (a 429, a 5xx) throws instead, and writes no marker. See

@@ -8,7 +8,8 @@ import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { COMMANDS } from '../src/bin/commands.js';
 import { main } from '../src/bin/mfm.js';
 
-const DATA = fileURLToPath(new URL('../data', import.meta.url));
+// The frozen v1.6 dataset, so the expectations below don't move with data updates.
+const DATA = fileURLToPath(new URL('./golden/data-v1.6', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'mfm-cli-'));
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 

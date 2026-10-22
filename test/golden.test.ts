@@ -15,7 +15,8 @@ import { planUpdate, type UpdatePr } from '../src/stack.js';
 /**
  * Golden tests: what the scrape workflow publishes for an update — the PR title and body,
  * the changelog entry, the Discord payload and the update-PR plan — pinned byte for byte
- * under `test/golden/`, on realistic snapshot pairs built from the committed `data/`.
+ * under `test/golden/`, on realistic snapshot pairs built from a real dataset: `data/` as
+ * of MFM v1.6, frozen in `test/golden/data-v1.6/` so a data update doesn't move them.
  *
  * Each output is checked twice: from the functions, and from the commands the workflow
  * runs. A refactor must leave every golden file untouched. A deliberate change to what is
@@ -24,13 +25,13 @@ import { planUpdate, type UpdatePr } from '../src/stack.js';
  */
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
-const DATA = join(ROOT, 'data');
+const DATA = join(ROOT, 'test', 'golden', 'data-v1.6');
 const TODAY = '2026-10-23';
 const PR = { prNumber: 78, prUrl: 'https://github.com/BSData/wh40k-11e-mfm/pull/78' };
 
 const before = loadFactionDir(DATA);
 const beforeMeta = loadMeta(DATA);
-if (!beforeMeta) throw new Error('data/meta.yaml has no site version');
+if (!beforeMeta) throw new Error(`${DATA}/meta.yaml has no site version`);
 
 // ---- Building the scraped side ---------------------------------------------------
 
@@ -236,7 +237,7 @@ const pr = (number: number, headRefName: string, baseRefName: string): UpdatePr 
   baseRefName,
 });
 
-/** The open PRs the plan is made against, as `gh pr list` reports them. */
+/** The open PRs the plan is made against, as `mfm open-prs` lists them. */
 const OPEN: [string, UpdatePr[]][] = [
   ['no update PR open', []],
   [
