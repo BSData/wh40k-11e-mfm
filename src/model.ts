@@ -139,6 +139,21 @@ export const FactionSummary = z.object({
 });
 export type FactionSummary = z.infer<typeof FactionSummary>;
 
+/**
+ * `data/meta.yaml`: the site version and the faction slugs of the last full scrape.
+ * `lastUpdated` is the latest `firstSeen` among them, so it too is stable on a no-op scrape.
+ */
+export const SiteMeta = z.object({
+  version: z.string().min(1),
+  lastUpdated: z.string().regex(ISO_DATE),
+  /** The expandable "Welcome…" help text, when captured via the browser. */
+  notes: z.string().min(1).optional(),
+  /** The expandable "Muster Armies" army-building rules, when captured via the browser. */
+  muster: z.string().min(1).optional(),
+  factions: z.array(z.string().min(1)).min(1),
+});
+export type SiteMeta = z.infer<typeof SiteMeta>;
+
 /** Parsed landing page: site version + the list of faction subpages. */
 export const SiteIndex = z.object({
   version: z.string().min(1),
