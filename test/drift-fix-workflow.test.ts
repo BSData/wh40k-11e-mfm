@@ -40,6 +40,12 @@ const workflow = parse(
 const agent = workflow.jobs.agent?.steps ?? [];
 const draft = agent.find((s) => s.id === 'agent');
 const check = agent.at(-1);
+/** The hosts the agent job's egress block lets through. */
+const allowed = (
+  agent.find((s) => s.uses?.startsWith('step-security/harden-runner@'))?.with?.[
+    'allowed-endpoints'
+  ] ?? ''
+).split(/\s+/);
 
 describe('the drift fixer workflow', () => {
   it('has a gate, an agent and a PR job, and nothing else', () => {
@@ -70,9 +76,14 @@ describe('the drift fixer workflow', () => {
   // Nothing in the repository uses these hosts, so nothing else would notice them gone
   // before an outage's run failed at the install.
   it("lets the agent's job reach Claude Code's installer", () => {
-    const block = agent.find((s) => s.uses?.startsWith('step-security/harden-runner@'));
-    const allowed = (block?.with?.['allowed-endpoints'] ?? '').split(/\s+/);
     expect(allowed).toEqual(expect.arrayContaining(['claude.ai:443', 'downloads.claude.ai:443']));
+  });
+
+  // Refused, pnpm's install of Node retries for over a minute before going on without it.
+  it("lets pnpm's install of Node read its checksums", () => {
+    expect(allowed).toEqual(
+      expect.arrayContaining(['nodejs.org:443', 'unofficial-builds.nodejs.org:443']),
+    );
   });
 
   it('opens the PR only after the agent job succeeded', () => {

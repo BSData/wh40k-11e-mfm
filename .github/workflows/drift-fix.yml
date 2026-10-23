@@ -118,7 +118,9 @@ jobs:
           # (*.actions.githubusercontent.com) and its storage
           # (productionresultssa*.blob.core.windows.net), which the artifacts use.
           # Claude Code's installer: claude.ai redirects it to downloads.claude.ai, which
-          # serves the script, the manifests and the binaries.
+          # serves the script, the manifests and the binaries. pnpm's install of Node
+          # reads checksums from nodejs.org and from its unofficial-builds mirror: refused
+          # the mirror, it retries for over a minute, then goes on without it.
           allowed-endpoints: >
             api.anthropic.com:443
             claude.ai:443
@@ -129,6 +131,7 @@ jobs:
             release-assets.githubusercontent.com:443
             registry.npmjs.org:443
             nodejs.org:443
+            unofficial-builds.nodejs.org:443
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
