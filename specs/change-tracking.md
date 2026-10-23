@@ -301,14 +301,16 @@ stands out. It is for readers who never open the detail, and nothing depends on 
   one or two short paragraphs of plain prose, at most 120 words, using only the
   changelog's facts and names, naming no dates (the title carries them), and, when there
   is a *Needs attention* warning, for how many changes it flags rather than their values.
-- **What of the answer is used.** Plain text: every character but letters, digits, spaces,
-  line breaks, dashes, quotation marks and `. , ; : ! ? ' " ( ) / % + × → ▲ ▼ ·` is
-  dropped, so it holds no HTML, mention or `#12` issue reference, and each paragraph
-  becomes one line of the quote. That is not the same as no Markdown: a list marker, an
-  `:emoji:` shortcode or a bare commit SHA, which GitHub links, can get through. An answer
-  that is empty, has a link (`http://`, `https://`, `ftp://`, `www.`) or a `GH-<number>`
-  reference, or doesn't fit the room is not used. The answer is never printed to the job's
-  log.
+- **What of the answer is used.** Plain text: the answer is normalised to NFC, a tab or
+  any other space character becomes a plain space, and every character but letters (with
+  their accents), digits, spaces, line breaks, dashes, quotation marks and
+  `. , ; : ! ? ' " ( ) / % + × → ▲ ▼ ·` is dropped, as is every invisible one (variation
+  selectors, joiners, fillers, tags, bidirectional controls), so it holds no HTML, mention
+  or `#12` issue reference, and each paragraph becomes one line of the quote. That is not
+  the same as no Markdown: a list marker, an `:emoji:` shortcode or a bare commit SHA,
+  which GitHub links, can get through. An answer that is empty, has a link (`http://`,
+  `https://`, `ftp://`, `www.`) or a `GH-<number>` reference, or doesn't fit the room is
+  not used. The answer is never printed to the job's log.
 - **The key.** `brief` holds the repository secret `ANTHROPIC_API_KEY`, the drift fixer's,
   and a token that only reads the repository. Like `publish`, it runs no dependency code:
   pinned actions, and one repository file under plain Node (`node

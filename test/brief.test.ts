@@ -54,13 +54,49 @@ describe('briefBlock — the answer as a quote a PR body can hold', () => {
 
   it('drops control and invisible characters', () => {
     // A right-to-left override, a zero-width space and a bell.
-    expect(firstLine('‮Orks​ up\u0007')).toBe('> Orks up');
+    expect(firstLine('\u202EOrks\u200B up\u0007')).toBe('> Orks up');
+  });
+
+  it('drops the invisible characters that are marks or letters, too', () => {
+    // A variation selector, a combining grapheme joiner, a Hangul filler, a variation
+    // selector supplement.
+    expect(firstLine('Orks\u{FE0F}\u{034F}\u{3164} up\u{E0101}')).toBe('> Orks up');
+  });
+
+  it.each([
+    '00AD', // soft hyphen
+    '034F', // combining grapheme joiner
+    '115F', // Hangul choseong filler
+    '1160', // Hangul jungseong filler
+    '180B', // Mongolian free variation selector one
+    '2064', // invisible plus
+    '3164', // Hangul filler
+    'FE0F', // variation selector 16
+    'FFA0', // halfwidth Hangul filler
+    'E0041', // tag latin capital letter A
+    'E0101', // variation selector 18
+  ])('drops U+%s', (hex) => {
+    const invisible = String.fromCodePoint(Number.parseInt(hex, 16));
+    expect(firstLine(`Orks${invisible} up`)).toBe('> Orks up');
+  });
+
+  it('composes accents, and keeps one that has no precomposed letter', () => {
+    expect(firstLine('Ae\u0301ldari')).toBe('> A\u00E9ldari');
+    expect(firstLine('x\u0301')).toBe('> x\u0301');
+  });
+
+  it('turns a tab or any other space character into a space', () => {
+    expect(firstLine('10\u00A0models:\t80\u202F→\u202F90 and\u3000more')).toBe(
+      '> 10 models: 80 → 90 and more',
+    );
+    // ... so a line with only one is still a blank line between paragraphs.
+    expect(block('a\n\t\nb')).toBe(`${BRIEF_MARKER}\n> ${HEADER}\n>\n> a\n>\n> b\n\n${BRIEF_END}`);
   });
 
   it('keeps names, numbers and arrows as the changelog writes them', () => {
     // U+2011 is the non-breaking hyphen the data uses.
     const text =
-      'T’au Empire — Kroot Hounds, 10 models: 80 → 90 (+10); ▲5 ▼2, ×3 · Sky‑stalker 50% "new"!?';
+      'T’au Empire — Kroot Hounds, 10 models: 80 → 90 (+10); ▲5 ▼2, ×3 · Sky\u2011stalker 50% "new"!?';
     expect(firstLine(text)).toBe(`> ${text}`);
   });
 
