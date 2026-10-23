@@ -76,11 +76,14 @@ describe('the release workflow', () => {
       'permission-contents': 'write',
       'permission-workflows': 'write',
     });
-    expect(
-      Object.keys(mint?.with ?? {})
-        .filter((k) => k.startsWith('permission-'))
-        .sort(),
-    ).toEqual(['permission-contents', 'permission-workflows']);
+    // Exactly these keys: no owner or repositories (so this repository only), no other
+    // permission, and no skip-token-revoke.
+    expect(Object.keys(mint?.with ?? {}).sort()).toEqual([
+      'client-id',
+      'permission-contents',
+      'permission-workflows',
+      'private-key',
+    ]);
     expect(env.GH_TOKEN?.replace(/\s/g, '')).toBe(['$', '{{steps.token.outputs.token}}'].join(''));
     expect(publish?.if).toContain("github.event_name != 'pull_request'");
     expect(publish?.if).toContain("github.ref == 'refs/heads/main'");
