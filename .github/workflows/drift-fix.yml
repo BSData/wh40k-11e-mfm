@@ -86,7 +86,7 @@ jobs:
   # only reads, it gets no other secret, and harden-runner blocks every host but the
   # model's API, GitHub (with its artifact storage) and the npm registry and Node.js
   # downloads the setup needs, with sudo off so the block holds. Everything is installed
-  # before the agent starts: the dependencies, and Claude Code itself, from npm. The
+  # before the agent starts: the dependencies, and Claude Code itself, each from a lockfile. The
   # agent's tools are Read, Edit, Glob, Grep, and Bash for exactly `pnpm verify`,
   # `git diff` and `git diff --stat`; its prompt points at the diagnose-parse skill and
   # hands it the failure report and the refreshed pages as untrusted data, never an issue
@@ -130,11 +130,14 @@ jobs:
           cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
 
       # The version claude-code-action v1.0.251 would install itself, but from the npm
-      # registry (npm versions are immutable), so its installer's hosts needn't be allowed.
+      # registry, with its version and integrity hashes pinned by the lockfile in
+      # .github/drift-fix, so the action's installer's hosts needn't be allowed. Outside
+      # the checkout, which the agent edits.
       - name: Install Claude Code
-        env:
-          VERSION: 2.1.301
-        run: npm install --prefix "$RUNNER_TEMP/claude-code" --no-save --no-package-lock --no-audit --no-fund "@anthropic-ai/claude-code@$VERSION"
+        run: |
+          mkdir -p "$RUNNER_TEMP/claude-code"
+          cp .github/drift-fix/package.json .github/drift-fix/package-lock.json "$RUNNER_TEMP/claude-code/"
+          npm ci --prefix "$RUNNER_TEMP/claude-code" --no-audit --no-fund
 
       - name: Fetch the drift
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -317,4 +320,5 @@ jobs:
           GH_REPO: ${{ github.repository }}
           ISSUE: ${{ needs.gate.outputs.issue }}
           PR: ${{ steps.pr.outputs.pull-request-number }}
-        run: gh issue comment "$ISSUE" --body "The drift-fix agent drafted #$PR. It stays a draft until a maintainer has reviewed it; the next successful scrape after it merges closes this issue."
+        run: |
+          gh issue comment "$ISSUE" --body "The drift-fix agent drafted #$PR. It stays a draft until a maintainer has reviewed it; the next successful scrape after it merges closes this issue."

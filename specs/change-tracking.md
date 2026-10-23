@@ -438,7 +438,8 @@ part holds only what it needs. See
    `actions: read`, the checkout keeps no credentials, and harden-runner blocks egress
    except to the model's API, GitHub (`github.com`, `api.github.com`, its release and
    artifact storage), the npm registry and `nodejs.org`, with sudo and containers off.
-   The dependencies, and Claude Code from npm at a pinned version, are installed before
+   The dependencies, and Claude Code from npm (`npm ci`, with the version and integrity
+   hashes pinned by `.github/drift-fix/package-lock.json`), are installed before
    the agent starts. `anthropics/claude-code-action` runs Claude Sonnet 5.5 for at most
    30 turns and 20 minutes, once. Its tools are Read, Edit, Glob and Grep, and Bash for
    exactly `pnpm verify`, `git diff` and `git diff --stat`: no web tools and no Write.

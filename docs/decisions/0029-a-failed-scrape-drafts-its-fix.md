@@ -78,9 +78,10 @@ The PR job runs one repository file next to the App's key, which [0022](0022-the
 `publish` doesn't. It is reviewed code from the commit the agent started from, with no
 imports a dependency could hide in, and a test fails if it gains one.
 
-Claude Code is installed from npm at the version the action would install, rather than by
-the action's installer, which downloads from Anthropic's own hosts: npm versions can't be
-replaced, and the allowlist stays at the hosts the setup already needs.
+Claude Code is installed from npm with `npm ci`, from a lockfile in `.github/drift-fix/`
+that pins the version the action would install and its integrity hashes, rather than by
+the action's installer, which downloads from Anthropic's own hosts. The allowlist stays at
+the hosts the setup already needs. The lockfile is bumped by hand, with the action.
 
 Rejected:
 - GitHub Agentic Workflows, which models this loop natively but is in public preview.
