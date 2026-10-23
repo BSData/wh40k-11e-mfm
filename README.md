@@ -156,7 +156,7 @@ pnpm scrape                    # full run, all factions (with Legends + notes)
 pnpm scrape --browser          # the same, cross-checked against Google Chrome
 ```
 
-See [`AGENTS.md`](AGENTS.md) for the project map and the commands,
+See [`AGENTS.md`](AGENTS.md) for the ground rules and the commands,
 [`.agents/skills/`](.agents/skills/) for the runbooks (notably what to do when a scrape
 breaks), and [`specs/`](specs/) for the source-of-truth contracts.
 

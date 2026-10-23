@@ -1,15 +1,15 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 
 /**
- * The agent layout (see "Harness files" in AGENTS.md): skills every harness can load, and
- * one instruction file that stays readable where harnesses truncate it.
+ * The agent layout (docs/decisions/0030-one-short-instruction-file.md): skills every
+ * harness can load, and one short instruction file that names nothing that isn't there.
  */
 
-const read = (path: string): string =>
-  readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), 'utf8');
+const root = (path: string): string => fileURLToPath(new URL(`../${path}`, import.meta.url));
+const read = (path: string): string => readFileSync(root(path), 'utf8');
 
 const SKILLS_DIR = fileURLToPath(new URL('../.agents/skills', import.meta.url));
 const skills = readdirSync(SKILLS_DIR, { withFileTypes: true })
@@ -54,21 +54,36 @@ describe('skills (.agents/skills/<name>/SKILL.md)', () => {
 });
 
 describe('AGENTS.md', () => {
-  it('stays under 200 lines', () => {
-    expect(agents.split('\n').length).toBeLessThan(200);
+  // Every line costs every task context, and long files are followed less well (0030).
+  it('stays under 100 lines and 5,000 characters', () => {
+    expect(agents.split('\n').length).toBeLessThan(100);
+    expect(agents.length).toBeLessThanOrEqual(5000);
   });
 
-  // Copilot code review reads only the first 4,000 characters of an instruction file.
-  it.each(['## Ground rules', '## Definition of done'])(
-    'ends "%s" within 4,000 characters',
-    (heading) => {
-      const start = agents.indexOf(heading);
-      expect(start).toBeGreaterThanOrEqual(0);
-      const end = agents.indexOf('\n## ', start + heading.length);
-      expect(end).toBeGreaterThan(start);
-      expect(end).toBeLessThanOrEqual(4000);
-    },
-  );
+  it('starts with the ground rules, then the definition of done', () => {
+    const headings = [...agents.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
+    expect(headings.slice(0, 2)).toEqual(['Ground rules', 'Definition of done']);
+  });
+
+  // A path that no longer exists is how the old project map went stale.
+  it('names only repository paths that exist', () => {
+    const linked = [...agents.matchAll(/\]\(([^)#\s]+)\)/g)].map((m) => m[1] ?? '');
+    const quoted = [...agents.matchAll(/`([^`\s]+)`/g)]
+      .map((m) => m[1] ?? '')
+      .filter((p) => /^[\w.-]+\/|^\.?[\w-]+\.(md|ts|ya?ml|json|html)$|\/$/.test(p));
+    const paths = [...linked, ...quoted].filter(
+      (p) => !/^https?:/.test(p) && !p.startsWith('/') && !/[<>*]/.test(p),
+    );
+    expect(paths.length).toBeGreaterThan(5);
+    expect(paths.filter((p) => !existsSync(root(p.replace(/\/$/, ''))))).toEqual([]);
+  });
+
+  it('runs only pnpm scripts that exist', () => {
+    const scripts = Object.keys(JSON.parse(read('package.json')).scripts ?? {});
+    const used = [...agents.matchAll(/^pnpm ([\w:-]+)/gm)].map((m) => m[1] ?? '');
+    expect(used.length).toBeGreaterThan(3);
+    expect(used.filter((s) => s !== 'install' && !scripts.includes(s))).toEqual([]);
+  });
 
   it('is what CLAUDE.md imports, and all it holds', () => {
     expect(read('CLAUDE.md').trim()).toBe('@AGENTS.md');
