@@ -92,7 +92,9 @@ error lists exactly what and where (`unit "…"`, `detachment "…"`, or `page-l
   consumed only by the step that reads its block, once, and only when it reads exactly as
   `UNIT_BLOCK_LABELS` / `ENHANCEMENTS_LABEL` list it. Left over means a second copy (a note
   that reads like one), a block whose list is now empty, or a renamed label: find which
-  in the page before changing anything.
+  in the page before changing anything. It is never chrome: don't allowlist it
+  (`deannotate()` removes every `div` whose text is in `CHANGE_BADGE_TEXT`, so a label
+  there would take the label, and the icon the parser finds the block by, off every card).
 
 ## Legends and the rules panels
 Both come over plain HTTP from details the site doesn't document (see "Legends" and "The

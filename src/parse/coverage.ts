@@ -85,8 +85,11 @@ export function assertFactionCovered(
   if (leftovers.length > 0) {
     throw new Error(
       `Unconsumed content on "${slug}": the page has data no selector captured. ` +
-        'Handle it in src/parse/ (and specs/scraping.md), or add it to the relevant ' +
-        `boilerplate allowlist if it is chrome:\n  ${leftovers.join('\n  ')}`,
+        'Handle it in src/parse/ (and specs/scraping.md); or, if it is chrome, add the exact ' +
+        'string to CHANGE_BADGE_TEXT (a change note on a card) or PAGE_BOILERPLATE (page ' +
+        'level) in src/allowlists.ts. A leftover block label (LEADER, SUPPORT, WARGEAR ' +
+        'OPTIONS, ENHANCEMENTS) is never chrome: its block changed, or a note repeats it:' +
+        `\n  ${leftovers.join('\n  ')}`,
     );
   }
 }
