@@ -34,6 +34,7 @@ import {
   Unit,
   Wargear,
 } from '../src/model.js';
+import { BRIEF_MARKER, BRIEF_ROOM, insertBrief } from '../src/ops/brief.js';
 import { parseFaction } from '../src/parse.js';
 
 const fixture = (name: string) =>
@@ -1463,7 +1464,9 @@ describe("fitting GitHub's PR body limit", () => {
     const log = changelog(before, after);
     // Too long whole — this isn't passing by accident.
     expect(changelogEntry(before, after).length).toBeGreaterThan(BODY_LIMIT);
-    expect(log.length).toBeLessThanOrEqual(BODY_LIMIT);
+    // Under the limit by the room kept for the brief: the largest quote still fits.
+    expect(log.length).toBeLessThanOrEqual(BODY_LIMIT - BRIEF_ROOM);
+    expect(insertBrief(log, 'x'.repeat(BRIEF_ROOM))).toBeDefined();
     // Every faction keeps its heading, and the fold still closes.
     for (let i = 1; i <= 40; i++)
       expect(log).toContain(`## Faction ${String(i).padStart(2, '0')}\n`);
@@ -1488,5 +1491,23 @@ describe("fitting GitHub's PR body limit", () => {
     expect(log).not.toContain('[!NOTE]');
     expect(log).not.toContain('left out');
     expect(log).toContain('the same entry this PR commits to `changelog/v1.1.md`._');
+  });
+});
+
+describe('the place for the brief', () => {
+  it('is marked after the title, before the blurb, in a body with a changelog entry', () => {
+    const after = necronsContent();
+    reprice(after, 5);
+    const lines = changelog([necronsContent()], [after]).split('\n');
+    expect(lines[0]).toMatch(/^# MFM v1\.1 update/);
+    expect(lines.slice(1, 4)).toEqual(['', BRIEF_MARKER, '']);
+    expect(lines[4]).toMatch(/^_Automated Munitorum Field Manual scrape\./);
+  });
+
+  it('is in neither the changelog entry nor a body with no changes', () => {
+    const after = necronsContent();
+    reprice(after, 5);
+    expect(changelogEntry([necronsContent()], [after])).not.toContain(BRIEF_MARKER);
+    expect(changelog([necronsContent()], [necronsContent()])).toBe('No changes detected.\n');
   });
 });

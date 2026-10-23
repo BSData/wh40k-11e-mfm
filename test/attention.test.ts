@@ -21,6 +21,7 @@ import {
 import { announcement } from '../src/discord.js';
 import { metaToYaml, type SiteMeta } from '../src/emit.js';
 import type { CostOption, Faction, Unit } from '../src/model.js';
+import { BRIEF_MARKER } from '../src/ops/brief.js';
 
 /**
  * The "Needs attention" flags (src/diff/attention.ts): each rule at its threshold, how
@@ -449,6 +450,11 @@ describe('the warning', () => {
     expect(body[0]).toMatch(/^# MFM v1\.6 update/);
     expect(body[1]).toBe('');
     expect(body[2]).toBe('> [!WARNING]');
+    // The warning, a blank line, the mark, a blank line, the blurb.
+    const mark = body.indexOf(BRIEF_MARKER);
+    expect(body.slice(2, mark - 1).every((l) => l.startsWith('>'))).toBe(true);
+    expect(body[mark - 1]).toBe('');
+    expect(body[mark + 2]).toMatch(/^_Automated/);
     expect(changelogEntry(base, after, { meta, today: '2026-10-23' })).not.toContain(
       'Needs attention',
     );
@@ -461,6 +467,7 @@ describe('the warning', () => {
     };
     const body = changelog(base, base, { meta, today: '2026-10-23' });
     expect(body).toContain("> - **Necrons** is gone from the site's index");
+    expect(body).not.toContain(BRIEF_MARKER);
     // `mfm changelog` writes no entry for it, so the blurb names none.
     expect(changelogEntry(base, base, { meta, today: '2026-10-23' })).toBe('');
     expect(body).not.toContain('changelog/');

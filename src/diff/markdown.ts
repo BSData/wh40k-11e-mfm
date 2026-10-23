@@ -1,4 +1,5 @@
 import { compareNames } from '../emit.js';
+import { BRIEF_MARKER, BRIEF_ROOM } from '../ops/brief.js';
 import { attentionSection, collectAttention } from './attention.js';
 import { collectChanges, type FactionChanges, type Snapshot } from './collect.js';
 import {
@@ -23,8 +24,9 @@ import { sharedHead, tallies, totals } from './tally.js';
 
 /**
  * The two Markdown renderings of an update: `changelog()`, the PR body (folded once it is
- * long, and shortened to fit GitHub's PR body limit), and `changelogEntry()`, the same
- * entry in full for the version's file under `changelog/`.
+ * long, and shortened to fit GitHub's PR body limit less the room kept for the brief a
+ * model may write above the changelog), and `changelogEntry()`, the same entry in full for
+ * the version's file under `changelog/`.
  */
 
 /** "+2 -1 ~7" — added / removed / changed in place — or "—" when nothing moved. */
@@ -103,6 +105,13 @@ const FOLD_AFTER_LINES = 50;
  */
 export const BODY_LIMIT = 65_536;
 
+/**
+ * What the body is fitted to: GitHub's limit less `BRIEF_ROOM`, the room kept for the brief
+ * a model may write above the changelog (`src/ops/brief.ts`), so putting it in never pushes
+ * the body over the limit.
+ */
+const FIT_TO = BODY_LIMIT - BRIEF_ROOM;
+
 const blurb = (file: string): string =>
   `_Automated Munitorum Field Manual scrape. The YAML diff is canonical; this is the readable summary — the same entry this PR commits to \`${file}\`._`;
 
@@ -127,10 +136,10 @@ function fold(detail: string, factions: number): string {
 }
 
 /**
- * The PR body within `BODY_LIMIT`: whole when it fits, otherwise with faction sections
- * replaced by a one-line stub, largest first — so the most factions keep their detail —
- * until it does. A stub keeps its heading; a note under the table names every shortened
- * section and the file that has them in full.
+ * The PR body within `FIT_TO` (`BODY_LIMIT` less the room for the brief): whole when it
+ * fits, otherwise with faction sections replaced by a one-line stub, largest first — so the
+ * most factions keep their detail — until it does. A stub keeps its heading; a note under
+ * the table names every shortened section and the file that has them in full.
  */
 function fitted(
   head: string,
@@ -162,7 +171,7 @@ function fitted(
     (a, b) => b.body.length - a.body.length || compareNames(a.name, b.name),
   );
   for (const s of largest) {
-    if (body.length <= BODY_LIMIT) return body;
+    if (body.length <= FIT_TO) return body;
     cut.push(s.name);
     shown = shown.map((x) => (x === s ? stub(x) : x));
     // Named in page order, not in the order they were cut.
@@ -172,7 +181,7 @@ function fitted(
     );
   }
   // Only reachable with hundreds of factions: even the stubs don't fit.
-  return body.length <= BODY_LIMIT
+  return body.length <= FIT_TO
     ? body
     : build(
         [],
@@ -192,7 +201,10 @@ export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpt
   const warning = attentionSection(flags);
   // Without a data or rules change `mfm changelog` writes no entry, so the blurb can't name one.
   const entry = changes.length > 0 || rules !== null;
-  const head = `# ${updateTitle(before, after, opts)}\n\n${warning ? `${warning}\n\n` : ''}${entry ? blurb(file) : NO_ENTRY}`;
+  // A body with an entry marks the place for the brief, which a later job may fill (see
+  // `src/ops/brief.ts`); the mark is invisible until then. One without has nothing to sum up.
+  const above = entry ? `${BRIEF_MARKER}\n\n${blurb(file)}` : NO_ENTRY;
+  const head = `# ${updateTitle(before, after, opts)}\n\n${warning ? `${warning}\n\n` : ''}${above}`;
   const all = [...rulesSection(rules), ...sections(changes)];
   return fitted(head, summary(changes, rules), all, changes.length, file);
 }
