@@ -50,10 +50,11 @@ To pin a release, download from its tag instead of `latest`, with the `+` writte
 ### Schema version
 `schemaVersion` (in `meta.yaml` and `all.json`) goes up by one whenever the files change in
 a way that can break a reader: a field removed or renamed, or its type or meaning changed
-(a required field becoming optional counts). Added fields don't change it. Check it before reading the rest, and validate against the JSON Schema of the
-same release if you want the shape checked; the schemas accept fields they don't list, so
-a later addition doesn't fail them. A bump is announced in its release notes and on
-Discord. The policy is in [`specs/data-model.md`](specs/data-model.md#schema-version-schemaversion).
+(a required field becoming optional counts). Added fields don't change it. Check it before
+reading the rest, and validate against the JSON Schema of the same release if you want the
+shape checked; the schemas accept fields they don't list, so a later addition doesn't fail
+them. A bump is announced in its release notes and on Discord. The policy is in
+[`specs/data-model.md`](specs/data-model.md#schema-version-schemaversion).
 
 ### Stable URLs
 Read the files from `raw.githubusercontent.com`. A file's path follows the faction's slug on

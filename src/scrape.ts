@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { POINTS_CSV, pointsCsv } from './csv.js';
 import type { CrossCheck } from './cross-check.js';
+import { POINTS_CSV, pointsCsv } from './csv.js';
 import { failuresReport, loadFactionDir } from './diff.js';
 import {
   contentKey,
