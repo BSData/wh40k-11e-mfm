@@ -10,6 +10,7 @@ import {
   renderRulesPanels,
   renderWithLegends,
 } from '../src/browser.js';
+import { factionFromYaml, factionToYaml, mapNames } from '../src/emit.js';
 import { BASE_URL, fetchText } from '../src/fetch.js';
 
 // The pipeline end to end, offline, as `mfm scrape` runs it: the network and the browser
@@ -90,6 +91,7 @@ describe('mfm scrape — its options', () => {
     [['--concurrency', 'four'], /--concurrency must be a whole number above 0, got: four/],
     [['--faction'], /--faction/],
     [['--legends'], /Unknown option '--legends'/],
+    [['--ignore-names-case'], /Unknown option '--ignore-names-case'/],
   ])('refuses %j before fetching anything', async (args, message) => {
     let stderr = '';
     const io = {
@@ -121,5 +123,71 @@ describe('mfm scrape — a browser that fails to open a page context', () => {
       rmSync(out, { recursive: true, force: true });
       vi.restoreAllMocks();
     }
+  });
+});
+
+describe('mfm scrape --ignore-name-case, for a regeneration after a change to the Names rule', () => {
+  const OLD_DATE = '2026-01-01';
+  let out: string;
+  const meta = () => readFileSync(join(out, 'meta.yaml'), 'utf8');
+  const necrons = () => readFileSync(join(out, 'necrons.yaml'), 'utf8');
+
+  beforeEach(() => {
+    out = mkdtempSync(join(tmpdir(), 'mfm-cli-'));
+    vi.mocked(fetchText).mockImplementation(async (url) =>
+      url === BASE_URL ? INDEX : fixture('necrons.html'),
+    );
+    vi.mocked(renderWithLegends).mockResolvedValue(fixture('necrons-legends.html'));
+    vi.mocked(renderRulesPanels).mockResolvedValue(fixture('necrons-panels.html'));
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterEach(() => {
+    rmSync(out, { recursive: true, force: true });
+    vi.restoreAllMocks();
+  });
+
+  /** Leave necrons.yaml as an older scrape wrote it: dated OLD_DATE, then `edit`ed. */
+  async function scrapedEarlier(edit: (yaml: string) => string) {
+    expect(await main(['scrape', '--out', out])).toBe(0);
+    const yaml = necrons().replace(/^firstSeen: .*$/m, `firstSeen: ${OLD_DATE}`);
+    writeFileSync(join(out, 'necrons.yaml'), edit(yaml));
+  }
+  /** The file as another casing rule wrote it: here, every name in capitals. */
+  const oldCase = (yaml: string) =>
+    factionToYaml(mapNames(factionFromYaml(yaml), (name) => name.toUpperCase()));
+
+  it('keeps firstSeen and lastUpdated when only the case of names changed', async () => {
+    await scrapedEarlier(oldCase);
+    // Names of every kind necrons has were re-cased: units and detachments, `unique`, a
+    // unit's attach list and an enhancement's.
+    expect(necrons()).toContain('  - name: IMOTEKH THE STORMLORD');
+    expect(necrons()).toContain('    unique: DYNASTY');
+    expect(necrons()).toMatch(/^ {6}- IMMORTALS$/m);
+    expect(necrons()).toMatch(/supportTo: \[ [^\]a-z]+ \]/);
+    expect(await main(['scrape', '--out', out, '--ignore-name-case'])).toBe(0);
+    expect(necrons()).not.toContain('  - name: IMOTEKH THE STORMLORD');
+    expect(necrons()).toContain(`firstSeen: ${OLD_DATE}`);
+    expect(meta()).toContain(`lastUpdated: ${OLD_DATE}`);
+  });
+
+  it('stamps the run date without the option', async () => {
+    await scrapedEarlier(oldCase);
+    expect(await main(['scrape', '--out', out])).toBe(0);
+    expect(necrons()).not.toContain(`firstSeen: ${OLD_DATE}`);
+  });
+
+  it('stamps the run date when anything else changed too', async () => {
+    await scrapedEarlier((yaml) =>
+      oldCase(yaml).replace(/points: (\d+)/, (_, n) => `points: ${Number(n) + 5}`),
+    );
+    expect(await main(['scrape', '--out', out, '--ignore-name-case'])).toBe(0);
+    expect(necrons()).not.toContain(`firstSeen: ${OLD_DATE}`);
+  });
+
+  it('compares enhancement names as they are, since they are not cased by the rule', async () => {
+    await scrapedEarlier((yaml) => yaml.replace('Eldritch Nightmare', 'ELDRITCH NIGHTMARE'));
+    expect(await main(['scrape', '--out', out, '--ignore-name-case'])).toBe(0);
+    expect(necrons()).not.toContain(`firstSeen: ${OLD_DATE}`);
   });
 });

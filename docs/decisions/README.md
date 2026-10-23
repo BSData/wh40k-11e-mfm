@@ -28,6 +28,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0018](0018-the-change-layer-is-not-data.md) | The "changed since the last MFM" layer is not data | scraping |
 | [0019](0019-account-for-every-visible-string.md) | Account for every visible string on the page | scraping, data model |
 | [0020](0020-fail-loud-and-located.md) | Fail loud and located, one faction at a time | scraping |
+| [0021](0021-names-match-the-official-ones.md) | Names match the official ones | data model |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and

@@ -16,6 +16,7 @@ import {
 import {
   factionFromYaml,
   factionToYaml,
+  mapNames,
   metaFromYaml,
   metaToYaml,
   type SiteMeta,
@@ -92,6 +93,57 @@ describe('emit', () => {
     const yaml = metaToYaml(meta);
     expect(metaFromYaml(yaml)).toEqual(meta);
     expect(yaml.indexOf('notes:')).toBeLessThan(yaml.indexOf('muster:'));
+  });
+
+  it('maps every name the Names rule cases, and nothing else', () => {
+    // Every string field filled in: the names in lower case, everything else not.
+    const content: FactionContent = {
+      name: 'Faction',
+      slug: 'faction',
+      version: '1.0',
+      parent: 'parent',
+      detachments: [
+        {
+          name: 'detachment',
+          dp: 1,
+          objectives: ['OBJECTIVE'],
+          unique: 'unique',
+          enhancements: [
+            { name: 'Enhancement', points: 10, leaderTo: ['led'], supportTo: ['supported'] },
+          ],
+        },
+      ],
+      units: [
+        {
+          name: 'unit',
+          groupTitle: 'group',
+          pricing: [{ range: '[1,)', label: 'Your Unit Costs', costs: [{ models: 1, points: 5 }] }],
+          leaderTo: ['leads'],
+          supportTo: ['supports'],
+          wargear: [{ item: 'Wargear', points: 5 }],
+        },
+      ],
+    };
+    const seen: string[] = [];
+    const mapped = mapNames(content, (name) => {
+      seen.push(name);
+      return name.toUpperCase();
+    });
+    expect(seen.sort()).toEqual(
+      [
+        'detachment',
+        'group',
+        'led',
+        'leads',
+        'parent',
+        'supported',
+        'supports',
+        'unique',
+        'unit',
+      ].sort(),
+    );
+    // Mapping the names back gives the original: nothing else was touched.
+    expect(mapNames(mapped, (name) => name.toLowerCase())).toEqual(content);
   });
 });
 
