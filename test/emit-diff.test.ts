@@ -1464,9 +1464,6 @@ describe("fitting GitHub's PR body limit", () => {
     const log = changelog(before, after);
     // Too long whole — this isn't passing by accident.
     expect(changelogEntry(before, after).length).toBeGreaterThan(BODY_LIMIT);
-    // Under the limit by the room kept for the brief: the largest quote still fits.
-    expect(log.length).toBeLessThanOrEqual(BODY_LIMIT - BRIEF_ROOM);
-    expect(insertBrief(log, 'x'.repeat(BRIEF_ROOM))).toBeDefined();
     // Every faction keeps its heading, and the fold still closes.
     for (let i = 1; i <= 40; i++)
       expect(log).toContain(`## Faction ${String(i).padStart(2, '0')}\n`);
@@ -1483,6 +1480,24 @@ describe("fitting GitHub's PR body limit", () => {
     );
     expect(log.indexOf('> [!NOTE]')).toBeLessThan(log.indexOf('<details>'));
   });
+
+  // Each stub saves about 3 KB, so one size can jump clean over the 1,500-character band
+  // between the limit less the brief's room and the limit itself: a body can only be caught
+  // fitted to the wrong limit at a size that lands in it. 31 to 39 factions do (fitted to
+  // 65,536 instead, their bodies are over 64,036 characters), and 40 does not.
+  it.each(Array.from({ length: 10 }, (_, i) => 31 + i))(
+    'leaves room for the largest brief, at %i factions',
+    (n) => {
+      const [before, after] = [manyFactions(n), manyFactions(n, 5)];
+      const log = changelog(before, after);
+      // Too long whole — this isn't passing by accident.
+      expect(changelogEntry(before, after).length).toBeGreaterThan(BODY_LIMIT);
+      expect(log).toContain('> [!NOTE]');
+      expect(log.length).toBeLessThanOrEqual(BODY_LIMIT - BRIEF_ROOM);
+      // The largest quote still fits GitHub's limit.
+      expect(insertBrief(log, 'x'.repeat(BRIEF_ROOM))).toBeDefined();
+    },
+  );
 
   it('leaves a body that fits whole, and names the file the entry goes to', () => {
     const after = necronsContent();
