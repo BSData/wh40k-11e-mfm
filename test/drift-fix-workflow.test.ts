@@ -10,7 +10,8 @@ import { parse } from 'yaml';
  * How `.github/workflows/drift-fix.yml` ends (docs/decisions/0031): the agent's step may
  * fail, so a run cut short at its limits still hands on its patch, and the job's last step
  * fails the run for any other end. That step's script runs here as it is, with bash and
- * jq, which GitHub's runners have; without them, it skips.
+ * jq, which GitHub's runners have; without them, it skips. And how Claude Code gets there
+ * (0032): the action installs it, through the hosts the egress block lets through.
  */
 
 const hasBash = spawnSync('bash', ['-c', 'command -v jq'], { encoding: 'utf8' }).status === 0;
@@ -21,7 +22,7 @@ interface Step {
   uses?: string;
   run?: string;
   env?: { EXECUTION_FILE?: string; CLAUDE_CODE_SUBPROCESS_ENV_SCRUB?: string };
-  with?: { path_to_claude_code_executable?: string };
+  with?: { path_to_claude_code_executable?: string; 'allowed-endpoints'?: string };
   'continue-on-error'?: boolean;
 }
 interface Job {
@@ -64,6 +65,14 @@ describe('the drift fixer workflow', () => {
   // docs/decisions/0032: a second pin drifts from the action's, and nothing bumps it.
   it('lets the action install the Claude Code its release pins', () => {
     expect(draft?.with ?? {}).not.toHaveProperty('path_to_claude_code_executable');
+  });
+
+  // Nothing in the repository uses these hosts, so nothing else would notice them gone
+  // before an outage's run failed at the install.
+  it("lets the agent's job reach Claude Code's installer", () => {
+    const block = agent.find((s) => s.uses?.startsWith('step-security/harden-runner@'));
+    const allowed = (block?.with?.['allowed-endpoints'] ?? '').split(/\s+/);
+    expect(allowed).toEqual(expect.arrayContaining(['claude.ai:443', 'downloads.claude.ai:443']));
   });
 
   it('opens the PR only after the agent job succeeded', () => {

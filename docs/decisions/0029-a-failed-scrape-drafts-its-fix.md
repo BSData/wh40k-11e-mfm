@@ -111,7 +111,7 @@ Claude Code is installed from npm with `npm ci`, from a lockfile in `.github/dri
 that pins the version the action would install and its integrity hashes, rather than by
 the action's installer, which downloads from Anthropic's own hosts. The allowlist stays at
 the hosts the setup already needs. The lockfile is bumped by hand, with the action. (Since
-[0032](0032-one-claude-code-pin.md), the action installs it: two pins drifted apart.)
+[0032](0032-one-claude-code-pin.md), the action installs it: two pins could drift apart.)
 
 Rejected:
 - GitHub Agentic Workflows, which models this loop natively but is in public preview.

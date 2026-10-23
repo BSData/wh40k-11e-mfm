@@ -1,6 +1,6 @@
 # 0032. One Claude Code pin: the action installs it
 
-- **Status:** accepted; revises [0029](0029-a-failed-scrape-drafts-its-fix.md)
+- **Status:** accepted, in [#104](https://github.com/BSData/wh40k-11e-mfm/pull/104); revises [0029](0029-a-failed-scrape-drafts-its-fix.md)
 - **Spec:** [change tracking — The drift fixer](../../specs/change-tracking.md#the-drift-fixer)
 
 ## Context
@@ -25,25 +25,37 @@ The two have to match. Each action release hardcodes the Claude Code version it 
 ## Decision
 The action installs Claude Code itself: no `path_to_claude_code_executable`, and no
 `.github/drift-fix/`. The agent job's allowlist gains the installer's two hosts:
-`claude.ai`, which serves `install.sh`, and `downloads.claude.ai`, which serves the
-releases and their manifests. The action's commit is now the only pin, and a Dependabot
+`claude.ai`, whose `install.sh` redirects to `downloads.claude.ai`, which serves the
+script, the manifests and the binaries. A test holds the allowlist to both. The action's commit is now the only pin, and a Dependabot
 bump of it moves Claude Code too. Action bumps change a workflow file, so they still wait
 for a maintainer to merge them ([0025](0025-dependabot-minor-and-patch-updates-merge-themselves.md)).
 
 ## Consequences
 - The pinned version matches the action by construction, with nothing to bump by hand.
-- What runs is less pinned than before:
-  - The installer script is fetched live from `claude.ai`, not from a pinned commit.
+- The Claude Code that runs is the same binary as before: npm's 2.1.301 and the
+  installer's have the same SHA-256.
+- What installs it is less pinned than before:
+  - The installer script is fetched live, not from a pinned commit.
   - It downloads the latest release's binary, checks its SHA-256 against that release's
     manifest, then runs it to install the version the action pins.
   - The manifest comes from the same host as the binary. So the check catches a
-    corrupted download, but not a compromised host.
+    corrupted download, but not a compromised host. The pinned release's manifest is
+    also signed, but that check is only advisory with nonessential traffic off.
+  - The script and that latest binary run inside the agent's step, with the model's key
+    in their environment. `claude.ai` stays reachable for the rest of the job: one more
+    way out for the key, like GitHub and the model's API (0029, "The key can leak").
 
   This trusts Anthropic's download hosts as the job already trusts Anthropic's action
   and its API. The job's prize is unchanged: the model's key, with its $10 spend limit,
   and a token that only reads. The App's key is never in this job.
-- If a release needs another host, the install fails under the egress block. Since 0031,
-  that fails the run, rather than passing for a run that found nothing.
+- The installer and the latest binary can change on any day, not just with an action
+  release, and the drift fixer only runs during an outage. If one of them moves to
+  another host or breaks, the install fails under the egress block. Since 0031 that
+  fails the run visibly, and a replay (about $0.15 against a past failure) checks the
+  install at any time: after an action bump, say.
+- The install counts against the step's 20-minute timeout; it takes about ten seconds.
+- `DISABLE_AUTOUPDATER` stays: with `downloads.claude.ai` allowed, it is what keeps
+  Claude Code from updating itself during the run.
 
 Rejected:
 - **Keep both pins, and add a test that fails when they differ.** It's safe, but someone

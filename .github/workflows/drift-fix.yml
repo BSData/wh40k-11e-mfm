@@ -3,7 +3,7 @@ name: Drift fix
 # When the scheduled scrape fails because the MFM site changed its markup, a model drafts
 # the parser fix as a draft PR, and a maintainer reviews it. The judgment is the model's;
 # everything around it is plain Actions, split by what each part holds (see "The drift
-# fixer" in specs/change-tracking.md, and docs/decisions/0029 and 0031):
+# fixer" in specs/change-tracking.md, and docs/decisions/0029, 0031 and 0032):
 # - `gate` decides from GitHub's records whether to run, and records the run;
 # - `agent` holds the model's key and nothing else: a token that only reads, and an egress
 #   allowlist. It never reaches the site: the failed scrape already saved the pages. It
@@ -117,7 +117,8 @@ jobs:
           # On top of these, harden-runner always allows GitHub's Actions service
           # (*.actions.githubusercontent.com) and its storage
           # (productionresultssa*.blob.core.windows.net), which the artifacts use.
-          # claude.ai serves Claude Code's installer, and downloads.claude.ai its releases.
+          # Claude Code's installer: claude.ai redirects it to downloads.claude.ai, which
+          # serves the script, the manifests and the binaries.
           allowed-endpoints: >
             api.anthropic.com:443
             claude.ai:443
