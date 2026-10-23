@@ -92,8 +92,10 @@ describe('checkData', () => {
 
     it('meta.yaml with its factions unsorted', () => {
       const text = metaToYaml(meta).replace('  - necrons\n', '  - orks\n  - necrons\n');
+      // The unsorted list also names a file that isn't there, which is its own problem.
       expect(checkData(withData('meta.yaml', text))).toEqual([
         'data/meta.yaml is not canonical: line 5 is "  - orks" where metaToYaml() writes "  - necrons"',
+        'data/meta.yaml lists "orks" in factions, but there is no data/orks.yaml',
       ]);
     });
   });
@@ -136,6 +138,7 @@ describe('checkData', () => {
       f.data.push({ name: 'orks.yaml', text: factionToYaml(necrons) });
       expect(checkData(f)).toEqual([
         'data/orks.yaml holds the slug "necrons", so it belongs in data/necrons.yaml',
+        "data/orks.yaml isn't in data/meta.yaml's factions",
       ]);
     });
 
@@ -148,6 +151,28 @@ describe('checkData', () => {
       expect(rest).toEqual([]);
       expect(problem).toMatch(/^data\/meta\.yaml is invalid:\n/);
       expect(problem).toContain('schemaVersion');
+    });
+  });
+
+  describe('fails on a faction list that does not match the files', () => {
+    const orks: Faction = { ...necrons, slug: 'orks', name: 'Orks' };
+
+    it('a faction file meta.yaml does not list', () => {
+      const f = files();
+      f.data.push({ name: 'orks.yaml', text: factionToYaml(orks) });
+      f.points = pointsCsv([necrons, orks]);
+      expect(checkData(f)).toEqual(["data/orks.yaml isn't in data/meta.yaml's factions"]);
+    });
+
+    it('a listed faction with no file', () => {
+      const f = withData('meta.yaml', metaToYaml({ ...meta, factions: ['necrons', 'orks'] }));
+      expect(checkData(f)).toEqual([
+        'data/meta.yaml lists "orks" in factions, but there is no data/orks.yaml',
+      ]);
+    });
+
+    it('a broken faction file once, as broken, not as missing', () => {
+      expect(checkData(withData('necrons.yaml', 'units: [\n'))).toHaveLength(1);
     });
   });
 

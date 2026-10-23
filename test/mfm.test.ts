@@ -198,6 +198,16 @@ describe('mfm check-data', () => {
     expect(stderr).toBe('');
   });
 
+  it('fails a faction file deleted by hand, naming it', async () => {
+    const root = frozenRepository(scratch, (r) => rmSync(join(r, 'data', 'orks.yaml')));
+    const { code, stderr } = await mfm('check-data', '--root', root);
+    expect(code).toBe(1);
+    // points.csv is then out of date too, a second problem.
+    expect(stderr).toContain(
+      'data/meta.yaml lists "orks" in factions, but there is no data/orks.yaml',
+    );
+  });
+
   it('fails a hand-edited file, naming it', async () => {
     const root = frozenRepository(scratch, (r) => {
       const file = join(r, 'data', 'necrons.yaml');

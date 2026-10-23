@@ -473,6 +473,9 @@ exactly what the tools would write. `mfm check-data` (`src/check-data.ts`) fails
   any other edit that breaks the writer's formatting;
 - `data/meta.yaml` fails the `SiteMeta` schema (which includes being at the current
   `schemaVersion`), or `metaToYaml()` doesn't reproduce it;
+- `data/meta.yaml`'s `factions` doesn't name exactly the faction files: a slug with no
+  `data/<slug>.yaml`, or a faction file whose slug it doesn't list (checked once `meta.yaml`
+  passes `SiteMeta`, by file name);
 - `data/points.csv` is missing, or isn't what `pointsCsv()` makes of the faction files
   (checked once every faction file passes);
 - a file in `schema/` is missing, differs from what `jsonSchemas()` generates, or isn't
