@@ -17,8 +17,9 @@ what you couldn't work out from the code ([0030](docs/decisions/0030-one-short-i
 - **Generated files.** Never hand-edit `data/`, `schema/`, `changelog/` or
   `DATA-CHANGELOG.md`: the scraper and `pnpm mfm` write them. The one exception, a
   schema-change note, goes through the `change-data-model` skill.
-- **Workflows.** Pin every action to a full commit SHA and keep dependency caches off (tests
-  check both). The App's key goes only in jobs that run no repository or dependency code.
+- **Workflows.** Pin every action to a full commit SHA and keep dependency caches off (CI
+  checks both). The App's key goes only in jobs that run no dependency code; the one
+  repository file such a job runs, `src/ops/agent-patch.ts`, imports only Node's own modules.
 
 ## Definition of done
 - `pnpm verify` is green: lint and format, typecheck, tests and the data checks.
@@ -64,6 +65,7 @@ your harness doesn't load `.agents/skills/` itself, open the file when its task 
 - `specs/` is the contract, and `docs/decisions/` the reasons behind it.
 - `test/fixtures/` holds the saved pages the parser tests run against.
 - `.github/workflows/` runs the daily scrape, the releases, the drift fixer and CI.
+- Open work is in GitHub issues labelled `enhancement`.
 
 `CLAUDE.md` only imports this file. Don't add another per-harness instruction file or a
 copy of the skills; [0030](docs/decisions/0030-one-short-instruction-file.md) says why.

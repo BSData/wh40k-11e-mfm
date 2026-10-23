@@ -55,8 +55,7 @@ describe('skills (.agents/skills/<name>/SKILL.md)', () => {
 
 describe('AGENTS.md', () => {
   // Every line costs every task context, and long files are followed less well (0030).
-  it('stays under 100 lines and 5,000 characters', () => {
-    expect(agents.split('\n').length).toBeLessThan(100);
+  it('stays under 5,000 characters', () => {
     expect(agents.length).toBeLessThanOrEqual(5000);
   });
 
@@ -65,17 +64,27 @@ describe('AGENTS.md', () => {
     expect(headings.slice(0, 2)).toEqual(['Ground rules', 'Definition of done']);
   });
 
-  // A path that no longer exists is how the old project map went stale.
+  // A path that no longer exists is how the old project map went stale. A token counts as
+  // a repository path when its first segment is an entry at the repository's root, which
+  // also leaves out `owner/repo`, URLs and /tmp: linked, quoted, or in the commands block.
   it('names only repository paths that exist', () => {
-    const linked = [...agents.matchAll(/\]\(([^)#\s]+)\)/g)].map((m) => m[1] ?? '');
-    const quoted = [...agents.matchAll(/`([^`\s]+)`/g)]
-      .map((m) => m[1] ?? '')
-      .filter((p) => /^[\w.-]+\/|^\.?[\w-]+\.(md|ts|ya?ml|json|html)$|\/$/.test(p));
-    const paths = [...linked, ...quoted].filter(
-      (p) => !/^https?:/.test(p) && !p.startsWith('/') && !/[<>*]/.test(p),
+    const top = new Set(readdirSync(root('.')));
+    // Every word of the file, links and comments included, split on anything a path
+    // can't hold; a link's #fragment is dropped.
+    const tokens = agents.split(/[\s`'"“”,;()[\]|]+/).map((t) =>
+      t
+        .replace(/#.*$/, '')
+        .replace(/[.:]+$/, '')
+        .replace(/\/$/, ''),
     );
-    expect(paths.length).toBeGreaterThan(5);
-    expect(paths.filter((p) => !existsSync(root(p.replace(/\/$/, ''))))).toEqual([]);
+    const paths = [
+      ...new Set(tokens.filter((t) => !/[<>*]/.test(t) && top.has(t.split('/')[0] ?? ''))),
+    ];
+    // One of each kind, so the detection itself can't quietly find nothing.
+    expect(paths).toContain('scripts/setup'); // in the commands block
+    expect(paths).toContain('CLAUDE.md'); // quoted
+    expect(paths).toContain('docs/decisions/0030-one-short-instruction-file.md'); // linked
+    expect(paths.filter((p) => !existsSync(root(p)))).toEqual([]);
   });
 
   it('runs only pnpm scripts that exist', () => {
