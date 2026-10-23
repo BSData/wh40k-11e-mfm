@@ -3,11 +3,11 @@ name: Drift fix
 # When the scheduled scrape fails because the MFM site changed its markup, a model drafts
 # the parser fix as a draft PR, and a maintainer reviews it. The judgment is the model's;
 # everything around it is plain Actions, split by what each part holds (see "The drift
-# fixer" in specs/change-tracking.md, and docs/decisions/0029):
+# fixer" in specs/change-tracking.md, and docs/decisions/0029 and 0031):
 # - `gate` decides from GitHub's records whether to run, and records the run;
 # - `agent` holds the model's key and nothing else: a token that only reads, and an egress
-#   allowlist. It never reaches the site: the failed scrape already saved the pages;
-# - `caches` deletes every Actions cache entry created since the gate, before `pr` runs;
+#   allowlist. It never reaches the site: the failed scrape already saved the pages. It
+#   fails unless the agent finished or stopped at its limits;
 # - `pr` holds the App's key and no model: it checks the agent's patch with one
 #   dependency-free script, then opens the draft PR.
 #
@@ -61,7 +61,6 @@ jobs:
       run: ${{ steps.gate.outputs.run }}
       issue: ${{ steps.gate.outputs.issue }}
       artifact: ${{ steps.gate.outputs.artifact }}
-      started: ${{ steps.clock.outputs.started }}
     steps:
       - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
@@ -86,11 +85,6 @@ jobs:
           if [ "$EVENT" = workflow_dispatch ]; then manual=(--manual); fi
           node_modules/.bin/tsx src/bin/mfm.ts drift-fix-gate --run-id "$RUN_ID" "${manual[@]}" --output "$GITHUB_OUTPUT"
 
-      # When the agent's job begins, at the latest: `caches` deletes what was written since.
-      - name: Note the time
-        id: clock
-        run: echo "started=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
-
   # The only job with the model's key, and the only one that runs the model. Its token
   # only reads, it gets no other secret, and harden-runner blocks every host but the
   # model's API, GitHub and the npm registry and Node.js downloads the setup needs, with
@@ -104,9 +98,8 @@ jobs:
   # `pnpm verify` runs tests the model wrote, so from the agent's step on, anything in
   # this job may be the model's: later steps, post steps, the Actions runtime token they
   # get, which can write a cache entry for main (harden-runner always lets a job reach
-  # GitHub's Actions service and its storage). That is why the job holds nothing else, why
-  # no workflow here restores a cache, and why `caches` deletes what this job wrote
-  # ("No dependency cache" in specs/change-tracking.md).
+  # GitHub's Actions service and its storage). That is why the job holds nothing else, and
+  # why no workflow here restores a cache ("No dependency cache" in specs/change-tracking.md).
   agent:
     needs: gate
     if: needs.gate.outputs.run == 'true'
@@ -165,16 +158,19 @@ jobs:
 
       # Sonnet, one try, at most 30 turns and $2 (Claude Code stops at the turn that
       # crosses it): a run is expected to cost $1-2 of the key's $10. A run cut short at
-      # a limit still hands on what it changed, as a draft that says so: the outage gets
-      # no second run.
+      # its turn or budget limit still hands on what it changed, as a draft that says so:
+      # the outage gets no second run. That is all `continue-on-error` is for: the job's
+      # last step fails it for any other end, the 20-minute timeout included, which leaves
+      # no record of the run.
       - name: Draft the fix
         id: agent
         timeout-minutes: 20
         continue-on-error: true
         uses: anthropics/claude-code-action@374f254f5efaf968abfe15d399fd90972e8138b9 # v1.0.251
+        # No CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: Claude Code won't start with it unless
+        # bubblewrap is installed, which takes sudo, and without bubblewrap the agent's
+        # commands could read the key from Claude Code's own process anyway (0031).
         env:
-          # Keep the model's key and the token out of what the agent's commands run.
-          CLAUDE_CODE_SUBPROCESS_ENV_SCRUB: '1'
           CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1'
           DISABLE_AUTOUPDATER: '1'
         with:
@@ -243,37 +239,19 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  # Code the model wrote ran in `agent`, which holds the Actions runtime token for main, so
-  # every cache entry created since the gate is deleted, whatever wrote it: no workflow
-  # here restores a cache, but CodeQL's PR runs restore their overlay database from main's.
-  # src/ops/cache-sweep.ts lists by creation time, page by page, and goes round until none
-  # is left; anything it can't delete fails the job, and `pr` waits on it, so the draft PR
-  # (whose CodeQL run would restore one) never opens before the sweep is done. It holds
-  # `actions: write`, so, like `pr`, it runs one dependency-free file under plain Node.
-  caches:
-    needs: [gate, agent]
-    if: always() && needs.gate.outputs.run == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30 # a flood of entries takes a while to delete, one request each
-    permissions:
-      contents: read # check out the script
-      actions: write # list and delete the repository's Actions caches
-    steps:
-      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
-        with:
-          egress-policy: audit
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: .node-version
-          package-manager-cache: false # no job restores one
-      - name: Delete the caches created since the gate
+      # Last, so what the agent left is kept to look at. Finished, or stopped at its turn
+      # or budget limit, it goes on to `pr`; any other end, such as Claude Code failing
+      # to start, an error or the timeout, fails the run, so it can't pass for a run that
+      # found nothing to fix.
+      - name: Check the agent finished or stopped at a limit
         env:
-          GH_TOKEN: ${{ github.token }}
-          SINCE: ${{ needs.gate.outputs.started }}
-        run: node --experimental-strip-types src/ops/cache-sweep.ts --since "$SINCE"
+          EXECUTION_FILE: ${{ steps.agent.outputs.execution_file }}
+        run: |
+          ended='[.[] | select(.type == "result")] | last | (.subtype == "success" and (.is_error | not)) or .subtype == "error_max_turns" or .subtype == "error_max_budget_usd"'
+          if [ -z "$EXECUTION_FILE" ] || [ ! -f "$EXECUTION_FILE" ] || ! jq -e "$ended" "$EXECUTION_FILE" > /dev/null; then
+            echo "::error title=The agent didn't finish::Claude Code neither finished nor stopped at its turn or budget limit: see the step \"Draft the fix\"."
+            exit 1
+          fi
 
   # The only job with the App's key, and no model credential. Like scrape.yml's
   # `publish`, it runs pinned actions and gh, plus one repository file:
@@ -284,8 +262,8 @@ jobs:
   # fresh checkout, and checks the tree changed exactly there. Then the App's token opens
   # the draft PR, so CI runs on it, and the default token labels and links it.
   pr:
-    needs: [gate, agent, caches]
-    if: needs.agent.result == 'success' && needs.caches.result == 'success'
+    needs: [gate, agent]
+    if: needs.agent.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

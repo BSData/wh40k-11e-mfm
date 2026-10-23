@@ -232,7 +232,7 @@ export function applyPatch(dir: string, patchPath: string): PatchFile[] {
 export interface RunMeta {
   turns?: number;
   costUsd?: number;
-  /** False when the agent stopped short: its turn or time limit, or an error. */
+  /** False when the agent stopped short, at its turn or budget limit (drift-fix.yml fails any other run). */
   finished: boolean;
 }
 
@@ -327,7 +327,7 @@ function renderBody(
       ? []
       : [
           '>',
-          '> **The agent did not finish** (its turn or time limit, or an error): this is the work it had done when it stopped.',
+          '> **The agent did not finish** (it reached its turn or budget limit): this is the work it had done when it stopped.',
         ]),
     '',
     '### Files',

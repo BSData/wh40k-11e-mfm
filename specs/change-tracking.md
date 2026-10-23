@@ -406,7 +406,8 @@ When the site changes its markup, the fix takes judgment: find what moved, chang
 parser or an allowlist, update the spec. `drift-fix.yml` has a model draft it as a draft
 PR for a maintainer to review; everything around the model is plain Actions, and each
 part holds only what it needs. See
-[0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md).
+[0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md) and
+[0031](../docs/decisions/0031-the-drift-fixer-fails-loud-with-fewer-layers.md).
 
 1. **The failure artifact**, in `scrape` (no secrets, no model). When the scrape fails,
    `mfm refresh-fixtures --failed /tmp/failures.md --out /tmp/drift/fixtures` downloads,
@@ -444,25 +445,21 @@ part holds only what it needs. See
    the agent starts. `anthropics/claude-code-action` runs Claude Sonnet 5.5 once, for at
    most 30 turns, 20 minutes and $2 (`--max-budget-usd`). Its tools are Read, Edit, Glob and Grep, and Bash for
    exactly `pnpm verify`, `git diff` and `git diff --stat`: no web tools and no Write.
-   Its commands run with the model's key and the token scrubbed from their environment.
    The prompt points at the `diagnose-parse` skill (its section "In the drift-fix
    workflow") and hands it the artifact as untrusted data; never an issue, a comment or a
    PR. The job uploads what the agent changed as a patch (`git diff`, with the new files
    under the allowed paths), with the agent's closing note, the run's turns and cost, and
-   whether it finished; a run cut short by its limits still hands on what it changed, and
-   its draft says so. The run's full record stays in the job. Since `pnpm verify` runs
-   tests the model wrote, the rest of this job is within its reach; see *No dependency
-   cache*.
-4. **The caches** (job `caches`, `actions: write`) runs after the agent, however it ended,
-   and deletes every Actions cache entry created since the gate finished (see *No
-   dependency cache*). `src/ops/cache-sweep.ts`, which imports only Node's own modules and
-   runs under plain Node, lists the entries newest first by creation, page by page until
-   one older than that, deletes them, and goes round again until a pass finds none, so a
-   flood of later entries can't push one off the list. An entry it can't delete fails the
-   job.
-5. **The PR** (job `pr`) runs only once `caches` has succeeded: the draft PR starts a
-   CodeQL run, which restores from main's cache. It holds the App's key and no model
-   credential. Like `publish`, it
+   whether it finished; a run cut short at its turn or budget limit still hands on what it
+   changed, and its draft says so. The run's full record stays in the job. Its last step
+   fails the job, and so the run, unless that record ends with the agent finished or
+   stopped at its turn or budget limit (`error_max_turns`, `error_max_budget_usd`): a run
+   that never started, ended in an error, or ran into the 20-minute timeout (which leaves
+   no record) is red, not a green run with nothing to show; its patch is still in the
+   job's artifact, and a replay tries again. Since
+   `pnpm verify` runs tests the model wrote, the rest of this job is within its reach; see
+   *No dependency cache*.
+4. **The PR** (job `pr`) runs only once the agent's job has succeeded. It holds the App's
+   key and no model credential. Like `publish`, it
    runs pinned actions and `gh`, plus one repository file: `src/ops/agent-patch.ts`, under
    plain Node, which imports only Node's own modules (a test checks), so no dependency
    code meets the key. The script rejects the whole patch unless:
@@ -482,7 +479,7 @@ part holds only what it needs. See
    files, the agent's note in a code block (where nothing in it renders), the run's turns
    and cost, and what is left to do, and stays under GitHub's 65,536-character limit
    (the note is cut to fit). An empty patch opens nothing.
-6. **A maintainer** reviews it, commits the refreshed page that shows the drift as the
+5. **A maintainer** reviews it, commits the refreshed page that shows the drift as the
    fixture, and merges. The next successful scrape closes the failure issue, as always.
 
 The model is the cheaper tier on purpose: Claude Sonnet 5.5 costs $2 per million input
@@ -559,10 +556,8 @@ GitHub's Actions service and its storage. So:
   touched. Each job installs from the registry, which costs it a few seconds.
 - `setup-node` runs with `package-manager-cache: false`, and no workflow uses
   `actions/cache`.
-- The drift fixer's `caches` job deletes every cache entry created since its gate, since
-  the agent's code can still write one, before its draft PR opens.
 
-`test/workflows.test.ts` holds every workflow to the first two; it can't see a cache a
+`test/workflows.test.ts` holds every workflow to both; it can't see a cache a
 third-party action keeps inside itself, so a pinned action's own caching is checked when
 it is pinned (claude-code-action v1.0.251 runs `setup-bun` with `no-cache: true`).
 
@@ -570,11 +565,13 @@ What is left is CodeQL's default setup, which the workflows don't configure: its
 restore `codeql-overlay-base-database-*` from main's cache and unpack it with `tar -P`,
 at the absolute paths it names. A poisoned entry would run code in a CodeQL job, which
 holds `security-events: write` and reads the repository: a low-privilege execution risk,
-not a way to the keys. It is open from the agent's first `pnpm verify` to the end of the
-sweep, up to about half an hour, and longer if the agent's code sent the runtime token
-out, since that token can stay valid for about six hours. Turning off CodeQL's overlay
-analysis closes it. See
-[0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md).
+not a way to the keys. The agent's code can write one from its first `pnpm verify` until
+its job ends, or for about six hours if it sent the runtime token out, and the entry stays
+until GitHub evicts it. That risk is accepted: deleting what the agent's job wrote took a
+job with `actions: write` and a script of its own, which cost more than it saved. Turning
+off CodeQL's overlay analysis closes it. See
+[0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md) and
+[0031](../docs/decisions/0031-the-drift-fixer-fails-loud-with-fewer-layers.md).
 
 A human reviews and merges the PR — giving reviewable, auditable history of every
 points change.

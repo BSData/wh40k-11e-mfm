@@ -1,6 +1,6 @@
 # 0029. A failed scrape drafts its own fix, with the model's key and the App's key in separate jobs
 
-- **Status:** accepted, for [#77](https://github.com/BSData/wh40k-11e-mfm/issues/77)
+- **Status:** accepted, for [#77](https://github.com/BSData/wh40k-11e-mfm/issues/77); revised by [0031](0031-the-drift-fixer-fails-loud-with-fewer-layers.md): no env scrub and no cache sweep, and a run that can't start fails
 - **Spec:** [change tracking — The drift fixer](../../specs/change-tracking.md#the-drift-fixer)
 
 ## Context
