@@ -273,7 +273,7 @@ describe('the rules', () => {
   it("a version-only update whose rules diff carries no site version ('')", () => {
     const after = structuredClone(base);
     for (const f of after) f.version = '1.7';
-    const rules = { version: '', panels: [] };
+    const rules = { schema: '', version: '', panels: [] };
     const flags = collectAttention(collectChanges(base, after), rules, base, after);
     expect(flags.map((f) => [f.kind, f.what.split(':')[0]])).toEqual([
       ['version-only', 'Only the version changed (v1.6 → v1.7)'],

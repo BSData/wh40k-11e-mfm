@@ -1,4 +1,5 @@
-import { compareNames, type SiteMeta } from '../emit.js';
+import { compareNames } from '../emit.js';
+import type { SnapshotMeta } from '../model.js';
 import { collectChanges, type Snapshot } from './collect.js';
 
 /**
@@ -13,10 +14,10 @@ export interface RenderOpts {
   /** The MFM version this update lands on; defaults to `meta.after`'s. */
   version?: string;
   /**
-   * Both snapshots' `meta.yaml` (`loadMeta()`), so the site version and the rules panels
-   * are diffed too. Without both, they aren't compared.
+   * Both snapshots' `meta.yaml` (`loadMeta()`), so the schema version, the site version
+   * and the rules panels are diffed too. Without both, they aren't compared.
    */
-  meta?: { before?: SiteMeta | undefined; after?: SiteMeta | undefined };
+  meta?: { before?: SnapshotMeta | undefined; after?: SnapshotMeta | undefined };
 }
 
 /**

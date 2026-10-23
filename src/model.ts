@@ -140,10 +140,22 @@ export const FactionSummary = z.object({
 export type FactionSummary = z.infer<typeof FactionSummary>;
 
 /**
+ * The shape version of the files, as `schemaVersion` states it. Bumped by one for a change
+ * that can break a reader of the current files: a field or file removed or renamed, a type
+ * or a meaning changed, a required field made optional (specs/data-model.md, "Schema
+ * version"). An added optional field doesn't bump it.
+ * Version 1 was the shape before #41 renamed `role`, `attachTo` and `objective`; no file
+ * ever said 1.
+ */
+export const SCHEMA_VERSION = 2;
+
+/**
  * `data/meta.yaml`: the site version and the faction slugs of the last full scrape.
  * `lastUpdated` is the latest `firstSeen` among them, so it too is stable on a no-op scrape.
  */
 export const SiteMeta = z.object({
+  /** The files' shape version: always `SCHEMA_VERSION`, so data and code agree. */
+  schemaVersion: z.literal(SCHEMA_VERSION),
   version: z.string().min(1),
   lastUpdated: z.string().regex(ISO_DATE),
   /** The expandable "Welcome…" help text, from a faction page's RSC payload. */
@@ -153,6 +165,28 @@ export const SiteMeta = z.object({
   factions: z.array(z.string().min(1)).min(1),
 });
 export type SiteMeta = z.infer<typeof SiteMeta>;
+
+/**
+ * A snapshot's `meta.yaml` read for comparison (`loadMeta()`): `SiteMeta` with any
+ * `schemaVersion`, or none (files written before it existed), so a report across a bump
+ * still names the site version and the rules panels on both sides.
+ */
+export const SnapshotMeta = SiteMeta.extend({
+  schemaVersion: z.number().int().positive().optional(),
+});
+export type SnapshotMeta = z.infer<typeof SnapshotMeta>;
+
+/**
+ * `all.json`, a release asset: `meta.yaml` and every faction file in one document, the
+ * factions in slug order. `schemaVersion` is repeated at the top, where a reader checks
+ * it first.
+ */
+export const Dataset = z.object({
+  schemaVersion: z.literal(SCHEMA_VERSION),
+  meta: SiteMeta,
+  factions: z.array(Faction).min(1),
+});
+export type Dataset = z.infer<typeof Dataset>;
 
 /** Parsed landing page: site version + the list of faction subpages. */
 export const SiteIndex = z.object({

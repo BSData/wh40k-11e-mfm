@@ -5,8 +5,11 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { main } from '../src/bin/mfm.js';
 import { openCrossCheck } from '../src/cross-check.js';
+import { pointsCsv } from '../src/csv.js';
+import { loadFactionDir } from '../src/diff.js';
 import { factionFromYaml, factionToYaml, mapNames } from '../src/emit.js';
 import { BASE_URL, factionUrl, fetchText, LEGENDS_COOKIE } from '../src/fetch.js';
+import type { Faction } from '../src/model.js';
 
 // The pipeline end to end, offline, as `mfm scrape` runs it: the network is stubbed with
 // saved fixtures, so what runs is the real parse → validate → write path. The browser
@@ -19,6 +22,20 @@ vi.mock('../src/cross-check.js', () => ({ openCrossCheck: vi.fn() }));
 
 const fixture = (name: string) =>
   readFileSync(fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url)), 'utf8');
+
+/** Another faction's file, already in --out from an earlier run. */
+const ORKS: Omit<Faction, 'firstSeen'> = {
+  name: 'Orks',
+  slug: 'orks',
+  version: '1.6',
+  detachments: [],
+  units: [
+    {
+      name: 'Boyz',
+      pricing: [{ range: '[1,)', label: 'Your Unit Costs', costs: [{ models: 10, points: 80 }] }],
+    },
+  ],
+};
 
 /** A one-faction index, so a full run (no `--faction`) scrapes just Necrons. */
 const INDEX = '<html><body><p>v1.6</p><a href="/en/necrons">Necrons</a></body></html>';
@@ -74,6 +91,26 @@ describe('mfm scrape — HTTP only', () => {
     expect(necrons.match(/legends: true/g)).toHaveLength(12);
     expect(meta()).toContain('## SELECT BATTLE SIZE');
     expect(meta()).toContain('## UNITS');
+  });
+
+  it('writes schemaVersion first in meta.yaml, and points.csv from the faction files', async () => {
+    serve(() => fixture('necrons-legends-cookie.html'));
+    expect(await scrape()).toBe(0);
+    expect(meta()).toMatch(/^schemaVersion: 2\nversion: "1\.6"\n/);
+    const csv = readFileSync(join(out, 'points.csv'), 'utf8');
+    expect(csv).toBe(pointsCsv(loadFactionDir(out)));
+    expect(csv).toMatch(/^faction,unit,/);
+    expect(csv).toContain('\nnecrons,Necron Warriors,');
+  });
+
+  it('rewrites points.csv on a single faction’s run too, from every file in --out', async () => {
+    serve(() => fixture('necrons-legends-cookie.html'));
+    writeFileSync(join(out, 'orks.yaml'), factionToYaml({ ...ORKS, firstSeen: '2026-01-01' }));
+    expect(await scrape('--faction', 'necrons')).toBe(0);
+    expect(meta()).toBe(OLD_META);
+    const csv = readFileSync(join(out, 'points.csv'), 'utf8');
+    expect(csv).toContain('\nnecrons,');
+    expect(csv).toContain('\norks,Boyz,');
   });
 
   it('fails a faction whose page comes back without its Legends', async () => {

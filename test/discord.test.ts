@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import { announcement, type DiscordMessage, send, webhookUrl } from '../src/discord.js';
 import type { SiteMeta } from '../src/emit.js';
-import type { FactionContent } from '../src/model.js';
+import type { FactionContent, SnapshotMeta } from '../src/model.js';
 import { parseFaction } from '../src/parse.js';
 
 const fixture = (name: string) =>
@@ -183,6 +183,7 @@ describe('announcement', () => {
 
   it('mentions a rules change, even when no faction moved', () => {
     const meta = (muster: string): SiteMeta => ({
+      schemaVersion: 2,
       version: '1.1',
       lastUpdated: '2026-08-31',
       muster,
@@ -196,6 +197,18 @@ describe('announcement', () => {
 
     const same = { before: rules.before, after: rules.before };
     expect(announcement([necrons()], [necrons()], { meta: same })).toBeNull();
+  });
+
+  it('announces a schemaVersion bump first, even when nothing else moved', () => {
+    const meta = (schemaVersion: number): SnapshotMeta => ({
+      schemaVersion,
+      version: '1.1',
+      lastUpdated: '2026-08-31',
+      factions: ['necrons'],
+    });
+    const bump = { before: meta(2), after: meta(3) };
+    const e = embedOf(announcement([necrons()], [necrons()], { today: '2026-08-31', meta: bump }));
+    expect(e.description).toMatch(/^\*\*No faction changes\*\* · `schemaVersion` 2 → 3/);
   });
 
   it('never lets a faction name become a ping', () => {

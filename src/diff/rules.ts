@@ -1,6 +1,6 @@
-import type { SiteMeta } from '../emit.js';
+import type { SnapshotMeta } from '../model.js';
 
-/** The `meta.yaml` diff: the site-wide version and the rules panels. */
+/** The `meta.yaml` diff: the schema version, the site-wide version and the rules panels. */
 
 /** A rules panel that changed between two snapshots' `meta.yaml`. */
 export interface PanelChange {
@@ -12,8 +12,13 @@ export interface PanelChange {
   diff: string[];
 }
 
-/** What changed in `meta.yaml`: the site-wide version and the rules panels. */
+/** What changed in `meta.yaml`: the schema version, the site-wide version and the rules panels. */
 export interface RulesChanges {
+  /**
+   * `2 → 3` when `schemaVersion` moved (`— → 2` from a snapshot written before it
+   * existed), `''` when it didn't. A bump is a breaking change to the files' shape.
+   */
+  schema: string;
   /** `v1.5 → v1.6` when the site version moved, `''` when it didn't. */
   version: string;
   panels: PanelChange[];
@@ -66,10 +71,14 @@ function lineDiff(a: string[], b: string[]): string[] {
  * the faction files, which are diffed in their own right.
  */
 export function collectRules(
-  before: SiteMeta | undefined,
-  after: SiteMeta | undefined,
+  before: SnapshotMeta | undefined,
+  after: SnapshotMeta | undefined,
 ): RulesChanges | null {
   if (!before || !after) return null;
+  const schema =
+    before.schemaVersion === after.schemaVersion
+      ? ''
+      : `${before.schemaVersion ?? '—'} → ${after.schemaVersion ?? '—'}`;
   const version = before.version === after.version ? '' : `v${before.version} → v${after.version}`;
   const panels: PanelChange[] = [];
   for (const [field, label] of PANELS) {
@@ -84,5 +93,5 @@ export function collectRules(
       panels.push({ label, status: 'changed', size: now.split('\n').length, diff });
     }
   }
-  return version || panels.length > 0 ? { version, panels } : null;
+  return schema || version || panels.length > 0 ? { schema, version, panels } : null;
 }

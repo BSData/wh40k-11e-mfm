@@ -137,10 +137,13 @@ export function mapNames<T extends FactionContent>(c: T, f: (name: string) => st
   };
 }
 
-/** Serialize a faction to canonical YAML. `firstSeen` sits just under `version`. */
-export function factionToYaml(f: Faction, order: OrderMode = 'name'): string {
+/**
+ * A faction as its file holds it, keys in the file's order: the canonical content, with
+ * `firstSeen` just under `version`. `factionToYaml()` writes it, and `all.json` holds it.
+ */
+export function factionDocument(f: Faction, order: OrderMode = 'name'): Faction {
   const { name, slug, version, parent, detachments, units } = orderContent(f, order);
-  const doc = new Document({
+  return {
     name,
     slug,
     version,
@@ -148,7 +151,12 @@ export function factionToYaml(f: Faction, order: OrderMode = 'name'): string {
     ...(parent !== undefined ? { parent } : {}),
     detachments,
     units,
-  });
+  };
+}
+
+/** Serialize a faction to canonical YAML. `firstSeen` sits just under `version`. */
+export function factionToYaml(f: Faction, order: OrderMode = 'name'): string {
+  const doc = new Document(factionDocument(f, order));
   // Compact leaf maps (cost options, wargear, enhancements) onto one line.
   visit(doc, {
     Map(_, node) {
@@ -167,16 +175,25 @@ export function factionFromYaml(text: string): Faction {
 // The schema lives in model.ts; the type stays importable from here, beside its reader/writer.
 export type { SiteMeta } from './model.js';
 
-/** Metadata index. `lastUpdated` is stable on no-op scrapes (max of firstSeen). */
-export function metaToYaml(meta: SiteMeta): string {
-  const doc = {
+/**
+ * `meta.yaml` as its file holds it, keys in the file's order: `schemaVersion` first, where
+ * a reader checks it, and the slugs sorted. `metaToYaml()` writes it, and `all.json` holds
+ * it.
+ */
+export function metaDocument(meta: SiteMeta): SiteMeta {
+  return {
+    schemaVersion: meta.schemaVersion,
     version: meta.version,
     lastUpdated: meta.lastUpdated,
     ...(meta.notes ? { notes: meta.notes } : {}),
     ...(meta.muster ? { muster: meta.muster } : {}),
     factions: [...meta.factions].sort(),
   };
-  return stringify(doc, STRINGIFY_OPTS);
+}
+
+/** Metadata index. `lastUpdated` is stable on no-op scrapes (max of firstSeen). */
+export function metaToYaml(meta: SiteMeta): string {
+  return stringify(metaDocument(meta), STRINGIFY_OPTS);
 }
 
 /** Parse `meta.yaml`, validated against `SiteMeta`. */

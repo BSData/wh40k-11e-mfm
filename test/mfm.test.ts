@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
@@ -9,10 +9,10 @@ import { promisify } from 'node:util';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { COMMANDS } from '../src/bin/commands.js';
 import { main } from '../src/bin/mfm.js';
-import { changelogIndex } from '../src/changelog.js';
-
+import { jsonSchemas } from '../src/schema.js';
 // The frozen v1.6 dataset, so the expectations below don't move with data updates.
-const DATA = fileURLToPath(new URL('./golden/data-v1.6', import.meta.url));
+import { DATA, frozenRepository } from './frozen-repo.js';
+
 const scratch = mkdtempSync(join(tmpdir(), 'mfm-cli-'));
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
@@ -130,28 +130,33 @@ describe('step outputs', () => {
   });
 });
 
-describe('mfm check-data', () => {
-  /** A repository holding the frozen dataset and a matching index, with `edit` applied. */
-  function repository(edit: (root: string) => void = () => {}): string {
-    const root = mkdtempSync(join(scratch, 'repo-'));
-    cpSync(DATA, join(root, 'data'), { recursive: true });
-    mkdirSync(join(root, 'changelog'));
-    writeFileSync(join(root, 'DATA-CHANGELOG.md'), changelogIndex([]));
-    edit(root);
-    return root;
-  }
-
-  it('passes canonical files, and says so on stdout', async () => {
-    const { code, stdout, stderr } = await mfm('check-data', '--root', repository());
+describe('mfm schema', () => {
+  it('writes the schemas the model generates, which check-data then accepts', async () => {
+    const root = frozenRepository(scratch, (r) => rmSync(join(r, 'schema'), { recursive: true }));
+    expect((await mfm('check-data', '--root', root)).code).toBe(1);
+    const out = join(root, 'schema');
+    const { code, stdout } = await mfm('schema', '--out', out);
     expect(code).toBe(0);
     expect(stdout).toBe(
-      'check-data: 30 faction files, meta.yaml and DATA-CHANGELOG.md are canonical.\n',
+      `Wrote faction.schema.json, meta.schema.json, all.schema.json to ${out}.\n`,
+    );
+    for (const s of jsonSchemas()) expect(readFileSync(join(out, s.name), 'utf8')).toBe(s.text);
+    expect((await mfm('check-data', '--root', root)).code).toBe(0);
+  });
+});
+
+describe('mfm check-data', () => {
+  it('passes canonical files, and says so on stdout', async () => {
+    const { code, stdout, stderr } = await mfm('check-data', '--root', frozenRepository(scratch));
+    expect(code).toBe(0);
+    expect(stdout).toBe(
+      'check-data: 30 faction files, meta.yaml, points.csv, 3 JSON Schemas and DATA-CHANGELOG.md are canonical.\n',
     );
     expect(stderr).toBe('');
   });
 
   it('fails a hand-edited file, naming it', async () => {
-    const root = repository((r) => {
+    const root = frozenRepository(scratch, (r) => {
       const file = join(r, 'data', 'necrons.yaml');
       writeFileSync(file, readFileSync(file, 'utf8').replace('slug: necrons', 'slug:  necrons'));
     });

@@ -60,6 +60,14 @@ export const COMMANDS: Record<string, Entry> = {
     'check that the committed generated files are what the tools write',
     () => import('./commands/check-data.js'),
   ),
+  schema: lazy(
+    'write the JSON Schemas generated from the zod model into schema/',
+    () => import('./commands/schema.js'),
+  ),
+  release: lazy(
+    "build the data's release: its tag, notes and assets (all.json, points.csv, …)",
+    () => import('./commands/release.js'),
+  ),
   'refresh-fixtures': lazy(
     're-download the parser test fixtures from the live site',
     () => import('./commands/refresh-fixtures.js'),

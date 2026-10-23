@@ -1,0 +1,257 @@
+name: Release
+
+# A release of the dataset for every change to data/ on main: tagged
+# mfm-v<version>+<date>, with the newest entry of changelog/v<version>.md as its notes,
+# and all.json, points.csv, the JSON Schemas and data.zip attached. Before it, every past
+# release listed in release/history.json that doesn't exist yet, oldest first. See
+# "Releases" in specs/data-model.md.
+
+on:
+  push:
+    branches: [main]
+    # changelog/ too: a PR that adds a missing entry releases the data it describes. An
+    # edit that adds no entry publishes nothing, since its tag is released with the
+    # same data/. release/ for a row added to the history table.
+    paths: ['data/**', 'changelog/**', 'release/**']
+  # A preview on a PR that changes what a release is made from: `release-assets` runs as
+  # on main, so the PR shows the releases its merge would publish, and fails early when
+  # its data/ changes without a new changelog entry. `publish` never runs for a PR.
+  # The job isn't called `build`: that name is CI's required check, which this job,
+  # running no tests, must never stand in for.
+  pull_request:
+    paths:
+      - 'data/**'
+      - 'changelog/**'
+      - 'release/**'
+      - 'schema/**'
+      - 'src/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Build the releases and print the plan, but publish nothing
+        type: boolean
+        default: false
+
+permissions: {}
+
+# One real run at a time. GitHub keeps one pending run per group, so a third push while
+# one runs and one waits cancels the waiting one; the next run then fails, naming the
+# release it lacks, until the cancelled run is re-run. A dry run, a PR's preview or a run
+# on another branch can publish nothing, so it gets a group of its own and never cancels
+# a real one.
+concurrency:
+  group: ${{ github.ref == 'refs/heads/main' && !inputs.dry-run && 'release' || format('release-preview-{0}', github.run_id) }}
+  cancel-in-progress: false
+
+jobs:
+  # Everything that runs the project's code, with a read-only token: the checks, every
+  # release's assets and notes, and which releases GitHub lacks (src/bin/commands/release.ts).
+  release-assets:
+    runs-on: ubuntu-latest
+    # A few minutes at most (a full clone, an install, twelve builds): a hang must not hold
+    # the one release queue for GitHub's six hours.
+    timeout-minutes: 15
+    permissions:
+      contents: read # check out the code, and look the tags up among the releases
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      title: ${{ steps.release.outputs.title }}
+      publish: ${{ steps.release.outputs.publish }}
+      reason: ${{ steps.release.outputs.reason }}
+    steps:
+      # Audit only: records outbound connections and processes, blocks nothing.
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
+      # The whole history: each past release is built from its commit's data/.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # No dependency cache: what this job installs goes into a release.
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          runtime: node
+          node-version-file: .node-version
+          require-lockfile: true
+
+      - name: Build the releases
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT: ${{ github.sha }}
+        run: node_modules/.bin/tsx src/bin/mfm.ts release --out "$RUNNER_TEMP/release" --commit "$COMMIT" --output "$GITHUB_OUTPUT"
+
+      - name: Summary
+        env:
+          PUBLISH: ${{ steps.release.outputs.publish }}
+          REASON: ${{ steps.release.outputs.reason }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          if [ "$PUBLISH" != true ]; then
+            what="Nothing to publish: $REASON."
+          elif [ "$DRY_RUN" = true ] || [ "$GITHUB_REF" != refs/heads/main ]; then
+            what="A real run on main would publish these, in this order ($REASON). This one publishes nothing."
+          else
+            what="Publishing, in this order: $REASON."
+          fi
+          {
+            echo "$what"
+            echo
+            cat "$RUNNER_TEMP/release/summary.md"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: ${{ runner.temp }}/release
+          if-no-files-found: error
+          retention-days: 7
+
+  # The only job that can write, and it runs no code from the repository or its
+  # dependencies: pinned actions, the artifact, gh and jq. It checks the whole plan first,
+  # then publishes its releases one by one, in order, and stops at the first failure, so the
+  # order can't break. gh uploads each release's assets to a draft and publishes it once
+  # they are all there, which immutable releases need. It runs on every real run, planned
+  # releases or not, to keep the newest release latest.
+  publish:
+    needs: release-assets
+    # A real run on main only: a dry run, a PR's preview or a run on another branch
+    # publishes nothing.
+    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && !inputs.dry-run }}
+    runs-on: ubuntu-latest
+    # The first run publishes twelve releases, 10 s apart, each with six uploads of under
+    # 500 KB: a few minutes. A hung upload must not hold the release queue for hours; a
+    # timeout can leave a draft behind (see "Publishing" in specs/data-model.md).
+    timeout-minutes: 30
+    permissions:
+      contents: write # create the tags and the releases, and mark the latest
+    steps:
+      # Audit only, as in every job (see "Workflow integration" in specs/change-tracking.md).
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: ${{ runner.temp }}/release
+
+      - name: Publish the releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          COMMIT: ${{ github.sha }}
+          PLAN: ${{ runner.temp }}/release
+          # The current release's tag: the newest changelog entry's.
+          CURRENT: ${{ needs.release-assets.outputs.tag }}
+          # Seconds between two releases, to stay clear of GitHub's limit on content created
+          # per minute: the first run publishes twelve.
+          PAUSE: '10'
+          # A release tag; src/history.ts's TAG, which a test keeps equal.
+          TAG_PATTERN: '^mfm-v[0-9]+(\.[0-9]+)*\+[0-9]{4}-[0-9]{2}-[0-9]{2}(\.[0-9]+)?$'
+          # From the compare API's $COMMIT...main: how many files under data/ or changelog/
+          # (what the current release is made from) changed on main after $COMMIT, renames
+          # counted at both ends. "unknown" when main isn't $COMMIT or ahead of it, or when
+          # the file list may be cut short (the API lists at most 300).
+          LATER_RELEASE_CHANGES: >-
+            if .status == "identical" then 0
+            elif .status == "ahead" and (.files | type) == "array" and (.files | length) < 300
+            then [.files[] | .filename, (.previous_filename // empty)
+            | select(startswith("data/") or startswith("changelog/"))] | length
+            else "unknown" end
+        # test/release-workflow.test.ts runs this script with a stub gh.
+        run: |
+          set -euo pipefail
+          api() { gh api "$@" </dev/null; }
+          uri() { jq -rn --arg s "$1" '$s | @uri'; }
+          fail() { echo "::error title=$1::$2"; exit 1; }
+          [[ "$CURRENT" =~ $TAG_PATTERN ]] || fail 'Not a release' "the current release, $CURRENT"
+
+          # The table as committed at this commit, read through the API: the artifact was
+          # written by code from the dependencies, so which past releases go out, where and
+          # in what order is checked against the table, not taken from the artifact. (The
+          # contents of each release, and the current release's tag, are the artifact's.)
+          table=$(api -H 'Accept: application/vnd.github.raw+json' \
+            "repos/$GH_REPO/contents/release/history.json?ref=$COMMIT")
+          tags=$(jq -r '.[].tag' <<<"$table")
+
+          # 1. The whole plan, before any of it is published: each line well formed, the
+          #    past releases rows of the table and in its order, and the current release,
+          #    if there, last and for this commit.
+          last=-1 current=
+          while IFS=$'\t' read -r -u 3 tag target kind dir; do
+            [[ "$tag" =~ $TAG_PATTERN && "$target" =~ ^[0-9a-f]{40}$ && "$dir" =~ ^[0-9]{2}$ ]] \
+              || fail 'Not a release' "$tag $target $dir"
+            [ -z "$current" ] || fail 'Not in order' "$tag comes after the current release"
+            case "$kind" in
+              history)
+                i=$(jq -r --arg tag "$tag" --arg commit "$target" \
+                  'map(.tag == $tag and .commit == $commit) | index(true) // -1' <<<"$table")
+                [ "$i" -ge 0 ] || fail 'Not in the history table' "$tag at $target"
+                [ "$i" -gt "$last" ] || fail 'Not in order' "$tag comes after a later row"
+                last=$i ;;
+              current)
+                if [ "$tag" != "$CURRENT" ] || [ "$target" != "$COMMIT" ]; then
+                  fail 'Not a release' "a current release, $tag at $target"
+                fi
+                current=$tag ;;
+              *) fail 'Not a release' "a $kind release, $tag at $target" ;;
+            esac
+          done 3< "$PLAN/plan.tsv"
+
+          # 2. Every row the plan leaves out is published already, so none is skipped.
+          planned=$(cut -f1 "$PLAN/plan.tsv")
+          while read -r tag; do
+            [ -n "$tag" ] || continue
+            grep -qxF "$tag" <<<"$planned" && continue
+            api "repos/$GH_REPO/releases/tags/$(uri "$tag")" --jq .id >/dev/null \
+              || fail 'Missing release' "$tag is neither published nor planned"
+          done <<<"$tags"
+
+          # 3. Whether the current release is to be latest: unless a later commit on main
+          #    changed data/ or changelog/, so an unrelated merge meanwhile doesn't demote
+          #    it, and a late re-run of an older run can't promote older data. A failed
+          #    call, or any doubt, is not latest.
+          changes=$(api "repos/$GH_REPO/compare/$COMMIT...main" --jq "$LATER_RELEASE_CHANGES") \
+            || changes=unknown
+          latest=false
+          [ "$changes" != 0 ] || latest=true
+
+          # 4. Publish, in order. A release an earlier attempt published (a re-run of the
+          #    failed jobs) is left as it is, if it is on its commit.
+          while IFS=$'\t' read -r -u 3 tag target kind dir; do
+            if at=$(api "repos/$GH_REPO/releases/tags/$(uri "$tag")" --jq .target_commitish 2>/dev/null); then
+              [ "$at" = "$target" ] || fail 'Released elsewhere' "$tag is published at $at, not $target"
+              echo "$tag is published already, at $target"
+              continue
+            fi
+            flag=false
+            if [ "$kind" = current ]; then flag=$latest; fi
+            echo "Publishing $tag at $target, latest=$flag"
+            gh release create --target "$target" --title "$(cat "$PLAN/$dir/title.txt")" \
+              --notes-file "$PLAN/$dir/notes.md" --latest="$flag" \
+              -- "$tag" "$PLAN/$dir"/assets/* </dev/null
+            sleep "$PAUSE"
+          done 3< "$PLAN/plan.tsv"
+
+          # 5. Keep the current release latest, published by this run or by an earlier one.
+          #    When main has moved on, the later run marks its own. When there's no telling,
+          #    the job fails after publishing: a re-run skips what is published and decides
+          #    again.
+          if [ "$changes" = unknown ]; then
+            fail 'Not latest' "couldn't tell whether main has changed since $COMMIT, so $CURRENT isn't marked latest: re-run this job, or, if main hasn't changed data/ or changelog/ since, mark it latest on its release page"
+          elif [ "$latest" != true ]; then
+            echo "::warning title=Not latest::$CURRENT isn't marked latest: main has $changes later changes to data/ or changelog/, and their run marks its own release"
+          elif [ "$(api "repos/$GH_REPO/releases/latest" --jq .tag_name 2>/dev/null || true)" != "$CURRENT" ]; then
+            # Only make_latest is sent: an immutable release takes no other change.
+            if id=$(api "repos/$GH_REPO/releases/tags/$(uri "$CURRENT")" --jq .id 2>/dev/null); then
+              echo "Marking $CURRENT latest"
+              api -X PATCH "repos/$GH_REPO/releases/$id" -f make_latest=true >/dev/null \
+                || fail 'Not latest' "marking $CURRENT latest failed: re-run this job, or mark it latest on its release page"
+            fi
+          fi

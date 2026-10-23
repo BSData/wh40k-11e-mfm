@@ -15,12 +15,50 @@ changes over time.
 | Path | Contents |
 |---|---|
 | `data/<slug>.yaml` | One faction: its units' points (per unit size and requisition tier), wargear costs and Leader/Support lists, and its detachments with their DP and enhancements. |
-| `data/meta.yaml` | The MFM version, the date of the last change, the `factions` list of slugs, and the site's rules panels ("Welcome…" notes and "Muster Armies") as Markdown. |
+| `data/meta.yaml` | The `schemaVersion`, the MFM version, the date of the last change, the `factions` list of slugs, and the site's rules panels ("Welcome…" notes and "Muster Armies") as Markdown. |
+| [`data/points.csv`](data/points.csv) | Every unit's points as one table for spreadsheets: one row per faction, unit, tier and cost option. UTF-8; in Excel, open it with Data → From Text/CSV. |
+| [`schema/`](schema) | JSON Schemas for a faction file, `meta.yaml` and `all.json`, generated from the model. |
 | `changelog/v<version>.md` | What changed in each MFM version, indexed by [`DATA-CHANGELOG.md`](DATA-CHANGELOG.md). |
 
 Every field is documented in [`specs/data-model.md`](specs/data-model.md). A slug is the
 faction's URL slug on the MFM site: `data/necrons.yaml` is
 <https://mfm.warhammer-community.com/en/necrons>.
+
+### Releases
+Every change to the data on `main` is published as a
+[release](https://github.com/BSData/wh40k-11e-mfm/releases), tagged
+`mfm-v<version>+<date>` after the last day of the change (`mfm-v1.5+2026-10-05`; a second
+change ending the same day adds `.2`), with that change's changelog entry as its notes.
+The releases go back to the first scrape (`mfm-v1.0+2026-06-17`): the ones from before
+releases existed were backfilled from `main`'s history, in today's shape, and their notes
+say what differs from today's data. A release never changes once published. Each one has
+the same assets, so the newest is always at the same URL:
+
+```text
+https://github.com/BSData/wh40k-11e-mfm/releases/latest/download/all.json
+https://github.com/BSData/wh40k-11e-mfm/releases/latest/download/points.csv
+```
+
+| Asset | Contents |
+|---|---|
+| `all.json` | `meta.yaml` and every faction in one file: `{ "schemaVersion": 2, "meta": …, "factions": […] }` |
+| `points.csv` | `data/points.csv` |
+| `faction.schema.json`, `meta.schema.json`, `all.schema.json` | the JSON Schemas |
+| `data.zip` | all of `data/` |
+
+To pin a release, download from its tag instead of `latest`:
+`https://github.com/BSData/wh40k-11e-mfm/releases/download/mfm-v1.6+2026-10-23/all.json`.
+The `+` works as it is in a URL; `%2B` works too. A version's tags sort by date as text,
+except that a `.10` sorts before a `.2`.
+
+### Schema version
+`schemaVersion` (in `meta.yaml` and `all.json`) goes up by one whenever the files change in
+a way that can break a reader: a field removed or renamed, or its type or meaning changed
+(a required field becoming optional counts). Added fields don't change it. Check it before
+reading the rest, and validate against the JSON Schema of the same release if you want the
+shape checked; the schemas accept fields they don't list, so a later addition doesn't fail
+them. A bump is announced in its release notes and on Discord. The policy is in
+[`specs/data-model.md`](specs/data-model.md#schema-version-schemaversion).
 
 ### Stable URLs
 Read the files from `raw.githubusercontent.com`. A file's path follows the faction's slug on
@@ -68,7 +106,9 @@ days: MFM v1.6 was first seen on 2026-10-14, and its update was merged on 2026-1
 - [`DATA-CHANGELOG.md`](DATA-CHANGELOG.md) links each version's changelog. The files have
   had one breaking change so far, noted in [`changelog/v1.4.md`](changelog/v1.4.md):
   `role` and `attachTo` became `leaderTo` and `supportTo`, and `objective` became
-  `objectives`. Every other change, such as `muster` in `meta.yaml`, only added fields.
+  `objectives`. That is why `schemaVersion` starts at 2. Every other change, such as
+  `muster` in `meta.yaml`, only added fields.
+- Releases follow `main`, so they lag the site the same way.
 
 ## License
 The code is released under the [MIT License](LICENSE).

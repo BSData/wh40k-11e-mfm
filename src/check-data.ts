@@ -2,8 +2,10 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { changelogIndex } from './changelog.js';
+import { POINTS_CSV, pointsCsv } from './csv.js';
 import { factionFromYaml, factionToYaml, metaFromYaml, metaToYaml } from './emit.js';
 import type { Faction, SiteMeta } from './model.js';
+import { jsonSchemas } from './schema.js';
 
 /**
  * Check that the committed generated files are exactly what the tools would write (see
@@ -12,11 +14,14 @@ import type { Faction, SiteMeta } from './model.js';
  *   pnpm check-data          (mfm check-data)
  *
  * Every `data/<slug>.yaml` must pass the `Faction` schema, be named after its slug and be
- * canonical; `data/meta.yaml` must pass `SiteMeta` and be canonical; and
- * `DATA-CHANGELOG.md` must be the index `changelogIndex()` generates from `changelog/`.
- * Canonical form catches a hand edit that breaks the writer's formatting, not a well-formed
- * one: keeping those out is CI's data-guard. `checkData()` is pure, files in and problems
- * out, so tests can hand it broken copies; `readGeneratedFiles()` reads a repository.
+ * canonical; `data/meta.yaml` must pass `SiteMeta` (so it is at the current
+ * `schemaVersion`) and be canonical; `data/points.csv` must be what `pointsCsv()` makes of
+ * the faction files; `schema/` must hold exactly the JSON Schemas `jsonSchemas()`
+ * generates; and `DATA-CHANGELOG.md` must be the index `changelogIndex()` generates from
+ * `changelog/`. Canonical form catches a hand edit that breaks the writer's formatting, not
+ * a well-formed one: keeping those out is CI's data-guard. `checkData()` is pure, files in
+ * and problems out, so tests can hand it broken copies; `readGeneratedFiles()` reads a
+ * repository.
  */
 
 /** A file as `checkData()` sees it: its name within its directory, and its text. */
@@ -25,9 +30,14 @@ export interface TextFile {
   text: string;
 }
 
-/** The generated files: `data/*.yaml`, `changelog/*`, and `DATA-CHANGELOG.md` if present. */
+/**
+ * The generated files: `data/*.yaml`, `data/points.csv`, `schema/*`, `changelog/*`, and
+ * `DATA-CHANGELOG.md`; `undefined` for a single file that is missing.
+ */
 export interface GeneratedFiles {
   data: TextFile[];
+  points: string | undefined;
+  schemas: TextFile[];
   changelog: TextFile[];
   index: string | undefined;
 }
@@ -37,11 +47,23 @@ export const INDEX = 'DATA-CHANGELOG.md';
 /** Every way the files differ from what the tools write, one message each; empty if none. */
 export function checkData(files: GeneratedFiles): string[] {
   const problems: string[] = [];
+  const factions: Faction[] = [];
   for (const f of files.data) {
-    const problem = f.name === 'meta.yaml' ? checkMeta(f.text) : checkFaction(f);
+    const problem = f.name === 'meta.yaml' ? checkMeta(f.text) : checkFaction(f, factions);
     if (problem) problems.push(problem);
   }
   if (!files.data.some((f) => f.name === 'meta.yaml')) problems.push('data/meta.yaml is missing');
+
+  // Only once every faction file is sound: the table is made from them, and a broken one
+  // is already reported.
+  const path = `data/${POINTS_CSV}`;
+  if (files.points === undefined) problems.push(`${path} is missing`);
+  else if (factions.length === files.data.filter((f) => f.name !== 'meta.yaml').length) {
+    const problem = canonical(path, files.points, pointsCsv(factions), 'pointsCsv()');
+    if (problem) problems.push(`${problem} (the faction files are the source; rescrape)`);
+  }
+
+  problems.push(...checkSchemas(files.schemas));
 
   if (files.index === undefined) {
     problems.push(`${INDEX} is missing`);
@@ -56,7 +78,8 @@ export function checkData(files: GeneratedFiles): string[] {
   return problems;
 }
 
-function checkFaction({ name, text }: TextFile): string | undefined {
+/** A faction file's problem, if any; a file without one is added to `sound`. */
+function checkFaction({ name, text }: TextFile, sound: Faction[]): string | undefined {
   const path = `data/${name}`;
   let faction: Faction;
   try {
@@ -67,7 +90,31 @@ function checkFaction({ name, text }: TextFile): string | undefined {
   if (name !== `${faction.slug}.yaml`) {
     return `${path} holds the slug "${faction.slug}", so it belongs in data/${faction.slug}.yaml`;
   }
-  return canonical(path, text, factionToYaml(faction), 'factionToYaml()');
+  const problem = canonical(path, text, factionToYaml(faction), 'factionToYaml()');
+  if (!problem) sound.push(faction);
+  return problem;
+}
+
+/** `schema/` against `jsonSchemas()`: each file present and current, and no others. */
+function checkSchemas(committed: TextFile[]): string[] {
+  const problems: string[] = [];
+  const fix = 'regenerate it with `pnpm mfm schema`';
+  const generated = jsonSchemas();
+  for (const g of generated) {
+    const path = `schema/${g.name}`;
+    const file = committed.find((f) => f.name === g.name);
+    if (!file) problems.push(`${path} is missing: ${fix}`);
+    else {
+      const problem = canonical(path, file.text, g.text, 'jsonSchemas()');
+      if (problem) problems.push(`${problem}; it is out of date with src/model.ts: ${fix}`);
+    }
+  }
+  for (const f of committed) {
+    if (!generated.some((g) => g.name === f.name)) {
+      problems.push(`schema/${f.name} isn't generated from the model: delete it`);
+    }
+  }
+  return problems;
 }
 
 function checkMeta(text: string): string | undefined {
@@ -123,12 +170,16 @@ function readFiles(dir: string, ext = ''): TextFile[] {
     .sort((x, y) => (x.name < y.name ? -1 : 1));
 }
 
+/** A file's text, or `undefined` when it doesn't exist. */
+const readIfThere = (path: string) => (existsSync(path) ? readFileSync(path, 'utf8') : undefined);
+
 /** A repository's generated files, as `checkData()` takes them. */
 export function readGeneratedFiles(root: string): GeneratedFiles {
-  const indexPath = join(root, INDEX);
   return {
     data: readFiles(join(root, 'data'), '.yaml'),
+    points: readIfThere(join(root, 'data', POINTS_CSV)),
+    schemas: readFiles(join(root, 'schema')),
     changelog: readFiles(join(root, 'changelog')),
-    index: existsSync(indexPath) ? readFileSync(indexPath, 'utf8') : undefined,
+    index: readIfThere(join(root, INDEX)),
   };
 }

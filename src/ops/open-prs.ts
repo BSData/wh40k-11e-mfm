@@ -1,8 +1,7 @@
-import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 import type { UpdatePr } from '../stack.js';
-import { gitEnv } from './git-env.js';
+import { git } from './git.js';
 import { type GitHub, paginate } from './github.js';
 
 /**
@@ -39,27 +38,6 @@ export async function listUpdatePrs(gh: GitHub): Promise<UpdatePr[]> {
         p.head.ref.startsWith('mfm/'),
     )
     .map((p) => ({ number: p.number, headRefName: p.head.ref, baseRefName: p.base.ref }));
-}
-
-/** Run git in `cwd`, feeding it `input`; its stdout, or a throw with its stderr. */
-function git(cwd: string, args: string[], input?: string): Promise<Buffer> {
-  return new Promise((done, fail) => {
-    const stdin = input === undefined ? 'ignore' : 'pipe';
-    const child = spawn('git', args, { cwd, env: gitEnv(), stdio: [stdin, 'pipe', 'pipe'] });
-    const out: Buffer[] = [];
-    const err: Buffer[] = [];
-    child.stdout?.on('data', (b: Buffer) => out.push(b));
-    child.stderr?.on('data', (b: Buffer) => err.push(b));
-    child.on('error', fail);
-    child.on('close', (code) => {
-      if (code === 0) done(Buffer.concat(out));
-      else fail(new Error(`git ${args.join(' ')}: ${Buffer.concat(err).toString().trim()}`));
-    });
-    // A git that exits before reading all of it closes the pipe: the write fails with
-    // EPIPE, and the exit code above is what reports why.
-    child.stdin?.on('error', () => {});
-    child.stdin?.end(input);
-  });
 }
 
 /**

@@ -28,6 +28,7 @@ import {
   type Faction,
   FactionContent,
   PricingTier,
+  type SnapshotMeta,
   Unit,
   Wargear,
 } from '../src/model.js';
@@ -77,13 +78,21 @@ describe('emit', () => {
     expect(yaml).toContain('firstSeen: 2026-06-17');
   });
 
-  it('round-trips meta', () => {
-    const meta = { version: '1.0', lastUpdated: '2026-06-17', factions: ['necrons'] };
-    expect(metaFromYaml(metaToYaml(meta))).toEqual(meta);
+  it('round-trips meta, schemaVersion first', () => {
+    const meta: SiteMeta = {
+      schemaVersion: 2,
+      version: '1.0',
+      lastUpdated: '2026-06-17',
+      factions: ['necrons'],
+    };
+    const yaml = metaToYaml(meta);
+    expect(metaFromYaml(yaml)).toEqual(meta);
+    expect(yaml).toMatch(/^schemaVersion: 2\nversion: "1\.0"\n/);
   });
 
   it('round-trips the rules panels, notes before muster', () => {
-    const meta = {
+    const meta: SiteMeta = {
+      schemaVersion: 2,
       version: '1.5',
       lastUpdated: '2026-09-30',
       notes: 'To muster…\n\n## UNITS',
@@ -1153,7 +1162,8 @@ describe('the rules panels (meta.yaml)', () => {
     '',
     'Fill it.',
   ].join('\n');
-  const meta = (over: Partial<SiteMeta> = {}): SiteMeta => ({
+  const meta = (over: Partial<SnapshotMeta> = {}): SnapshotMeta => ({
+    schemaVersion: 2,
     version: '1.1',
     lastUpdated: '2026-06-17',
     notes: 'To muster…\n\n## UNITS',
@@ -1234,11 +1244,37 @@ describe('the rules panels (meta.yaml)', () => {
     expect(entry).toContain('\n### Rules\n\n**Muster Armies:**\n');
   });
 
+  it('names a schemaVersion change first, in the PR body and the changelog entry', () => {
+    const opts = { meta: { before: meta(), after: meta({ schemaVersion: 3 }) } };
+    expect(changelog(same, same, opts)).toContain(
+      '**No faction changes** · `schemaVersion` 2 → 3\n',
+    );
+    const after = necronsContent();
+    reprice(after, 5);
+    expect(changelogEntry(same, [after], { ...opts, date: '2026-11-02' })).toContain(
+      '**1 faction changed** · `schemaVersion` 2 → 3 · ',
+    );
+  });
+
+  it('names the schemaVersion a snapshot from before it gains', () => {
+    const { schemaVersion: _, ...old } = meta();
+    const log = changelog(same, same, { meta: { before: old, after: meta() } });
+    expect(log).toContain('**No faction changes** · `schemaVersion` — → 2\n');
+  });
+
   it('loads a snapshot directory’s meta.yaml', () => {
     const data = loadMeta(fileURLToPath(new URL('../data/', import.meta.url)));
+    expect(data?.schemaVersion).toBe(2);
     expect(data?.version).toMatch(/^\d+\.\d+$/);
     expect(data?.muster).toContain('## SELECT BATTLE SIZE');
     expect(loadMeta(fileURLToPath(new URL('./fixtures/', import.meta.url)))).toBeUndefined();
+  });
+
+  it('loads one from another schemaVersion, or from before it, to compare across a bump', () => {
+    // Frozen before schemaVersion existed.
+    const v16 = loadMeta(fileURLToPath(new URL('./golden/data-v1.6/', import.meta.url)));
+    expect(v16?.version).toBe('1.6');
+    expect(v16?.schemaVersion).toBeUndefined();
   });
 });
 
