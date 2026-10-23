@@ -574,7 +574,7 @@ not a way to the keys. It is open from the agent's first `pnpm verify` to the en
 sweep, up to about half an hour, and longer if the agent's code sent the runtime token
 out, since that token can stay valid for about six hours. Turning off CodeQL's overlay
 analysis closes it. See
-[0028](../docs/decisions/0028-a-failed-scrape-drafts-its-fix.md).
+[0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md).
 
 A human reviews and merges the PR — giving reviewable, auditable history of every
 points change.

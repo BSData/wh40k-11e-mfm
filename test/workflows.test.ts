@@ -38,8 +38,12 @@ const steps = readdirSync(root('.github/workflows'))
 const using = (action: string) => steps.filter(({ step }) => step.uses?.startsWith(`${action}@`));
 
 describe('no workflow restores a dependency cache', () => {
-  it('finds the setup steps', () => {
+  it('finds the setup steps, in every workflow that installs', () => {
     expect(using('pnpm/setup').length).toBeGreaterThan(5);
+    const files = new Set(using('pnpm/setup').map(({ where }) => where.split(' ')[0]));
+    for (const name of ['ci.yml', 'drift-fix.yml', 'release.yml', 'scrape.yml', 'smoke.yml']) {
+      expect(files).toContain(name);
+    }
   });
 
   it.each(using('pnpm/setup'))(

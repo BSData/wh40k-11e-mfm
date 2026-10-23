@@ -78,6 +78,8 @@ jobs:
           runtime: node
           node-version-file: .node-version
           require-lockfile: true
+          cache: false # "No dependency cache" in specs/change-tracking.md
+          cache-dependency-path: .github/no-dependency-cache # matches no file: no cache at all
 
       - name: Build the releases
         id: release
