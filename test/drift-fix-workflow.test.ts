@@ -51,6 +51,9 @@ describe('the drift fixer workflow', () => {
     expect(check?.env?.EXECUTION_FILE).toMatch(
       /^\$\{\{ steps\.agent\.outputs\.execution_file \}\}$/,
     );
+    // Either would turn a failed agent green again.
+    expect(check).not.toHaveProperty('continue-on-error');
+    expect(check).not.toHaveProperty('if');
   });
 
   it("asks Claude Code for nothing it can't start with on a runner", () => {
@@ -67,12 +70,19 @@ describe.skipIf(!hasBash)('the check at the end of the agent job', () => {
   const scratch = mkdtempSync(join(tmpdir(), 'drift-fix-check-'));
   afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
-  /** Runs the step with a run record as Claude Code writes one; null leaves no file. */
-  const run = (record: string | null) => {
+  /**
+   * Runs the step, as Actions runs it, with a run record as Claude Code writes one: null
+   * names a file that isn't there, and undefined names none, as when the action never set
+   * its output (a failed start, or the timeout).
+   */
+  const run = (record: string | null | undefined) => {
     const file = join(scratch, `${Math.random().toString(36).slice(2)}.json`);
-    if (record !== null) writeFileSync(file, record);
-    return spawnSync('bash', ['-c', check?.run ?? 'exit 99'], {
-      env: { ...process.env, EXECUTION_FILE: file.replaceAll('\\', '/') },
+    if (typeof record === 'string') writeFileSync(file, record);
+    return spawnSync('bash', ['-e', '-c', check?.run ?? 'exit 99'], {
+      env: {
+        ...process.env,
+        EXECUTION_FILE: record === undefined ? '' : file.replaceAll('\\', '/'),
+      },
       encoding: 'utf8',
     });
   };
@@ -94,9 +104,10 @@ describe.skipIf(!hasBash)('the check at the end of the agent job', () => {
     ['left an empty record', ''],
     ['left a record that is not JSON', 'error: bubblewrap is required'],
     ['left no record', null],
+    ['never named a record', undefined],
   ])('fails a run that %s, and says why', (_, record) => {
     const { status, stdout } = run(record);
     expect(status).toBe(1);
-    expect(stdout).toContain("::error title=The agent didn't run::");
+    expect(stdout).toContain("::error title=The agent didn't finish::");
   });
 });

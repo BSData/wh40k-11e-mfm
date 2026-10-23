@@ -449,11 +449,13 @@ part holds only what it needs. See
    workflow") and hands it the artifact as untrusted data; never an issue, a comment or a
    PR. The job uploads what the agent changed as a patch (`git diff`, with the new files
    under the allowed paths), with the agent's closing note, the run's turns and cost, and
-   whether it finished; a run cut short by its limits still hands on what it changed, and
-   its draft says so. The run's full record stays in the job. Its last step fails the job,
-   and so the run, unless that record ends with the agent finished or stopped at its turn
-   or budget limit (`error_max_turns`, `error_max_budget_usd`): a run that never started,
-   or ended in an error, is red, not a green run with nothing to show. Since
+   whether it finished; a run cut short at its turn or budget limit still hands on what it
+   changed, and its draft says so. The run's full record stays in the job. Its last step
+   fails the job, and so the run, unless that record ends with the agent finished or
+   stopped at its turn or budget limit (`error_max_turns`, `error_max_budget_usd`): a run
+   that never started, ended in an error, or ran into the 20-minute timeout (which leaves
+   no record) is red, not a green run with nothing to show; its patch is still in the
+   job's artifact, and a replay tries again. Since
    `pnpm verify` runs tests the model wrote, the rest of this job is within its reach; see
    *No dependency cache*.
 4. **The PR** (job `pr`) runs only once the agent's job has succeeded. It holds the App's

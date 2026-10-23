@@ -158,9 +158,10 @@ jobs:
 
       # Sonnet, one try, at most 30 turns and $2 (Claude Code stops at the turn that
       # crosses it): a run is expected to cost $1-2 of the key's $10. A run cut short at
-      # a limit still hands on what it changed, as a draft that says so: the outage gets
-      # no second run. That is all `continue-on-error` is for: the job's last step fails
-      # it for any other end.
+      # its turn or budget limit still hands on what it changed, as a draft that says so:
+      # the outage gets no second run. That is all `continue-on-error` is for: the job's
+      # last step fails it for any other end, the 20-minute timeout included, which leaves
+      # no record of the run.
       - name: Draft the fix
         id: agent
         timeout-minutes: 20
@@ -240,14 +241,15 @@ jobs:
 
       # Last, so what the agent left is kept to look at. Finished, or stopped at its turn
       # or budget limit, it goes on to `pr`; any other end, such as Claude Code failing
-      # to start, fails the run, so it can't pass for a run that found nothing to fix.
+      # to start, an error or the timeout, fails the run, so it can't pass for a run that
+      # found nothing to fix.
       - name: Check the agent finished or stopped at a limit
         env:
           EXECUTION_FILE: ${{ steps.agent.outputs.execution_file }}
         run: |
           ended='[.[] | select(.type == "result")] | last | (.subtype == "success" and (.is_error | not)) or .subtype == "error_max_turns" or .subtype == "error_max_budget_usd"'
           if [ -z "$EXECUTION_FILE" ] || [ ! -f "$EXECUTION_FILE" ] || ! jq -e "$ended" "$EXECUTION_FILE" > /dev/null; then
-            echo "::error title=The agent didn't run::Claude Code neither finished nor stopped at its limits: see the step \"Draft the fix\"."
+            echo "::error title=The agent didn't finish::Claude Code neither finished nor stopped at its turn or budget limit: see the step \"Draft the fix\"."
             exit 1
           fi
 

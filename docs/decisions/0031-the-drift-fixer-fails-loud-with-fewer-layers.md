@@ -1,6 +1,6 @@
 # 0031. The drift fixer fails loud, with fewer layers
 
-- **Status:** accepted; revises [0029](0029-a-failed-scrape-drafts-its-fix.md)
+- **Status:** accepted, in [#102](https://github.com/BSData/wh40k-11e-mfm/pull/102); revises [0029](0029-a-failed-scrape-drafts-its-fix.md)
 - **Spec:** [change tracking — The drift fixer](../../specs/change-tracking.md#the-drift-fixer), and *No dependency cache*
 
 ## Context
@@ -27,9 +27,10 @@ Looking at why the scrub was there, two of 0029's layers cost more than they bou
 ## Decision
 - The agent's step keeps `continue-on-error`, and the job's last step fails the job
   unless the run's record ends with the agent finished, or stopped at its turn or budget
-  limit (`error_max_turns`, `error_max_budget_usd`). A run that didn't start, or ended in
-  an error, is red; its patch and note are still uploaded to look at, and `pr` doesn't
-  run. `test/drift-fix-workflow.test.ts` runs the step's script on each kind of record.
+  limit (`error_max_turns`, `error_max_budget_usd`). A run that didn't start, ended in
+  an error, or ran into the step's 20-minute timeout is red; its patch and note are still
+  uploaded to look at, and `pr` doesn't run. `test/drift-fix-workflow.test.ts` runs the
+  step's script on each kind of record.
 - No `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`.
 - No `caches` job: `pr` waits on the agent's job alone.
 
@@ -41,8 +42,11 @@ since GitHub and the model's API both accept uploads made with an attacker's own
 credentials; it costs one list of hosts.
 
 ## Consequences
-- A drift fixer that can't run says so: the run fails with "The agent didn't run". The
+- A drift fixer that can't run says so: the run fails with "The agent didn't finish". The
   outage's one run is spent, so a replay (`workflow_dispatch`) is how to try again.
+- A run the timeout stops is red too, where before it opened a draft marked unfinished:
+  the step is killed before Claude Code writes its record, and telling that apart from a
+  failed start isn't worth the code. The patch it left is in the job's artifact.
 - A cache entry the agent's code writes stays until GitHub evicts it, and a CodeQL PR run
   could restore it. That is accepted as a low-privilege risk; turning off CodeQL's overlay
   analysis closes it.
