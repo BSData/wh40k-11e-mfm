@@ -4,6 +4,8 @@ name: Dependabot auto-merge
 
 on:
   pull_request:
+    # edited: a change of base is checked again.
+    types: [opened, synchronize, reopened, edited]
 
 permissions: {}
 
@@ -24,6 +26,8 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       PR: ${{ github.event.pull_request.number }}
+      # Auto-merge this job turned on. One a maintainer turned on is theirs to keep.
+      OURS: '.autoMergeRequest.enabledBy.login // "" | IN("github-actions", "github-actions[bot]")'
     steps:
       # Fails unless the PR's author is Dependabot and its first commit carries GitHub's
       # signature. The rest of the commits are checked below.
@@ -62,7 +66,7 @@ jobs:
           set -euo pipefail
           # Auto-merge waits only for the checks the branch's rules require. Without a rule
           # requiring build it would merge at once, untested, so enable nothing then.
-          required=$(gh api "repos/$GH_REPO/rules/branches/$BASE" --jq \
+          required=$(gh api "repos/$GH_REPO/rules/branches/$(jq -rn --arg b "$BASE" '$b | @uri')" --jq \
             'any(.[]; .type == "required_status_checks" and any(.parameters.required_status_checks[]; .context == "build"))')
           if [ "$required" != true ]; then
             echo "::error title=No required build check::$BASE has no rule requiring the build check, so auto-merge would not wait for it. Add it to the ruleset, then re-run this job."
@@ -77,12 +81,13 @@ jobs:
         run: |
           set -euo pipefail
           # An earlier run may have turned auto-merge on before a push changed the answer.
-          if [ "$(gh pr view "$PR" --json autoMergeRequest --jq '.autoMergeRequest != null')" = true ]; then
+          if [ "$(gh pr view "$PR" --json autoMergeRequest --jq "$OURS")" = true ]; then
             gh pr merge "$PR" --disable-auto
           fi
-          # One comment per PR, however often Dependabot rebases it.
+          # One comment per PR, however often Dependabot rebases it. Only this job's own
+          # count, so nobody else's comment can stand in for it.
           held=$(gh pr view "$PR" --json comments \
-            --jq '[.comments[].body | select(contains("<!-- dependabot-automerge: held -->"))] | length')
+            --jq '[.comments[] | select(.author.login == "github-actions" and (.body | contains("<!-- dependabot-automerge: held -->")))] | length')
           if [ "$held" = 0 ]; then
             gh pr comment "$PR" --body "Not merged automatically: $REASON. A maintainer reviews and merges this one. <!-- dependabot-automerge: held -->"
           fi
@@ -93,6 +98,6 @@ jobs:
         if: failure()
         run: |
           set -euo pipefail
-          if [ "$(gh pr view "$PR" --json autoMergeRequest --jq '.autoMergeRequest != null')" = true ]; then
+          if [ "$(gh pr view "$PR" --json autoMergeRequest --jq "$OURS")" = true ]; then
             gh pr merge "$PR" --disable-auto
           fi

@@ -24,7 +24,8 @@ behind a running one would cancel a scheduled run already waiting there.
 
 ## Consequences
 A workflow change can be run against today's site from its branch before it merges. The
-first dry run, [39873916763](https://github.com/BSData/wh40k-11e-mfm/actions/runs/39873916763), planned an update of `mfm/v1.6` and published nothing.
+first dry run of the four jobs, [39882594770](https://github.com/BSData/wh40k-11e-mfm/actions/runs/39882594770), ran `scrape` and `app-check`, skipped
+the rest, and published nothing.
 
 A dry run doesn't exercise `publish`, `announce` or `report`, so their first test is
 still a real run. That is also why `publish` runs `harden-runner` in audit mode, not in

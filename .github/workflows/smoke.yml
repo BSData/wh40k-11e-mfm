@@ -9,7 +9,10 @@ on:
   pull_request:
     paths:
       - src/**
+      - package.json
       - pnpm-lock.yaml # cheerio, Playwright and the rest of what parses the page
+      - pnpm-workspace.yaml
+      - .node-version
       - .github/workflows/smoke.yml # a change to this check runs it
 
 permissions: {}

@@ -28,6 +28,7 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 30 # a full scrape takes about five minutes
     permissions:
       contents: read # check out the code
       pull-requests: read # list the open update PRs
@@ -179,6 +180,7 @@ jobs:
     needs: scrape
     if: ${{ !inputs.dry-run }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read # check out the base
     outputs:
@@ -187,6 +189,24 @@ jobs:
       - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
           egress-policy: audit
+
+      # Everything `scrape` hands over is untrusted, since that job ran every dependency.
+      # So the names that steer the App's token are checked first, in plain bash: the
+      # branch is an update branch, and the base is main or another one.
+      - name: Check the plan
+        env:
+          BRANCH: ${{ needs.scrape.outputs.branch }}
+          BASE: ${{ needs.scrape.outputs.base }}
+          BASE_SHA: ${{ needs.scrape.outputs.base-sha }}
+        run: |
+          set -euo pipefail
+          update='^mfm/v[0-9]+(\.[0-9]+)*$'
+          [[ "$BRANCH" =~ $update ]] || { echo "::error::Not an update branch: '$BRANCH'"; exit 1; }
+          if ! { [[ "$BASE" == main || "$BASE" =~ $update ]] && [[ "$BASE" != "$BRANCH" ]]; }; then
+            echo "::error::Not a base for $BRANCH: '$BASE'"
+            exit 1
+          fi
+          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::Not a commit: '$BASE_SHA'"; exit 1; }
 
       # A fresh checkout of the commit `scrape` staged on, never a .git from the artifact:
       # git config can run commands, and create-pull-request runs git here. With `base`
@@ -202,8 +222,29 @@ jobs:
         with:
           name: update
           path: /tmp/update
-      # Only the paths the update writes, each replaced whole, so a faction the site
-      # dropped is deleted here too.
+
+      # The base commit must be on the base branch, not any commit the repository can
+      # fetch. And the staged update must be regular files where an update writes and
+      # nothing else: no dot-files, links, subdirectories or .git.
+      - name: Check what scrape handed over
+        env:
+          BASE: ${{ needs.scrape.outputs.base }}
+          BASE_SHA: ${{ needs.scrape.outputs.base-sha }}
+        run: |
+          set -euo pipefail
+          git -C pub fetch --no-tags --depth=50 origin "+refs/heads/$BASE:refs/remotes/origin/$BASE"
+          if ! git -C pub merge-base --is-ancestor "$BASE_SHA" "refs/remotes/origin/$BASE"; then
+            echo "::error::$BASE_SHA is not on $BASE"
+            exit 1
+          fi
+          cd /tmp/update/staged
+          allowed='^(d \./(data|changelog)|f \./DATA-CHANGELOG\.md|f \./data/[a-z0-9-]+\.yaml|f \./changelog/v[0-9.]+\.md)$'
+          while IFS= read -r -d '' entry; do
+            [[ "$entry" =~ $allowed ]] || { echo "::error::Not part of an update: ${entry#? }"; exit 1; }
+          done < <(find . -mindepth 1 -printf '%y %p\0')
+
+      # Only the paths the update writes, each replaced whole, so the tree is the one
+      # `scrape` staged.
       - name: Stage the update on the base
         run: |
           rm -rf pub/data pub/changelog pub/DATA-CHANGELOG.md
@@ -240,6 +281,7 @@ jobs:
   app-check:
     if: ${{ inputs.dry-run }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions: {}
     steps:
       - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
@@ -259,6 +301,7 @@ jobs:
     needs: [scrape, publish]
     if: ${{ !inputs.dry-run && needs.publish.outputs.pr != '' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read # check out the code
       pull-requests: write # link the stack, and read and write the Discord marker
@@ -318,11 +361,14 @@ jobs:
 
   # One issue per outage, not per day: a failure in any job while a `scrape-failure`
   # issue is open is reported as a comment on it, and the next successful run closes it
-  # (src/ops/failure-issue.ts). A dry run touches neither: its own red run is the report.
+  # (src/ops/failure-issue.ts). A job that timed out, or lost its runner, ends as
+  # `cancelled` while the run goes on, so that counts as a failure here too; a run that
+  # was cancelled skips this job. A dry run touches neither: its own red run is the report.
   report:
     needs: [scrape, publish, announce]
     if: ${{ !cancelled() && !inputs.dry-run }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read # check out the code
       issues: write # open, comment on and close the scrape-failure issue
@@ -349,7 +395,7 @@ jobs:
 
       - name: Report the failure
         id: report
-        if: needs.scrape.result == 'failure' || needs.publish.result == 'failure' || needs.announce.result == 'failure'
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         env:
           GH_TOKEN: ${{ github.token }}
         run: node_modules/.bin/tsx src/bin/mfm.ts report-failure --details /tmp/failures.md
@@ -374,7 +420,7 @@ jobs:
           fi
 
       - name: Close the failure issue
-        if: needs.scrape.result == 'success' && needs.publish.result == 'success' && needs.announce.result != 'failure'
+        if: needs.scrape.result == 'success' && needs.publish.result == 'success' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
         env:
           GH_TOKEN: ${{ github.token }}
         run: node_modules/.bin/tsx src/bin/mfm.ts resolve-failure

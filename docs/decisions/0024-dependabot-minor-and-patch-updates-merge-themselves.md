@@ -24,8 +24,9 @@ for a maintainer, with one comment saying why.
 
 The author check uses the PR's author, not `github.actor`: the actor is whoever caused the
 event, and Dependabot can be made the actor on someone else's PR. The job fails closed:
-when an update stops qualifying, or a run fails, it turns off any auto-merge an earlier
-run turned on.
+when an update stops qualifying, or a run fails, it turns off the auto-merge an earlier
+run turned on. Auto-merge a maintainer turned on, say after reviewing a major update, is
+theirs, and stays.
 
 ## Consequences
 The weekly npm minor and patch group merges itself. The weekly GitHub Actions group

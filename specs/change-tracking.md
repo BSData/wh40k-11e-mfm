@@ -344,11 +344,12 @@ issue only when there isn't. After a successful run, `mfm resolve-failure` comme
 every open one with a link to that run, and closes it. See
 [0013](../docs/decisions/0013-one-failure-issue-per-outage.md).
 
-A failure in any job is reported, by the `report` job (see *Workflow integration*). When
-that job fails before `mfm` can report (in its checkout or setup, or in the report step
-itself), a fallback step that needs only `gh` files the failure the same way: the issue
-then links the run and says there is no per-faction detail. So a failure is reported
-unless GitHub itself can't be reached.
+A failure in any job, a job that timed out included, is reported by the `report` job (see
+*Workflow integration*). When that job fails before `mfm` can report (in its checkout or
+setup, or in the report step itself), a fallback step that needs only `gh` files the
+failure the same way: the issue then links the run and says there is no per-faction
+detail. So a failure is reported unless the run itself was cancelled, or GitHub can't be
+reached.
 
 ## Workflow integration
 Each step that has logic is one `mfm` command, run as `node_modules/.bin/tsx
@@ -373,7 +374,11 @@ captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after an
       and gives the plan, the title and the base's commit as job outputs. A failed
       scrape uploads its failure report instead, as `failure-report`.
 2. **`publish`** holds the App's key, and runs no repository code (see *The App token*).
-   It checks out the base's commit afresh, replaces its `data/`, `changelog/` and
+   It first checks what `scrape` handed over, since that job ran every dependency: the
+   branch is an update branch (`mfm/v…`), the base is `main` or another one, the base
+   commit is on the base branch, and the staged files are regular files named
+   `data/*.yaml`, `changelog/v*.md` and `DATA-CHANGELOG.md`, and nothing else. Then it
+   checks out the base's commit afresh, replaces its `data/`, `changelog/` and
    `DATA-CHANGELOG.md` with the staged ones, and, if anything changed, opens (or
    updates) the PR on the planned branch and base. Its title and body are the two
    outputs of `mfm diff`, and the title is also the commit subject (`data: <title>`).
@@ -381,7 +386,7 @@ captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after an
    `gh stack link` (best-effort), and `mfm announce <before> <new> --send --record`
    posts or edits the Discord message and records a new one's marker on the PR (see
    *Announcing an update* above).
-4. **`report`**: if any job failed, `mfm report-failure` reports it on the
+4. **`report`**: if any job failed or timed out, `mfm report-failure` reports it on the
    `scrape-failure` issue (with the failure report, when there is one), and if that step
    didn't succeed, a fallback step reports it with `gh` alone. After a successful run,
    `mfm resolve-failure` closes any open one.
@@ -402,9 +407,9 @@ it from the org variable `BSDATA_AUTOMATON_APP_CLIENT_ID` and the org secret
 own `GITHUB_TOKEN`, with only the permissions it needs; so do the stack link and the
 Discord marker, which needn't start anything.
 
-The key never shares a job with dependency code: `publish` runs pinned actions and a file
-copy, nothing else. It takes no `.git` from the artifact, because git config can run
-commands and `create-pull-request` runs git there. See
+The key never shares a job with dependency code: `publish` runs pinned actions, a file
+copy and the checks above, nothing else. It takes no `.git` from the artifact, because git
+config can run commands and `create-pull-request` runs git there. See
 [0021](../docs/decisions/0021-the-app-key-never-meets-dependency-code.md).
 
 ### Dry run
@@ -421,8 +426,8 @@ A dry run has its own concurrency group. See
 
 ## Around the pipeline
 ### Live smoke test
-`smoke.yml` runs on each PR that touches `src/` or `pnpm-lock.yaml` (or `smoke.yml`
-itself). It scrapes the live site with the PR's code into `$RUNNER_TEMP`, with
+`smoke.yml` runs on each PR that touches `src/`, the dependencies (`package.json`,
+`pnpm-lock.yaml`, `pnpm-workspace.yaml`), `.node-version` or `smoke.yml` itself. It scrapes the live site with the PR's code into `$RUNNER_TEMP`, with
 `--dates-from data` so a faction that matches its committed file keeps its date, and puts
 the `mfm diff` changelog from the committed `data/` to that scrape in the job summary,
 with a notice when they differ. A difference never fails the job; a scrape that fails
@@ -440,6 +445,7 @@ check passes, only when all of these hold:
 - it changes no workflow file, which the job's `GITHUB_TOKEN` may not merge;
 - the rules of the PR's base require `build`.
 
-Otherwise it waits for a maintainer. The PR gets one comment saying why, and any
-auto-merge an earlier run turned on is turned off; a run that fails turns it off too. See
+Otherwise it waits for a maintainer. The PR gets one comment saying why, and auto-merge
+that an earlier run of this job turned on is turned off; a run that fails turns it off
+too. Auto-merge a maintainer turned on is left alone. See
 [0024](../docs/decisions/0024-dependabot-minor-and-patch-updates-merge-themselves.md).

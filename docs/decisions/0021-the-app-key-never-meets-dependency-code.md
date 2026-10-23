@@ -19,15 +19,24 @@ all of the npm code the scraper depends on.
 ## Decision
 The scrape workflow is split by what each part needs. `scrape` runs every dependency, with
 no secrets and a token that only reads, and hands the staged update on as an artifact.
-`publish` is the only job that holds the App's key, and runs nothing but pinned actions
-and a file copy: it checks out the base afresh, copies the staged files in, mints a token
-scoped to this repository with `contents: write` and `pull-requests: write`, and runs
-`create-pull-request` with it. It takes no `.git` from the artifact, since git config can
-run commands. `announce` and `report` run our code again, with the default token.
+`publish` is the only job that holds the App's key, and runs nothing but pinned actions,
+a file copy and plain-bash checks. It treats everything `scrape` hands over as untrusted:
+the branch must be an update branch and the base `main` or another one, the base commit
+must be on the base branch, and the staged update must be regular files where an update
+writes, with no dot-files, links, subdirectories or `.git`. Then it checks out the base
+afresh, copies the staged files in, mints a token scoped to this repository with
+`contents: write` and `pull-requests: write`, and runs `create-pull-request` with it. It
+takes no `.git` from the artifact, since git config can run commands. `announce` and
+`report` run our code again, with the default token.
 
 ## Consequences
 The update PR gets CI, so `build` can be required. A compromised dependency can still
-corrupt the data the PR proposes, which a reviewer reads, but it can't reach the key.
+corrupt the data the PR proposes, but only as YAML and changelog files on an `mfm/` branch,
+which a reviewer reads; it can't reach the key, run code in its job, or point the token
+at another branch.
+
+The pinned actions in `publish` include `harden-runner`, whose agent runs as root, so it
+is trusted as much as the others there.
 
 The workflow has four jobs and an artifact instead of one job, and each job that runs our
 code installs the dependencies again, about a minute each.
@@ -38,7 +47,9 @@ workflow, and the marker must be `github-actions[bot]`'s anyway
 the default token too, so it starts no workflow either.
 
 The App has no Workflows permission, so its token can't push a change to
-`.github/workflows/`. The update commit only touches `data/` and the changelog.
+`.github/workflows/`. The update commit only touches `data/` and the changelog, and an
+update branch rebuilt on a `main` whose workflows changed has been pushed before with
+`GITHUB_TOKEN`, which has no Workflows permission either: `dc2e719`, on top of #54.
 
 Rejected: down-scoped tokens per step in the one job, which the first version of #91 used.
 They narrow what a dependency reading its environment finds, but not what it can read
