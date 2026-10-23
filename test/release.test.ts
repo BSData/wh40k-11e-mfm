@@ -29,6 +29,7 @@ import {
   dataZip,
   NOTES_LIMIT,
   newestEntry,
+  previousRelease,
   releaseNotes,
   releaseTag,
 } from '../src/release.js';
@@ -69,6 +70,43 @@ describe('newestEntry', () => {
   it('fails a file with no entry', () => {
     expect(() => newestEntry(`# MFM v1.7\n\n${ENTRIES_MARKER}\n`)).toThrow('no entry');
     expect(() => newestEntry('## [2026-10-14] — MFM v1.6\n')).toThrow('no entry');
+  });
+});
+
+describe('previousRelease', () => {
+  const file = (version: string, ...headings: string[]) => ({
+    version,
+    text: `${ENTRIES_MARKER}\n\n${headings.map((h) => `## [${h}] — x\n\ny\n`).join('\n')}`,
+  });
+
+  it('is the entry before the newest, tagged by the counting rule', () => {
+    const files = [file('1.6', '2026-10-24', '2026-10-23', '2026-10-23')];
+    expect(previousRelease(files, [], '1.6')).toEqual({
+      heading: '## [2026-10-23] — x',
+      tag: 'mfm-v1.6+2026-10-23.2',
+    });
+  });
+
+  it("is the previous version's newest entry for a version's first", () => {
+    const files = [
+      file('1.7', '2026-11-02'),
+      file('1.6', '2026-10-23'),
+      file('1.10', '2027-01-01'),
+    ];
+    expect(previousRelease(files, [], '1.7')?.tag).toBe('mfm-v1.6+2026-10-23');
+    expect(previousRelease(files, [], '1.10')?.tag).toBe('mfm-v1.7+2026-11-02');
+  });
+
+  it('is tagged as its history row says, when it has one', () => {
+    const files = [file('1.6', '2026-10-24', '2026-10-23')];
+    const row = { tag: 'mfm-v1.6+2026-10-23', version: '1.6', entries: ['## [2026-10-23] — x'] };
+    expect(previousRelease(files, [{ ...row, tag: 'mfm-v1.6+2026-10-23' }], '1.6')?.tag).toBe(
+      'mfm-v1.6+2026-10-23',
+    );
+  });
+
+  it('is none before the first entry', () => {
+    expect(previousRelease([file('1.0', '2026-06-22')], [], '1.0')).toBeUndefined();
   });
 });
 
@@ -402,13 +440,13 @@ describe('mfm release', () => {
       cpSync(current, root, { recursive: true });
       const table = [
         {
-          tag: 'mfm-v1.6+2026-10-01',
+          tag: 'mfm-v1.3+2026-08-26',
           commit: first,
           pr: null,
-          version: '1.6',
-          title: 'MFM v1.6 — 2026-10-01: Baseline',
+          version: '1.3',
+          title: 'MFM v1.3 — 2026-08-26: Baseline',
           entries: [],
-          notes: '## [2026-10-01] — MFM v1.6 baseline\n\nThe first one.',
+          notes: '## [2026-08-26] — MFM v1.3 baseline\n\nThe first one.',
           schema1: true,
         },
         {
@@ -433,14 +471,14 @@ describe('mfm release', () => {
       const { code, out, read, plan } = await release([], root);
       expect(code).toBe(0);
       expect(plan()).toEqual([
-        ['mfm-v1.6+2026-10-01', first, 'history', '01'],
+        ['mfm-v1.3+2026-08-26', first, 'history', '01'],
         ['mfm-v1.6+2026-10-14', second, 'history', '02'],
         ['mfm-v1.6+2026-10-22', '', 'current', '03'],
       ]);
-      expect(read('01/title.txt')).toBe('MFM v1.6 — 2026-10-01: Baseline');
+      expect(read('01/title.txt')).toBe('MFM v1.3 — 2026-08-26: Baseline');
       const baseline = read('01/notes.md');
       expect(baseline).toMatch(
-        /^## \[2026-10-01\] — MFM v1\.6 baseline\n\nThe first one\.\n\n\*\*Backfilled\*\* on 2026-10-23 from \[`[0-9a-f]{7}`\]\(https:\/\/github\.com\/BSData\/wh40k-11e-mfm\/commit\/[0-9a-f]{40}\): /,
+        /^## \[2026-08-26\] — MFM v1\.3 baseline\n\nThe first one\.\n\n\*\*Backfilled\*\* on 2026-10-23 from \[`[0-9a-f]{7}`\]\(https:\/\/github\.com\/BSData\/wh40k-11e-mfm\/commit\/[0-9a-f]{40}\): /,
       );
       expect(baseline).toContain("- Converted from schema 1 with #41's mapping");
       expect(baseline).toMatch(
@@ -476,7 +514,7 @@ describe('mfm release', () => {
       const assets = Object.fromEntries(
         ASSETS.map((n) => [n, sha256(join(built.out, '01', 'assets', n))]),
       );
-      const calls = await github({ 'mfm-v1.6+2026-10-01': { commit: first, assets } });
+      const calls = await github({ 'mfm-v1.3+2026-08-26': { commit: first, assets } });
       const { code, stdout, plan, outputs } = await release(['--commit', SHA], root);
       expect(code).toBe(0);
       expect(plan().map(([tag, , kind, dir]) => [tag, kind, dir])).toEqual([
@@ -485,14 +523,43 @@ describe('mfm release', () => {
       ]);
       expect(plan()[1]?.[1]).toBe(SHA);
       expect(stdout).toContain(
-        '### 1. `mfm-v1.6+2026-10-01`: skip (mfm-v1.6+2026-10-01 is released already, with identical assets)',
+        '### 1. `mfm-v1.3+2026-08-26`: skip (mfm-v1.3+2026-08-26 is released already, with identical assets)',
       );
       expect(stdout).toContain(
         '### 2. `mfm-v1.6+2026-10-14`: publish (no release is tagged mfm-v1.6+2026-10-14 yet)',
       );
       expect(outputs()).toMatch(/\npublish=true\nreason=2 of 3 releases to publish\n$/);
       expect(calls).toContain(
-        'GET /repos/BSData/wh40k-11e-mfm/releases/tags/mfm-v1.6%2B2026-10-01',
+        'GET /repos/BSData/wh40k-11e-mfm/releases/tags/mfm-v1.3%2B2026-08-26',
+      );
+    });
+
+    it('fails a row whose commit is not the version and day it is tagged with', async () => {
+      const { root } = repository();
+      const path = join(root, 'release', 'history.json');
+      writeFileSync(
+        path,
+        readFileSync(path, 'utf8').replace('mfm-v1.6+2026-10-14', 'mfm-v1.6+2026-10-15'),
+      );
+      await expect(release([], root)).rejects.toThrow(
+        /^mfm-v1\.6\+2026-10-15: [0-9a-f]{40}'s meta\.yaml says v1\.6, last updated 2026-10-14: the row's commit or tag is wrong$/,
+      );
+    });
+
+    it('takes the notes from the notesFile a row names, in place of its entries', async () => {
+      const { root } = repository();
+      const path = join(root, 'release', 'history.json');
+      const table = JSON.parse(readFileSync(path, 'utf8'));
+      table[1].notesFile = 'notes/v1.6-2026-10-14.md';
+      writeFileSync(path, JSON.stringify(table));
+      mkdirSync(join(root, 'release', 'notes'));
+      writeFileSync(
+        join(root, 'release', 'notes', 'v1.6-2026-10-14.md'),
+        '## [2026-10-14] — Corrected\n\nThe real change.\n',
+      );
+      const { read } = await release([], root);
+      expect(read('02/notes.md')).toMatch(
+        /^## \[2026-10-14\] — Corrected\n\nThe real change\.\n\n\*\*Backfilled\*\*/,
       );
     });
 
@@ -502,7 +569,7 @@ describe('mfm release', () => {
       const assets = (dir: string) =>
         Object.fromEntries(ASSETS.map((n) => [n, sha256(join(built.out, dir, 'assets', n))]));
       await github({
-        'mfm-v1.6+2026-10-01': { commit: first, assets: assets('01') },
+        'mfm-v1.3+2026-08-26': { commit: first, assets: assets('01') },
         'mfm-v1.6+2026-10-14': { commit: second, assets: assets('02'), annotated: true },
         'mfm-v1.6+2026-10-22': { commit: SHA },
       });
@@ -521,9 +588,26 @@ describe('mfm release', () => {
     });
   });
 
+  /** The frozen repository's previous entry, 2026-10-14, as published. */
+  const PREVIOUS = { 'mfm-v1.6+2026-10-14': { commit: '9'.repeat(40) } };
+
+  it('with --commit: fails while the release before the current one is unpublished', async () => {
+    await github();
+    await expect(release(['--commit', SHA])).rejects.toThrow(
+      'mfm-v1.6+2026-10-14, the release of "## [2026-10-14] — MFM v1.6", isn\'t published, so mfm-v1.6+2026-10-22 would come before it',
+    );
+  });
+
+  it('with --commit: plans the current release once the one before it is published', async () => {
+    await github(PREVIOUS);
+    const { code, plan } = await release(['--commit', SHA]);
+    expect(code).toBe(0);
+    expect(plan()).toEqual([['mfm-v1.6+2026-10-22', SHA, 'current', '01']]);
+  });
+
   it('with --commit: publishes nothing when data/ is unchanged since the current release', async () => {
     const calls = await github(
-      { 'mfm-v1.6+2026-10-22': { commit: OTHER } },
+      { ...PREVIOUS, 'mfm-v1.6+2026-10-22': { commit: OTHER } },
       { [SHA]: 'd1', [OTHER]: 'd1' },
     );
     const { code, plan, outputs, stdout } = await release(['--commit', SHA]);
@@ -535,7 +619,10 @@ describe('mfm release', () => {
   });
 
   it('with --commit: fails for a current tag released with other data', async () => {
-    await github({ 'mfm-v1.6+2026-10-22': { commit: OTHER } }, { [SHA]: 'd2', [OTHER]: 'd1' });
+    await github(
+      { ...PREVIOUS, 'mfm-v1.6+2026-10-22': { commit: OTHER } },
+      { [SHA]: 'd2', [OTHER]: 'd1' },
+    );
     await expect(release(['--commit', SHA])).rejects.toThrow('with other data');
   });
 

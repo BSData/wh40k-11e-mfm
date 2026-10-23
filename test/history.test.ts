@@ -16,7 +16,13 @@ import {
 } from '../src/history.js';
 import { filesAt } from '../src/ops/git.js';
 import { gitEnv } from '../src/ops/git-env.js';
-import { entriesOf, newestEntry, releaseTag, releaseTitle } from '../src/release.js';
+import {
+  entriesOf,
+  newestEntry,
+  previousRelease,
+  releaseTag,
+  releaseTitle,
+} from '../src/release.js';
 
 /**
  * The past releases (see "Releases" in specs/data-model.md): the reviewed table in
@@ -64,7 +70,7 @@ describe('release/history.json', () => {
     expect(h.title).toBe(releaseTitle(h.version, newest));
   });
 
-  it("names each entry it folds in as its version's file has it, once", () => {
+  it("names each entry it folds in as its version's file has it, once, in one row", () => {
     for (const h of history) {
       for (const heading of h.entries) {
         expect(entriesOf(changelog(h.version)).filter((e) => e.heading === heading)).toHaveLength(
@@ -72,6 +78,25 @@ describe('release/history.json', () => {
         );
       }
     }
+    const all = history.flatMap((h) => h.entries.map((e) => `${h.version} ${e}`));
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it('has the notes files its rows name', () => {
+    for (const h of history.filter((h) => h.notesFile)) {
+      expect(read(`release/${h.notesFile}`)).toMatch(/^## \[/);
+    }
+  });
+
+  it('ends with the release before the current one, which the current release checks', () => {
+    const files = readdirSync(root('changelog')).map((name) => ({
+      version: name.replace(/^v|\.md$/g, ''),
+      text: read(`changelog/${name}`),
+    }));
+    expect(previousRelease(files, history, '1.6')).toEqual({
+      heading: '## [2026-10-22] — MFM v1.6',
+      tag: history.at(-1)?.tag,
+    });
   });
 
   it('leaves no changelog entry unreleased: each is a past release or the current one', () => {

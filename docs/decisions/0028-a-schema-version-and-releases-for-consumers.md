@@ -47,31 +47,37 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
   that will be published. Each is built from its commit's `data/`, converted to the current
   shape: the pre-#41 snapshots by #41's own mapping, which a test holds to the data #41
   migrated. The notes say it is backfilled, and what differs from today's data.
-- **Never in the wrong order.** One job publishes the plan one release at a time and stops
-  at the first failure, so a later release can't exist without the ones before it. A past
-  release is never latest. The current one is, unless a later commit on `main` changed
-  `data/` or `changelog/`: an unrelated merge doesn't demote it, and a late re-run of an
-  older run can't promote older data.
+- **Never in the wrong order.** One job checks the whole plan, then publishes it one
+  release at a time and stops at the first failure, so a later release can't exist without
+  the ones before it. A re-run of the failed jobs carries on where it stopped. Across runs,
+  the current release is planned only once the one before it is published: a run that
+  failed or was cancelled stops the next one, which names it, rather than being skipped
+  over. A past release is never latest. The current one is, unless a later commit on
+  `main` changed `data/` or `changelog/`: an unrelated merge doesn't demote it, and a late
+  re-run of an older run can't promote older data. Every run checks that again, so one
+  that published while a changelog-only commit merged gets put right by that commit's run.
 - **The write token never meets project code**, as the App key doesn't in the scrape
   ([0022](0022-the-app-key-never-meets-dependency-code.md)). `release-assets` runs `mfm
   release` with a read-only token; `publish` downloads its artifact and runs `gh release
   create`, and is the only job with `contents: write`. A compromised dependency could still
   shape what a real run on `main` publishes, since `release-assets` makes every file, but
   it can't reach the token, push to the repository, or publish from a dry run or another
-  branch. Nor can it choose where a release goes: a past release must be a row of the
-  table as committed, which `publish` reads through the API, and the current one goes on
-  the workflow's own commit. This is the second exception to
+  branch. Nor can it choose where a release goes, or in what order: a past release must be
+  a row of the table as committed, which `publish` reads through the API, in the table's
+  order, with every row it leaves out published already, and the current one goes last,
+  on the workflow's own commit. This is the second exception to
   [0005](0005-ship-the-code-you-test.md) after the failure report's fallback: a script of
   checks and `gh release create`, kept out of TypeScript so that the token never shares a
   process with the dependencies. A test runs it, as it is, against a stub `gh`. The logic
   before it (the tags, the notes, what to publish) is in `mfm release`, under test. A dry
   run runs `release-assets` as a real run would and skips `publish`, as in the scrape
   ([0023](0023-a-dry-run-publishes-nothing.md)).
-- **A preview on every PR that feeds a release.** GitHub dispatches only workflows that
-  exist on the default branch, so a dry run can't try a change to the workflow before it
-  merges. A `pull_request` run of `release-assets` can, and on an update or regeneration
-  PR it shows the releases the merge would publish, and fails while `data/` changes
-  without a new entry: before the merge, where it can still be fixed.
+- **A preview on every PR that feeds a release.** GitHub dispatches a workflow only once
+  its file is on the default branch, so the first `release.yml` couldn't be dry-run before
+  it merged; later changes to it can, from their branch. The `pull_request` run of
+  `release-assets` needs no dispatch, and on an update or regeneration PR it shows the
+  releases the merge would publish, and fails while `data/` changes without a new entry:
+  before the merge, where it can still be fixed.
 
 ## Consequences
 - A data change that lands on `main` without a new changelog entry fails the release: its
@@ -86,7 +92,13 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
   for it than were published; failing on that would fail every run from then on, and the
   published release can't change anyway. The difference is reported.
 - Every run rebuilds the past releases, which needs the whole history (`fetch-depth: 0`)
-  and takes a few seconds.
+  and takes a few seconds. A row's commit must give the row's version and date in its
+  `meta.yaml`, or the build fails: a wrong SHA can't become an immutable release.
+- A run that fails or is cancelled holds up the next one until it is re-run. That is the
+  price of never publishing out of order, and the error says which run to re-run.
+- #6's 2026-06-22 changelog entry was written later and describes the first scrape, so
+  its release takes notes of its own, generated from the two commits, and the entry
+  itself is left as it is.
 - The backfilled notes give the day they were backfilled, the one thing a release reads
   from the clock.
 - Hand-written entries count towards the `.2`, released or not. #88's name-casing note of

@@ -27,18 +27,32 @@ export const HistoryEntry = z
     pr: z.number().int().positive().nullable(),
     version: z.string().regex(/^[0-9]+(\.[0-9]+)*$/),
     title: z.string().min(1),
-    /** The headings, in `changelog/v<version>.md`, of the entries that are its notes. */
+    /**
+     * The headings, in `changelog/v<version>.md`, of the entries the release accounts for:
+     * its notes, unless `notes` or `notesFile` stands in for them.
+     */
     entries: z.array(z.string().regex(/^## \[[^\]]+\]/)),
-    /** The notes when no changelog entry describes the commit (the baseline). */
+    /** The notes, when no changelog entry describes the commit (the baseline). */
     notes: z.string().min(1).optional(),
+    /**
+     * A Markdown file under `release/` that is the notes, when the entries don't describe
+     * the commit right (#6's 2026-06-22 entry was written later, as the baseline's).
+     */
+    notesFile: z
+      .string()
+      .regex(/^notes\/[a-z0-9.+-]+\.md$/)
+      .optional(),
     /** Whether the data is in schema 1, from before #41, and is converted. */
     schema1: z.boolean(),
     /** What else a reader of this snapshot should know, as reviewed. */
     caveats: z.array(z.string().min(1)).optional(),
   })
   .strict()
-  .refine((e) => e.entries.length > 0 || e.notes !== undefined, {
+  .refine((e) => e.entries.length > 0 || e.notes !== undefined || e.notesFile !== undefined, {
     message: 'a release needs changelog entries or notes',
+  })
+  .refine((e) => e.notes === undefined || e.notesFile === undefined, {
+    message: 'notes and notesFile both give the notes: keep one',
   });
 export type HistoryEntry = z.infer<typeof HistoryEntry>;
 

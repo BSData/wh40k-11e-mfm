@@ -6,7 +6,7 @@
     "version": "1.0",
     "title": "MFM v1.0 — 2026-06-17: Baseline",
     "entries": [],
-    "notes": "## [2026-06-17] — MFM v1.0 baseline\n\nThe first scrape of the Munitorum Field Manual v1.0: every faction's points as the site showed them, before any change was tracked. No changelog entry describes it.",
+    "notes": "## [2026-06-17] — MFM v1.0 baseline\n\nThe first scrape of the Munitorum Field Manual v1.0: 30 factions, their points as the site showed them, before any change was tracked.",
     "schema1": true
   },
   {
@@ -16,7 +16,11 @@
     "version": "1.0",
     "title": "MFM v1.0 — 2026-06-22",
     "entries": ["## [2026-06-22] — MFM v1.0"],
-    "schema1": true
+    "notesFile": "notes/v1.0-2026-06-22.md",
+    "schema1": true,
+    "caveats": [
+      "The 2026-06-22 entry in changelog/v1.0.md was written later and reads \"Initial dataset baseline\". These notes are the changes #6 made to the baseline, written by `mfm changelog` from the two commits."
+    ]
   },
   {
     "tag": "mfm-v1.0+2026-06-23",

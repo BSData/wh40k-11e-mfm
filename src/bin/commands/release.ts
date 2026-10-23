@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkData, readGeneratedFiles } from '../../check-data.js';
 import { changelogFile } from '../../diff.js';
@@ -15,8 +15,8 @@ import {
 import { filesAt } from '../../ops/git.js';
 import { githubFromEnv } from '../../ops/github.js';
 import { writeOutputs } from '../../ops/outputs.js';
-import { checkHistorical, checkRelease, type Verdict } from '../../ops/release.js';
-import { currentRelease, historicalRelease, type Release } from '../../release.js';
+import { checkHistorical, checkRelease, isReleased, type Verdict } from '../../ops/release.js';
+import { currentRelease, historicalRelease, previousRelease, type Release } from '../../release.js';
 import { REPO_URL } from '../../schema.js';
 import { type Command, required, text, UsageError } from '../command.js';
 
@@ -46,12 +46,13 @@ Publishing is the workflow's \`gh release create\`, one release at a time.
   --commit <sha>   the commit the current release is for. The notes link to it, and
                    GitHub (GH_TOKEN, GITHUB_REPOSITORY) is asked which releases exist
                    (see the spec): only the missing ones are planned, and a release
-                   that is already there with other data fails the run. Without it,
+                   that is already there with other data fails the run, as does a
+                   current release whose predecessor isn't published. Without it,
                    every release is planned, and GitHub isn't asked.
   --root <dir>     the repository (default: the one this command is in)
-  --output <file>  append tag=… and title=… (the current release), publish=… (whether
-                   any is planned) and reason=… to a step-output file, such as
-                   $GITHUB_OUTPUT
+  --output <file>  append tag=… and title=… (the current release) to a step-output
+                   file, such as $GITHUB_OUTPUT, and with --commit, publish=…
+                   (whether any is planned) and reason=…
   --today <date>   the day the past releases are backfilled on, for their notes
                    (default: today, UTC)
 `,
@@ -94,11 +95,13 @@ Publishing is the workflow's \`gh release create\`, one release at a time.
       factions: yamls.filter((n) => n !== 'meta.yaml').map((n) => factionFromYaml(read(n))),
     };
     const ref = commit ?? 'main';
-    const changelogOf = (version: string) => {
+    /** A version's changelog file, and its URL at the release's commit. */
+    const changelogOf = (version: string, required = true) => {
       const file = changelogFile(version);
-      if (!existsSync(join(root, file))) throw new Error(`${file} doesn't exist`);
+      const there = existsSync(join(root, file));
+      if (!there && required) throw new Error(`${file} doesn't exist`);
       return {
-        text: readFileSync(join(root, file), 'utf8'),
+        text: there ? readFileSync(join(root, file), 'utf8') : '',
         url: `${REPO_URL}/blob/${ref}/${file}`,
       };
     };
@@ -118,12 +121,15 @@ Publishing is the workflow's \`gh release create\`, one release at a time.
       } catch (err) {
         throw new Error(`${entry.tag} (${entry.commit}): ${(err as Error).message}`);
       }
-      const log = changelogOf(entry.version);
+      const log = changelogOf(entry.version, entry.entries.length > 0);
       const release = historicalRelease({
         entry,
         snapshot,
         changelog: log.text,
         changelogUrl: log.url,
+        ...(entry.notesFile
+          ? { notesFile: readFileSync(join(root, dirname(HISTORY_FILE), entry.notesFile), 'utf8') }
+          : {}),
         fieldsNow,
         today,
       });
@@ -136,16 +142,39 @@ Publishing is the workflow's \`gh release create\`, one release at a time.
     }
     planned.push({ release: current, target: commit, kind: 'current' });
 
+    // The release before the current one, outside the table: it must exist already, or a
+    // failed or cancelled run's release would be skipped over, and come after this one.
+    const versions = readdirSync(join(root, 'changelog'))
+      .map((name) => name.match(/^v(.+)\.md$/)?.[1])
+      .filter((v): v is string => v !== undefined)
+      .map((version) => ({ version, text: changelogOf(version).text }));
+    const previous = previousRelease(versions, history, now.meta.version);
+    const gh = commit === undefined ? undefined : githubFromEnv();
+    if (gh && previous && !history.some((h) => h.tag === previous.tag)) {
+      if (!(await isReleased(gh, previous.tag))) {
+        throw new Error(
+          `${previous.tag}, the release of "${previous.heading}", isn't published, so ` +
+            `${current.tag} would come before it. Re-run the release workflow's run for the ` +
+            'commit that added that entry, then this one (see "Releases" in specs/data-model.md).',
+        );
+      }
+    }
+
     const sha256 = (data: Uint8Array) => createHash('sha256').update(data).digest('hex');
     // What GitHub has: each release's verdict, in order.
     const verdicts: (Verdict | undefined)[] = [];
-    const gh = commit === undefined ? undefined : githubFromEnv();
     for (const { release, target, kind } of planned) {
       if (!gh || !target) verdicts.push(undefined);
       else if (kind === 'current') verdicts.push(await checkRelease(gh, release.tag, target));
       else {
         const ours = release.assets.map((a) => ({ name: a.name, sha256: sha256(a.data) }));
-        verdicts.push(await checkHistorical(gh, release.tag, target, ours));
+        const verdict = await checkHistorical(gh, release.tag, target, ours);
+        // Not a failure (see checkHistorical), but worth a look on the run's page.
+        // biome-ignore lint/complexity/useLiteralKeys: tsc's noPropertyAccessFromIndexSignature requires the bracket form on process.env, and the two rules disagree.
+        if (verdict.reason.includes('differently') && process.env['GITHUB_ACTIONS'] === 'true') {
+          io.out(`::warning title=Built differently::${verdict.reason}\n`);
+        }
+        verdicts.push(verdict);
       }
     }
 

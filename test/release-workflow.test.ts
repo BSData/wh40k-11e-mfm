@@ -16,7 +16,10 @@ import { TAG } from '../src/history.js';
  */
 
 const hasJq = spawnSync('jq', ['--version']).status === 0;
-const hasBash = spawnSync('bash', ['-c', 'command -v jq']).status === 0;
+const bashJq = spawnSync('bash', ['-c', 'command -v jq'], { encoding: 'utf8' });
+const hasBash = bashJq.status === 0;
+/** jq, as bash finds it. */
+const JQ = bashJq.stdout?.trim() ?? 'jq';
 
 interface Step {
   name?: string;
@@ -118,18 +121,27 @@ describe.skipIf(!hasBash)('the publish script', () => {
   const COMMIT = 'c'.repeat(40);
   const T1 = '1'.repeat(40);
   const T2 = '2'.repeat(40);
+  const CURRENT = 'mfm-v1.6+2026-10-23';
   const TABLE = [
     { tag: 'mfm-v1.0+2026-06-17', commit: T1 },
     { tag: 'mfm-v1.0+2026-06-22', commit: T2 },
   ];
 
   /**
-   * A stand-in for gh: it records each call, one per line, serves the history table and
-   * the compare response from files, and fails `release create` for the tag in `fail`.
+   * A stand-in for gh. It records each call, one per line, in `calls`; serves the history
+   * table and the compare response from files; knows the releases in `published` (lines of
+   * tag and commit), adding each one it creates; keeps the latest tag in `latest`; and
+   * fails `release create` for the tag in `fail`.
    */
   const STUB_GH = `#!/usr/bin/env bash
 set -eu
 printf '%s\\n' "$*" >> "$STUB/calls"
+published() { # the commit a published tag is on, from its URI-encoded form
+  while read -r t c; do
+    [ "$(jq -rn --arg s "$t" '$s | @uri')" = "$1" ] && { echo "$c"; return 0; }
+  done < "$STUB/published"
+  return 1
+}
 if [ "$1" = api ]; then
   path= query=
   shift
@@ -146,38 +158,68 @@ if [ "$1" = api ]; then
     */compare/*)
       [ -f "$STUB/compare.json" ] || { echo 'HTTP 502' >&2; exit 1; }
       jq -r "$query" "$STUB/compare.json" ;;
+    */releases/latest) [ -s "$STUB/latest" ] || exit 1; cat "$STUB/latest" ;;
+    */releases/tags/*)
+      commit=$(published "\${path##*/}") || { echo 'HTTP 404' >&2; exit 1; }
+      [ "$query" = .id ] && echo 1 || echo "$commit" ;;
     *) echo "unexpected: $path" >&2; exit 1 ;;
   esac
 elif [ "$1 $2" = 'release create' ]; then
-  tag=
-  for a in "$@"; do if [ "$a" = -- ]; then seen=1; elif [ -n "\${seen:-}" ]; then tag=$a; break; fi; done
-  [ "$tag" != "$(cat "$STUB/fail" 2>/dev/null)" ] || { echo "HTTP 422" >&2; exit 1; }
+  tag= target= latest= seen=
+  for a in "$@"; do
+    case "$a" in --target) next=target ;; --latest=*) latest=\${a#--latest=} ;; esac
+    if [ "\${next:-}" = target ] && [ "$a" != --target ]; then target=$a; next=; fi
+    if [ "$a" = -- ]; then seen=1; elif [ -n "$seen" ] && [ -z "$tag" ]; then tag=$a; fi
+  done
+  [ "$tag" != "$(cat "$STUB/fail" 2>/dev/null)" ] || { echo 'HTTP 422' >&2; exit 1; }
+  echo "$tag $target" >> "$STUB/published"
+  [ "$latest" != true ] || echo "$tag" > "$STUB/latest"
+elif [ "$1 $2" = 'release edit' ]; then
+  echo "$3" > "$STUB/latest"
 else
   echo "unexpected: $*" >&2; exit 1
 fi
 `;
 
+  interface Opts {
+    /** The compare API's answer; none, and the call fails. */
+    compare?: unknown;
+    /** A tag `release create` fails for. */
+    fail?: string;
+    /** The releases GitHub has already: tag and commit. */
+    published?: [string, string][];
+    /** The latest release's tag. */
+    latest?: string;
+  }
+
   /**
-   * Run the step's script on `plan` (lines of tag, target, kind), with GitHub answering
-   * `compare` (none: the call fails); the gh calls it made, and its exit code.
+   * Run the step's script on `plan` (lines of tag, target, kind): its exit code and
+   * output, the gh calls it made, the releases it created (tag, commit, latest flag) and
+   * the latest tag after it.
    */
-  function publishPlan(
-    plan: [string, string, string][],
-    opts: { compare?: unknown; fail?: string; table?: unknown } = {},
-  ) {
+  function publishPlan(plan: [string, string, string][], opts: Opts = {}) {
     const dir = mkdtempSync(join(scratch, 'run-'));
     const stub = join(dir, 'stub');
     const bin = join(dir, 'bin');
     const planDir = join(dir, 'release');
-    mkdirSync(stub);
-    mkdirSync(bin);
-    mkdirSync(planDir);
+    for (const d of [stub, bin, planDir]) mkdirSync(d);
     writeFileSync(join(bin, 'gh'), STUB_GH);
     chmodSync(join(bin, 'gh'), 0o755);
-    writeFileSync(join(stub, 'table.json'), JSON.stringify(opts.table ?? TABLE));
+    if (process.platform === 'win32') {
+      // A native jq.exe writes CRLF unless told not to; the runner's jq writes LF.
+      writeFileSync(join(bin, 'jq'), `#!/usr/bin/env bash\nexec '${JQ}' -b "$@"\n`);
+      chmodSync(join(bin, 'jq'), 0o755);
+    }
+    writeFileSync(join(stub, 'table.json'), JSON.stringify(TABLE));
     writeFileSync(join(stub, 'calls'), '');
-    if (opts.compare !== undefined)
+    writeFileSync(
+      join(stub, 'published'),
+      (opts.published ?? []).map(([tag, commit]) => `${tag} ${commit}\n`).join(''),
+    );
+    writeFileSync(join(stub, 'latest'), opts.latest ?? '');
+    if (opts.compare !== undefined) {
       writeFileSync(join(stub, 'compare.json'), JSON.stringify(opts.compare));
+    }
     if (opts.fail) writeFileSync(join(stub, 'fail'), opts.fail);
     const lines = plan.map(([tag, target, kind], i) => {
       const n = String(i + 1).padStart(2, '0');
@@ -202,6 +244,8 @@ fi
           GH_REPO: 'BSData/wh40k-11e-mfm',
           GH_TOKEN: 'stub',
           COMMIT,
+          CURRENT,
+          PAUSE: '0',
           PLAN: posix(planDir),
           TAG_PATTERN: env.TAG_PATTERN ?? '',
           LATER_RELEASE_CHANGES: filter,
@@ -209,16 +253,17 @@ fi
         encoding: 'utf8',
       },
     );
-    const calls = readFileSync(join(stub, 'calls'), 'utf8').split('\n').filter(Boolean);
+    const read = (name: string) => readFileSync(join(stub, name), 'utf8');
+    const calls = read('calls').split('\n').filter(Boolean);
     const created = calls
       .filter((c) => c.startsWith('release create'))
       .map((c) => {
         const target = c.match(/--target (\S+)/)?.[1];
-        const latest = c.match(/--latest=(\S+)/)?.[1];
+        const flag = c.match(/--latest=(\S+)/)?.[1];
         const tag = c.match(/ -- (\S+)/)?.[1];
-        return `${tag} ${target === COMMIT ? 'COMMIT' : target?.slice(0, 1)} latest=${latest}`;
+        return `${tag} ${target === COMMIT ? 'COMMIT' : target?.slice(0, 1)} latest=${flag}`;
       });
-    return { status: result.status, stderr: result.stderr, stdout: result.stdout, calls, created };
+    return { ...result, calls, created, latest: read('latest').trim() };
   }
 
   const history = (n: 0 | 1): [string, string, string] => [
@@ -226,12 +271,13 @@ fi
     TABLE[n]?.commit ?? '',
     'history',
   ];
-  const current: [string, string, string] = ['mfm-v1.6+2026-10-23', COMMIT, 'current'];
+  const current: [string, string, string] = [CURRENT, COMMIT, 'current'];
+  const IDENTICAL = { status: 'identical', files: [] };
+  /** The two past releases, published already. */
+  const PAST: [string, string][] = TABLE.map((t) => [t.tag, t.commit]);
 
   it('publishes the plan in order: the past releases, never latest, then the current one', () => {
-    const run = publishPlan([history(0), history(1), current], {
-      compare: { status: 'identical', files: [] },
-    });
+    const run = publishPlan([history(0), history(1), current], { compare: IDENTICAL });
     expect(run.stderr).toBe('');
     expect(run.status).toBe(0);
     expect(run.created).toEqual([
@@ -239,30 +285,58 @@ fi
       'mfm-v1.0+2026-06-22 2 latest=false',
       'mfm-v1.6+2026-10-23 COMMIT latest=true',
     ]);
+    expect(run.latest).toBe(CURRENT);
     expect(run.calls[0]).toBe(
       `api -H Accept: application/vnd.github.raw+json repos/BSData/wh40k-11e-mfm/contents/release/history.json?ref=${COMMIT}`,
     );
     expect(run.calls.find((c) => c.startsWith('release create'))).toContain(
       '--title Title of mfm-v1.0+2026-06-17 --notes-file',
     );
+    expect(run.calls).toContain(
+      'api repos/BSData/wh40k-11e-mfm/releases/tags/mfm-v1.0%2B2026-06-17 --jq .target_commitish',
+    );
   });
 
-  it('marks the current release not latest when main has a later change to data/', () => {
+  it('marks the current release not latest when main has a later change to data/, and says so', () => {
     const run = publishPlan([current], {
       compare: { status: 'ahead', files: [file('data/necrons.yaml')] },
+      published: PAST,
+      latest: 'mfm-v1.0+2026-06-22',
     });
-    expect(run.created).toEqual(['mfm-v1.6+2026-10-23 COMMIT latest=false']);
-  });
-
-  it('marks it not latest when the compare call fails', () => {
-    const run = publishPlan([current]);
     expect(run.status).toBe(0);
     expect(run.created).toEqual(['mfm-v1.6+2026-10-23 COMMIT latest=false']);
+    expect(run.latest).toBe('mfm-v1.0+2026-06-22');
+    expect(run.stdout).toContain(`::warning title=Not latest::${CURRENT} isn't marked latest`);
+  });
+
+  it('marks it not latest when the compare call fails, and says so', () => {
+    const run = publishPlan([current], { published: PAST });
+    expect(run.status).toBe(0);
+    expect(run.created).toEqual(['mfm-v1.6+2026-10-23 COMMIT latest=false']);
+    expect(run.stdout).toContain('later changes to data/ or changelog/ are unknown');
+  });
+
+  it('marks an earlier run’s current release latest again when nothing is planned', () => {
+    // A change outside data/ merged while that run waited, so it published it not latest.
+    const run = publishPlan([], {
+      compare: IDENTICAL,
+      published: [...PAST, [CURRENT, '9'.repeat(40)]],
+      latest: 'mfm-v1.0+2026-06-22',
+    });
+    expect(run.status).toBe(0);
+    expect(run.calls).toContain(`release edit ${CURRENT} --latest`);
+    expect(run.latest).toBe(CURRENT);
+    const again = publishPlan([], {
+      compare: IDENTICAL,
+      published: [...PAST, [CURRENT, '9'.repeat(40)]],
+      latest: CURRENT,
+    });
+    expect(again.calls.some((c) => c.startsWith('release edit'))).toBe(false);
   });
 
   it('stops at the first release that fails, so the order holds', () => {
     const run = publishPlan([history(0), history(1), current], {
-      compare: { status: 'identical' },
+      compare: IDENTICAL,
       fail: 'mfm-v1.0+2026-06-22',
     });
     expect(run.status).not.toBe(0);
@@ -272,25 +346,53 @@ fi
     ]);
   });
 
-  it.each([
-    [
-      'a past release the table at this commit lacks',
-      [history(0), ['mfm-v1.0+2026-06-22', T1, 'history']],
-    ],
-    ['a current release for another commit', [history(0), ['mfm-v1.6+2026-10-23', T2, 'current']]],
-    ['a tag of another shape', [history(0), ['v1.6', COMMIT, 'current']]],
-    ['a target that is not a commit', [history(0), ['mfm-v1.6+2026-10-23', 'main', 'current']]],
-    ['a kind it does not know', [history(0), ['mfm-v1.6+2026-10-23', COMMIT, 'draft']]],
-  ] as [string, [string, string, string][]][])('refuses %s, after what came before', (_, plan) => {
-    const run = publishPlan(plan, { compare: { status: 'identical' } });
-    expect(run.status).toBe(1);
-    expect(run.stdout).toMatch(/::error title=(Not a release|Not in the history table)::/);
-    expect(run.created).toEqual(['mfm-v1.0+2026-06-17 1 latest=false']);
+  it('leaves what an earlier attempt published, so a re-run of the failed jobs goes on', () => {
+    const run = publishPlan([history(0), history(1), current], {
+      compare: IDENTICAL,
+      published: [[TABLE[0]?.tag ?? '', T1]],
+    });
+    expect(run.status).toBe(0);
+    expect(run.stdout).toContain('mfm-v1.0+2026-06-17 is published already');
+    expect(run.created).toEqual([
+      'mfm-v1.0+2026-06-22 2 latest=false',
+      'mfm-v1.6+2026-10-23 COMMIT latest=true',
+    ]);
   });
 
-  it('publishes nothing for an empty plan', () => {
-    const run = publishPlan([]);
-    expect(run.status).toBe(0);
+  it('fails on a planned tag published at another commit', () => {
+    const run = publishPlan([history(0), current], {
+      compare: IDENTICAL,
+      published: [[TABLE[0]?.tag ?? '', T2], ...PAST.slice(1)],
+    });
+    expect(run.status).toBe(1);
+    expect(run.stdout).toContain('::error title=Released elsewhere::');
+    expect(run.created).toEqual([]);
+  });
+
+  it.each([
+    ['a past release the table lacks', [history(0), ['mfm-v1.0+2026-06-22', T1, 'history']]],
+    ['past releases out of the table’s order', [history(1), history(0)]],
+    ['a current release for another commit', [history(0), [CURRENT, T2, 'current']]],
+    ['a current release of another tag', [history(0), ['mfm-v1.6+2026-10-24', COMMIT, 'current']]],
+    ['a release after the current one', [current, history(0)]],
+    ['a tag of another shape', [history(0), ['v1.6', COMMIT, 'current']]],
+    ['a target that is not a commit', [history(0), [CURRENT, 'main', 'current']]],
+    ['a kind it does not know', [history(0), [CURRENT, COMMIT, 'draft']]],
+  ] as [string, [string, string, string][]][])('refuses %s, publishing nothing', (_, plan) => {
+    const run = publishPlan(plan, { compare: IDENTICAL, published: PAST.slice(1) });
+    expect(run.status).toBe(1);
+    expect(run.stdout).toMatch(
+      /::error title=(Not a release|Not in the history table|Not in order)::/,
+    );
+    expect(run.created).toEqual([]);
+  });
+
+  it('refuses a plan that leaves out a past release GitHub lacks', () => {
+    const run = publishPlan([history(1), current], { compare: IDENTICAL });
+    expect(run.status).toBe(1);
+    expect(run.stdout).toContain(
+      '::error title=Missing release::mfm-v1.0+2026-06-17 is neither published nor planned',
+    );
     expect(run.created).toEqual([]);
   });
 });

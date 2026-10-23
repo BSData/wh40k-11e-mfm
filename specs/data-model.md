@@ -330,13 +330,19 @@ list reads oldest to newest. A release's parts come from the files, never from t
 `release/history.json` is a reviewed table of the releases from before releases existed:
 one row per update that reached `main`, from the first scrape (v1.0, 2026-06-17) to MFM
 v1.6's 2026-10-22 update. Each row gives the tag, the commit on `main` whose `data/` the
-release holds, its PR, the version and title, the headings of the changelog entries that
-are its notes (or, for the first scrape, which no entry describes, notes of its own),
-whether its data is in schema 1, and any caveat a reader needs. A test holds the table to
-the rules above: each tag and title is what its first entry gives (v1.4's update and #41's
-schema change, both of 2026-09-02, are one release, so the update isn't `.2`), every
-changelog entry is in exactly one release, the dates only go up, and every tag is dated
-before the current release, so no later entry can take one.
+release holds, its PR, the version and title, the headings of the changelog entries it
+accounts for, whether its data is in schema 1, and any caveat a reader needs. Its notes
+are those entries, unless the row has notes of its own: inline (`notes`, for the first
+scrape, which no entry describes) or in a file under `release/notes/` (`notesFile`, for
+#6, whose 2026-06-22 entry was written later and describes the first scrape; its notes
+are the changes #6 made, as `mfm changelog` writes them from the two commits).
+
+A test holds the table to the rules above: each tag and title is what its first entry
+gives (v1.4's update and #41's schema change, both of 2026-09-02, are one release, so the
+update isn't `.2`), every changelog entry is in exactly one release, the dates only go
+up, and every tag is dated before the current release, so no later entry can take one.
+The build checks each row against its commit: the commit's `meta.yaml` must give the
+row's version, and its `lastUpdated` the tag's date, or the build fails.
 
 A past release is built from `git` (`filesAt()` in `src/ops/git.ts`), so the build needs
 the whole history. Its data is brought to the current shape (`snapshotOf()` in
@@ -345,12 +351,12 @@ the whole history. Its data is brought to the current shape (`snapshotOf()` in
 `objective` becomes `objectives`), which gives MFM v1.3's data exactly as #41 migrated it.
 `meta.yaml` gets the current `schemaVersion`. A field the model doesn't know fails the
 build rather than being dropped. The assets are then built as for the current release.
-Its notes are its entries, then a **Backfilled** paragraph: the commit and PR it comes
-from, the date it was backfilled, and what differs from today's data. That paragraph is
-worked out from the data where it can be (the conversion, how many names are cased as
-before #88, the fields later scrapes added) and taken from the table's caveats where it
-can't (Space Wolves' second Venerable Dreadnought, not yet marked Legends before
-2026-10-22). It is the one part of a release that reads the clock.
+The notes end with a **Backfilled** paragraph: the commit and PR it comes from, the date
+it was backfilled, and what differs from today's data. That paragraph is worked out from
+the data where it can be (the conversion, how many names are cased as before #88, the
+fields later scrapes added) and taken from the table's caveats where it can't (Space
+Wolves' second Venerable Dreadnought, not yet marked Legends before 2026-10-22). It is the
+one part of a release that reads the clock.
 
 ### Publishing
 `mfm release` (`src/release.ts`) builds every release into a directory, after the same
@@ -363,12 +369,12 @@ exist (`src/ops/release.ts`):
 | a past release (`checkHistorical()`) | |
 |---|---|
 | not released | published |
-| released at its row's commit, with the same asset names | skipped; when the current tools build different bytes (a change to them since), that is reported, and the published assets stand |
+| released at its row's commit, with the same asset names | skipped; when the current tools build different bytes (a change to them since), that is reported, as a warning on the run, and the published assets stand |
 | released at another commit, or with other assets | the run fails |
 
 | the current release (`checkRelease()`) | |
 |---|---|
-| not released | published |
+| not released | published, if the release before it is (below) |
 | released at this commit (a re-run) | skipped |
 | released at another commit with the same `data/` tree (a dry run, a change outside `data/`) | skipped |
 | released at another commit with other `data/` | the run fails |
@@ -380,30 +386,47 @@ push that changes `changelog/` or `release/`, so the PR that adds a missing entr
 row) releases what it describes; one that only edits an entry finds its tag released with
 the same data, and publishes nothing.
 
+The release before the current one must be published, or planned in the same run (a row
+of the table): `previousRelease()` finds the entry just older than the newest one, across
+the version files, and its tag, from its row or by the counting rule. If it isn't
+published, the run fails, naming it: its own run failed or was cancelled, and publishing
+the current release now would put it after a newer one. The fix is to re-run that run
+first, then this one.
+
 The workflow has two jobs. `release-assets` runs `mfm release` with the default read-only
 token and a full clone, and uploads the result as an artifact; it isn't called `build`,
 which is the name of CI's required check. `publish`, the only job with `contents: write`,
 runs no code from the repository or its dependencies, only pinned actions, `gh` and `jq`.
-It publishes the plan's releases one at a time, in order, and stops at the first that
-fails, so the order can't break. For each, it checks the tag's form; a past release must
-be a row, tag and commit, of `release/history.json` as committed at the workflow's commit
-(read through the API, not from the artifact), and the current release must be for that
-commit. `gh release create --target <its commit>` uploads the assets to a draft and
-publishes it once they are all there. Both jobs start with `harden-runner` in audit mode,
-like the scrape's. Releases are immutable on this repository, so a published release, its
-tag and its assets never change, and a deleted release's tag can't be used again.
+It doesn't take the artifact's word for what to publish. First it checks the whole plan,
+before publishing any of it: every tag of the release form, every target a commit, the
+past releases rows (tag and commit) of `release/history.json` as committed at the
+workflow's commit (read through the API) and in the table's order, and the current
+release, if planned, last, under the tag `release-assets` named, for the workflow's
+commit. Then it checks that every row the plan leaves out is published already. Only then
+does it publish the plan's releases, one at a time, in order, a few seconds apart (the
+first run makes twelve, and GitHub limits how much content is created per minute), and
+stop at the first that fails, so the order can't break. A release an earlier attempt
+already published at the same commit is left as it is, so "Re-run failed jobs" carries on
+where the run stopped; one published at another commit fails the run. `gh release create
+--target <its commit>` uploads the assets to a draft and publishes it once they are all
+there. Both jobs start with `harden-runner` in audit mode, like the scrape's. Releases are
+immutable on this repository, so a published release, its tag and its assets never
+change, and a deleted release's tag can't be used again.
 
 A past release is never marked latest. The current one is, unless a commit on `main`
 after its own changed `data/` or `changelog/` (from the compare API, `$COMMIT...main`): an
 unrelated merge in the meantime doesn't demote the newest release, and a late re-run of an
 older run can't promote older data. A failed call, or a file list GitHub may have cut short
-(300 files), counts as not latest.
+(300 files), counts as not latest, with a warning on the run. `publish` runs on every real
+run, even with nothing to publish, and when the rule says the current release should be
+latest and it isn't (it was published while a change to `changelog/` alone was merging),
+it marks it latest.
 
 Real runs share one concurrency group and run one at a time. GitHub keeps one pending run
-per group, so a third push while one runs and another waits cancels the waiting one; its
-data is in the newer release, and re-running the cancelled run releases its own entry. A
-`workflow_dispatch` with `dry-run` builds and prints everything, the checks against GitHub
-included, and publishes nothing. So does every pull request that changes `data/`,
+per group, so a third push while one runs and another waits cancels the waiting one; the
+next run then fails, naming the release that is missing, until the cancelled run is re-run.
+A `workflow_dispatch` with `dry-run` builds and prints everything, the checks against
+GitHub included, and publishes nothing. So does every pull request that changes `data/`,
 `changelog/`, `release/`, `schema/`, `src/`, the dependencies or the workflow: its run
 summary shows the releases its merge would publish, and the check fails on the PR, before
 the merge, when `data/` changes without a new entry. `publish` runs only for a push or a

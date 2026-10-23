@@ -92,6 +92,52 @@ export function releaseTag(version: string, window: string, nth = 1): string {
   return `mfm-v${version}+${last}${nth > 1 ? `.${nth}` : ''}`;
 }
 
+/** Numeric version order: v1.10 after v1.9. */
+const byVersion = (a: string, b: string) => {
+  const x = a.split('.').map(Number);
+  const y = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(x.length, y.length); i++) {
+    const d = (x[i] ?? 0) - (y[i] ?? 0);
+    if (d) return d;
+  }
+  return 0;
+};
+
+/**
+ * The release before the current one: the entry just older than the newest entry of
+ * `version`'s file, in all the changelog files (`files`, by version), and its tag: its
+ * history row's, when it has one, or else the counting rule's. `undefined` when the current
+ * entry is the first. A run checks it is published, so a release whose run failed or was
+ * cancelled can't be skipped over.
+ */
+export function previousRelease(
+  files: { version: string; text: string }[],
+  history: Pick<HistoryEntry, 'tag' | 'version' | 'entries'>[],
+  version: string,
+): { heading: string; tag: string } | undefined {
+  // Oldest first, across the versions.
+  const all = [...files]
+    .filter((f) => byVersion(f.version, version) <= 0)
+    .sort((a, b) => byVersion(a.version, b.version))
+    .flatMap((f) => {
+      const entries = entriesOf(f.text);
+      return entries
+        .map((e, i) => ({ ...e, version: f.version, older: entries.slice(i + 1) }))
+        .reverse();
+    });
+  const previous = all.at(-2);
+  if (!previous) return undefined;
+  const row = history.find(
+    (h) => h.version === previous.version && h.entries.includes(previous.heading),
+  );
+  if (row) return { heading: previous.heading, tag: row.tag };
+  const sameDay = previous.older.filter((e) => lastDay(e.window) === lastDay(previous.window));
+  return {
+    heading: previous.heading,
+    tag: releaseTag(previous.version, previous.window, 1 + sameDay.length),
+  };
+}
+
 /** `MFM v<version> — <window>`, and the entry's label when it isn't the version. */
 export function releaseTitle(version: string, entry: Pick<Entry, 'window' | 'label'>): string {
   const name = `MFM v${version}`;
@@ -211,19 +257,27 @@ const list = (items: string[]) =>
 /**
  * A past release, from its row in the history table: the notes are its changelog entries
  * (from `changelog`, the version's file, which `changelogUrl` shows), or the row's own
- * notes, then what a reader should know about a backfilled snapshot. `fieldsNow` are the
- * fields the current data uses, to name the ones this snapshot doesn't have yet. `today`
- * is the day it is backfilled on.
+ * notes (`notesFile`: the text of its `notesFile`), then what a reader should know about a
+ * backfilled snapshot. `fieldsNow` are the fields the current data uses, to name the ones
+ * this snapshot doesn't have yet. `today` is the day it is backfilled on.
  */
 export function historicalRelease(input: {
   entry: HistoryEntry;
   snapshot: Snapshot;
   changelog: string;
   changelogUrl: string;
+  notesFile?: string;
   fieldsNow: Set<string>;
   today: string;
 }): Release {
   const { entry, snapshot } = input;
+  const date = entry.tag.match(/\+(\d{4}-\d{2}-\d{2})/)?.[1];
+  if (snapshot.meta.version !== entry.version || snapshot.meta.lastUpdated !== date) {
+    throw new Error(
+      `${entry.tag}: ${entry.commit}'s meta.yaml says v${snapshot.meta.version}, last updated ` +
+        `${snapshot.meta.lastUpdated}: the row's commit or tag is wrong`,
+    );
+  }
   const entries = entriesOf(input.changelog);
   const texts = entry.entries.map((heading) => {
     const found = entries.filter((e) => e.heading === heading);
@@ -265,7 +319,11 @@ export function historicalRelease(input: {
   return {
     tag: entry.tag,
     title: entry.title,
-    notes: releaseNotes(texts.join('\n\n') || (entry.notes ?? ''), input.changelogUrl, extra),
+    notes: releaseNotes(
+      (input.notesFile ?? entry.notes ?? texts.join('\n\n')).trim(),
+      input.changelogUrl,
+      extra,
+    ),
     assets: releaseAssets(snapshot),
   };
 }

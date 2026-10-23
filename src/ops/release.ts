@@ -71,6 +71,11 @@ export async function checkRelease(gh: GitHub, tag: string, commit: string): Pro
   return verdict(tag, commit, { commit: at, sameData: theirs !== undefined && theirs === ours });
 }
 
+/** Whether GitHub has a published release tagged `tag`. */
+export async function isReleased(gh: GitHub, tag: string): Promise<boolean> {
+  return (await find<object>(gh, `/releases/tags/${encodeURIComponent(tag)}`)) !== undefined;
+}
+
 /** A published release's asset, as GitHub lists it: `digest` is `sha256:<hex>`. */
 export interface PublishedAsset {
   name: string;
