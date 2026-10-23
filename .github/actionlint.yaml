@@ -1,7 +1,8 @@
 paths:
   .github/workflows/scrape.yml:
     ignore:
-      # Exactly one word split, on purpose as the comment beside it says: $DATES (one
-      # --dates-from pair per open update PR, in "Scrape"). The position is within that
-      # step's script, so any other SC2086 in this file is still reported.
-      - 'SC2086:info:1:39:'
+      # Exactly two word splits, each on purpose as the comment beside it says: $DATES (one
+      # --dates-from pair per open update PR) and $BROWSER (the cross-check's flag, or
+      # nothing), both in "Scrape". The positions are within that step's script, so any
+      # other SC2086 in this file is still reported.
+      - 'SC2086:info:(1:39|1:46):'
