@@ -52,11 +52,15 @@ git diff origin/<base>...origin/mfm/v<version> -- data/
 - A cost dropping to 0, or changing threefold or more.
 - The same units removed and re-added under slightly different names (casing,
   apostrophes): a parser or title-casing change, not a rename by GW.
-- `notes` or `muster` removed from `meta.yaml`: the rules panels failed to render.
+- `notes` or `muster` removed from `meta.yaml`: the rules panels failed to decode.
 - A faction's Legends units all removed: the page stopped shipping the Legends toggle,
   so nothing checked that the Legends cookie still works. Or many current units newly
   flagged `legends: true`: units moved under the `LEGENDS` section heading, or the page's
   sections changed. `pnpm scrape --faction <slug> --browser` compares with Chrome's view.
+- Base units removed with no version change: the page fetched with the Legends cookie
+  may be leaving some out. The scheduled run can't tell (it fails only when the whole base
+  roster is missing); `pnpm scrape --faction <slug> --browser --out /tmp/check` is the
+  per-unit check, against the page a visitor sees without the Legends.
 - Many units re-tiered with identical prices on both sides.
 - A body that says `No changes detected.` while `data/` changed: something the diff
   doesn't report yet. Read the YAML diff.

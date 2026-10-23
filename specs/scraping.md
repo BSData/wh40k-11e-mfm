@@ -186,7 +186,8 @@ for React. `rulesPanels()` in `src/parse/panels.ts` decodes it with `src/parse/r
 - **An element** is `["$", type, key, props]`. A type that is a tag name (`"div"`) is an
   HTML element; a type `"$L<id>"` is the client component that row `<id>` names. A string
   `"$<id>"` or `"$L<id>"` stands for row `<id>`'s value, `"$$…"` is a string starting `$`,
-  and `"$undefined"` is nothing.
+  and `"$undefined"` is nothing. A `T` row's text is taken as is: React writes long strings
+  there unescaped, so a leading `$` in it is text, not a reference.
 - **A panel** is found through its collapsible, not its headings: the `Collapsible` element
   whose `CollapsibleTrigger` child's text (its `render` element, the button) starts with
   the panel's button label (`RULES_PANELS` in `src/parse/panels.ts`). Its

@@ -11,12 +11,26 @@ import { clean } from './text.js';
  * rendered throws rather than being guessed at.
  */
 
+/**
+ * A `T` row's text. React writes a long string (1024 characters or more) there as is, not
+ * as a JSON string with its leading `$` escaped, so it is kept apart from the strings of
+ * JSON rows: never read as a reference or an escape, always rendered literally.
+ */
+class LiteralText {
+  readonly text: string;
+  constructor(text: string) {
+    this.text = text;
+  }
+}
+
 /** One row of the payload: JSON (parsed when first read), or a `T` text row. */
-type Row = { text: string } | { raw: string; json?: unknown; parsed?: boolean };
+type Row = { text: LiteralText } | { raw: string; json?: unknown; parsed?: boolean };
 
 /** The payload's rows, by hex id. */
 export type Flight = ReadonlyMap<string, Row>;
 
+// Only `[1, "<text>"]` pushes. A `[3, "<base64>"]` push (binary data) is skipped on
+// purpose: no saved page has one, and a panel it held would then fail as not found.
 const PUSH_RE = /self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g;
 
 /** The number of UTF-16 code units in the first `bytes` UTF-8 bytes of `s` from `start`. */
@@ -47,7 +61,7 @@ export function readFlight(html: string): Flight {
     if (text) {
       const start = colon + 1 + (text[0] as string).length;
       const end = start + utf8Span(flight, start, Number.parseInt(text[1] as string, 16));
-      rows.set(id, { text: flight.slice(start, end) });
+      rows.set(id, { text: new LiteralText(flight.slice(start, end)) });
       i = end;
     } else {
       const nl = flight.indexOf('\n', colon);
@@ -59,7 +73,10 @@ export function readFlight(html: string): Flight {
   return rows;
 }
 
-/** A row's value: its text, or its JSON (`undefined` for a row that isn't JSON, like `I`). */
+/**
+ * A row's value: its `LiteralText`, or its JSON (`undefined` for a row that isn't JSON,
+ * like `I`).
+ */
 function rowValue(flight: Flight, id: string): unknown {
   const row = flight.get(id);
   if (!row) return undefined;
@@ -117,7 +134,8 @@ function deref(flight: Flight, node: unknown): unknown {
 /** Every element in a value, depth first, through row references. */
 function* elements(flight: Flight, node: unknown, seen = new Set<unknown>()): Generator<Element> {
   node = deref(flight, node);
-  if (node === null || typeof node !== 'object' || seen.has(node)) return;
+  if (node === null || typeof node !== 'object' || node instanceof LiteralText) return;
+  if (seen.has(node)) return;
   seen.add(node);
   if (isElement(node)) yield node;
   for (const value of Array.isArray(node) ? node : Object.values(node)) {
@@ -141,6 +159,7 @@ function textOf(flight: Flight, node: unknown): string {
         return child.startsWith('$') ? '' : child; // `$undefined`, or a reference
       }
       if (typeof child === 'number') return String(child);
+      if (child instanceof LiteralText) return child.text;
       if (!isElement(child)) return '';
       return textOf(flight, child[3]?.children) + textOf(flight, child[3]?.render);
     })
@@ -225,7 +244,8 @@ function attributes(flight: Flight, props: Record<string, unknown>, where: strin
     if (key === 'dangerouslySetInnerHTML') throw new Error(`${where}: dangerouslySetInnerHTML`);
     let value =
       typeof raw === 'string' && ROW_REF_RE.test(raw) ? resolveRef(flight, raw, where) : raw;
-    if (typeof value === 'string' && value.startsWith('$')) {
+    if (value instanceof LiteralText) value = value.text;
+    else if (typeof value === 'string' && value.startsWith('$')) {
       if (!value.startsWith('$$')) continue;
       value = value.slice(1);
     }
@@ -246,6 +266,7 @@ function attributes(flight: Flight, props: Record<string, unknown>, where: strin
 export function renderHtml(flight: Flight, node: unknown, where: string): string {
   if (node === null || node === undefined || typeof node === 'boolean') return '';
   if (typeof node === 'number') return String(node);
+  if (node instanceof LiteralText) return escapeText(node.text);
   if (typeof node === 'string') {
     if (node.startsWith('$$')) return escapeText(node.slice(1));
     if (node === '$undefined') return '';

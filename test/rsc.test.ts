@@ -71,6 +71,41 @@ describe('the RSC payload decoder (src/parse/rsc.ts)', () => {
     expect(renderHtml(flight, '$b', 'x')).toBe('after');
   });
 
+  it('renders a T row literally: React writes its text as is, with no $ escaped', () => {
+    const content = [
+      '$',
+      'p',
+      null,
+      { title: '$a', children: ['$a', ' / ', '$b', ' / ', '$c', ' / ', '$$5 escaped'] },
+    ];
+    expect(
+      panel([
+        row('6', collapsible('Muster Armies', content)),
+        textRow('a', '$$2 a model'),
+        textRow('b', '$5 off'),
+        textRow('c', '$6'), // what a row reference looks like, but text
+      ]),
+    ).toBe('<p title="$$2 a model">$$2 a model / $5 off / $6 / $5 escaped</p>');
+  });
+
+  it('reads a trigger label held in a T row literally', () => {
+    const trigger = (label: unknown) => [
+      '$',
+      '$L1',
+      null,
+      {
+        children: [
+          ['$', '$L2', null, { children: label }],
+          ['$', '$L3', null, { children: 'in' }],
+        ],
+      },
+    ];
+    const flight = readFlight(
+      page(...COMPONENTS, row('6', trigger('$a')), textRow('a', '$ Armies')),
+    );
+    expect(renderHtml(flight, collapsibleContent(flight, '$ Armies'), 'x')).toBe('in');
+  });
+
   it('renders string, number and true props as attributes, and drops references', () => {
     const link = [
       '$',
