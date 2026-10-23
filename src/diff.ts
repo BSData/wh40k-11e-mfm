@@ -24,11 +24,20 @@ import { movedTo } from './moved.js';
  *  - `collect.ts` — the structured diff of the factions, with `units.ts` (which unit is
  *    which, and how its pricing is named) and `rules.ts` (`meta.yaml`);
  *  - `tally.ts` — the counts an update is summed up by;
+ *  - `attention.ts` — the changes that look like a misread: the PR body's warning, the
+ *    Discord summary's count and the `needs-attention` label;
  *  - `sections.ts` and `markdown.ts` — the Markdown renderers;
  *  - `naming.ts` — the version and the days an update is named by;
  *  - `failures.ts` and `load.ts` — the failure report, and reading snapshots from disk.
  */
 
+export {
+  attentionSection,
+  collectAttention,
+  type Flag,
+  flagLine,
+  needsAttention,
+} from './diff/attention.js';
 export { collectChanges, type FactionChanges, type Snapshot } from './diff/collect.js';
 export { failuresReport } from './diff/failures.js';
 export { loadFactionDir, loadMeta, loadSnapshots, loadVersion } from './diff/load.js';

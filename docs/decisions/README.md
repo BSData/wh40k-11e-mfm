@@ -33,6 +33,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0023](0023-a-dry-run-publishes-nothing.md) | A dry run publishes nothing | change tracking |
 | [0024](0024-a-live-smoke-test-reports-and-gates-only-auto-merge.md) | A live smoke test reports, and gates only Dependabot's merges | change tracking |
 | [0025](0025-dependabot-minor-and-patch-updates-merge-themselves.md) | Dependabot's minor and patch updates merge themselves | change tracking |
+| [0026](0026-flag-what-looks-like-a-misread.md) | Flag what looks like a misread, not just what changed | change tracking |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and

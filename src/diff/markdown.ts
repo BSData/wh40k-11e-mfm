@@ -1,4 +1,5 @@
 import { compareNames } from '../emit.js';
+import { attentionSection, collectAttention } from './attention.js';
 import { collectChanges, type FactionChanges, type Snapshot } from './collect.js';
 import {
   changelogFile,
@@ -179,7 +180,9 @@ export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpt
   const rules = collectRules(opts.meta?.before, opts.meta?.after);
   if (changes.length === 0 && !rules) return 'No changes detected.\n';
   const file = changelogFile(updateVersion(after, opts));
-  const head = `# ${updateTitle(before, after, opts)}\n\n${blurb(file)}`;
+  // The warning is part of the head, which fitting the body to GitHub's limit never cuts.
+  const warning = attentionSection(collectAttention(changes, rules, before, after));
+  const head = `# ${updateTitle(before, after, opts)}\n\n${warning ? `${warning}\n\n` : ''}${blurb(file)}`;
   const all = [...rulesSection(rules), ...sections(changes)];
   return fitted(head, summary(changes, rules), all, changes.length, file);
 }

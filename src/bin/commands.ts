@@ -32,6 +32,10 @@ export const COMMANDS: Record<string, Entry> = {
     "the update's Discord message: preview it, or post or edit it",
     () => import('./commands/announce.js'),
   ),
+  attention: lazy(
+    'the changes that look like a misread, and the needs-attention label',
+    () => import('./commands/attention.js'),
+  ),
   plan: lazy(
     'where the update PR goes: its branch, its base, and the PRs below it',
     () => import('./commands/plan.js'),

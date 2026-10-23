@@ -203,6 +203,36 @@ for; a note under the table names every shortened section. The complete entry is
 shortened: it is the version's changelog file (below), which the same PR commits and the
 body names. See [0009](../docs/decisions/0009-fit-the-pr-body-limit.md).
 
+### Needs attention
+Some changes are more likely the scraper misreading the site than GW changing it.
+`collectAttention()` in [`src/diff/attention.ts`](../src/diff/attention.ts) flags them:
+
+| flag | when |
+| --- | --- |
+| a faction is gone | a faction in the old snapshot isn't in the new one |
+| a faction lost more than half its units | more than half of the units it had (by identity, see *Which unit is which*) aren't in the new snapshot, whether or not new ones were added: a misread name looks like that too |
+| only the version changed | the site or the factions moved to a new version, and nothing else changed: no faction content and no rules panel |
+| a value dropped to 0 | a cost option, wargear item or enhancement went from more than 0 to 0 |
+| a value changed threefold | it went to at least three times what it was, or to a third of it or less, or up from 0 |
+
+A re-tiered unit's prices aren't in the cost diff, so they are checked option by option:
+a new price is flagged when it is 0, at least three times the option's highest old price,
+a third of its lowest or less, or above an old price of 0.
+
+The PR body lists the flags in a **Needs attention** warning (a GitHub `> [!WARNING]`
+alert), straight after the title and before everything else, one line each: the faction
+in bold, then what moved, as `**Orks**: Nobz — 5 models: 100 → 350 (×3.5)`. A flag that several factions share word
+for word (a sub-faction carrying its parent's roster) is one line naming them all. At
+most 25 lines are listed, then how many more there are. The section is part of the
+body's head, so fitting GitHub's limit never cuts it. It isn't in the changelog file: it
+is for the reviewer, and every change it names is in the entry anyway.
+
+The Discord message says how many lines there are. When there are any, the workflow
+labels the update PR `needs-attention`, creating the label if the repository has none,
+and a later run that finds none takes the label off. A flag never fails the run or
+blocks the merge: the reviewer checks the line against the site. See
+[0026](../docs/decisions/0026-flag-what-looks-like-a-misread.md).
+
 ## Naming an update
 `updateTitle()` names an update `MFM v<version> update — <window>`. The version is the
 site-wide one from `meta.yaml` (`loadVersion()`); failing that, the version most factions
@@ -315,7 +345,8 @@ Any other failed edit (a 429, a 5xx) throws instead, and writes no marker. See
 `announcement()` renders the same `collectChanges()` diff the other renderers use, as a
 single Discord embed: the update title, the summary totals, then **every faction that
 moved with the number of units and detachments that moved in it**, busiest first, and the
-factions a global revision swept up without touching named separately. It is `null`, and
+factions a global revision swept up without touching named separately. When some changes
+need attention (see *Needs attention*), the summary opens with how many. It is `null`, and
 nothing is posted, when nothing changed.
 
 The changelog link points at the **PR**, not at the version's changelog file on `main`.
@@ -383,9 +414,11 @@ captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after an
    updates) the PR on the planned branch and base. Its title and body are the two
    outputs of `mfm diff`, and the title is also the commit subject (`data: <title>`).
 3. **`announce`**, when there is a PR: when the base isn't `main`, links the chain with
-   `gh stack link` (best-effort), and `mfm announce <before> <new> --send --record`
-   posts or edits the Discord message and records a new one's marker on the PR (see
-   *Announcing an update* above).
+   `gh stack link` (best-effort); `mfm attention <before> <new> --label --pr-number <n>`
+   puts the `needs-attention` label on the PR or takes it off (see *Needs attention*);
+   and `mfm announce <before> <new> --send --record` posts or edits the Discord message
+   and records a new one's marker on the PR (see *Announcing an update* above). The
+   label and the announcement are `continue-on-error`: neither is a scrape failure.
 4. **`report`**: if any job failed or timed out, `mfm report-failure` reports it on the
    `scrape-failure` issue (with the failure report, when there is one), and if that step
    didn't succeed, a fallback step reports it with `gh` alone. After a successful run,

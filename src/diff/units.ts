@@ -127,7 +127,7 @@ export interface Retier {
 }
 
 /** Every option's points across a unit's tiers, in tier order, keyed by option label. */
-function pricesByOption(pricing: PricingTier[]): Map<string, number[]> {
+export function pricesByOption(pricing: PricingTier[]): Map<string, number[]> {
   const m = new Map<string, number[]>();
   for (const t of pricing) {
     for (const c of t.costs) {
