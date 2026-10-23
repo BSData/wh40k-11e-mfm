@@ -171,6 +171,7 @@ Cost`).
 ## Meta file (`data/meta.yaml`)
 
 ```yaml
+schemaVersion: 2          # the files' shape version (see Schema version below); first
 version: "1.0"            # site version at last full scrape
 lastUpdated: 2026-06-17   # most recent firstSeen across factions (stable on no-op)
 notes: |-                 # the expandable "Welcome…" help text, as Markdown
@@ -204,6 +205,133 @@ in [`scraping.md`](scraping.md).
 The runtime contract is the `SiteMeta` schema in `src/model.ts`: `metaFromYaml()` validates
 against it, as `factionFromYaml()` validates a faction file against `Faction`.
 
+## Schema version (`schemaVersion`)
+`schemaVersion` is an integer saying which shape the files have. It is the first key of
+`meta.yaml`, and the first key of `all.json` (see [Releases](#releases)), the one JSON
+output. The faction files don't carry it: `meta.yaml` speaks for the dataset it lists.
+The current version is `SCHEMA_VERSION` in `src/model.ts`, and `SiteMeta` accepts that
+value only, so the data and the code always agree (`mfm check-data` fails otherwise).
+
+| version | shape |
+|---|---|
+| 1 | before [#41](https://github.com/BSData/wh40k-11e-mfm/pull/41): a unit's `role` and `attachTo`, a detachment's `objective`. No file ever said `1`. |
+| 2 | `leaderTo` and `supportTo`, `objectives`, from 2026-09-02. Files written before [#75](https://github.com/BSData/wh40k-11e-mfm/issues/75) have this shape and no `schemaVersion`. |
+
+### Breaking changes
+The version goes up by one, in the PR that changes the shape, when a reader of the current
+files could break:
+- a field or a file is removed or renamed;
+- a field's type changes (a string becomes a list, a number becomes nullable), or a
+  required field becomes optional;
+- a value's meaning changes while its type stays (`points` counted per model instead of
+  per unit).
+
+It doesn't go up for an addition: a new optional field, a new file, a new faction. Nor for
+the values themselves, which are data rather than shape: points, and also how names are
+written (a regeneration like [#88](https://github.com/BSData/wh40k-11e-mfm/pull/88)'s,
+which a changelog entry announces).
+
+A bump is announced in three places:
+- **the PR body** that makes it, which says "Breaking" and what a reader has to change;
+- **the release notes**: the PR adds an entry to the version's changelog file (the
+  `change-data-model` skill), which becomes the notes of the release it triggers;
+- **Discord**: `mfm announce <before> <after>` with the old and new `data/` names it, and a
+  maintainer sends it (`--send`, with `DISCORD_WEBHOOK_URL`), since a model change merges
+  through an ordinary PR rather than the scrape workflow.
+
+The reports name it themselves. `mfm diff`, `mfm changelog` and `mfm announce` compare the
+two snapshots' `schemaVersion` and name a change right after the count of factions in the
+summary line (`` `schemaVersion` 2 → 3 ``, or `— → 2` from a snapshot written before it
+existed). To
+compare across a bump, `loadMeta()` reads a snapshot's `meta.yaml` as `SnapshotMeta`:
+`SiteMeta` with any `schemaVersion`, or none. See
+[0022](../docs/decisions/0022-a-schema-version-and-releases-for-consumers.md).
+
+## JSON Schema (`schema/`)
+`schema/` holds JSON Schemas (draft 2020-12) generated from the zod model with
+`z.toJSONSchema()` (`jsonSchemas()` in `src/schema.ts`):
+
+| file | describes | from |
+|---|---|---|
+| `faction.schema.json` | a `data/<slug>.yaml` | `Faction` |
+| `meta.schema.json` | `data/meta.yaml` | `SiteMeta` |
+| `all.schema.json` | `all.json` | `Dataset` |
+
+`pnpm mfm schema` writes them; run it after changing `src/model.ts`. `mfm check-data` fails
+while a committed schema differs from the generated one, and on a file in `schema/` that
+nothing generates. Each release attaches them.
+
+The schemas describe what the model's parser accepts (`io: 'input'`), so they allow keys
+they don't list. That is deliberate: data with an optional field added later still
+validates against an older schema of the same `schemaVersion`, which is what makes an
+addition non-breaking for a reader who validates. The committed files carry no unknown key
+all the same: check-data's canonical check catches one. Dates (`firstSeen`,
+`lastUpdated`) are strings with a `YYYY-MM-DD` pattern: a YAML parser that returns dates
+(see the README) needs them as strings before validating.
+
+## Points table (`data/points.csv`)
+Every unit's points as one flat table, for spreadsheets. One row per faction, unit, tier
+and cost option, under this header:
+
+```csv
+faction,unit,groupTitle,legends,range,label,models,points,desc,addon
+necrons,Technomancer,,,"[1,1]",Your 1st Unit Costs,1,80,,
+necrons,Technomancer,,,"[2,)",Your 2nd + Unit Costs,1,90,,
+```
+- `faction` is the slug; the other columns are the fields of the same names (see above).
+  An absent field is an empty cell; `legends` and `addon` are `true` or empty.
+- RFC 4180 quoting: a cell with a comma, a quote or a line break is quoted, with its quotes
+  doubled. So every `range` is quoted (`"[1,)"`). UTF-8, LF line endings, no byte-order
+  mark.
+- Rows follow the faction files: factions by slug, units in the files' name order
+  (same-named units in page order), then each unit's tiers and cost options in source
+  order. Points never decide where a row goes, so a points change is a one-line diff.
+- Enhancements, wargear and detachment points aren't in it; they stay in the YAML.
+
+`pointsCsv()` in `src/csv.ts` makes it from the faction files in `--out`, and `mfm scrape`
+rewrites it at the end of every run, a single faction's included, so it always matches the
+files beside it.
+
+## Releases
+Each push to `main` that changes `data/` publishes a GitHub release of the dataset, from
+`.github/workflows/release.yml`. Its parts come from the files, never from the clock:
+- **Tag:** `mfm-v<version>+<date>`: `version` from `meta.yaml`, and the last day of the
+  newest entry's window in `changelog/v<version>.md` (`## [2026-10-02 → 2026-10-05]` gives
+  `mfm-v1.5+2026-10-05`). That is the last day of the update window (see
+  [Naming an update](change-tracking.md#naming-an-update)), since the entry is dated by it.
+- **Title:** `MFM v<version> — <window>`.
+- **Notes:** that newest entry, with its relative links pointing at the release's commit,
+  and a footer giving the `schemaVersion`, a link to the README's "Using the data" and the
+  attribution. An entry over GitHub's 125,000-character limit is replaced by a link to the
+  file.
+- **Assets**, under the same names in every release, so
+  `https://github.com/BSData/wh40k-11e-mfm/releases/latest/download/<name>` always serves
+  the newest:
+
+  | asset | contents |
+  |---|---|
+  | `all.json` | `{ "schemaVersion": 2, "meta": <meta.yaml>, "factions": [<every faction file>] }`, factions by slug, keys in the files' order, on one line |
+  | `points.csv` | `data/points.csv` |
+  | `faction.schema.json`, `meta.schema.json`, `all.schema.json` | the JSON Schemas |
+  | `data.zip` | every file in `data/`, under `data/`, dated `lastUpdated`, so the same data zips to the same bytes |
+
+`mfm release` (`src/release.ts`) builds all of it into a directory, after the same checks
+as `mfm check-data`, and prints it. With `--commit`, it asks GitHub whether the tag is
+released already: not yet, it is published; at this commit (a re-run), there is nothing to
+do; at another commit, it fails. That last case means `data/` changed on `main` without a
+new changelog entry, and a release is named by its entry: so a PR that changes `data/`
+adds one, as update PRs do by themselves, and a regeneration does by hand (see the
+`change-data-model` skill).
+
+The workflow has two jobs. `build` runs `mfm release` with the default read-only token and
+uploads the result as an artifact. `publish`, the only job with `contents: write`, runs no
+code from the repository or its dependencies: it downloads the artifact and runs `gh
+release create`, which uploads the assets to a draft and publishes it once they are all
+there. Releases are immutable on this repository, so a published release, its tag and its
+assets never change. A `workflow_dispatch` with `dry-run` builds and prints everything,
+the release check included, and publishes nothing; `publish` also runs only on `main`.
+See [0022](../docs/decisions/0022-a-schema-version-and-releases-for-consumers.md).
+
 ## Index (in-memory only, not written)
 `SiteIndex` = `{ version, factions: [{ slug, name }] }`, parsed from the landing page
 to drive the scrape and supply clean display names.
@@ -215,14 +343,21 @@ exactly what the tools would write. `mfm check-data` (`src/check-data.ts`) fails
   canonical: reading it with `factionFromYaml()` and writing it back with `factionToYaml()`
   must reproduce it byte for byte, which catches an unknown key, an entry out of order, and
   any other edit that breaks the writer's formatting;
-- `data/meta.yaml` fails the `SiteMeta` schema, or `metaToYaml()` doesn't reproduce it;
+- `data/meta.yaml` fails the `SiteMeta` schema (which includes being at the current
+  `schemaVersion`), or `metaToYaml()` doesn't reproduce it;
+- `data/points.csv` is missing, or isn't what `pointsCsv()` makes of the faction files
+  (checked once every faction file passes);
+- a file in `schema/` is missing, differs from what `jsonSchemas()` generates, or isn't
+  generated at all;
 - `DATA-CHANGELOG.md` differs from what `changelogIndex()` generates from `changelog/`.
 
 `pnpm verify` runs lint, typecheck, the tests and then this check. It is the definition of
-done, and it is what CI runs.
+done, and it is what CI runs. The tests also validate every committed data file against
+the committed JSON Schemas with Ajv, an off-the-shelf validator (`test/schema.test.ts`).
 
 A well-formed hand edit, such as one changed points value, is still canonical, so this check
-can't tell it from the scraper's output. Only the scraper writes these files, so CI's
+can't tell it from the scraper's output (though a points edit in the YAML alone leaves
+`points.csv` behind, which it does catch). Only the scraper writes these files, so CI's
 `data-guard` job fails a pull request that changes any of them unless its head branch is an
 update branch (`mfm/*`, in this repository) or it carries the `regenerated-data` label,
 which a maintainer adds to a PR that reran the scraper, for example to apply a format change.

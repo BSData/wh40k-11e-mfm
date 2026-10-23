@@ -157,7 +157,10 @@ each of their sections. See [0010](../docs/decisions/0010-sub-factions-share-a-c
 and `muster` (Muster Armies: battle sizes, DP, unit limits). `loadMeta()` reads a
 snapshot's `meta.yaml`, and every command that compares snapshots (`mfm diff`, `mfm
 announce`, `mfm changelog`) passes both snapshots' to the renderers. `lastUpdated` and
-`factions` are derived from the faction files, so they aren't compared.
+`factions` are derived from the faction files, so they aren't compared. A change of
+`schemaVersion` is the summary line's first clause after the count of factions, in the
+reports and the Discord summary alike: a bump breaks readers of the files (see
+[Schema version](data-model.md#schema-version-schemaversion)).
 
 A changed panel is listed in a **Rules** section, ahead of the factions, as a compact
 line diff: the changed lines only, `-` before `+`, with `…` between hunks that aren't
