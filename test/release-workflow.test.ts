@@ -23,8 +23,10 @@ const JQ = bashJq.stdout?.trim() ?? 'jq';
 
 interface Step {
   name?: string;
+  uses?: string;
+  with?: Record<string, string>;
   run?: string;
-  env?: { TAG_PATTERN?: string; LATER_RELEASE_CHANGES?: string };
+  env?: { GH_TOKEN?: string; TAG_PATTERN?: string; LATER_RELEASE_CHANGES?: string };
 }
 interface Job {
   if?: string;
@@ -63,7 +65,26 @@ describe('the release workflow', () => {
     // would report under that name, and this workflow runs no tests.
     expect(Object.keys(workflow.jobs).sort()).toEqual(['publish', 'release-assets']);
     expect(workflow.jobs['release-assets']?.permissions).toEqual({ contents: 'read' });
-    expect(publish?.permissions).toEqual({ contents: 'write' });
+    expect(JSON.stringify(workflow.jobs['release-assets'])).not.toContain('PRIVATE_KEY');
+    // publish writes with the App's token alone, which the default token can't stand in
+    // for: a tag on a commit whose workflow files differ from main's needs workflows write.
+    expect(publish?.permissions).toEqual({ contents: 'read' });
+    const mint = publish?.steps?.find((s) =>
+      s.uses?.startsWith('actions/create-github-app-token@'),
+    );
+    expect(mint?.with).toMatchObject({
+      'permission-contents': 'write',
+      'permission-workflows': 'write',
+    });
+    // Exactly these keys: no owner or repositories (so this repository only), no other
+    // permission, and no skip-token-revoke.
+    expect(Object.keys(mint?.with ?? {}).sort()).toEqual([
+      'client-id',
+      'permission-contents',
+      'permission-workflows',
+      'private-key',
+    ]);
+    expect(env.GH_TOKEN?.replace(/\s/g, '')).toBe(['$', '{{steps.token.outputs.token}}'].join(''));
     expect(publish?.if).toContain("github.event_name != 'pull_request'");
     expect(publish?.if).toContain("github.ref == 'refs/heads/main'");
     expect(publish?.if).toContain('!inputs.dry-run');

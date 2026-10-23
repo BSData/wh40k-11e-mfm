@@ -585,9 +585,11 @@ so that its push starts CI like anyone else's: events made with a workflow's
 `GITHUB_TOKEN` start no workflows. In `publish`, `actions/create-github-app-token` mints
 it from the org variable `BSDATA_AUTOMATON_APP_CLIENT_ID` and the org secret
 `BSDATA_AUTOMATON_APP_PRIVATE_KEY`, scoped to this repository, with `contents: write` and
-`pull-requests: write`, and only `create-pull-request` uses it. Every other job uses its
-own `GITHUB_TOKEN`, with only the permissions it needs; so do the stack link and the
-Discord marker, which needn't start anything.
+`pull-requests: write`, and only `create-pull-request` uses it. The release workflow's
+`publish` mints its own, with `contents: write` and `workflows: write`, for `gh release
+create` alone (see "Publishing" in `specs/data-model.md`). Every other job uses its own
+`GITHUB_TOKEN`, with only the permissions it needs; so do the stack link and the Discord
+marker, which needn't start anything.
 
 The key never shares a job with dependency code: `publish` runs pinned actions, a file
 copy and the checks above, nothing else. It takes no `.git` from the artifact, because git
