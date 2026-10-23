@@ -129,8 +129,8 @@ fix it, and re-test. Then open a PR that links the issue.
 - Write commit subjects in the imperative, in plain English, as in `git log`.
 
 ## Coding agents
-[`AGENTS.md`](AGENTS.md) is the entry point for coding agents: the project map, the
-commands, the conventions and the runbooks. Everything on this page applies to
+[`AGENTS.md`](AGENTS.md) is the entry point for coding agents: the ground rules, the
+commands, the conventions and the skills index. Everything on this page applies to
 agent-written PRs too, and a person reviews them like any other PR.
 
 ## Conduct and license

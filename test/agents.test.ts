@@ -1,15 +1,15 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 
 /**
- * The agent layout (see "Harness files" in AGENTS.md): skills every harness can load, and
- * one instruction file that stays readable where harnesses truncate it.
+ * The agent layout (docs/decisions/0030-one-short-instruction-file.md): skills every
+ * harness can load, and one short instruction file that names nothing that isn't there.
  */
 
-const read = (path: string): string =>
-  readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), 'utf8');
+const root = (path: string): string => fileURLToPath(new URL(`../${path}`, import.meta.url));
+const read = (path: string): string => readFileSync(root(path), 'utf8');
 
 const SKILLS_DIR = fileURLToPath(new URL('../.agents/skills', import.meta.url));
 const skills = readdirSync(SKILLS_DIR, { withFileTypes: true })
@@ -54,21 +54,45 @@ describe('skills (.agents/skills/<name>/SKILL.md)', () => {
 });
 
 describe('AGENTS.md', () => {
-  it('stays under 200 lines', () => {
-    expect(agents.split('\n').length).toBeLessThan(200);
+  // Every line costs every task context, and long files are followed less well (0030).
+  it('stays under 5,000 characters', () => {
+    expect(agents.length).toBeLessThanOrEqual(5000);
   });
 
-  // Copilot code review reads only the first 4,000 characters of an instruction file.
-  it.each(['## Ground rules', '## Definition of done'])(
-    'ends "%s" within 4,000 characters',
-    (heading) => {
-      const start = agents.indexOf(heading);
-      expect(start).toBeGreaterThanOrEqual(0);
-      const end = agents.indexOf('\n## ', start + heading.length);
-      expect(end).toBeGreaterThan(start);
-      expect(end).toBeLessThanOrEqual(4000);
-    },
-  );
+  it('starts with the ground rules, then the definition of done', () => {
+    const headings = [...agents.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
+    expect(headings.slice(0, 2)).toEqual(['Ground rules', 'Definition of done']);
+  });
+
+  // A path that no longer exists is how the old project map went stale. A token counts as
+  // a repository path when its first segment is an entry at the repository's root, which
+  // also leaves out `owner/repo`, URLs and /tmp: linked, quoted, or in the commands block.
+  it('names only repository paths that exist', () => {
+    const top = new Set(readdirSync(root('.')));
+    // Every word of the file, links and comments included, split on anything a path
+    // can't hold; a link's #fragment is dropped.
+    const tokens = agents.split(/[\s`'"“”,;()[\]|]+/).map((t) =>
+      t
+        .replace(/#.*$/, '')
+        .replace(/[.:]+$/, '')
+        .replace(/\/$/, ''),
+    );
+    const paths = [
+      ...new Set(tokens.filter((t) => !/[<>*]/.test(t) && top.has(t.split('/')[0] ?? ''))),
+    ];
+    // One of each kind, so the detection itself can't quietly find nothing.
+    expect(paths).toContain('scripts/setup'); // in the commands block
+    expect(paths).toContain('CLAUDE.md'); // quoted
+    expect(paths).toContain('docs/decisions/0030-one-short-instruction-file.md'); // linked
+    expect(paths.filter((p) => !existsSync(root(p)))).toEqual([]);
+  });
+
+  it('runs only pnpm scripts that exist', () => {
+    const scripts = Object.keys(JSON.parse(read('package.json')).scripts ?? {});
+    const used = [...agents.matchAll(/^pnpm ([\w:-]+)/gm)].map((m) => m[1] ?? '');
+    expect(used.length).toBeGreaterThan(3);
+    expect(used.filter((s) => s !== 'install' && !scripts.includes(s))).toEqual([]);
+  });
 
   it('is what CLAUDE.md imports, and all it holds', () => {
     expect(read('CLAUDE.md').trim()).toBe('@AGENTS.md');
