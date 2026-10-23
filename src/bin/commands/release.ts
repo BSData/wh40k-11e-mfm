@@ -9,8 +9,10 @@ import {
   fieldsUsed,
   HISTORY_FILE,
   parseHistory,
+  parseUnreleased,
   type Snapshot,
   snapshotOf,
+  UNRELEASED_FILE,
 } from '../../history.js';
 import { filesAt } from '../../ops/git.js';
 import { githubFromEnv } from '../../ops/github.js';
@@ -148,14 +150,20 @@ Publishing is the workflow's \`gh release create\`, one release at a time.
       .map((name) => name.match(/^v(.+)\.md$/)?.[1])
       .filter((v): v is string => v !== undefined)
       .map((version) => ({ version, text: changelogOf(version).text }));
-    const previous = previousRelease(versions, history, now.meta.version);
+    const unreleasedPath = join(root, UNRELEASED_FILE);
+    const unreleased = existsSync(unreleasedPath)
+      ? parseUnreleased(readFileSync(unreleasedPath, 'utf8'))
+      : [];
+    const previous = previousRelease(versions, history, now.meta.version, unreleased);
     const gh = commit === undefined ? undefined : githubFromEnv();
     if (gh && previous && !history.some((h) => h.tag === previous.tag)) {
       if (!(await isReleased(gh, previous.tag))) {
         throw new Error(
           `${previous.tag}, the release of "${previous.heading}", isn't published, so ` +
             `${current.tag} would come before it. Re-run the release workflow's run for the ` +
-            'commit that added that entry, then this one (see "Releases" in specs/data-model.md).',
+            'commit that added that entry, then this one; or, when no run can publish it (its ' +
+            `tag is burnt, or it came in the same push as this one), list it in ${UNRELEASED_FILE} ` +
+            '(see "Releases" in specs/data-model.md).',
         );
       }
     }

@@ -38,8 +38,8 @@ on:
 permissions: {}
 
 # One real run at a time. GitHub keeps one pending run per group, so a third push while
-# one runs and one waits cancels the waiting one: its data is in the newer release, and a
-# re-run of the cancelled run releases its own entry. A dry run, a PR's preview or a run
+# one runs and one waits cancels the waiting one; the next run then fails, naming the
+# release it lacks, until the cancelled run is re-run. A dry run, a PR's preview or a run
 # on another branch can publish nothing, so it gets a group of its own and never cancels
 # a real one.
 concurrency:
@@ -144,7 +144,7 @@ jobs:
           CURRENT: ${{ needs.release-assets.outputs.tag }}
           # Seconds between two releases, to stay clear of GitHub's limit on content created
           # per minute: the first run publishes twelve.
-          PAUSE: '3'
+          PAUSE: '10'
           # A release tag; src/history.ts's TAG, which a test keeps equal.
           TAG_PATTERN: '^mfm-v[0-9]+(\.[0-9]+)*\+[0-9]{4}-[0-9]{2}-[0-9]{2}(\.[0-9]+)?$'
           # From the compare API's $COMMIT...main: how many files under data/ or changelog/
@@ -152,8 +152,9 @@ jobs:
           # counted at both ends. "unknown" when main isn't $COMMIT or ahead of it, or when
           # the file list may be cut short (the API lists at most 300).
           LATER_RELEASE_CHANGES: >-
-            if (.status == "identical" or .status == "ahead") and ((.files // []) | length) < 300
-            then [(.files // [])[] | .filename, (.previous_filename // empty)
+            if .status == "identical" then 0
+            elif .status == "ahead" and (.files | type) == "array" and (.files | length) < 300
+            then [.files[] | .filename, (.previous_filename // empty)
             | select(startswith("data/") or startswith("changelog/"))] | length
             else "unknown" end
         # test/release-workflow.test.ts runs this script with a stub gh.
@@ -165,9 +166,12 @@ jobs:
           [[ "$CURRENT" =~ $TAG_PATTERN ]] || fail 'Not a release' "the current release, $CURRENT"
 
           # The table as committed at this commit, read through the API: the artifact was
-          # written by code from the dependencies, so it decides nothing on its own.
+          # written by code from the dependencies, so which past releases go out, where and
+          # in what order is checked against the table, not taken from the artifact. (The
+          # contents of each release, and the current release's tag, are the artifact's.)
           table=$(api -H 'Accept: application/vnd.github.raw+json' \
             "repos/$GH_REPO/contents/release/history.json?ref=$COMMIT")
+          tags=$(jq -r '.[].tag' <<<"$table")
 
           # 1. The whole plan, before any of it is published: each line well formed, the
           #    past releases rows of the table and in its order, and the current release,
@@ -195,10 +199,11 @@ jobs:
           # 2. Every row the plan leaves out is published already, so none is skipped.
           planned=$(cut -f1 "$PLAN/plan.tsv")
           while read -r tag; do
+            [ -n "$tag" ] || continue
             grep -qxF "$tag" <<<"$planned" && continue
             api "repos/$GH_REPO/releases/tags/$(uri "$tag")" --jq .id >/dev/null \
               || fail 'Missing release' "$tag is neither published nor planned"
-          done < <(jq -r '.[].tag' <<<"$table")
+          done <<<"$tags"
 
           # 3. Whether the current release is to be latest: unless a later commit on main
           #    changed data/ or changelog/, so an unrelated merge meanwhile doesn't demote
@@ -227,12 +232,17 @@ jobs:
           done 3< "$PLAN/plan.tsv"
 
           # 5. Keep the current release latest, published by this run or by an earlier one.
-          if [ "$latest" != true ]; then
-            echo "::warning title=Not latest::$CURRENT isn't marked latest: main's later changes to data/ or changelog/ are $changes, and their run marks its own release"
+          #    When main has moved on, the later run marks its own. When there's no telling,
+          #    the job fails after publishing: a re-run skips what is published and decides
+          #    again.
+          if [ "$changes" = unknown ]; then
+            fail 'Not latest' "couldn't tell whether main has changed since $COMMIT, so $CURRENT isn't marked latest: re-run this job"
+          elif [ "$latest" != true ]; then
+            echo "::warning title=Not latest::$CURRENT isn't marked latest: main has $changes later changes to data/ or changelog/, and their run marks its own release"
           elif [ "$(api "repos/$GH_REPO/releases/latest" --jq .tag_name 2>/dev/null || true)" != "$CURRENT" ]; then
             if api "repos/$GH_REPO/releases/tags/$(uri "$CURRENT")" --jq .id >/dev/null 2>&1; then
               echo "Marking $CURRENT latest"
               gh release edit "$CURRENT" --latest </dev/null \
-                || echo "::warning title=Not latest::marking $CURRENT latest failed"
+                || fail 'Not latest' "marking $CURRENT latest failed: re-run this job"
             fi
           fi

@@ -105,6 +105,12 @@ describe('previousRelease', () => {
     );
   });
 
+  it('steps over an entry listed as having no release of its own', () => {
+    const files = [file('1.6', '2026-10-26', '2026-10-25', '2026-10-24')];
+    const skip = [{ version: '1.6', heading: '## [2026-10-25] — x', reason: 'tag burnt' }];
+    expect(previousRelease(files, [], '1.6', skip)?.tag).toBe('mfm-v1.6+2026-10-24');
+  });
+
   it('is none before the first entry', () => {
     expect(previousRelease([file('1.0', '2026-06-22')], [], '1.0')).toBeUndefined();
   });

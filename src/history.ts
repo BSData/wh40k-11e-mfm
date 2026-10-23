@@ -60,6 +60,27 @@ export type HistoryEntry = z.infer<typeof HistoryEntry>;
 export const parseHistory = (text: string): HistoryEntry[] =>
   z.array(HistoryEntry).parse(JSON.parse(text));
 
+/**
+ * The changelog entries that have no release of their own, and why, as reviewed: one whose
+ * tag is burnt (a publish that failed after GitHub applied it), or one that reached `main`
+ * in the same push as a later one, so no run was ever its own. The check that the release
+ * before the current one is published steps over them.
+ */
+export const UNRELEASED_FILE = 'release/unreleased.json';
+
+export const parseUnreleased = (text: string) =>
+  z
+    .array(
+      z
+        .object({
+          version: z.string().regex(/^[0-9]+(\.[0-9]+)*$/),
+          heading: z.string().regex(/^## \[[^\]]+\]/),
+          reason: z.string().min(1),
+        })
+        .strict(),
+    )
+    .parse(JSON.parse(text));
+
 type Json = Record<string, unknown>;
 const isObject = (x: unknown): x is Json =>
   typeof x === 'object' && x !== null && !Array.isArray(x);

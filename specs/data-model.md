@@ -391,7 +391,10 @@ of the table): `previousRelease()` finds the entry just older than the newest on
 the version files, and its tag, from its row or by the counting rule. If it isn't
 published, the run fails, naming it: its own run failed or was cancelled, and publishing
 the current release now would put it after a newer one. The fix is to re-run that run
-first, then this one.
+first, then this one. When no run can publish it (its tag is burnt, see below, or it
+reached `main` in the same push as a later entry, so it never had a run of its own), it
+goes into `release/unreleased.json`, a reviewed list of entries without a release of their
+own, with the reason; the check steps over those.
 
 The workflow has two jobs. `release-assets` runs `mfm release` with the default read-only
 token and a full clone, and uploads the result as an artifact; it isn't called `build`,
@@ -403,8 +406,9 @@ past releases rows (tag and commit) of `release/history.json` as committed at th
 workflow's commit (read through the API) and in the table's order, and the current
 release, if planned, last, under the tag `release-assets` named, for the workflow's
 commit. Then it checks that every row the plan leaves out is published already. Only then
-does it publish the plan's releases, one at a time, in order, a few seconds apart (the
-first run makes twelve, and GitHub limits how much content is created per minute), and
+does it publish the plan's releases, one at a time, in order, ten seconds apart (the
+first run makes twelve, each a create, six uploads and a publish, and GitHub limits how
+much content is created per minute), and
 stop at the first that fails, so the order can't break. A release an earlier attempt
 already published at the same commit is left as it is, so "Re-run failed jobs" carries on
 where the run stopped; one published at another commit fails the run. `gh release create
@@ -416,11 +420,18 @@ change, and a deleted release's tag can't be used again.
 A past release is never marked latest. The current one is, unless a commit on `main`
 after its own changed `data/` or `changelog/` (from the compare API, `$COMMIT...main`): an
 unrelated merge in the meantime doesn't demote the newest release, and a late re-run of an
-older run can't promote older data. A failed call, or a file list GitHub may have cut short
-(300 files), counts as not latest, with a warning on the run. `publish` runs on every real
-run, even with nothing to publish, and when the rule says the current release should be
-latest and it isn't (it was published while a change to `changelog/` alone was merging),
-it marks it latest.
+older run can't promote older data. A failed call, an answer without a file list, or one
+GitHub may have cut short (300 files), is no telling: the release is published not latest,
+and the job then fails, so that a re-run, which skips what is published, decides again.
+When main has moved on, the job warns and passes: the later run marks its own release.
+`publish` runs on every real run, even with nothing to publish, and when the rule says the
+current release should be latest and it isn't (it was published while a change to
+`changelog/` alone was merging), it marks it latest.
+
+A tag is burnt when a publish fails after GitHub applied it: gh's cleanup deletes what it
+takes for a draft, and the tag can't be used again. A burnt current release's entry goes
+into `release/unreleased.json`, and a new entry (with the next number, if it is the same
+day) releases the data. A burnt past release's row leaves the table for the same list.
 
 Real runs share one concurrency group and run one at a time. GitHub keeps one pending run
 per group, so a third push while one runs and another waits cancels the waiting one; the

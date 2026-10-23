@@ -103,21 +103,19 @@ const byVersion = (a: string, b: string) => {
   return 0;
 };
 
+/** An entry that has no release of its own, and why: `release/unreleased.json`. */
+export interface Unreleased {
+  version: string;
+  heading: string;
+  reason: string;
+}
+
 /**
- * The release before the current one: the entry just older than the newest entry of
- * `version`'s file, in all the changelog files (`files`, by version), and its tag: its
- * history row's, when it has one, or else the counting rule's. `undefined` when the current
- * entry is the first. A run checks it is published, so a release whose run failed or was
- * cancelled can't be skipped over.
+ * Every entry of the changelog files, oldest first across the versions, with its version
+ * and the older entries of its own file.
  */
-export function previousRelease(
-  files: { version: string; text: string }[],
-  history: Pick<HistoryEntry, 'tag' | 'version' | 'entries'>[],
-  version: string,
-): { heading: string; tag: string } | undefined {
-  // Oldest first, across the versions.
-  const all = [...files]
-    .filter((f) => byVersion(f.version, version) <= 0)
+export function chronological(files: { version: string; text: string }[]) {
+  return [...files]
     .sort((a, b) => byVersion(a.version, b.version))
     .flatMap((f) => {
       const entries = entriesOf(f.text);
@@ -125,7 +123,30 @@ export function previousRelease(
         .map((e, i) => ({ ...e, version: f.version, older: entries.slice(i + 1) }))
         .reverse();
     });
-  const previous = all.at(-2);
+}
+
+/**
+ * The release before the current one: the entry just older than the newest entry of
+ * `version`'s file, in all the changelog files (`files`, by version), and its tag: its
+ * history row's, when it has one, or else the counting rule's. `undefined` when the current
+ * entry is the first. A run checks it is published, so a release whose run failed or was
+ * cancelled can't be skipped over. An entry in `unreleased` is stepped over: one whose tag
+ * is burnt, or that came in the same push as a later one, so that no run was ever its own.
+ */
+export function previousRelease(
+  files: { version: string; text: string }[],
+  history: Pick<HistoryEntry, 'tag' | 'version' | 'entries'>[],
+  version: string,
+  unreleased: Unreleased[] = [],
+): { heading: string; tag: string } | undefined {
+  const all = chronological(files.filter((f) => byVersion(f.version, version) <= 0));
+  // The entries a reviewed list says have no release of their own are stepped over.
+  const skip = (e: { version: string; heading: string }) =>
+    unreleased.some((u) => u.version === e.version && u.heading === e.heading);
+  const previous = all
+    .slice(0, -1)
+    .filter((e) => !skip(e))
+    .at(-1);
   if (!previous) return undefined;
   const row = history.find(
     (h) => h.version === previous.version && h.entries.includes(previous.heading),

@@ -107,8 +107,10 @@ describe.skipIf(!hasJq)('LATER_RELEASE_CHANGES, the latest decision', () => {
     expect(laterChanges({ status: 'ahead', files: files.slice(1) })).toBe('0');
   });
 
-  it('counts nothing when the response has no file list', () => {
+  it('counts nothing for an identical main, file list or not, and is unknown for ahead without one', () => {
     expect(laterChanges({ status: 'identical' })).toBe('0');
+    expect(laterChanges({ status: 'ahead' })).toBe('unknown');
+    expect(laterChanges({ status: 'ahead', files: null })).toBe('unknown');
   });
 });
 
@@ -309,11 +311,22 @@ fi
     expect(run.stdout).toContain(`::warning title=Not latest::${CURRENT} isn't marked latest`);
   });
 
-  it('marks it not latest when the compare call fails, and says so', () => {
+  it('publishes but fails when the compare call fails, so a re-run marks it latest', () => {
     const run = publishPlan([current], { published: PAST });
-    expect(run.status).toBe(0);
+    expect(run.status).toBe(1);
     expect(run.created).toEqual(['mfm-v1.6+2026-10-23 COMMIT latest=false']);
-    expect(run.stdout).toContain('later changes to data/ or changelog/ are unknown');
+    expect(run.stdout).toContain(
+      `::error title=Not latest::couldn't tell whether main has changed`,
+    );
+    // The re-run: the release is there, the call answers, and it is marked latest.
+    const again = publishPlan([current], {
+      compare: IDENTICAL,
+      published: [...PAST, [CURRENT, COMMIT]],
+      latest: 'mfm-v1.0+2026-06-22',
+    });
+    expect(again.status).toBe(0);
+    expect(again.created).toEqual([]);
+    expect(again.latest).toBe(CURRENT);
   });
 
   it('marks an earlier run’s current release latest again when nothing is planned', () => {

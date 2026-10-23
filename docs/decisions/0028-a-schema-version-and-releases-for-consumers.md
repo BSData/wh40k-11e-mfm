@@ -95,7 +95,12 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
   and takes a few seconds. A row's commit must give the row's version and date in its
   `meta.yaml`, or the build fails: a wrong SHA can't become an immutable release.
 - A run that fails or is cancelled holds up the next one until it is re-run. That is the
-  price of never publishing out of order, and the error says which run to re-run.
+  price of never publishing out of order, and the error says which run to re-run. An
+  entry no run can publish (a burnt tag; two entries reaching `main` in one push) is
+  listed, with the reason, in `release/unreleased.json`, a reviewed escape hatch.
+- When the latest check can't tell (the compare call fails), the release goes out not
+  latest and the job fails, so a re-run decides again; it doesn't pass with no release
+  marked latest.
 - #6's 2026-06-22 changelog entry was written later and describes the first scrape, so
   its release takes notes of its own, generated from the two commits, and the entry
   itself is left as it is.
@@ -107,8 +112,10 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
 - A release is immutable from the moment it is published, and so is its tag, even after
   the release is deleted. `gh release create` uploads the assets to a draft and then
   publishes it; if that last request fails after GitHub applied it, gh's cleanup deletes
-  what it takes for a draft, and the tag is burnt. It is rare, and the way out is a new
-  entry, whose tag gets the next number (for a past release, a new row).
+  what it takes for a draft, and the tag is burnt. It is rare. The way out is to list the
+  burnt entry in `release/unreleased.json` (a past release: move its row there), so the
+  check for the release before the current one steps over it, and to add a new entry,
+  whose tag gets the next number if it is the same day.
 - A release is only as fresh as `main`: update PRs wait for review (see the README), so the
   newest values are still on the `mfm/v<version>` branch.
 - Faction files carry no `schemaVersion`: a consumer reading a single faction file has to

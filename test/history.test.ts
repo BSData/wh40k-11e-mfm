@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
+import { ENTRIES_MARKER } from '../src/changelog.js';
 import { factionToYaml, metaToYaml } from '../src/emit.js';
 import {
   fieldsUsed,
@@ -11,14 +12,16 @@ import {
   HISTORY_FILE,
   namesCasedOtherwise,
   parseHistory,
+  parseUnreleased,
   snapshotOf,
   TAG,
+  UNRELEASED_FILE,
 } from '../src/history.js';
 import { filesAt } from '../src/ops/git.js';
 import { gitEnv } from '../src/ops/git-env.js';
 import {
+  chronological,
   entriesOf,
-  newestEntry,
   previousRelease,
   releaseTag,
   releaseTitle,
@@ -32,6 +35,7 @@ import {
 const root = (path: string) => fileURLToPath(new URL(`../${path}`, import.meta.url));
 const read = (path: string) => readFileSync(root(path), 'utf8');
 const history = parseHistory(read(HISTORY_FILE));
+const unreleased = parseUnreleased(read(UNRELEASED_FILE));
 
 const lastDay = (window: string) => window.split(' → ').at(-1) ?? '';
 const dateOf = (tag: string) => tag.match(/\+(\d{4}-\d{2}-\d{2})/)?.[1] ?? '';
@@ -88,36 +92,73 @@ describe('release/history.json', () => {
     }
   });
 
-  it('ends with the release before the current one, which the current release checks', () => {
+  /** Every changelog entry but the unreleased ones, oldest first across the versions. */
+  const released = () => {
     const files = readdirSync(root('changelog')).map((name) => ({
       version: name.replace(/^v|\.md$/g, ''),
       text: read(`changelog/${name}`),
     }));
-    expect(previousRelease(files, history, '1.6')).toEqual({
-      heading: '## [2026-10-22] — MFM v1.6',
-      tag: history.at(-1)?.tag,
-    });
+    return chronological(files).filter(
+      (e) => !unreleased.some((u) => u.version === e.version && u.heading === e.heading),
+    );
+  };
+  const inRow = (e: { version: string; heading: string }) =>
+    history.some((h) => h.version === e.version && h.entries.includes(e.heading));
+  /** The tag the counting rule gives an entry, as if it were the newest. */
+  const ruleTag = (e: ReturnType<typeof released>[number]) =>
+    releaseTag(
+      e.version,
+      e.window,
+      1 + e.older.filter((o) => lastDay(o.window) === lastDay(e.window)).length,
+    );
+
+  it('accounts for the entries from the first up to its last row, and none after', () => {
+    const covered = released().map(inRow);
+    const after = covered.indexOf(false);
+    expect(after).toBeGreaterThan(0);
+    // What follows is the current release and the ones after it, named by the counting
+    // rule; nothing there belongs in the table.
+    expect(covered.slice(after).every((c) => !c)).toBe(true);
   });
 
-  it('leaves no changelog entry unreleased: each is a past release or the current one', () => {
-    const files = readdirSync(root('changelog'));
-    const current = newestEntry(changelog('1.6'));
-    const released = new Set([...history.flatMap((h) => h.entries), current.heading]);
-    for (const file of files) {
-      for (const e of entriesOf(read(`changelog/${file}`))) {
-        expect(released.has(e.heading), `${file}: ${e.heading}`).toBe(true);
-      }
+  it('is the release before the first one after it, which that one checks for', () => {
+    const entries = released();
+    const after = entries.findIndex((e) => !inRow(e));
+    const first = entries[after];
+    if (!first) throw new Error('every entry is a row');
+    // The changelog files as they were when that entry was the newest.
+    const files = [...new Set(entries.slice(0, after + 1).map((e) => e.version))].map(
+      (version) => ({
+        version,
+        text: `${ENTRIES_MARKER}\n\n${entries
+          .slice(0, after + 1)
+          .filter((e) => e.version === version)
+          .reverse()
+          .map((e) => e.text)
+          .join('\n\n')}\n`,
+      }),
+    );
+    expect(previousRelease(files, history, first.version, unreleased)?.tag).toBe(
+      history.at(-1)?.tag,
+    );
+  });
+
+  it('takes no tag a later entry can get', () => {
+    const entries = released();
+    const tags = new Set(history.map((h) => h.tag));
+    const last = dateOf(history.at(-1)?.tag ?? '');
+    for (const e of entries.filter((e) => !inRow(e))) {
+      expect(tags.has(ruleTag(e)), e.heading).toBe(false);
+      // A later entry ends on the day of the table's last row or after it.
+      expect(lastDay(e.window) >= last, e.heading).toBe(true);
     }
   });
 
-  it('ends before the current release, so no later entry can take one of its tags', () => {
-    const version = '1.6';
-    const current = newestEntry(changelog(version));
-    const tag = releaseTag(version, current.window, current.nth);
-    expect(history.map((h) => h.tag)).not.toContain(tag);
-    // A later entry ends on the current release's day or after it; every tag here is
-    // dated before that.
-    for (const h of history) expect(dateOf(h.tag) < lastDay(current.window)).toBe(true);
+  it('has a valid list of the entries without a release', () => {
+    for (const u of unreleased) {
+      expect(entriesOf(changelog(u.version)).some((e) => e.heading === u.heading)).toBe(true);
+      expect(inRow(u)).toBe(false);
+    }
   });
 
   it('converts the schema-1 releases, which all come first', () => {
