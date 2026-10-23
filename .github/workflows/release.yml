@@ -189,8 +189,9 @@ jobs:
                 [ "$i" -gt "$last" ] || fail 'Not in order' "$tag comes after a later row"
                 last=$i ;;
               current)
-                [ "$tag" = "$CURRENT" ] && [ "$target" = "$COMMIT" ] \
-                  || fail 'Not a release' "a current release, $tag at $target"
+                if [ "$tag" != "$CURRENT" ] || [ "$target" != "$COMMIT" ]; then
+                  fail 'Not a release' "a current release, $tag at $target"
+                fi
                 current=$tag ;;
               *) fail 'Not a release' "a $kind release, $tag at $target" ;;
             esac
