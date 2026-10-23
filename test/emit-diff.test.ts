@@ -1001,6 +1001,57 @@ describe('unit identity (names are not unique within a faction)', () => {
     expect(log).not.toContain('re-tiered');
   });
 
+  it('reads a unit moved beside its namesake as moved, not as two reprices', () => {
+    const before = committed('imperial-agents');
+    const after = committed('imperial-agents');
+    const base = after.units.find((u) => u.name === 'Inquisitor' && !u.groupTitle);
+    if (!base) throw new Error('data changed');
+    base.groupTitle = 'Every Model Has the Imperium Keyword';
+    const log = changelog([before], [after]);
+    expect(log).toContain('**1 faction changed** · units ~1\n');
+    expect(log).toContain(
+      '**Unit changes:**\n- Inquisitor (Every Model Has the Imperium Keyword, #1) — group: — → Every Model Has the Imperium Keyword\n',
+    );
+    expect(log).not.toContain('**Unit points:**');
+  });
+
+  it('removes the first of two same-named units, not the second', () => {
+    const before = committed('space-wolves');
+    const after = committed('space-wolves');
+    after.units.splice(
+      after.units.findIndex((u) => u.name === 'Venerable Dreadnought'),
+      1,
+    );
+    const log = changelog([before], [after]);
+    expect(log).toContain('**1 faction changed** · units -1\n');
+    expect(log).toContain('**Units removed:** Venerable Dreadnought (#1)\n');
+    expect(log).not.toContain('re-tiered');
+    expect(log).not.toContain('Legends');
+  });
+
+  it('reprices the base copy of an identical pair, not its sub-group twin', () => {
+    const before = committed('imperial-agents');
+    const after = committed('imperial-agents');
+    const cost = after.units.filter((u) => u.name === 'Callidus Assassin')[0]?.pricing[0]?.costs[0];
+    if (!cost) throw new Error('data changed');
+    cost.points += 5;
+    const log = changelog([before], [after]);
+    expect(log).toContain(
+      `- Callidus Assassin — 1 model: ${cost.points - 5} → ${cost.points} (+5)\n`,
+    );
+    expect(log).not.toContain('group:');
+  });
+
+  it('a base roster dropped beside its sub-group copies is 29 removals', () => {
+    const before = committed('imperial-agents');
+    const after = committed('imperial-agents');
+    const grouped = new Set(after.units.filter((u) => u.groupTitle).map((u) => u.name));
+    after.units = after.units.filter((u) => u.groupTitle || !grouped.has(u.name));
+    const log = changelog([before], [after]);
+    expect(log).toContain('· units -29\n');
+    expect(log).not.toContain(' → ');
+  });
+
   it('reports a unit moving to Legends, and back', () => {
     const legends = necronsContent();
     const warriors = legends.units.find((u) => u.name === 'Necron Warriors');

@@ -103,15 +103,20 @@ For an order-only change, the two complete lists would instead appear as:
 ### Which unit is which
 A unit's **identity** is its `groupTitle`, its `name`, and its occurrence index among the
 units with the same group and name, in page order. Every comparison uses it: cost rows,
-wargear, re-tiering, attribute changes, and the added and removed lists. The units left
-unmatched are then paired by name, in page order, and such a pair is a **changed** unit
-(`group: A → B`), not a removal plus an addition.
+wargear, re-tiering, attribute changes, and the added and removed lists. Units are paired
+up in four passes, each in page order and each taking only units the passes before it left
+unpaired: by group and name with identical content (everything but `groupTitle`); by group
+and name; by name with identical content; by name. So a unit that moves into a group that
+already has its namesake reads as moved (`group: A → B`), not as two reprices, and dropping
+the first of two same-named units removes that one rather than shifting the second onto
+it. A pair from the last two passes is a **changed** unit, not a removal plus an addition.
 
 A unit is named as it always was unless another unit in either snapshot has the same
 name. Then the report adds its group, `Inquisitor (Every Model Has the Imperium
 Keyword)`, and, if the group doesn't tell them apart either, its position: `Venerable
 Dreadnought (#2)`. Leader/Support lists hold bare names, so a target counts as lost
-only when no unit of that name is left. See [0014](../docs/decisions/0014-unit-identity.md).
+only when no unit of that name is left. See [0014](../docs/decisions/0014-unit-identity.md)
+and [0035](../docs/decisions/0035-pair-namesakes-by-content-first.md).
 
 ### The table must explain every row
 The Units and Detachments columns count entities **added (`+`), removed (`-`) and

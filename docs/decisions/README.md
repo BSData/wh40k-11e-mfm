@@ -21,7 +21,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0011](0011-a-changelog-file-per-version.md) | A changelog file per MFM version | change tracking |
 | [0012](0012-one-pr-per-version-stacked.md) | One update PR per MFM version, stacked | change tracking |
 | [0013](0013-one-failure-issue-per-outage.md) | One failure issue per outage | change tracking |
-| [0014](0014-unit-identity.md) | A unit is its group, name and position | change tracking |
+| [0014](0014-unit-identity.md) | A unit is its group, name and position (revised by 0035) | change tracking |
 | [0015](0015-diff-the-rules-panels.md) | Diff the rules panels | change tracking |
 | [0016](0016-one-english-collation.md) | One English collation | change tracking |
 | [0017](0017-http-first-a-browser-only-where-needed.md) | Plain HTTP first, a browser only where the page needs one (superseded by 0026) | scraping |
@@ -40,6 +40,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0030](0030-one-short-instruction-file.md) | One short instruction file, for every harness | (AGENTS.md) |
 | [0031](0031-the-drift-fixer-fails-loud-with-fewer-layers.md) | The drift fixer fails loud, with fewer layers (revises 0029) | change tracking |
 | [0032](0032-one-claude-code-pin.md) | One Claude Code pin: the action installs it (revises 0029) | change tracking |
+| [0035](0035-pair-namesakes-by-content-first.md) | Pair same-named units by content before position (revises 0014) | change tracking |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and
