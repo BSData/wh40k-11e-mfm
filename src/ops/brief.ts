@@ -201,6 +201,18 @@ const parsed = (text: string): unknown => {
 };
 
 /**
+ * A failed request's error in a few words. undici's `fetch` says only "fetch failed" and
+ * keeps the reason in `cause`: the one trace of a DNS failure, a TLS error or a reset.
+ */
+const described = (err: unknown): string => {
+  if (!(err instanceof Error)) return String(err);
+  const { cause } = err;
+  if (cause === undefined || cause === null) return err.message;
+  const { code, message } = cause as { code?: unknown; message?: unknown };
+  return `${err.message}: ${code ?? message ?? String(cause)}`;
+};
+
+/**
  * Asks the model for a brief of `body`, once: no retry, since the next run asks again while
  * the PR has no brief. The answer is the text of the reply's text blocks; its thinking is
  * not read.
@@ -230,7 +242,7 @@ export async function askModel(
     if (err instanceof Error && err.name === 'TimeoutError') {
       return { reason: `no answer within ${timeoutMs / 1000} s` };
     }
-    return { reason: `the request failed: ${err instanceof Error ? err.message : String(err)}` };
+    return { reason: `the request failed: ${described(err)}` };
   }
   if (!response.ok) {
     const { error } = (parsed(text) ?? {}) as ErrorResponse;
@@ -262,11 +274,11 @@ const USAGE = `usage: node --experimental-strip-types src/ops/brief.ts <body> --
 
 Writes the update PR's body to --out with a brief above the changelog: a few sentences a
 model writes from <body>, the body \`mfm diff\` wrote. Without a brief (no changelog in the
-body, no ANTHROPIC_API_KEY, a failed or timed-out request, or an answer it doesn't use),
-<body> goes to --out unchanged. While the changelog is the same, the brief already on the
-open PR's body (--previous; a missing file is no PR) is kept and nothing is asked.
-Appends what it did to --report, such as $GITHUB_STEP_SUMMARY, and says why there is no
-brief as a workflow warning. Exits 0 either way, and 2 on a command line it can't run.
+body, no ANTHROPIC_API_KEY, no room left in it, a failed or timed-out request, or an answer
+it doesn't use), <body> goes to --out unchanged. While the changelog is the same, the brief
+already on the open PR's body (--previous; a missing file is no PR) is kept and nothing is
+asked. Appends what it did to --report, such as $GITHUB_STEP_SUMMARY, and says why there is
+no brief as a workflow warning. Exits 0 either way, and 2 on a command line it can't run.
 `;
 
 /** Where the command line writes: its usage to `out`, notes and warnings to `err`. */
@@ -292,6 +304,10 @@ async function withNewBrief(
 ): Promise<{ text: string; block: string; tokens: Tokens } | { reason: string }> {
   const { ANTHROPIC_API_KEY = '' } = env;
   if (ANTHROPIC_API_KEY === '') return { reason: 'no ANTHROPIC_API_KEY' };
+  // Less room than a brief may take: an answer could be paid for, then refused by `insertBrief`.
+  if (body.length > BODY_LIMIT - BRIEF_ROOM) {
+    return { reason: 'the body leaves no room for a brief' };
+  }
   const asked = await askModel(body, ANTHROPIC_API_KEY, fetchFn);
   if ('reason' in asked) return asked;
   const quoted = briefBlock(asked.answer);

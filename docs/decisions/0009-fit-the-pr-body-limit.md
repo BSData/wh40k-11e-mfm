@@ -1,6 +1,6 @@
 # 0009. Fit the PR body under GitHub's limit
 
-- **Status:** accepted, [#54](https://github.com/BSData/wh40k-11e-mfm/pull/54)
+- **Status:** accepted, [#54](https://github.com/BSData/wh40k-11e-mfm/pull/54); revised by [0033](0033-a-model-sums-up-each-update.md): the body is fitted to 64,036 characters, not 65,536, to leave room for a brief
 - **Spec:** [change tracking — Fitting GitHub's limit](../../specs/change-tracking.md#fitting-githubs-limit)
 
 ## Context

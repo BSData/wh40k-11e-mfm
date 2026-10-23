@@ -286,13 +286,17 @@ stands out. It is for readers who never open the detail, and nothing depends on 
   attention* warning, above the blurb, as a quote whose first line is **In brief**, then
   that a model (`claude-opus-5-5`) wrote it from the changelog below, that nobody checked
   it line by line, and that the changelog is the record. `changelog()` marks the place with
-  `<!-- mfm-brief -->` on a line of its own in every body that has a changelog entry, and
-  the brief takes the mark's place, between it and `<!-- /mfm-brief -->`. The version's
-  changelog file and the Discord message don't have it: the file is the durable record, and
-  the message gives counts ([0007](../docs/decisions/0007-announce-how-much-moved.md)).
+  `<!-- mfm-brief -->` on a line of its own in every body that has a changelog entry. A
+  body with a brief reads: the mark, the quote, `<!-- /mfm-brief -->`; a body without one
+  has the mark alone. So the opening mark stays, and the next run finds the brief between
+  the two. The version's changelog file and the Discord message don't have it: the file is
+  the durable record, and the message gives counts
+  ([0007](../docs/decisions/0007-announce-how-much-moved.md)).
 - **Room for it.** `changelog()` keeps 1,500 characters of GitHub's limit for the quote
-  (`BRIEF_ROOM`, see *Fitting GitHub's limit*). An answer that makes the quote longer, or
-  the body longer than 65,536 characters, is not used.
+  (`BRIEF_ROOM`, see *Fitting GitHub's limit*). A body longer than 64,036 characters has
+  less than that, and no request is made for it: its answer could be paid for and then
+  refused. An answer that makes the quote longer, or the body longer than 65,536
+  characters, is not used.
 - **The model.** Claude Opus 5.5 (`claude-opus-5-5`) at effort `high`: one request to the
   Messages API (`anthropic-version: 2026-10-21`), at most 16,000 output tokens, a 4-minute
   timeout and no retry, sent with Node's own `fetch`. The request holds the PR body,
@@ -329,13 +333,15 @@ stands out. It is for readers who never open the detail, and nothing depends on 
   dates. A PR body without a brief asks again.
 - **Never a failed run.** There is no brief when the body has no changelog (nothing
   changed, or only a *Needs attention* flag), when `ANTHROPIC_API_KEY` is unset, when the
-  request fails or times out, when the model didn't finish its answer (a `stop_reason`
-  other than `end_turn`), or when the answer isn't used. The PR then gets `mfm diff`'s
-  body, and each of those but the first is a workflow warning, `No brief`. The job's
-  summary says what happened: the brief and the tokens it took, the brief kept, or why
-  there is none. `brief` is `continue-on-error` and `publish` runs whatever it did, so not
-  even a broken `brief` job fails the run or holds back the PR. This is the one deliberate
-  exception to failing loud ([0020](../docs/decisions/0020-fail-loud-and-located.md)).
+  body leaves no room for one, when the request fails or times out (the reason names the
+  error's cause, such as `ENOTFOUND`, when it has one), when the model didn't finish its
+  answer (a `stop_reason` other than `end_turn`), or when the answer isn't used. The PR
+  then gets `mfm diff`'s body, and each of those but the first is a workflow warning,
+  `No brief`. The job's summary says what happened: the brief and the tokens it took, the
+  brief kept, or why there is none. `brief` is `continue-on-error` and `publish` runs
+  whatever it did, so not even a broken `brief` job fails the run or holds back the PR.
+  This is a deliberate exception to failing loud
+  ([0020](../docs/decisions/0020-fail-loud-and-located.md)).
 - **Cost.** Opus 5.5 costs $4 per million input tokens and $20 per million output tokens:
   a few cents for a typical update, at most about $0.40 for a body at the limit, from the
   key's $10 spend limit, which the drift fixer shares.
@@ -599,9 +605,9 @@ before it reaches `main`.
 Each step that has logic is one `mfm` command, run as `node_modules/.bin/tsx
 src/bin/mfm.ts <command>` (not `pnpm exec`, which can print to stdout); a result a later
 step reads goes to a file (`--output "$GITHUB_OUTPUT"`, `--body-file`), never through a
-captured stdout. The one exception is `brief`, which runs a plain-Node script instead:
-the model's key can't share a job with the dependencies that `tsx` and `mfm` load. The
-scrape workflow (`scrape.yml`) runs five jobs, one after another:
+captured stdout. The one exception in this workflow is `brief`, which runs a plain-Node
+script instead: the model's key can't share a job with the dependencies that `tsx` and
+`mfm` load. The scrape workflow (`scrape.yml`) runs five jobs, one after another:
 
 1. **`scrape`**, with no secrets and a token that only reads:
    1. `mfm open-prs` lists the open update PRs and copies each one's `data/` to its own

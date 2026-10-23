@@ -1,6 +1,6 @@
 # 0033. A model sums up each update in brief, and nothing depends on it
 
-- **Status:** accepted, for [#79](https://github.com/BSData/wh40k-11e-mfm/issues/79)
+- **Status:** accepted, for [#79](https://github.com/BSData/wh40k-11e-mfm/issues/79); revises [0009](0009-fit-the-pr-body-limit.md): the renderer fits the body to 64,036 characters, not 65,536, to leave room for the brief
 - **Spec:** [change tracking — In brief, by a model](../../specs/change-tracking.md#in-brief-by-a-model)
 
 ## Context
@@ -59,7 +59,7 @@ A model can write it. Three things make that risky in this pipeline:
 - **Never a failed run.** No key, a failed or timed-out request, an unfinished answer or one
   that isn't used: the PR goes out with `mfm diff`'s body, a workflow warning and a line in
   the job's summary. `brief` is `continue-on-error`, and `publish` runs whatever it did.
-  This is the one deliberate exception to failing loud
+  This is a deliberate exception to failing loud
   ([0020](0020-fail-loud-and-located.md)): everything the brief says is in the changelog
   under it, and holding back an update, or opening a `scrape-failure` issue, for want of a
   paragraph would cost more than the paragraph is worth.

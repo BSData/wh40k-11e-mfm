@@ -331,6 +331,25 @@ describe('askModel — one request, and its answer or why there is none', () => 
     });
   });
 
+  it("says why a request failed, from the error's cause: DNS, TLS and a reset look alike", async () => {
+    const withCode = fetching(() => {
+      throw new TypeError('fetch failed', {
+        cause: Object.assign(new Error('getaddrinfo ENOTFOUND api.anthropic.com'), {
+          code: 'ENOTFOUND',
+        }),
+      });
+    });
+    await expect(askModel(BODY, 'k', withCode as typeof fetch)).resolves.toEqual({
+      reason: 'the request failed: fetch failed: ENOTFOUND',
+    });
+    const noCode = fetching(() => {
+      throw new TypeError('fetch failed', { cause: new Error('socket hang up') });
+    });
+    await expect(askModel(BODY, 'k', noCode as typeof fetch)).resolves.toEqual({
+      reason: 'the request failed: fetch failed: socket hang up',
+    });
+  });
+
   it('gives up after the timeout', async () => {
     const hang = vi.fn(
       (_url: string | URL | Request, init?: RequestInit) =>
@@ -457,6 +476,31 @@ describe('the command line — a body for the PR, with or without a brief, and e
     expect(read(f.out)).toBe('No changes detected.\n');
     expect(io.stderr).toBe('No brief: the body has no changelog to sum up.\n');
     expect(read(f.report)).toBe(`${HEAD}No brief: the body has no changelog to sum up.\n`);
+  });
+
+  it('asks nothing, and warns, when the body leaves no room for a brief', async () => {
+    // The longest body that keeps BRIEF_ROOM free, and one character more: too little room.
+    const full = `${BODY}${'x'.repeat(BODY_LIMIT - BRIEF_ROOM - BODY.length)}`;
+    expect(full).toHaveLength(BODY_LIMIT - BRIEF_ROOM);
+    const crowded = `${full}x`;
+    const f = given(crowded);
+    const io = captured();
+    const fetchFn = fetching(() => answered('Orks changed most.'));
+    const argv = [f.body, '--out', f.out, '--report', f.report];
+    const env = { ANTHROPIC_API_KEY: 'test-key' };
+    await expect(main(argv, env, io, fetchFn as typeof fetch)).resolves.toBe(0);
+    expect(fetchFn).not.toHaveBeenCalled();
+    expect(read(f.out)).toBe(crowded);
+    expect(io.stderr).toBe('::warning title=No brief::the body leaves no room for a brief\n');
+    expect(read(f.report)).toBe(`${HEAD}No brief: the body leaves no room for a brief.\n`);
+
+    // A body that fills the room the renderer keeps is not crowded: it is asked about.
+    const g = given(full);
+    const asked = fetching(() => answered('Orks changed most.'));
+    const out = await main([g.body, '--out', g.out], env, captured(), asked as typeof fetch);
+    expect(out).toBe(0);
+    expect(asked).toHaveBeenCalledTimes(1);
+    expect(read(g.out)).toBe(insertBrief(full, block('Orks changed most.')));
   });
 
   it("keeps the open PR's brief while the changelog is the same", async () => {

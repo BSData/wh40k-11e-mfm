@@ -67,6 +67,11 @@ describe('the brief in the scrape workflow', () => {
       .filter(([, j]) => JSON.stringify(j).includes('secrets.ANTHROPIC_API_KEY'))
       .map(([name]) => name);
     expect(holding).toEqual(['brief']);
+    // Nor does a workflow-level `env:` (or anything else outside the jobs) hand it to them all.
+    const { brief: _brief, ...otherJobs } = workflow.jobs;
+    expect(JSON.stringify({ ...workflow, jobs: otherJobs })).not.toContain(
+      'secrets.ANTHROPIC_API_KEY',
+    );
 
     const brief = job('brief');
     expect(brief.permissions).toEqual({ contents: 'read' });
