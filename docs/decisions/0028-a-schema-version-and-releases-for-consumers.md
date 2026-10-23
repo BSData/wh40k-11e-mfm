@@ -1,4 +1,4 @@
-# 0022. A schema version, and a release for every data change
+# 0028. A schema version, and a release for every data change
 
 - **Status:** accepted, [#75](https://github.com/BSData/wh40k-11e-mfm/issues/75)
 - **Spec:** [data model — Schema version](../../specs/data-model.md#schema-version-schemaversion),
@@ -37,16 +37,19 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
   2026-10-23), so the second one adds `.2`, counted from the file, not from GitHub. Asset
   names stay the same from one release to the next, so `releases/latest/download/all.json`
   is a stable URL.
-- **The write token never meets project code.** `build` runs `mfm release` with a
-  read-only token; `publish` downloads its artifact and runs `gh release create`, and is
-  the only job with `contents: write`. A compromised dependency could still shape what a
-  real run on `main` publishes, since `build` makes every file, but it can't reach the
-  token, push to the repository, or publish from a dry run or another branch, and the
+- **The write token never meets project code**, as the App key doesn't in the scrape
+  ([0022](0022-the-app-key-never-meets-dependency-code.md)). `build` runs `mfm release`
+  with a read-only token; `publish` downloads its artifact and runs `gh release create`,
+  and is the only job with `contents: write`. A compromised dependency could still shape
+  what a real run on `main` publishes, since `build` makes every file, but it can't reach
+  the token, push to the repository, or publish from a dry run or another branch, and the
   release's commit is the workflow's, not the artifact's. This is the second exception to
   [0005](0005-ship-the-code-you-test.md) after the failure report's fallback: a tag check,
   a "latest" check and one `gh` command, kept out of TypeScript so that the token never
   shares a process with the dependencies. The logic before it (the tag, the notes,
-  whether to publish) is in `mfm release`, under test.
+  whether to publish) is in `mfm release`, under test. A dry run runs `build` as a real
+  run would and skips `publish`, as in the scrape
+  ([0023](0023-a-dry-run-publishes-nothing.md)).
 
 ## Consequences
 - A data change that lands on `main` without a new changelog entry fails the release: its

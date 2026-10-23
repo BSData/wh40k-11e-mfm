@@ -43,6 +43,11 @@ jobs:
       publish: ${{ steps.release.outputs.publish }}
       reason: ${{ steps.release.outputs.reason }}
     steps:
+      # Audit only: records outbound connections and processes, blocks nothing.
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -99,7 +104,7 @@ jobs:
           retention-days: 7
 
   # The only job that can write, and it runs no code from the repository or its
-  # dependencies: the artifact, and gh. gh uploads the assets to a draft and publishes it
+  # dependencies: pinned actions, the artifact, and gh. gh uploads the assets to a draft and publishes it
   # once they are all there, which immutable releases need. The release is marked latest
   # only while its commit is still main's head, so a late re-run of an older run can't
   # point releases/latest at older data.
@@ -111,6 +116,11 @@ jobs:
     permissions:
       contents: write # create the tag and the release
     steps:
+      # Audit only, as in every job (see "Workflow integration" in specs/change-tracking.md).
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: release

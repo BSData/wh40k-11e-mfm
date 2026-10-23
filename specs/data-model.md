@@ -245,7 +245,7 @@ summary line (`` `schemaVersion` 2 → 3 ``, or `— → 2` from a snapshot writ
 existed). To
 compare across a bump, `loadMeta()` reads a snapshot's `meta.yaml` as `SnapshotMeta`:
 `SiteMeta` with any `schemaVersion`, or none. See
-[0022](../docs/decisions/0022-a-schema-version-and-releases-for-consumers.md).
+[0028](../docs/decisions/0028-a-schema-version-and-releases-for-consumers.md).
 
 ## JSON Schema (`schema/`)
 `schema/` holds JSON Schemas (draft 2020-12) generated from the zod model with
@@ -341,9 +341,10 @@ publishes nothing.
 
 The workflow has two jobs. `build` runs `mfm release` with the default read-only token and
 uploads the result as an artifact. `publish`, the only job with `contents: write`, runs no
-code from the repository or its dependencies: it downloads the artifact, checks the tag's
-form, and runs `gh release create`, which uploads the assets to a draft and publishes it
-once they are all there. The release is marked latest only while its commit is `main`'s
+code from the repository or its dependencies, only pinned actions and `gh`: it downloads
+the artifact, checks the tag's form, and runs `gh release create`, which uploads the
+assets to a draft and publishes it once they are all there. Both jobs start with
+`harden-runner` in audit mode, like the scrape's. The release is marked latest only while its commit is `main`'s
 head, so a late re-run of an older run can't point `releases/latest` at older data.
 Releases are immutable on this repository, so a published release, its tag and its assets
 never change.
@@ -354,7 +355,7 @@ data is in the newer release, and re-running the cancelled run releases its own 
 `workflow_dispatch` with `dry-run` builds and prints everything, the release check
 included, and publishes nothing. `publish` runs only on `main`, and a dry run or a run on
 another branch has a concurrency group of its own, so it can't cancel a real one. See
-[0022](../docs/decisions/0022-a-schema-version-and-releases-for-consumers.md).
+[0028](../docs/decisions/0028-a-schema-version-and-releases-for-consumers.md).
 
 ## Index (in-memory only, not written)
 `SiteIndex` = `{ version, factions: [{ slug, name }] }`, parsed from the landing page
