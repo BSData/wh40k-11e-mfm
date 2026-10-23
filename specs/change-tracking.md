@@ -406,8 +406,9 @@ When the site changes its markup, the fix takes judgment: find what moved, chang
 parser or an allowlist, update the spec. `drift-fix.yml` has a model draft it as a draft
 PR for a maintainer to review; everything around the model is plain Actions, and each
 part holds only what it needs. See
-[0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md) and
-[0031](../docs/decisions/0031-the-drift-fixer-fails-loud-with-fewer-layers.md).
+[0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md),
+[0031](../docs/decisions/0031-the-drift-fixer-fails-loud-with-fewer-layers.md) and
+[0032](../docs/decisions/0032-one-claude-code-pin.md).
 
 1. **The failure artifact**, in `scrape` (no secrets, no model). When the scrape fails,
    `mfm refresh-fixtures --failed /tmp/failures.md --out /tmp/drift/fixtures` downloads,
@@ -438,11 +439,15 @@ part holds only what it needs. See
    `ANTHROPIC_API_KEY`, and no other secret. Its token has `contents: read` and
    `actions: read`, the checkout keeps no credentials, and harden-runner blocks egress
    except to the model's API, GitHub (`github.com`, `api.github.com` and its release
-   downloads), the npm registry and `nodejs.org`, with sudo and containers off;
-   harden-runner itself always allows GitHub's Actions service and its storage.
-   The dependencies, and Claude Code from npm (`npm ci`, with the version and integrity
-   hashes pinned by `.github/drift-fix/package-lock.json`), are installed before
-   the agent starts. `anthropics/claude-code-action` runs Claude Sonnet 5.5 once, for at
+   downloads), the npm registry, `nodejs.org`, and Claude Code's installer (`claude.ai`,
+   which redirects to `downloads.claude.ai`), with sudo and containers off; harden-runner
+   itself always allows GitHub's Actions service and its storage. The dependencies are
+   installed from the lockfile before the agent starts, and the action installs Claude
+   Code itself, at the version its release pins: the installer checks the binary's
+   SHA-256 against the release's manifest. So the action's pin is the only one, and
+   Dependabot's bump of it moves both. The installer itself isn't pinned and can change
+   any day, so a replay is how to check it ([0032](../docs/decisions/0032-one-claude-code-pin.md)).
+   `anthropics/claude-code-action` runs Claude Sonnet 5.5 once, for at
    most 30 turns, 20 minutes and $2 (`--max-budget-usd`). Its tools are Read, Edit, Glob and Grep, and Bash for
    exactly `pnpm verify`, `git diff` and `git diff --stat`: no web tools and no Write.
    The prompt points at the `diagnose-parse` skill (its section "In the drift-fix
@@ -570,8 +575,9 @@ its job ends, or for about six hours if it sent the runtime token out, and the e
 until GitHub evicts it. That risk is accepted: deleting what the agent's job wrote took a
 job with `actions: write` and a script of its own, which cost more than it saved. Turning
 off CodeQL's overlay analysis closes it. See
-[0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md) and
-[0031](../docs/decisions/0031-the-drift-fixer-fails-loud-with-fewer-layers.md).
+[0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md),
+[0031](../docs/decisions/0031-the-drift-fixer-fails-loud-with-fewer-layers.md) and
+[0032](../docs/decisions/0032-one-claude-code-pin.md).
 
 A human reviews and merges the PR — giving reviewable, auditable history of every
 points change.

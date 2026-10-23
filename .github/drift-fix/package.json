@@ -1,8 +1,0 @@
-{
-  "name": "drift-fix-agent",
-  "private": true,
-  "description": "Claude Code for drift-fix.yml's agent job, installed with `npm ci` from the lockfile beside it. Bump it together with anthropics/claude-code-action, to the version that release installs itself.",
-  "dependencies": {
-    "@anthropic-ai/claude-code": "2.1.301"
-  }
-}

@@ -1,6 +1,6 @@
 # 0029. A failed scrape drafts its own fix, with the model's key and the App's key in separate jobs
 
-- **Status:** accepted, for [#77](https://github.com/BSData/wh40k-11e-mfm/issues/77); revised by [0031](0031-the-drift-fixer-fails-loud-with-fewer-layers.md): no env scrub and no cache sweep, and a run that can't start fails
+- **Status:** accepted, for [#77](https://github.com/BSData/wh40k-11e-mfm/issues/77); revised by [0031](0031-the-drift-fixer-fails-loud-with-fewer-layers.md): no env scrub and no cache sweep, and a run that can't start fails; and by [0032](0032-one-claude-code-pin.md): the action installs Claude Code itself
 - **Spec:** [change tracking — The drift fixer](../../specs/change-tracking.md#the-drift-fixer)
 
 ## Context
@@ -110,7 +110,8 @@ imports a dependency could hide in, and a test fails if it gains one.
 Claude Code is installed from npm with `npm ci`, from a lockfile in `.github/drift-fix/`
 that pins the version the action would install and its integrity hashes, rather than by
 the action's installer, which downloads from Anthropic's own hosts. The allowlist stays at
-the hosts the setup already needs. The lockfile is bumped by hand, with the action.
+the hosts the setup already needs. The lockfile is bumped by hand, with the action. (Since
+[0032](0032-one-claude-code-pin.md), the action installs it: two pins could drift apart.)
 
 Rejected:
 - GitHub Agentic Workflows, which models this loop natively but is in public preview.
