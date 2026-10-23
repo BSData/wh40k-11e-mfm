@@ -75,10 +75,9 @@ costs:
 
 ### `leaderTo` / `supportTo` / `wargear` / `groupTitle` — optional unit extras
 - `leaderTo` / `supportTo`: the units this unit can join, listed separately per ability
-  (from each role block's icon + list). Either may be present, or both — MFM v1.4 gave the
-  Judiciar a Leader list of twelve units and a Support list of five, so a single `role` +
-  `attachTo` pair cannot express what the page says. These are named to match
-  `Enhancement.leaderTo`/`supportTo`, which already modelled exactly this shape.
+  (from each role block's icon + list). Either may be present, or both, as on
+  `Enhancement.leaderTo`/`supportTo` (see
+  [0008](../docs/decisions/0008-leader-and-support-lists.md)).
 - `wargear`: per-item point costs from the unit's "Wargear Options" block (`per` stripped).
 - `legends: true`: marks Legends (deprecated) units — see specs/scraping.md.
 - `groupTitle`: the page sub-group the unit is listed under, Title-Cased from its army-group
@@ -102,19 +101,19 @@ is the first that names a faction.
   list shown beside it (source order preserved). Buying the enhancement is what grants the
   association, so it is modelled per enhancement. Each omitted when absent.
 
-`parent`, `unique`, `leaderTo`, and `supportTo` were all surfaced by the completeness coverage check in
-`src/parse.ts` (see specs/scraping.md) — they were being silently dropped before it forced
-them into the model.
+`parent`, `unique`, `leaderTo` and `supportTo` were all found by the completeness coverage
+check (see specs/scraping.md and [0019](../docs/decisions/0019-account-for-every-visible-string.md)).
 
 ### `firstSeen` — when this content took effect
 The date the file's *current content* was first observed. The scraper keeps it **stable
 across no-op scrapes** and only advances it (to the run date) when the rest of the content
 actually changes — so it records when each set of values came into effect, and an
-unchanged scrape produces no git diff. Implemented in `src/cli.ts` (`resolveFirstSeen`)
+unchanged scrape produces no git diff. Implemented in `src/scrape.ts` (`resolveFirstSeen`)
 via the content fingerprint `contentKey()` in `src/emit.ts`, which ignores `firstSeen`.
 
-### Rules & rationale
-- **One file per faction** — minimal, reviewable diffs; git is the change history.
+### Rules
+- **One file per faction**; git is the change history
+  ([0001](../docs/decisions/0001-git-is-the-change-history.md)).
 - **Deterministic ordering** (see `orderContent()` in `src/emit.ts`): top-level keys in a
   fixed order, leaf cost/wargear/enhancement maps rendered in flow style. Entity order
   (units, detachments, enhancements) is selectable via `--order`: `name` (default,
@@ -157,7 +156,7 @@ factions:                 # slugs successfully scraped, sorted
 `lastUpdated` deliberately avoids a per-run timestamp so an unchanged scrape leaves
 `meta.yaml` byte-identical (no spurious PR). `notes` and `muster` are present only on
 browser runs (omitted with `--no-legends`). Both are **Markdown**: `extractNotesMarkdown` /
-`extractMusterMarkdown` in `src/parse.ts` convert the rendered panel — `<b>` → `**bold**`,
+`extractMusterMarkdown` in `src/parse/panels.ts` convert the rendered panel — `<b>` → `**bold**`,
 all-caps section labels → `##` headings, `<ul>/<li>` → bullet lists, `<table>` → GFM
 tables — so the rules keep their structure, and a change to them (e.g. a battle size's DP)
 is a readable line diff. `src/browser.ts` only drives the page (open + wait) and hands the
@@ -172,7 +171,7 @@ to drive the scrape and supply clean display names.
 
 ## Integrity of the committed files (`pnpm check-data`)
 `data/`, `changelog/` and `DATA-CHANGELOG.md` are generated, so the committed copies must be
-exactly what the tools would write. `scripts/check-data.ts` fails, naming each file, when:
+exactly what the tools would write. `mfm check-data` (`src/check-data.ts`) fails, naming each file, when:
 - a `data/<slug>.yaml` fails the `Faction` schema, isn't named after its `slug`, or isn't
   canonical: reading it with `factionFromYaml()` and writing it back with `factionToYaml()`
   must reproduce it byte for byte, which catches an unknown key, an entry out of order, and

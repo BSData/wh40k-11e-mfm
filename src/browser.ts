@@ -52,7 +52,7 @@ async function dismissCookies(page: Page): Promise<void> {
  * unit-card count jumps straight to its full total; waiting for it to exceed the
  * current count is therefore exact (and deterministic under concurrency), not a
  * timed guess. Unit cards are counted the way the parser tells them apart
- * (`isUnitCard` in src/parse.ts): a card holding a pricing-tier label. Header styles
+ * (`isUnitCard` in src/parse/page.ts): a card holding a pricing-tier label. Header styles
  * vary with the annotation layer, so they are no signal.
  */
 export async function renderWithLegends(ctx: BrowserContext, url: string): Promise<string> {
