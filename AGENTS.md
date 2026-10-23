@@ -91,7 +91,7 @@ pnpm scrape --faction necrons  # live run for one faction (with Legends) → dat
 pnpm scrape --no-legends       # fast HTTP-only run, no browser/Legends
 pnpm scrape                    # full run, all factions → data/ + meta.yaml
 pnpm refresh-fixtures          # re-download test fixtures after a site change
-pnpm mfm announce <before> <after>   # preview the Discord payload (pnpm mfm --help for more)
+pnpm mfm announce <before> <after>   # preview the Discord payload (pnpm mfm --help: every command, exit codes)
 pnpm check                     # Biome lint+format
 pnpm typecheck                 # tsc --noEmit
 ```

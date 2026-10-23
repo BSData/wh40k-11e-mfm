@@ -12,6 +12,7 @@ import {
   updateWindow,
 } from './diff.js';
 import { compareNames } from './emit.js';
+import { movedTo } from './moved.js';
 
 /**
  * Renders a dataset diff as a Discord webhook message — the push half of change
@@ -394,3 +395,6 @@ export async function send(
   });
   return { id: posted.id, ...(url ? { url } : {}) };
 }
+
+// This module used to be the `mfm announce` command: run directly, say where that went.
+movedTo(import.meta.url, 'mfm announce');

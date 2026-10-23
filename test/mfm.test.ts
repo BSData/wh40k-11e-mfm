@@ -1,9 +1,11 @@
+import { execFile } from 'node:child_process';
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { promisify } from 'node:util';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { COMMANDS } from '../src/bin/commands.js';
 import { main } from '../src/bin/mfm.js';
@@ -62,6 +64,26 @@ describe('usage errors exit 2 and say why', () => {
     expect(code).toBe(2);
     expect(stdout).toBe('');
     expect(stderr).toMatch(message);
+  });
+});
+
+describe('a module that used to be a command', () => {
+  const TSX = pathToFileURL(
+    fileURLToPath(new URL('../node_modules/tsx/dist/loader.mjs', import.meta.url)),
+  );
+
+  it.each([
+    ['src/diff.ts', 'mfm diff'],
+    ['src/stack.ts', 'mfm plan'],
+    ['src/discord.ts', 'mfm announce'],
+  ])('%s, run directly, fails and names %s', { timeout: 60_000 }, async (file, command) => {
+    const script = fileURLToPath(new URL(`../${file}`, import.meta.url));
+    const run = promisify(execFile)(process.execPath, ['--import', TSX.href, script, DATA, DATA]);
+    // A caller that still runs the old entrypoint must not take silence for success.
+    await expect(run).rejects.toMatchObject({ code: 1, stdout: '' });
+    await run.catch((err: { stderr: string }) =>
+      expect(err.stderr).toContain(`use \`${command}\``),
+    );
   });
 });
 

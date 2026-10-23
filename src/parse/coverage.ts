@@ -85,7 +85,7 @@ export function assertFactionCovered(
   if (leftovers.length > 0) {
     throw new Error(
       `Unconsumed content on "${slug}": the page has data no selector captured. ` +
-        'Handle it in src/parse.ts (and specs/scraping.md), or add it to the relevant ' +
+        'Handle it in src/parse/ (and specs/scraping.md), or add it to the relevant ' +
         `boilerplate allowlist if it is chrome:\n  ${leftovers.join('\n  ')}`,
     );
   }

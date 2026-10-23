@@ -1,3 +1,5 @@
+import { movedTo } from './moved.js';
+
 /**
  * Turns two dataset snapshots (committed YAML vs. freshly scraped) into readable
  * change reports. One structured diff (`collectChanges`, plus `collectRules` for
@@ -39,7 +41,11 @@ export {
   updateWindow,
   windowLabel,
 } from './diff/naming.js';
+
 export { collectRules, type PanelChange, type RulesChanges } from './diff/rules.js';
 export { sgn } from './diff/sections.js';
 export { sharedHead, tallies, totals } from './diff/tally.js';
 export { tierLabel } from './diff/units.js';
+
+// This module used to be the `mfm diff` command: run directly, say where that went.
+movedTo(import.meta.url, 'mfm diff');

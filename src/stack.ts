@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { movedTo } from './moved.js';
 
 /**
  * Where a scrape's changes go: which update PR branch to write, and what it's based on.
@@ -86,3 +87,6 @@ export function planUpdate(prs: readonly UpdatePr[], version: string, trunk = 'm
     ? { branch, base: top.headRefName, below: stack.map((p) => p.number) }
     : { branch, base: trunk, below: [] };
 }
+
+// This module used to be the `mfm plan` command: run directly, say where that went.
+movedTo(import.meta.url, 'mfm plan');

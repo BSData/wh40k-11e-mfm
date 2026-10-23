@@ -25,7 +25,7 @@ function overview(): string {
   const lines = Object.entries(COMMANDS).map(
     ([name, cmd]) => `  ${name.padEnd(width)}  ${cmd.summary}`,
   );
-  return `usage: mfm <command> [options]\n\nCommands:\n${lines.join('\n')}\n\nRun \`mfm <command> --help\` for a command's options.\n`;
+  return `usage: mfm <command> [options]\n\nCommands:\n${lines.join('\n')}\n\nRun \`mfm <command> --help\` for a command's options.\n\nExit codes: 0 done; 1 failed; 2 a command line it can't run (an unknown command or\noption, a missing or malformed value, the wrong number of arguments), with its help.\n`;
 }
 
 /** `argv` without a `--` at `at`: pnpm passes one through as is (`pnpm scrape -- --out x`). */

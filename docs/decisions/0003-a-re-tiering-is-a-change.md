@@ -1,6 +1,6 @@
 # 0003. A re-tiering is a change, not an add plus a remove
 
-- **Status:** accepted, [#37](https://github.com/BSData/wh40k-11e-mfm/pull/37)
+- **Status:** accepted, [#39](https://github.com/BSData/wh40k-11e-mfm/pull/39) (`84c33c1`)
 - **Spec:** [change tracking — Re-tiering](../../specs/change-tracking.md#a-re-tiering-is-a-modification-not-an-add-plus-a-remove)
 
 ## Context
