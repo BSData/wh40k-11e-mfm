@@ -100,8 +100,9 @@ export function insertBrief(body: string, block: string): string | undefined {
 /** GitHub may hand a body back with CRLF line breaks and without its final line break. */
 const normalised = (text: string): string => text.replace(/\r\n?/g, '\n').trimEnd();
 /**
- * An update with a rules change is dated the day it is scraped and re-dated by each daily
- * re-scrape until it merges, and the brief names no dates: a date is not a change.
+ * A rules change or a faction the site dropped dates an update today, so each daily
+ * re-scrape re-dates it until it merges, and the brief names no dates: a date is not a
+ * change.
  */
 const undated = (text: string): string => text.replace(/\d{4}-\d{2}-\d{2}/g, 'YYYY-MM-DD');
 

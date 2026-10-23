@@ -325,12 +325,14 @@ stands out. It is for readers who never open the detail, and nothing depends on 
   the mark, is the new body, the brief stays and no request is made: a PR left open for
   weeks costs one request, not one a day, and its brief doesn't change under a changelog
   that didn't. Line endings, trailing whitespace and dates (any `YYYY-MM-DD`) don't count
-  as a change: an update with a rules change is dated the day it is scraped and re-dated
-  by each daily re-scrape until it merges
-  ([0002](../docs/decisions/0002-name-and-date-an-update-from-the-data.md),
-  [0015](../docs/decisions/0015-diff-the-rules-panels.md)), which would otherwise ask the
-  model again every day, on the key the drift fixer shares. That is why the brief names no
-  dates. A PR body without a brief asks again.
+  as a change: what has no stamp of its own, a rules change or a faction the site dropped
+  ([0034](../docs/decisions/0034-a-faction-the-site-drops-is-deleted.md)), dates the
+  update today, alone or as its window's last day, so each daily re-scrape re-dates it
+  until it merges ([0002](../docs/decisions/0002-name-and-date-an-update-from-the-data.md),
+  [0015](../docs/decisions/0015-diff-the-rules-panels.md),
+  [0038](../docs/decisions/0038-a-rules-change-dates-the-update.md)), which would
+  otherwise ask the model again every day, on the key the drift fixer shares. That is why
+  the brief names no dates. A PR body without a brief asks again.
 - **Never a failed run.** There is no brief when the body has no changelog (nothing
   changed, or only a *Needs attention* flag), when `ANTHROPIC_API_KEY` is unset, when the
   body leaves no room for one, when the request fails or times out (the reason names the

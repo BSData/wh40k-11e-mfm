@@ -51,11 +51,14 @@ A model can write it. Three things make that risky in this pipeline:
   asked. An update PR has stayed open three weeks
   ([#55](https://github.com/BSData/wh40k-11e-mfm/pull/55)): asked daily, that is 21
   requests, up to $8 of the key's $10 for a body at the limit, and a brief rewritten every
-  day over the same changelog. Dates don't count as a change (any `YYYY-MM-DD`): an update
-  with a rules change is dated the day it is scraped and re-dated by each daily re-scrape
-  until it merges ([0002](0002-name-and-date-an-update-from-the-data.md),
-  [0015](0015-diff-the-rules-panels.md)), which would ask again every day all the same. So
-  the brief is asked to name no dates; the title carries them.
+  day over the same changelog. Dates don't count as a change (any `YYYY-MM-DD`): what has
+  no stamp of its own, a rules change or a faction the site dropped
+  ([0034](0034-a-faction-the-site-drops-is-deleted.md)), dates the update today, alone or
+  as its window's last day, so each daily re-scrape re-dates it until it merges
+  ([0002](0002-name-and-date-an-update-from-the-data.md),
+  [0015](0015-diff-the-rules-panels.md), [0038](0038-a-rules-change-dates-the-update.md)),
+  which would ask again every day all the same. So the brief is asked to name no dates; the
+  title carries them.
 - **Never a failed run.** No key, a failed or timed-out request, an unfinished answer or one
   that isn't used: the PR goes out with `mfm diff`'s body, a workflow warning and a line in
   the job's summary. `brief` is `continue-on-error`, and `publish` runs whatever it did.
