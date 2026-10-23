@@ -48,7 +48,9 @@ git diff origin/<base>...origin/mfm/v<version> -- data/
   report the body.
 
 ## Red flags (likely a scraper bug, not a GW change)
-- A faction file deleted, or a faction losing most of its units.
+- A faction file deleted: check the site's index. A faction the site really dropped is
+  deleted by design (0034); if the site still lists it, the index was misread. And a
+  faction losing most of its units.
 - A cost dropping to 0, or changing threefold or more.
 - The same units removed and re-added under slightly different names (casing,
   apostrophes): a parser or title-casing change, not a rename by GW.

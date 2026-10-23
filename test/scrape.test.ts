@@ -147,6 +147,40 @@ describe('mfm scrape — the rules panels on a full run', () => {
   });
 });
 
+describe('mfm scrape — a faction the index no longer lists', () => {
+  const orks = () => join(out, 'orks.yaml');
+  const writeOrks = () =>
+    writeFileSync(orks(), factionToYaml({ ...ORKS, firstSeen: '2026-01-01' }));
+
+  it('deletes its file on a full run, so data/ matches meta.yaml', async () => {
+    serve(() => fixture('necrons-legends-cookie.html'));
+    writeOrks();
+    expect(await scrape()).toBe(0);
+    expect(existsSync(orks())).toBe(false);
+    expect(existsSync(join(out, 'necrons.yaml'))).toBe(true);
+    expect(meta()).toContain('factions:\n  - necrons\n');
+    expect(readFileSync(join(out, 'points.csv'), 'utf8')).not.toContain('\norks,');
+    expect(vi.mocked(console.log).mock.calls.flat().join('\n')).toMatch(
+      /orks +no longer in the index: orks\.yaml removed/,
+    );
+  });
+
+  it('keeps it on a --faction run, which writes no meta.yaml', async () => {
+    serve(() => fixture('necrons-legends-cookie.html'));
+    writeOrks();
+    expect(await scrape('--faction', 'necrons')).toBe(0);
+    expect(existsSync(orks())).toBe(true);
+  });
+
+  it('keeps it when the rules panels fail and meta.yaml is left as it was', async () => {
+    serve(withoutMuster);
+    writeOrks();
+    expect(await scrape()).toBe(1);
+    expect(meta()).toBe(OLD_META);
+    expect(existsSync(orks())).toBe(true);
+  });
+});
+
 describe('mfm scrape --browser — the cross-check', () => {
   const stub = () => {
     const check = {

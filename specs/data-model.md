@@ -189,7 +189,7 @@ muster: |-                # the expandable "Muster Armies" army-building rules, 
   | Battle Size  | Points Total | Detachment Points (DP) | Enhancement Limit | Unit Limit\* |
   | ------------ | ------------ | ---------------------- | ----------------- | ------------ |
   | INCURSION    | 1000         | 2                      | 2                 | 2            |
-factions:                 # slugs successfully scraped, sorted
+factions:                 # slugs successfully scraped, sorted; one data/<slug>.yaml each
   - adepta-sororitas
   - ...
 ```
@@ -201,6 +201,13 @@ payload and converts it — `<b>` → `**bold**`, all-caps section labels → `#
 `<ul>/<li>` → bullet lists, `<table>` → GFM tables — so the rules keep their structure, and
 a change to them (e.g. a battle size's DP) is a readable line diff. See "The rules panels"
 in [`scraping.md`](scraping.md).
+
+`factions` names the factions the full run scraped. A faction the index stops listing has
+its file deleted by the next full scrape, and drops out of `factions` with it; the release
+after the update leaves it out, and earlier releases keep it. A run in which a listed
+faction fails keeps that faction's old file but leaves it out of `factions`, and exits 1,
+so no update is made from it. See
+[0034](../docs/decisions/0034-a-faction-the-site-drops-is-deleted.md).
 
 The runtime contract is the `SiteMeta` schema in `src/model.ts`: `metaFromYaml()` validates
 against it, as `factionFromYaml()` validates a faction file against `Faction`.
@@ -226,8 +233,9 @@ files could break:
 - a value's meaning changes while its type stays (`points` counted per model instead of
   per unit).
 
-It doesn't go up for an addition: a new optional field, a new file, a new faction. Nor for
-the values themselves, which are data rather than shape: points, and also how names are
+It doesn't go up for an addition: a new optional field, a new file, a new faction; nor for
+a faction the site drops, whose file a scrape deletes (see
+[Meta file](#meta-file-datametayaml)). Nor for the values themselves, which are data rather than shape: points, and also how names are
 written (a regeneration like [#88](https://github.com/BSData/wh40k-11e-mfm/pull/88)'s,
 which a changelog entry announces).
 

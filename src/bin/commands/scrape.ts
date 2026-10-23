@@ -6,9 +6,10 @@ export const command: Command = {
 
 Scrapes the Munitorum Field Manual into --out over plain HTTP, one request per page:
 each faction's YAML, Legends included, validated, and on a full run meta.yaml with the
-rules panels. Every run then rewrites points.csv from the faction files in --out. A
-faction that fails doesn't stop the others, but the run exits 1 at the end. \`pnpm
-scrape\` runs this.
+rules panels; a run that writes meta.yaml also deletes the file of each faction the
+index no longer lists. Every run then rewrites points.csv from the faction files in
+--out. A faction that fails doesn't stop the others, but the run exits 1 at the end.
+\`pnpm scrape\` runs this.
 
   --faction <slug>     one faction only; meta.yaml is left as it is
   --out <dir>          where the YAML goes (default: data)

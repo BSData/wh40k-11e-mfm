@@ -69,6 +69,10 @@ https://raw.githubusercontent.com/BSData/wh40k-11e-mfm/main/data/meta.yaml
 https://raw.githubusercontent.com/BSData/wh40k-11e-mfm/main/data/necrons.yaml
 ```
 
+A faction the MFM site stops listing is removed: its file is deleted and its slug leaves
+`meta.yaml`, in an update whose changelog entry (and so its release notes) says so. A commit
+SHA or an earlier release still has it.
+
 `meta.yaml` lists every faction's slug, so you don't need the rate-limited GitHub API to
 find the files. In JavaScript, with the [`yaml`](https://www.npmjs.com/package/yaml)
 package:

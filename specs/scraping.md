@@ -220,6 +220,12 @@ for React. `rulesPanels()` in `src/parse/panels.ts` decodes it with `src/parse/r
   run records a failure named `rules panels` (in the `--report` file, exit code 1) and does
   **not** write `meta.yaml`. The factions are still scraped and written. A `--faction` run
   writes no `meta.yaml`.
+- When a full run writes `meta.yaml`, it also deletes each faction file in `--out` whose
+  slug the index no longer lists. `meta.yaml`'s `factions` are the slugs scraped, so when
+  every listed faction is scraped, `--out` holds exactly the factions `meta.yaml` names. A
+  listed faction that fails keeps the file it had, which `factions` then leaves out, and
+  the run exits 1, so no update PR is made from it. A run that writes no `meta.yaml`
+  deletes nothing. See [0034](../docs/decisions/0034-a-faction-the-site-drops-is-deleted.md).
 
 ## The browser (tests and troubleshooting only)
 `src/browser.ts` drives Google Chrome with

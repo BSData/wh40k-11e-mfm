@@ -185,7 +185,7 @@ export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpt
   const changes = collectChanges(before, after);
   const rules = collectRules(opts.meta?.before, opts.meta?.after);
   const flags = collectAttention(changes, rules, before, after, opts.meta);
-  // A flag alone still makes a body: a faction gone from the index changes no data file.
+  // A flag alone still makes a body: the index flag can come with no data file changed.
   if (changes.length === 0 && !rules && flags.length === 0) return 'No changes detected.\n';
   const file = changelogFile(updateVersion(after, opts));
   // The warning is part of the head, which fitting the body to GitHub's limit never cuts.

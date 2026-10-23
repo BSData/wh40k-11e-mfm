@@ -228,9 +228,14 @@ Some changes are more likely the scraper misreading the site than GW changing it
 | a value changed threefold | it went to at least three times what it was, or to a third of it or less, or up from 0 |
 | a new cost option priced off its unit | a cost option its unit didn't have (a new row, or an option new in a re-tier) costs per model three times the most, or a third of the least, that the unit's old options cost per model, or it costs 0 |
 
-The scraper writes a file for each faction the index lists and deletes none, so a
-faction the index stops listing keeps its old file, unchanged, and the diff never sees it
-go: the index is where it shows. Its flag says the file was kept.
+A full scrape deletes the file of a faction the index no longer lists (see
+[0034](../docs/decisions/0034-a-faction-the-site-drops-is-deleted.md)), so the diff reports
+it as a removed faction, flagged as gone from the site with what it had. The index flag is
+for a slug that leaves `meta.yaml`'s `factions` with no removed file to report, in a
+snapshot `check-data` rejects: one whose file the new snapshot keeps though its own
+`meta.yaml` no longer lists it, which since 0034 only a failed run leaves (its flag says the
+file was kept), or one the old `meta.yaml` listed with no `data/` file at all (its flag names
+the slug and says it had no file).
 
 A re-tiered unit's prices aren't in the cost diff, so they are checked option by option,
 against the range of the option's old prices: a new price above the old highest is
@@ -253,7 +258,7 @@ flag that several factions share word for word (a sub-faction carrying its paren
 roster) is one line naming them all. At most 50 lines are listed, then how many more
 there are, which `mfm attention <before> <after>` lists in full. The warning is part of
 the body's head, so fitting GitHub's limit never cuts it. A flag alone makes a body,
-and a Discord message: a faction gone from the index changes no data file, so without it
+and a Discord message: the index flag can come with no data file changed, so without it
 the body would say `No changes detected.` and nothing would be announced. Such an update
 has no changelog entry either (`mfm changelog` writes none), so its body's blurb says
 the PR commits none, and that `meta.yaml` is the whole change. The warning isn't in the

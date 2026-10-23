@@ -108,7 +108,7 @@ describe('the rules', () => {
     ]);
   });
 
-  it('a faction the index stopped listing, whose file the scraper keeps', () => {
+  it('a faction the index stopped listing, whose file the snapshot keeps', () => {
     const flags = flagsFor((fs, meta) => {
       meta.factions = meta.factions.filter((s) => s !== 'chaos-titan-legions');
       return fs;

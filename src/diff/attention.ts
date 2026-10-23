@@ -223,9 +223,11 @@ export function collectAttention(
     }
   }
 
-  // A faction the site's index stopped listing. The scraper writes only what the index
-  // lists and deletes nothing, so its old file stays in `data/` unchanged and the diff
-  // never sees it go: `meta.yaml`'s list of factions is where it shows.
+  // A slug `meta.yaml` stopped listing that the diff doesn't report removed. A full scrape
+  // deletes the file of a faction the index no longer lists (0034), so the diff reports it
+  // as a removed faction, flagged above. This is for a snapshot that keeps a file its own
+  // `meta.yaml` no longer lists (one written before 0034, by hand, or by a failed run), or
+  // whose old `meta.yaml` listed a slug with no file: `check-data` rejects both.
   const reported = new Set(changes.filter((c) => c.status === 'removed').map((c) => c.slug));
   const listed = new Set(meta?.after?.factions ?? []);
   if (meta?.after) {

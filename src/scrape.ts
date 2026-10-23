@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { CrossCheck } from './cross-check.js';
 import { POINTS_CSV, pointsCsv } from './csv.js';
@@ -28,7 +28,8 @@ import { parseFaction, parseIndex, type RulesPanels, rulesPanels } from './parse
  * One faction failing does not abort the run; the process exits 1 at the end so CI
  * fails loudly, while still writing the factions that did parse. The rules panels are
  * required too: if they fail, that is reported the same way (as `RULES_PANELS_FAILURE`)
- * and meta.yaml is not written.
+ * and meta.yaml is not written. A full run that writes meta.yaml also deletes the file of
+ * each faction the index no longer lists (docs/decisions/0034).
  */
 
 /** What to scrape, and where to: `mfm scrape`'s options. */
@@ -208,6 +209,17 @@ export async function scrape(args: ScrapeOptions): Promise<number> {
         factions: scraped.map((s) => s.slug),
       }),
     );
+    // A faction the index no longer lists loses its file, so the files are the factions
+    // meta.yaml names and the diff reports it removed. The slugs are the index's, not the
+    // scraped ones: a listed faction that failed keeps its file (and the run exits 1).
+    const listed = new Set(index.factions.map((f) => f.slug));
+    for (const file of readdirSync(args.out).sort()) {
+      if (!file.endsWith('.yaml') || file === 'meta.yaml') continue;
+      const slug = file.slice(0, -'.yaml'.length);
+      if (listed.has(slug)) continue;
+      rmSync(join(args.out, file));
+      console.log(`  - ${slug.padEnd(22)} no longer in the index: ${file} removed`);
+    }
   }
   // The points table is made from the faction files in --out, so it matches them on every
   // run, a single faction's included.
