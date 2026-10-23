@@ -108,7 +108,7 @@ unmatched are then paired by name, in page order, and such a pair is a **changed
 (`group: A → B`), not a removal plus an addition.
 
 A unit is named as it always was unless another unit in either snapshot has the same
-name. Then the report adds its group, `Inquisitor (Every Model Has The Imperium
+name. Then the report adds its group, `Inquisitor (Every Model Has the Imperium
 Keyword)`, and, if the group doesn't tell them apart either, its position: `Venerable
 Dreadnought (#2)`. Leader/Support lists hold bare names, so a target counts as lost
 only when no unit of that name is left. See [0014](../docs/decisions/0014-unit-identity.md).
