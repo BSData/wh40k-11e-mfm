@@ -541,7 +541,7 @@ poison. It costs each job its install, a few seconds. pnpm/setup still restores 
 lockfile-verification log, a memo of the lockfile entries it has checked against the
 registry; a forged one could only skip that check for the committed lockfile, whose
 integrity hashes pnpm checks every download against. See
-[0027](../docs/decisions/0027-a-failed-scrape-drafts-its-fix.md).
+[0028](../docs/decisions/0028-a-failed-scrape-drafts-its-fix.md).
 
 A human reviews and merges the PR — giving reviewable, auditable history of every
 points change.
