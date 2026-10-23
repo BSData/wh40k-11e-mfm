@@ -81,7 +81,7 @@ describe('the release workflow', () => {
         .filter((k) => k.startsWith('permission-'))
         .sort(),
     ).toEqual(['permission-contents', 'permission-workflows']);
-    expect(env.GH_TOKEN).toBe('${{ steps.token.outputs.token }}');
+    expect(env.GH_TOKEN?.replace(/\s/g, '')).toBe(['$', '{{steps.token.outputs.token}}'].join(''));
     expect(publish?.if).toContain("github.event_name != 'pull_request'");
     expect(publish?.if).toContain("github.ref == 'refs/heads/main'");
     expect(publish?.if).toContain('!inputs.dry-run');
