@@ -297,7 +297,7 @@ export function announcement(
 ): DiscordMessage | null {
   const changes = collectChanges(before, after);
   const rules = collectRules(opts.meta?.before, opts.meta?.after);
-  // A flag alone is announced too: a faction gone from the index changes no data file.
+  // A flag alone is announced too: the index flag can come with no data file changed.
   const attention = collectAttention(changes, rules, before, after, opts.meta).length;
   if (changes.length === 0 && !rules && attention === 0) return null;
 

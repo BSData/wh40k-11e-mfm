@@ -1,16 +1,24 @@
 import { compareNames } from '../emit.js';
-import { collectChanges, type Delta, type FactionChanges, type Snapshot } from './collect.js';
+import type { CostOption, PricingTier } from '../model.js';
+import {
+  collectChanges,
+  costDisplay,
+  type Delta,
+  type FactionChanges,
+  type Snapshot,
+} from './collect.js';
 import type { RenderOpts } from './naming.js';
 import { collectRules, type RulesChanges } from './rules.js';
 import { listing, plural } from './sections.js';
 import { sharedHead } from './tally.js';
-import { matchUnits, pricesByOption, tierRanges } from './units.js';
+import { costLabel, matchUnits, pricesByOption, tierRanges } from './units.js';
 
 /**
  * The changes more likely the scraper misreading the site than GW changing it: what the
  * PR body lists under "Needs attention", what the Discord summary counts, and what the
  * update PR is labelled `needs-attention` for. See "Needs attention" in
- * specs/change-tracking.md, and docs/decisions/0027 for where the thresholds come from.
+ * specs/change-tracking.md, and docs/decisions/0027 for where the thresholds come from,
+ * 0037 for the cost rows that are new to their unit.
  */
 
 /** A value this many times bigger, or smaller, than before is flagged. */
@@ -67,6 +75,32 @@ function retierNote(olds: number[], news: number[]) {
   return undefined;
 }
 
+/**
+ * Why a cost option its unit didn't have needs attention: it costs 0, or its price per
+ * model (`points / models`) is threefold the highest of `old`'s, or a third of the lowest or
+ * less, `old` being the unit's old options in every tier. An add-on prices an extra, and a
+ * row of no models has no price per model: neither is measured, nor is any row against old
+ * options that have none. `undefined` when it doesn't.
+ */
+function newRowNote(
+  old: CostOption[],
+  cost: CostOption,
+): { kind: 'to-zero' | 'threefold'; note: string } | undefined {
+  if (cost.points === 0) return { kind: 'to-zero', note: 'at 0' };
+  const priced = (c: CostOption) => !c.addon && c.models > 0;
+  if (!priced(cost)) return undefined;
+  const rates = old.filter(priced).map((c) => c.points / c.models);
+  if (rates.length === 0) return undefined;
+  const lo = Math.min(...rates);
+  const hi = Math.max(...rates);
+  const p = cost.points / cost.models;
+  const note = p > hi ? valueNote(hi, p) : p < lo ? valueNote(lo, p) : undefined;
+  return note && { kind: 'threefold', note: `${note.note} per model` };
+}
+
+/** A cost row's key within its unit, as the cost diff keys it. */
+const rowKey = (t: PricingTier, c: CostOption): string => `${t.range}\n${costLabel(c)}`;
+
 const VERSION_NOTE = /^v\S+ → v\S+$/;
 
 /** A faction whose only change is its version number. */
@@ -99,7 +133,8 @@ const contents = (units: number, dets: number): string =>
  * Every flag in an update, in listing order, a value's flag merged where several factions
  * share it word for word (a sub-faction carries its parent's roster). `changes` and
  * `rules` are the update's diff. The snapshots are read again for the re-tiered units,
- * whose prices the diff keeps out of its cost rows; `meta` for the site's index.
+ * whose prices the diff keeps out of its cost rows, and for the cost rows new to their
+ * unit, which have no old value to compare; `meta` for the site's index.
  */
 export function collectAttention(
   changes: FactionChanges[],
@@ -140,40 +175,74 @@ export function collectAttention(
     };
     for (const d of [...c.costs.deltas, ...c.wargear.deltas, ...c.enh.deltas]) value(d);
 
-    if (c.retiered.length === 0) continue;
+    if (c.costs.added.length === 0 && c.retiered.length === 0) continue;
     const was = beforeBySlug.get(c.slug);
     const now = afterBySlug.get(c.slug);
     if (!was || !now) continue;
     for (const pair of matchUnits(was.units, now.units).pairs) {
-      if (tierRanges(pair.was.unit).join('|') === tierRanges(pair.now.unit).join('|')) continue;
-      const olds = pricesByOption(pair.was.unit.pricing);
-      for (const [option, news] of pricesByOption(pair.now.unit.pricing)) {
+      const [oldUnit, newUnit] = [pair.was.unit, pair.now.unit];
+      const oldCosts = oldUnit.pricing.flatMap((t) => t.costs);
+      if (tierRanges(oldUnit).join('|') === tierRanges(newUnit).join('|')) {
+        // Not re-tiered: a row whose key the old unit doesn't have is new to it.
+        const had = new Set(oldUnit.pricing.flatMap((t) => t.costs.map((x) => rowKey(t, x))));
+        for (const t of newUnit.pricing) {
+          for (const cost of t.costs) {
+            if (had.has(rowKey(t, cost))) continue;
+            const note = newRowNote(oldCosts, cost);
+            if (!note) continue;
+            const detail = note.kind === 'to-zero' ? '' : ` (${note.note})`;
+            const what = `${costDisplay(pair.now, t, cost)}: new at ${cost.points}${detail}`;
+            add(note.kind, c.name, what);
+          }
+        }
+        continue;
+      }
+      const olds = pricesByOption(oldUnit.pricing);
+      for (const [option, news] of pricesByOption(newUnit.pricing)) {
         const old = olds.get(option);
-        const note = old ? retierNote(old, news) : undefined;
-        if (note) {
-          const prices = `${old?.join(' / ')} → ${news.join(' / ')}`;
-          add(
-            note.kind,
-            c.name,
-            `${pair.now.label} — ${option}: ${prices} (re-tiered, ${note.note})`,
-          );
+        if (old) {
+          const note = retierNote(old, news);
+          if (note) {
+            const prices = `${old.join(' / ')} → ${news.join(' / ')}`;
+            const what = `${pair.now.label} — ${option}: ${prices} (re-tiered, ${note.note})`;
+            add(note.kind, c.name, what);
+          }
+          continue;
+        }
+        // An option the unit didn't have before: its costs in tier order, the first that
+        // needs attention says why.
+        for (const cost of newUnit.pricing.flatMap((t) => t.costs)) {
+          if (costLabel(cost) !== option) continue;
+          const note = newRowNote(oldCosts, cost);
+          if (!note) continue;
+          const what = `${pair.now.label} — ${option}: — → ${news.join(' / ')} (re-tiered, new option, ${note.note})`;
+          add(note.kind, c.name, what);
+          break;
         }
       }
     }
   }
 
-  // A faction the site's index stopped listing. The scraper writes only what the index
-  // lists and deletes nothing, so its old file stays in `data/` unchanged and the diff
-  // never sees it go: `meta.yaml`'s list of factions is where it shows.
+  // A slug `meta.yaml` stopped listing that the diff doesn't report removed. A full scrape
+  // deletes the file of a faction the index no longer lists (0034), so the diff reports it
+  // as a removed faction, flagged above. This is for a snapshot that keeps a file its own
+  // `meta.yaml` no longer lists (one written before 0034, by hand, or by a failed run), or
+  // whose old `meta.yaml` listed a slug with no file: `check-data` rejects both.
   const reported = new Set(changes.filter((c) => c.status === 'removed').map((c) => c.slug));
   const listed = new Set(meta?.after?.factions ?? []);
   if (meta?.after) {
     for (const slug of meta.before?.factions ?? []) {
       if (listed.has(slug) || reported.has(slug)) continue;
       const f = beforeBySlug.get(slug);
-      const had = f ? contents(f.units.length, f.detachments.length) : 'a faction file';
+      if (!f) {
+        const what =
+          "is gone from the site's index (`meta.yaml` listed it, but it had no `data/` file)";
+        flags.push({ kind: 'gone', factions: [`\`${slug}\``], what });
+        continue;
+      }
+      const had = contents(f.units.length, f.detachments.length);
       const what = `is gone from the site's index (it had ${had}; its \`data/\` file is kept as it was)`;
-      flags.push({ kind: 'gone', factions: [f?.name ?? slug], what });
+      flags.push({ kind: 'gone', factions: [f.name], what });
     }
   }
 

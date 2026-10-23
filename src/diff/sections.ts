@@ -101,7 +101,12 @@ function factionSection(c: FactionChanges, blocks: Block[], note?: string): Sect
       title: c.name,
       body: `🆕 **New faction** — ${c.unitCount} units, ${c.detCount} detachments`,
     };
-  if (c.status === 'removed') return { name: c.name, title: c.name, body: '🗑 **Removed faction**' };
+  if (c.status === 'removed')
+    return {
+      name: c.name,
+      title: c.name,
+      body: `🗑 **Removed faction**: the site no longer lists it, so \`data/${c.slug}.yaml\` is deleted; earlier releases keep it`,
+    };
   const title = c.head.length > 0 ? `${c.name}  _(${c.head.join(', ')})_` : c.name;
   const parts = [...(note ? [note] : []), ...renderBlocks(blocks)];
   // A version/parent bump alone leaves nothing to list — say so, rather than emitting

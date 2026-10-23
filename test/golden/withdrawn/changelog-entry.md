@@ -4,4 +4,4 @@
 
 ### Chaos Titan Legions
 
-🗑 **Removed faction**
+🗑 **Removed faction**: the site no longer lists it, so `data/chaos-titan-legions.yaml` is deleted; earlier releases keep it

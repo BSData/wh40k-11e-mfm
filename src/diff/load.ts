@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
+import { z } from 'zod';
 import { factionFromYaml } from '../emit.js';
 import { type Faction, SnapshotMeta } from '../model.js';
 
@@ -8,17 +9,19 @@ import { type Faction, SnapshotMeta } from '../model.js';
 
 /**
  * A snapshot's `meta.yaml` (the schema version, the site version and the rules panels),
- * when it has one. Read as `SnapshotMeta`, so a snapshot from another schema version, or
- * from before `schemaVersion`, still compares.
+ * when it has one: a missing file is no meta (a `--faction` scrape writes none), but one
+ * that doesn't parse or fails `SnapshotMeta` throws, naming the file, so the Rules
+ * comparison is never turned off silently. Read as `SnapshotMeta`, so a snapshot from
+ * another schema version, or from before `schemaVersion`, still compares.
  */
 export function loadMeta(dir: string): SnapshotMeta | undefined {
   const path = join(dir, 'meta.yaml');
   if (!existsSync(path)) return undefined;
   try {
-    const meta: SnapshotMeta | null = SnapshotMeta.parse(parse(readFileSync(path, 'utf8')));
-    return meta?.version ? meta : undefined;
-  } catch {
-    return undefined; // A snapshot without usable meta just goes unnamed.
+    return SnapshotMeta.parse(parse(readFileSync(path, 'utf8')));
+  } catch (err) {
+    const detail = err instanceof z.ZodError ? z.prettifyError(err) : String(err);
+    throw new Error(`${path} is invalid: ${detail}`, { cause: err });
   }
 }
 

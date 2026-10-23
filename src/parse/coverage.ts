@@ -1,5 +1,5 @@
 import type { CheerioAPI } from 'cheerio';
-import { DETACHMENT_BOILERPLATE, PAGE_BOILERPLATE, UNIT_BOILERPLATE } from '../allowlists.js';
+import { PAGE_BOILERPLATE } from '../allowlists.js';
 import { CARD_SELECTOR, cardName, isUnitCard, topCards } from './page.js';
 import { findPanel, RULES_PANELS } from './panels.js';
 import { clean } from './text.js';
@@ -9,10 +9,11 @@ const PARENT_TITLE_SELECTOR = 'h3.font-header:not([class*="break-after"])';
 
 /**
  * What is left of `text` once the `consumed` strings are subtracted — one occurrence
- * each, as each stands for one element a parse step read — and then every occurrence
- * of each `boilerplate` string, longest first within each. Used by the coverage
- * check: if a card's whole text minus everything the parser read is empty, the
- * parser consumed all of it.
+ * each, as each stands for one element a parse step read (a block's label included) —
+ * and then every occurrence of each `boilerplate` string (the page level's chrome, which
+ * no parse step reads), longest first within each. Used by the coverage check: if a
+ * card's whole text minus everything the parser read is empty, the parser consumed all
+ * of it.
  */
 function residue(
   text: string,
@@ -32,11 +33,11 @@ function residue(
  * and ignores everything else — so a new section, field, badge, or row that Games
  * Workshop adds would otherwise be dropped with no error and no diff. This pass
  * inverts that: for every unit and detachment card it subtracts the strings the
- * card's parse step consumed (`consumed`, keyed by card element) plus the card
- * allowlist, then does the same for the page chrome, and throws if anything visible
- * is left over. New content fails loudly and locatedly instead of vanishing. Mutates
- * `$` (page-level pass strips parsed cards), so it must run last, after
- * units/detachments are built.
+ * card's parse step consumed (`consumed`, keyed by card element), its block labels
+ * included, then does the same for the page with the page chrome allowlist, and throws
+ * if anything visible is left over. New content fails loudly and locatedly instead of
+ * vanishing. Mutates `$` (page-level pass strips parsed cards), so it must run last,
+ * after units/detachments are built.
  */
 export function assertFactionCovered(
   $: CheerioAPI,
@@ -50,8 +51,7 @@ export function assertFactionCovered(
   topCards($).each((_i, el) => {
     const card = $(el);
     const kind = isUnitCard($, card) ? 'unit' : 'detachment';
-    const boilerplate = kind === 'unit' ? UNIT_BOILERPLATE : DETACHMENT_BOILERPLATE;
-    const left = residue(card.text(), consumed.get(el) ?? [], boilerplate);
+    const left = residue(card.text(), consumed.get(el) ?? []);
     if (left) leftovers.push(`${kind} "${cardName(card)}": ${JSON.stringify(left)}`);
   });
 
@@ -85,8 +85,11 @@ export function assertFactionCovered(
   if (leftovers.length > 0) {
     throw new Error(
       `Unconsumed content on "${slug}": the page has data no selector captured. ` +
-        'Handle it in src/parse/ (and specs/scraping.md), or add it to the relevant ' +
-        `boilerplate allowlist if it is chrome:\n  ${leftovers.join('\n  ')}`,
+        'Handle it in src/parse/ (and specs/scraping.md); or, if it is chrome, add the exact ' +
+        'string to CHANGE_BADGE_TEXT (a change note on a card) or PAGE_BOILERPLATE (page ' +
+        'level) in src/allowlists.ts. A leftover block label (LEADER, SUPPORT, WARGEAR ' +
+        'OPTIONS, ENHANCEMENTS) is never chrome: its block changed, or a note repeats it:' +
+        `\n  ${leftovers.join('\n  ')}`,
     );
   }
 }

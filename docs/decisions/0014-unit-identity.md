@@ -1,6 +1,6 @@
 # 0014. A unit is its group, name and position
 
-- **Status:** accepted, [#86](https://github.com/BSData/wh40k-11e-mfm/pull/86)
+- **Status:** accepted, [#86](https://github.com/BSData/wh40k-11e-mfm/pull/86); revised by [0035](0035-pair-namesakes-by-content-first.md): content before position
 - **Spec:** [change tracking — Which unit is which](../../specs/change-tracking.md#which-unit-is-which)
 
 ## Context

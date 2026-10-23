@@ -74,21 +74,24 @@ name element (see below). See [0018](../docs/decisions/0018-the-change-layer-is-
 
 ## Selectors (the drift-prone surface)
 Every unit and detachment is one **card** — `div.flex.flex-col.space-y-1.m-1` — parsed whole
-and in isolation. A card is a **unit** iff it carries a `YOUR … COST(S)` tier label
-(`div.bg-slate-200` matching `/COST/`); otherwise it is a **detachment**. This holds in both
-header styles (plain and "changed") and whether or not the annotation layer is present.
+and in isolation. A card is a **unit** iff it has a `div.bg-slate-200` tier label reading
+`YOUR … COST(S)` (its whole text: `TIER_LABEL_RE`) **immediately followed by** its
+`ul.leaders`; otherwise it is a **detachment**. A change note is a `div.bg-slate-200` too, and
+one with "COST" in it (`ENHANCEMENT COSTS CHANGED`) must not make a detachment a unit. This
+holds in both header styles (plain and "changed") and whether or not the annotation layer is
+present.
 
 | Datum | Selector |
 |---|---|
 | Site version | first `vX.Y` match in body text |
 | Faction links | `a[href]` matching `^/en/<slug>$`; link text = display name |
-| Card | `div.flex.flex-col.space-y-1.m-1`; unit iff it has a `div.bg-slate-200` label matching `/COST/`, else detachment |
+| Card | `div.flex.flex-col.space-y-1.m-1`; unit iff it has a `div.bg-slate-200` label whose whole text reads `YOUR … COST(S)` (`TIER_LABEL_RE`) and whose next sibling is a `ul.leaders`, else detachment |
 | Card name | header (first child) — a `span.text-xl` inside it if present (detachment / "changed" header), else the header div's own text (plain `div.bg-slate-500.text-xl` unit header) |
 | Unit `groupTitle` / faction `parent` | `h3.font-header:not([class*="break-after"])` sub-group headers (the UNITS/DETACHMENTS section headings are `h3.font-header` *with* the break-after class). Walking headers + cards in document order, each unit takes the sub-group header it sits under as `groupTitle`; a section header resets to the base roster. A sub-group header that names another faction from the index is also surfaced as the faction-level `parent` |
 | Unit pricing tier | `div.bg-slate-200` label + following `ul.leaders` (label → `range`) |
 | Unit cost row | `ul.leaders > li` (post-hydration): trailing `NN pts` = points, rest → `models`/`desc` |
-| Unit roles | `img[src$="leader.svg"]`/`img[src$="support.svg"]`; each block's sibling span = its comma-separated list → `leaderTo`/`supportTo`. **Every** block is read: since v1.4 a unit can carry both, with a different list for each. The block labels (`LEADER`, `SUPPORT`) are allowlisted |
-| Unit wargear | `img[src$="cog.svg"]` block → `ul li`: `per <item>` + `NN pts`. The block label (`WARGEAR OPTIONS`) is allowlisted |
+| Unit roles | `img[src$="leader.svg"]`/`img[src$="support.svg"]`; each block's sibling span = its comma-separated list → `leaderTo`/`supportTo`. **Every** block is read: since v1.4 a unit can carry both, with a different list for each. Each block's label (`LEADER`, `SUPPORT`) is consumed once, with its list |
+| Unit wargear | `img[src$="cog.svg"]` block → `ul li`: `per <item>` + `NN pts`. The block's label (`WARGEAR OPTIONS`) is consumed once, with its rows |
 | Detachment DP badge | `span.self-end` in the header, the whole of it `NDP` (e.g. `2DP`) |
 | Detachment objectives | `div[style]` (styled banner) under the header — **all** of them, since v1.4 a detachment can grant two Force Dispositions |
 | Detachment `unique` | direct-child `div.bg-slate-200` whose text starts `UNIQUE:` (prefix stripped) |
@@ -110,7 +113,7 @@ fixing one.
 | A wargear row without an item or whose points aren't `NN pts` (e.g. `FREE`) | `"<slug>", unit "<CARD>": unreadable wargear row "…"` |
 | An enhancement without a name | `"<slug>", detachment "<CARD>": unreadable enhancement row "…"` |
 | An enhancement whose points aren't `NN pts` (e.g. `FREE`) | `"<slug>", detachment "<CARD>": enhancement "<name>" has unreadable points "…"` |
-| Any visible string no parse step consumed (an unknown change note, a new field, a DP badge that isn't `NDP`) | `Unconsumed content on "<slug>"`, one line per card: `unit "<CARD>": "<leftover>"` (see below) |
+| Any visible string no parse step consumed (an unknown change note, a new field, a DP badge that isn't `NDP`, a block label read twice or without its list) | `Unconsumed content on "<slug>"`, one line per card: `unit "<CARD>": "<leftover>"` (see below) |
 | A page fetched with the Legends cookie that ships the Legends toggle but no `LEGENDS` section | `"<slug>": the page has the Legends toggle but no LEGENDS section …` |
 | A page whose every unit is in the `LEGENDS` section | `"<slug>": every unit is in the LEGENDS section, so the base roster is missing` |
 | On a full run, a rules panel not found in the page's RSC payload, found more than once, holding something the decoder can't render, or without text, or the page it is read from not loading | A failure named `rules panels` (see [The rules panels](#the-rules-panels-over-http)) |
@@ -133,12 +136,18 @@ records the exact text it read, and only that text counts as covered. A string a
 looked at but did not keep (an unparseable value, an unrecognised note, a label it doesn't
 interpret) is not consumed, so it is left over and fails the parse.
 - **Per unit card** — the name, each pricing tier's label and cost rows, each role block's
-  list, and each wargear row, plus `UNIT_BOILERPLATE` (the `LEADER`/`SUPPORT`/`WARGEAR
-  OPTIONS` block labels), must add up to the whole card's text. Any leftover throws.
+  list, each wargear row, and each block's label, once, with the block it heads
+  (`UNIT_BLOCK_LABELS`: `LEADER`, `SUPPORT`, `WARGEAR OPTIONS`), must add up to the whole
+  card's text. Any leftover throws.
 - **Per detachment card** — the name, the DP badge, every objective, the `UNIQUE:` banner,
-  each enhancement's name and points, and each grant's `LEADER:`/`SUPPORT:` keyword and
-  list, plus `DETACHMENT_BOILERPLATE` (the `ENHANCEMENTS` heading), must add up to the whole
-  card.
+  each enhancement's name and points, each grant's `LEADER:`/`SUPPORT:` keyword and list,
+  and the `ENHANCEMENTS` heading, once, with the list it heads (`ENHANCEMENTS_LABEL`), must
+  add up to the whole card.
+
+A label is consumed only by the step that read its block, and only when it reads exactly as
+listed: a second copy (an unknown note `SUPPORT`), a label with no list, or a renamed label
+is left over, and is reported whole (`LEADER UPDATED`, not `UPDATED`). See
+[0036](../docs/decisions/0036-a-label-counts-once-with-its-block.md).
 
 The coverage runs on the **de-annotated** DOM, so only an *unrecognised* change note is
 left of the annotation layer, and it is caught here.
@@ -148,7 +157,7 @@ left of the annotation layer, and it is caught here.
   headings (`UNITS`/`DETACHMENTS`/`LEGENDS`), and the rules panels' button labels (shown
   whether open or not), *nothing* may remain.
 
-The allowlists (`UNIT_BOILERPLATE`, `DETACHMENT_BOILERPLATE`, `PAGE_BOILERPLATE`, and the
+The allowlists (`UNIT_BLOCK_LABELS`, `ENHANCEMENTS_LABEL`, `PAGE_BOILERPLATE`, and the
 `CHANGE_BADGE_TEXT` notes stripped by `deannotate()`) live on their own in
 [`src/allowlists.ts`](../src/allowlists.ts), where code owners guard them. Genuinely new
 chrome is added there, as the exact string, in a reviewed commit; new *data* is taught to
@@ -212,6 +221,14 @@ for React. `rulesPanels()` in `src/parse/panels.ts` decodes it with `src/parse/r
   run records a failure named `rules panels` (in the `--report` file, exit code 1) and does
   **not** write `meta.yaml`. The factions are still scraped and written. A `--faction` run
   writes no `meta.yaml`.
+- When a full run writes `meta.yaml`, it also deletes each faction file in `--out` whose
+  slug the index no longer lists. `meta.yaml`'s `factions` are the slugs scraped, so when
+  every listed faction is scraped, `--out` holds exactly the factions `meta.yaml` names. A
+  listed faction that fails keeps the file it had, which `factions` then leaves out, and
+  the run exits 1, so no update PR is made from it. A run that writes no `meta.yaml`
+  deletes nothing. A `*.yaml` in `--out` that doesn't read as a faction file (and isn't
+  `meta.yaml`) is never deleted: the run throws, naming it. See
+  [0034](../docs/decisions/0034-a-faction-the-site-drops-is-deleted.md).
 
 ## The browser (tests and troubleshooting only)
 `src/browser.ts` drives Google Chrome with
@@ -234,10 +251,12 @@ carries over from another page; a render first declines cookies
 - **Legends**, on a page that has them (it ships `input#show-legends`): wait for the
   toggle's label `#show-legends-label`, which appears once React hydrates, keep the page's
   default render, click the label, and wait for the number of **unit cards** to exceed the
-  default one. A unit card is counted the way the parser recognises one — the card
-  container holding a `div.bg-slate-200` label matching `/COST/` — not by the plain
-  `div.bg-slate-500.text-xl` header, which "changed"-style headers don't have. The Legends
-  render in a single React commit, so the count jumps straight to the full total.
+  default one. A unit card is counted by its tier label: the card container holding a
+  `div.bg-slate-200` label matching `TIER_LABEL_RE` (`YOUR … COST(S)`). The parser also
+  requires the `ul.leaders` after it, which every unit card has, but a count to wait on
+  needn't. Cards are not counted by the plain `div.bg-slate-500.text-xl` header, which
+  "changed"-style headers don't have. The Legends render in a single React commit, so the
+  count jumps straight to the full total.
 - **The rules panels**: click each panel's button and wait for the panel it controls
   (`aria-controls`) to have content.
 

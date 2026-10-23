@@ -1,6 +1,6 @@
 # 0027. Flag what looks like a misread, not just what changed
 
-- **Status:** accepted, [#76](https://github.com/BSData/wh40k-11e-mfm/issues/76)
+- **Status:** accepted, [#76](https://github.com/BSData/wh40k-11e-mfm/issues/76); the file deletion it left for later is decided in [0034](0034-a-faction-the-site-drops-is-deleted.md)
 - **Spec:** [change tracking — Needs attention](../../specs/change-tracking.md#needs-attention)
 
 ## Context

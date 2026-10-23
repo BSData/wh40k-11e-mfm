@@ -1,4 +1,6 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 import { parse as parseYaml } from 'yaml';
@@ -570,6 +572,49 @@ describe('update dates (the sticky PR keeps its start date)', () => {
     expect(windowLabel({ from: '2026-08-31', to: '2026-08-31' })).toBe('2026-08-31');
     expect(windowLabel({ from: '2026-08-31', to: '2026-09-02' })).toBe('2026-08-31 → 2026-09-02');
   });
+
+  const metaOf = (over: Partial<SnapshotMeta> = {}): SnapshotMeta => ({
+    schemaVersion: 2,
+    version: '1.1',
+    lastUpdated: '2026-08-31',
+    muster: '| STRIKE FORCE | 2000 | 3 |',
+    factions: ['necrons'],
+    ...over,
+  });
+
+  it('stretches the window to today when a rules panel changed beside the factions', () => {
+    const after = necrons('2026-08-31');
+    reprice(after, 5);
+    const opts = {
+      today: '2026-09-02',
+      meta: { before: metaOf(), after: metaOf({ muster: '| STRIKE FORCE | 2000 | 4 |' }) },
+    };
+    expect(updateWindow([necrons('2026-06-17')], [after], opts)).toEqual({
+      from: '2026-08-31',
+      to: '2026-09-02',
+    });
+    expect(updateTitle([necrons('2026-06-17')], [after], opts)).toBe(
+      'MFM v1.1 update — 2026-08-31 → 2026-09-02',
+    );
+    expect(changelogEntry([necrons('2026-06-17')], [after], opts)).toContain(
+      '## [2026-08-31 → 2026-09-02] — MFM v1.1',
+    );
+  });
+
+  it('does not move it for a site version or schemaVersion change', () => {
+    const after = necrons('2026-08-31');
+    reprice(after, 5);
+    // exactOptionalPropertyTypes is on: drop the key rather than set it to undefined.
+    const { schemaVersion: _, ...unversioned } = metaOf();
+    const opts = {
+      today: '2026-09-02',
+      meta: { before: unversioned, after: metaOf({ version: '1.2' }) },
+    };
+    expect(updateWindow([necrons('2026-06-17')], [after], opts)).toEqual({
+      from: '2026-08-31',
+      to: '2026-08-31',
+    });
+  });
 });
 
 describe('summary table (stays in sync with the sections)', () => {
@@ -1001,6 +1046,75 @@ describe('unit identity (names are not unique within a faction)', () => {
     expect(log).not.toContain('re-tiered');
   });
 
+  it('reads a unit moved beside its namesake as moved, not as two reprices', () => {
+    const before = committed('imperial-agents');
+    const after = committed('imperial-agents');
+    const base = after.units.find((u) => u.name === 'Inquisitor' && !u.groupTitle);
+    if (!base) throw new Error('data changed');
+    base.groupTitle = 'Every Model Has the Imperium Keyword';
+    const log = changelog([before], [after]);
+    expect(log).toContain('**1 faction changed** · units ~1\n');
+    expect(log).toContain(
+      '**Unit changes:**\n- Inquisitor (Every Model Has the Imperium Keyword, #1) — group: — → Every Model Has the Imperium Keyword\n',
+    );
+    expect(log).not.toContain('**Unit points:**');
+  });
+
+  it('removes the first of two same-named units, not the second', () => {
+    const before = committed('space-wolves');
+    const after = committed('space-wolves');
+    after.units.splice(
+      after.units.findIndex((u) => u.name === 'Venerable Dreadnought'),
+      1,
+    );
+    const log = changelog([before], [after]);
+    expect(log).toContain('**1 faction changed** · units -1\n');
+    expect(log).toContain('**Units removed:** Venerable Dreadnought (#1)\n');
+    expect(log).not.toContain('re-tiered');
+    expect(log).not.toContain('Legends');
+  });
+
+  it('reprices the base copy of an identical pair, not its sub-group twin', () => {
+    const before = committed('imperial-agents');
+    const after = committed('imperial-agents');
+    const cost = after.units.filter((u) => u.name === 'Callidus Assassin')[0]?.pricing[0]?.costs[0];
+    if (!cost) throw new Error('data changed');
+    cost.points += 5;
+    const log = changelog([before], [after]);
+    expect(log).toContain(
+      `- Callidus Assassin — 1 model: ${cost.points - 5} → ${cost.points} (+5)\n`,
+    );
+    expect(log).not.toContain('group:');
+  });
+
+  it('pairs by group before it pairs by content, so a reprice that meets its twin is no move', () => {
+    const before = committed('imperial-agents');
+    const after = committed('imperial-agents');
+    // Both Inquisitors (55 and 65 points) go up by 10: the base's new content is now the
+    // sub-group's old content, which a content-first pairing would take for a move.
+    for (const u of after.units.filter((u) => u.name === 'Inquisitor')) {
+      const cost = u.pricing[0]?.costs[0];
+      if (!cost) throw new Error('data changed');
+      cost.points += 10;
+    }
+    const log = changelog([before], [after]);
+    expect(log).toContain('- Inquisitor — 1 model: 55 → 65 (+10)\n');
+    expect(log).toContain(
+      '- Inquisitor (Every Model Has the Imperium Keyword) — 1 model: 65 → 75 (+10)\n',
+    );
+    expect(log).not.toContain('group:');
+  });
+
+  it('a base roster dropped beside its sub-group copies is 29 removals', () => {
+    const before = committed('imperial-agents');
+    const after = committed('imperial-agents');
+    const grouped = new Set(after.units.filter((u) => u.groupTitle).map((u) => u.name));
+    after.units = after.units.filter((u) => u.groupTitle || !grouped.has(u.name));
+    const log = changelog([before], [after]);
+    expect(log).toContain('· units -29\n');
+    expect(log).not.toContain(' → ');
+  });
+
   it('reports a unit moving to Legends, and back', () => {
     const legends = necronsContent();
     const warriors = legends.units.find((u) => u.name === 'Necron Warriors');
@@ -1268,6 +1382,25 @@ describe('the rules panels (meta.yaml)', () => {
     expect(data?.version).toMatch(/^\d+\.\d+$/);
     expect(data?.muster).toContain('## SELECT BATTLE SIZE');
     expect(loadMeta(fileURLToPath(new URL('./fixtures/', import.meta.url)))).toBeUndefined();
+  });
+
+  it.each([
+    [
+      'a non-string muster',
+      'version: "1.6"\nlastUpdated: 2026-10-22\nmuster: 5\nfactions: [necrons]\n',
+      /muster/,
+    ],
+    ['broken YAML', 'version: "1.6\nfactions: [\n', /meta\.yaml is invalid/],
+    ['an empty file', '', /meta\.yaml is invalid/],
+  ])('fails on an unreadable meta.yaml (%s), naming it', (_, text, detail) => {
+    const dir = mkdtempSync(join(tmpdir(), 'mfm-meta-'));
+    try {
+      writeFileSync(join(dir, 'meta.yaml'), text);
+      expect(() => loadMeta(dir)).toThrow(/meta\.yaml is invalid/);
+      expect(() => loadMeta(dir)).toThrow(detail);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('loads one from another schemaVersion, or from before it, to compare across a bump', () => {

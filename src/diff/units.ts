@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from 'node:util';
 import type { CostOption, PricingTier, Unit } from '../model.js';
 
 /**
@@ -46,6 +47,10 @@ export interface Listed {
 /** A unit's group and name: what its identity shares with any namesake in that group. */
 const groupedName = (u: Unit): string => JSON.stringify([u.groupTitle ?? '', u.name]);
 
+/** Whether two units are alike in everything but the sub-group they sit under. */
+const sameContent = (a: Unit, b: Unit): boolean =>
+  isDeepStrictEqual({ ...a, groupTitle: undefined }, { ...b, groupTitle: undefined });
+
 /** Names that more than one unit carries in either snapshot, by `pick`. */
 function repeated(snapshots: Unit[][], pick: (u: Unit) => string): Set<string> {
   const out = new Set<string>();
@@ -60,10 +65,15 @@ function repeated(snapshots: Unit[][], pick: (u: Unit) => string): Set<string> {
 }
 
 /**
- * Both snapshots' units, identified, labelled and matched up. A unit is matched by its
- * identity first. One that changed sub-group, and so identity, is then matched by name
- * among the units left over, in page order, so it reads as changed rather than as one
- * unit removed and another added.
+ * Both snapshots' units, identified, labelled and matched up, in four passes over the new
+ * units in page order, each taking the first old unit still unpaired: the same group and
+ * name with identical content, the same group and name, the same name with identical
+ * content, the same name. So a unit that moved into a group that already has its namesake
+ * reads as changed, not as two reprices, and one that changed sub-group reads as changed
+ * rather than as one unit removed and another added.
+ *
+ * `removed` keeps the old snapshot's own ids, which may coincide with a pair's (the old
+ * side of a pair takes its partner's id), so rows must be keyed by `pairs` only.
  *
  * A label is the bare name unless another unit in either snapshot carries it; then it
  * adds the group, `Inquisitor (Every Model Has the Imperium Keyword)`, and, if that
@@ -86,27 +96,27 @@ export function matchUnits(before: Unit[], after: Unit[]) {
     });
   };
   const now = listed(after);
-  const left = new Map(listed(before).map((l) => [l.id, l]));
+  const left = listed(before);
   const partner = new Map<Listed, Listed>();
-  for (const l of now) {
-    const was = left.get(l.id);
-    if (!was) continue;
-    partner.set(l, was);
-    left.delete(was.id);
-  }
-  for (const l of now) {
-    if (partner.has(l)) continue;
-    const was = [...left.values()].find((x) => x.unit.name === l.unit.name);
-    if (!was) continue;
-    partner.set(l, was);
-    left.delete(was.id);
-  }
+  const pass = (fits: (now: Listed, was: Listed) => boolean) => {
+    for (const l of now) {
+      if (partner.has(l)) continue;
+      const i = left.findIndex((was) => fits(l, was));
+      if (i === -1) continue;
+      partner.set(l, left[i] as Listed);
+      left.splice(i, 1);
+    }
+  };
+  pass((l, was) => groupedName(l.unit) === groupedName(was.unit) && sameContent(l.unit, was.unit));
+  pass((l, was) => groupedName(l.unit) === groupedName(was.unit));
+  pass((l, was) => l.unit.name === was.unit.name && sameContent(l.unit, was.unit));
+  pass((l, was) => l.unit.name === was.unit.name);
   // The old side takes its partner's id, so the two key their rows alike.
   const pairs = now.flatMap((l) => {
     const was = partner.get(l);
     return was ? [{ was: { ...was, id: l.id }, now: l }] : [];
   });
-  return { pairs, added: now.filter((l) => !partner.has(l)), removed: [...left.values()] };
+  return { pairs, added: now.filter((l) => !partner.has(l)), removed: left };
 }
 
 /**

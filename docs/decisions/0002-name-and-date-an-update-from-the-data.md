@@ -1,6 +1,6 @@
 # 0002. Name and date an update from the data
 
-- **Status:** accepted, [#37](https://github.com/BSData/wh40k-11e-mfm/pull/37) (dates) and [#38](https://github.com/BSData/wh40k-11e-mfm/pull/38) (the version)
+- **Status:** accepted, [#37](https://github.com/BSData/wh40k-11e-mfm/pull/37) (dates) and [#38](https://github.com/BSData/wh40k-11e-mfm/pull/38) (the version); revised by [0038](0038-a-rules-change-dates-the-update.md): a rules change beside faction changes counts as today too
 - **Spec:** [change tracking — Naming an update](../../specs/change-tracking.md#naming-an-update)
 
 ## Context

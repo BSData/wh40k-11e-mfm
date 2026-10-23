@@ -1,4 +1,4 @@
-# MFM v1.7 update — 2026-10-28
+# MFM v1.7 update — 2026-10-21 → 2026-10-23
 
 _Automated Munitorum Field Manual scrape. The YAML diff is canonical; this is the readable summary — the same entry this PR commits to `changelog/v1.7.md`._
 

@@ -85,9 +85,16 @@ error lists exactly what and where (`unit "…"`, `detachment "…"`, or `page-l
 - **It's new data** (a field/section/row worth keeping) → teach the parser to capture it
   (selector + `src/model.ts` + `specs/data-model.md`), the way `unique`/`leaderTo` were added.
 - **It's new chrome** (a heading, banner, nav text) → add the exact string to the relevant
-  allowlist (`UNIT_BOILERPLATE` / `DETACHMENT_BOILERPLATE` / `PAGE_BOILERPLATE`;
-  `grep -rn _BOILERPLATE src` finds them). Keep it tight and specific — a broad entry
+  allowlist in `src/allowlists.ts`: `PAGE_BOILERPLATE` for the page level, or
+  `CHANGE_BADGE_TEXT` for a change note. Keep it tight and specific — a broad entry
   silently swallows future data.
+- **It's a block label** (`LEADER`, `SUPPORT`, `WARGEAR OPTIONS`, `ENHANCEMENTS`) → it is
+  consumed only by the step that reads its block, once, and only when it reads exactly as
+  `UNIT_BLOCK_LABELS` / `ENHANCEMENTS_LABEL` list it. Left over means a second copy (a note
+  that reads like one), a block whose list is now empty, or a renamed label: find which
+  in the page before changing anything. It is never chrome: don't allowlist it
+  (`deannotate()` removes every `div` whose text is in `CHANGE_BADGE_TEXT`, so a label
+  there would take the label, and the icon the parser finds the block by, off every card).
 
 ## Legends and the rules panels
 Both come over plain HTTP from details the site doesn't document (see "Legends" and "The

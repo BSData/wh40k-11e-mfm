@@ -728,6 +728,67 @@ describe('loud failures — content the parser cannot read fails, located', () =
     expect(parse).toThrow(/unit "TECHNOMANCER": "UNIT POINTS REVISED"/);
   });
 
+  const unitNote = (text: string) =>
+    '<div class="m-0 px-1 py-0.5 bg-slate-300 dark:bg-slate-700 font-bold"><span>UPDATED</span></div>' +
+    `<div class="m-0 px-1 py-0.5 bg-slate-200 dark:bg-slate-600 font-bold"><span>${text}</span></div>`;
+
+  it.each([
+    // TECHNOMANCER has a SUPPORT block and no wargear (necrons.html).
+    ['SUPPORT', 'CANOPTEK WRAITHS, IMMORTALS, NECRON WARRIORS</span></div>', 'TECHNOMANCER'],
+    [
+      'WARGEAR OPTIONS',
+      'CANOPTEK WRAITHS, IMMORTALS, NECRON WARRIORS</span></div>',
+      'TECHNOMANCER',
+    ],
+    // SKORPEKH LORD has a LEADER block (necrons.html): the note is reported whole.
+    ['LEADER UPDATED', 'SKORPEKH DESTROYERS</span></div>', 'SKORPEKH LORD'],
+  ])(
+    'fails on a unit note that repeats a block label (%s), naming it whole',
+    (text, anchor, card) => {
+      const html = fixture('necrons.html').replace(anchor, anchor + unitNote(text));
+      expect(html).not.toBe(fixture('necrons.html'));
+      const parse = () => parseFaction(html, 'necrons', 'Necrons');
+      expect(parse).toThrow(/Unconsumed content/);
+      expect(parse).toThrow(`unit "${card}": "${text}"`);
+    },
+  );
+
+  it('fails on a role block with no list', () => {
+    const html = fixture('necrons.html').replace(
+      'SKORPEKH DESTROYERS</span></div>',
+      '</span></div>',
+    );
+    expect(html).not.toBe(fixture('necrons.html'));
+    expect(() => parseFaction(html, 'necrons', 'Necrons')).toThrow(
+      'unit "SKORPEKH LORD": "LEADER"',
+    );
+  });
+
+  it.each(['ENHANCEMENTS', 'ENHANCEMENT COSTS CHANGED', 'YOUR UNIT COSTS'])(
+    'fails on a detachment note %s as a detachment, naming it',
+    (text) => {
+      const html = fixture('adepta-sororitas.html').replaceAll(
+        'FORCE DISPOSITION(S) CHANGED',
+        text,
+      );
+      const parse = () => parseFaction(html, 'adepta-sororitas', 'Adepta Sororitas');
+      // A detachment, so it fails on the note, not on an "unreadable cost row".
+      expect(parse).toThrow(/Unconsumed content/);
+      expect(parse).toThrow(`detachment "BRINGERS OF FLAME": "${text}"`);
+    },
+  );
+
+  it('keeps a detachment whose list heading mentions costs a detachment', () => {
+    const html = fixture('adepta-sororitas.html').replace(
+      '>ENHANCEMENTS</div><ul class="leaders">',
+      '>ENHANCEMENT COSTS</div><ul class="leaders">',
+    );
+    expect(html).not.toBe(fixture('adepta-sororitas.html'));
+    expect(() => parseFaction(html, 'adepta-sororitas', 'Adepta Sororitas')).toThrow(
+      'detachment "ARMY OF FAITH": "ENHANCEMENT COSTS"',
+    );
+  });
+
   it('fails on an enhancement whose points are not a number, naming faction, detachment and enhancement', () => {
     const html = fixture('adepta-sororitas.html').replace(
       '<span>Fire and Fury</span><span>30 pts</span>',

@@ -185,7 +185,7 @@ export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpt
   const changes = collectChanges(before, after);
   const rules = collectRules(opts.meta?.before, opts.meta?.after);
   const flags = collectAttention(changes, rules, before, after, opts.meta);
-  // A flag alone still makes a body: a faction gone from the index changes no data file.
+  // A flag alone still makes a body: the index flag can come with no data file changed.
   if (changes.length === 0 && !rules && flags.length === 0) return 'No changes detected.\n';
   const file = changelogFile(updateVersion(after, opts));
   // The warning is part of the head, which fitting the body to GitHub's limit never cuts.
@@ -203,8 +203,8 @@ export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpt
  * `''` when nothing changed. Written by `mfm changelog` on each scrape PR. `date`
  * defaults to the update's own window (see `updateWindow`), so a re-scrape that finds
  * nothing new rewrites the file byte-identically instead of churning the heading to
- * today and force-pushing the sticky PR. A rules-only update is the exception: it has no
- * stamp to date it by (see `updateWindow`).
+ * today and force-pushing the sticky PR. An update with a rules panel change is the
+ * exception: it has no stamp to date it by (see `updateWindow`).
  */
 export function changelogEntry(
   before: Snapshot[],

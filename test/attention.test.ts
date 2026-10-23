@@ -20,7 +20,7 @@ import {
 } from '../src/diff.js';
 import { announcement } from '../src/discord.js';
 import { metaToYaml, type SiteMeta } from '../src/emit.js';
-import type { Faction, Unit } from '../src/model.js';
+import type { CostOption, Faction, Unit } from '../src/model.js';
 
 /**
  * The "Needs attention" flags (src/diff/attention.ts): each rule at its threshold, how
@@ -108,7 +108,7 @@ describe('the rules', () => {
     ]);
   });
 
-  it('a faction the index stopped listing, whose file the scraper keeps', () => {
+  it('a faction the index stopped listing, whose file the snapshot keeps', () => {
     const flags = flagsFor((fs, meta) => {
       meta.factions = meta.factions.filter((s) => s !== 'chaos-titan-legions');
       return fs;
@@ -118,6 +118,17 @@ describe('the rules', () => {
         kind: 'gone',
         factions: ['Chaos Titan Legions'],
         what: "is gone from the site's index (it had 4 units; its `data/` file is kept as it was)",
+      },
+    ]);
+  });
+
+  it('a slug meta.yaml listed with no faction file, by its slug', () => {
+    const before = { ...baseMeta, factions: [...baseMeta.factions, 'squats'] };
+    expect(needsAttention(base, base, { meta: { before, after: baseMeta } })).toEqual([
+      {
+        kind: 'gone',
+        factions: ['`squats`'],
+        what: "is gone from the site's index (`meta.yaml` listed it, but it had no `data/` file)",
       },
     ]);
   });
@@ -229,6 +240,91 @@ describe('the rules', () => {
       'Necron Warriors — 20 models: 190 → 190 / 63 (re-tiered, ÷3)',
     ]);
     expect(retier(() => 0).map((f) => f.kind)).toEqual(['to-zero', 'to-zero']);
+  });
+
+  // Necron Warriors in v1.6 has one tier, `10 models: 85` and `20 models: 190`: 8.5 and
+  // 9.5 points a model.
+  const warriors = (fs: Faction[]) => unit(faction(fs, 'necrons'), 'Necron Warriors');
+  const withRow = (row: CostOption) =>
+    flagsFor((fs) => {
+      warriors(fs).pricing[0]?.costs.push(row);
+      return fs;
+    });
+
+  it('a new cost row priced off its unit, per model', () => {
+    // A misread model count with a tenfold price: 10 models at 85 read as 1 model at 850.
+    const flags = flagsFor((fs) => {
+      const tier = warriors(fs).pricing[0];
+      if (!tier) throw new Error('no tier');
+      tier.costs[0] = { models: 1, points: 850 };
+      return fs;
+    });
+    expect(flags).toEqual([
+      {
+        kind: 'threefold',
+        factions: ['Necrons'],
+        what: 'Necron Warriors — 1 model: new at 850 (×89.5 per model)',
+      },
+    ]);
+    // Either side of ×3 against the most, 9.5 a model, and of a third of the least, 8.5.
+    // (Model counts the unit doesn't have, so each row is new rather than a reprice.)
+    expect(withRow({ models: 15, points: 140 })).toEqual([]);
+    expect(withRow({ models: 1, points: 28 })).toEqual([]);
+    expect(withRow({ models: 1, points: 29 }).map((f) => f.what)).toEqual([
+      'Necron Warriors — 1 model: new at 29 (×3.1 per model)',
+    ]);
+    expect(withRow({ models: 30, points: 87 })).toEqual([]);
+    expect(withRow({ models: 30, points: 84 }).map((f) => f.what)).toEqual([
+      'Necron Warriors — 30 models: new at 84 (÷3 per model)',
+    ]);
+    expect(withRow({ models: 5, points: 0 }).map((f) => [f.kind, f.what])).toEqual([
+      ['to-zero', 'Necron Warriors — 5 models: new at 0'],
+    ]);
+    // An add-on prices an extra, not models: not measured.
+    expect(withRow({ models: 1, points: 500, desc: 'Big Gun', addon: true })).toEqual([]);
+  });
+
+  it('a new cost row names its tier, where the unit has more than one', () => {
+    // Doomsday Ark: `1 model` at 200 (1st–2nd) and 230 (3rd+).
+    const flags = flagsFor((fs) => {
+      const ark = unit(faction(fs, 'necrons'), 'Doomsday Ark');
+      ark.pricing[1]?.costs.push({ models: 2, points: 2000 });
+      return fs;
+    });
+    expect(flags.map((f) => f.what)).toEqual([
+      'Doomsday Ark — 2 models (3rd+): new at 2000 (×4.3 per model)',
+    ]);
+  });
+
+  it('an option new in a re-tier, per model', () => {
+    const retier = (extra: CostOption) =>
+      flagsFor((fs) => {
+        const u = warriors(fs);
+        const [only] = u.pricing;
+        if (!only) throw new Error('no tier');
+        u.pricing = [
+          { ...only, range: '[1,2]', label: 'Your 1st To 2nd Units Cost' },
+          {
+            range: '[3,)',
+            label: 'Your 3rd + Unit Costs',
+            costs: [...only.costs.map((c) => ({ ...c, points: c.points + 15 })), extra],
+          },
+        ];
+        return fs;
+      });
+    expect(retier({ models: 1, points: 850 }).map((f) => f.what)).toEqual([
+      'Necron Warriors — 1 model: — → 850 (re-tiered, new option, ×89.5 per model)',
+    ]);
+    expect(retier({ models: 1, points: 10 })).toEqual([]);
+  });
+
+  it('not a removed row: its misread, if any, is the new row beside it', () => {
+    expect(
+      flagsFor((fs) => {
+        warriors(fs).pricing[0]?.costs.pop();
+        return fs;
+      }),
+    ).toEqual([]);
   });
 
   it('a new version with nothing else in it, but not one that changed anything', () => {

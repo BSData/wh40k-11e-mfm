@@ -15,13 +15,15 @@ import { jsonSchemas } from './schema.js';
  *
  * Every `data/<slug>.yaml` must pass the `Faction` schema, be named after its slug and be
  * canonical; `data/meta.yaml` must pass `SiteMeta` (so it is at the current
- * `schemaVersion`) and be canonical; `data/points.csv` must be what `pointsCsv()` makes of
- * the faction files; `schema/` must hold exactly the JSON Schemas `jsonSchemas()`
- * generates; and `DATA-CHANGELOG.md` must be the index `changelogIndex()` generates from
- * `changelog/`. Canonical form catches a hand edit that breaks the writer's formatting, not
- * a well-formed one: keeping those out is CI's data-guard. `checkData()` is pure, files in
- * and problems out, so tests can hand it broken copies; `readGeneratedFiles()` reads a
- * repository.
+ * `schemaVersion`) and be canonical; its `factions` must name exactly the faction files (a
+ * slug with no `data/<slug>.yaml`, or a file whose slug it doesn't list, is a problem; by
+ * file name, so a broken file still counts as there, and checked once `meta.yaml` passes
+ * `SiteMeta`); `data/points.csv` must be what `pointsCsv()` makes of the faction files;
+ * `schema/` must hold exactly the JSON Schemas `jsonSchemas()` generates; and
+ * `DATA-CHANGELOG.md` must be the index `changelogIndex()` generates from `changelog/`.
+ * Canonical form catches a hand edit that breaks the writer's formatting, not a well-formed
+ * one: keeping those out is CI's data-guard. `checkData()` is pure, files in and problems
+ * out, so tests can hand it broken copies; `readGeneratedFiles()` reads a repository.
  */
 
 /** A file as `checkData()` sees it: its name within its directory, and its text. */
@@ -48,17 +50,26 @@ export const INDEX = 'DATA-CHANGELOG.md';
 export function checkData(files: GeneratedFiles): string[] {
   const problems: string[] = [];
   const factions: Faction[] = [];
+  const factionFiles = files.data.filter((f) => f.name !== 'meta.yaml');
+  let meta: SiteMeta | undefined;
   for (const f of files.data) {
-    const problem = f.name === 'meta.yaml' ? checkMeta(f.text) : checkFaction(f, factions);
-    if (problem) problems.push(problem);
+    if (f.name === 'meta.yaml') {
+      const checked = checkMeta(f.text);
+      meta = checked.meta;
+      if (checked.problem) problems.push(checked.problem);
+    } else {
+      const problem = checkFaction(f, factions);
+      if (problem) problems.push(problem);
+    }
   }
   if (!files.data.some((f) => f.name === 'meta.yaml')) problems.push('data/meta.yaml is missing');
+  if (meta) problems.push(...checkFactionList(meta, factionFiles));
 
   // Only once every faction file is sound: the table is made from them, and a broken one
   // is already reported.
   const path = `data/${POINTS_CSV}`;
   if (files.points === undefined) problems.push(`${path} is missing`);
-  else if (factions.length === files.data.filter((f) => f.name !== 'meta.yaml').length) {
+  else if (factions.length === factionFiles.length) {
     const problem = canonical(path, files.points, pointsCsv(factions), 'pointsCsv()');
     if (problem) problems.push(`${problem} (the faction files are the source; rescrape)`);
   }
@@ -117,15 +128,38 @@ function checkSchemas(committed: TextFile[]): string[] {
   return problems;
 }
 
-function checkMeta(text: string): string | undefined {
+/** `meta.yaml`'s problem, if any; `meta` once it passes `SiteMeta`, canonical or not. */
+function checkMeta(text: string): { problem?: string | undefined; meta?: SiteMeta } {
   const path = 'data/meta.yaml';
   let meta: SiteMeta;
   try {
     meta = metaFromYaml(text);
   } catch (err) {
-    return invalid(path, err);
+    return { problem: invalid(path, err) };
   }
-  return canonical(path, text, metaToYaml(meta), 'metaToYaml()');
+  return { problem: canonical(path, text, metaToYaml(meta), 'metaToYaml()'), meta };
+}
+
+/**
+ * `meta.yaml`'s `factions` against the faction files, by file name, so a file that is
+ * broken still counts as there: a slug with no file, then a file whose slug isn't listed.
+ */
+function checkFactionList(meta: SiteMeta, factionFiles: TextFile[]): string[] {
+  const problems: string[] = [];
+  const slugs = factionFiles.map((f) => f.name.replace(/\.yaml$/, ''));
+  for (const slug of meta.factions) {
+    if (!slugs.includes(slug)) {
+      problems.push(
+        `data/meta.yaml lists "${slug}" in factions, but there is no data/${slug}.yaml`,
+      );
+    }
+  }
+  for (const slug of slugs) {
+    if (!meta.factions.includes(slug)) {
+      problems.push(`data/${slug}.yaml isn't in data/meta.yaml's factions`);
+    }
+  }
+  return problems;
 }
 
 /** A file that doesn't parse, or fails its schema. */

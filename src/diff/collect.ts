@@ -1,5 +1,5 @@
 import { compareNames } from '../emit.js';
-import type { FactionContent } from '../model.js';
+import type { CostOption, FactionContent, PricingTier } from '../model.js';
 import {
   costLabel,
   describeRetier,
@@ -64,18 +64,25 @@ export interface Numeric {
   entity: string; // owning unit or detachment, so we can skip lines of added/removed entities
 }
 
+/**
+ * A cost option as the report words it: the unit, the option, and its tier when the unit
+ * has more than one (`Nobz — 5 models (3rd+)`).
+ */
+export function costDisplay(l: Listed, tier: PricingTier, cost: CostOption): string {
+  const where = l.unit.pricing.length > 1 ? ` (${tierLabel(tier.range)})` : '';
+  return `${l.label} — ${costLabel(cost)}${where}`;
+}
+
 /** Unit cost options keyed by `unit · tier · option`. */
 function costRows(units: Listed[]): Map<string, Numeric> {
   const m = new Map<string, Numeric>();
-  for (const { id, label, unit: u } of units) {
-    for (const t of u.pricing) {
-      const tier = u.pricing.length > 1 ? ` (${tierLabel(t.range)})` : '';
+  for (const l of units) {
+    for (const t of l.unit.pricing) {
       for (const c of t.costs) {
-        const what = costLabel(c);
-        m.set(`${id}\n${t.range}\n${what}`, {
-          entity: id,
+        m.set(`${l.id}\n${t.range}\n${costLabel(c)}`, {
+          entity: l.id,
           points: c.points,
-          display: `${label} — ${what}${tier}`,
+          display: costDisplay(l, t, c),
         });
       }
     }

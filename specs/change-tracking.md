@@ -103,15 +103,20 @@ For an order-only change, the two complete lists would instead appear as:
 ### Which unit is which
 A unit's **identity** is its `groupTitle`, its `name`, and its occurrence index among the
 units with the same group and name, in page order. Every comparison uses it: cost rows,
-wargear, re-tiering, attribute changes, and the added and removed lists. The units left
-unmatched are then paired by name, in page order, and such a pair is a **changed** unit
-(`group: A → B`), not a removal plus an addition.
+wargear, re-tiering, attribute changes, and the added and removed lists. Units are paired
+up in four passes, each in page order and each taking only units the passes before it left
+unpaired: by group and name with identical content (everything but `groupTitle`); by group
+and name; by name with identical content; by name. So a unit that moves into a group that
+already has its namesake reads as moved (`group: A → B`), not as two reprices, and dropping
+the first of two same-named units removes that one rather than shifting the second onto
+it. A pair from the last two passes is a **changed** unit, not a removal plus an addition.
 
 A unit is named as it always was unless another unit in either snapshot has the same
 name. Then the report adds its group, `Inquisitor (Every Model Has the Imperium
 Keyword)`, and, if the group doesn't tell them apart either, its position: `Venerable
 Dreadnought (#2)`. Leader/Support lists hold bare names, so a target counts as lost
-only when no unit of that name is left. See [0014](../docs/decisions/0014-unit-identity.md).
+only when no unit of that name is left. See [0014](../docs/decisions/0014-unit-identity.md)
+and [0035](../docs/decisions/0035-pair-namesakes-by-content-first.md).
 
 ### The table must explain every row
 The Units and Detachments columns count entities **added (`+`), removed (`-`) and
@@ -156,10 +161,12 @@ each of their sections. See [0010](../docs/decisions/0010-sub-factions-share-a-c
 `meta.yaml` carries the site version and two rules panels: `notes` (the "Welcome…" text)
 and `muster` (Muster Armies: battle sizes, DP, unit limits). `loadMeta()` reads a
 snapshot's `meta.yaml`, and every command that compares snapshots (`mfm diff`, `mfm
-announce`, `mfm changelog`) passes both snapshots' to the renderers. `lastUpdated` and
-`factions` are derived from the faction files, so they aren't compared. A change of
-`schemaVersion` is the summary line's first clause after the count of factions, in the
-reports and the Discord summary alike: a bump breaks readers of the files (see
+announce`, `mfm changelog`) passes both snapshots' to the renderers. A `meta.yaml` that
+doesn't parse, or fails `SnapshotMeta`, fails the command, naming the file; a snapshot
+without one is compared without it. `lastUpdated` and `factions` are derived from the
+faction files, so they aren't compared. A change of `schemaVersion` is the summary line's
+first clause after the count of factions, in the reports and the Discord summary alike: a
+bump breaks readers of the files (see
 [Schema version](data-model.md#schema-version-schemaversion)).
 
 A changed panel is listed in a **Rules** section, ahead of the factions, as a compact
@@ -184,9 +191,11 @@ moved), and the Discord summary names them (`Rules: Muster Armies changed`). The
 row in the table, which is per faction.
 
 The site version is named in the summary line (`site v1.5 → v1.6`) unless the factions
-already say it (`all v1.5 → v1.6`). A rules-only change has no `firstSeen` of its own, so
-its window falls back to today, like a removed faction's. See
-[0015](../docs/decisions/0015-diff-the-rules-panels.md).
+already say it (`all v1.5 → v1.6`). A changed panel has no `firstSeen` of its own, so it
+counts as today, like a removed faction: alone, it dates the update today; beside faction
+changes, it stretches the window to today. Either way each re-scrape re-dates it until the
+PR merges. See [0015](../docs/decisions/0015-diff-the-rules-panels.md) and
+[0038](../docs/decisions/0038-a-rules-change-dates-the-update.md).
 
 ### Order
 Wherever the report or the dataset orders names (factions, units, the added and removed
@@ -217,16 +226,30 @@ Some changes are more likely the scraper misreading the site than GW changing it
 | only the version changed | the site or the factions moved to a new version, and nothing else changed: no faction content and no rules panel |
 | a value dropped to 0 | a cost option, wargear item or enhancement went from more than 0 to 0 |
 | a value changed threefold | it went to at least three times what it was, or to a third of it or less, or up from 0 |
+| a new cost option priced off its unit | a cost option its unit didn't have (a new row, or an option new in a re-tier) costs per model three times the most, or a third of the least, that the unit's old options cost per model, or it costs 0 |
 
-The scraper writes a file for each faction the index lists and deletes none, so a
-faction the index stops listing keeps its old file, unchanged, and the diff never sees it
-go: the index is where it shows. Its flag says the file was kept.
+A full scrape deletes the file of a faction the index no longer lists (see
+[0034](../docs/decisions/0034-a-faction-the-site-drops-is-deleted.md)), so the diff reports
+it as a removed faction, flagged as gone from the site with what it had. The index flag is
+for a slug that leaves `meta.yaml`'s `factions` with no removed file to report, in a
+snapshot `check-data` rejects: one whose file the new snapshot keeps though its own
+`meta.yaml` no longer lists it, which since 0034 only a failed run leaves (its flag says the
+file was kept), or one the old `meta.yaml` listed with no `data/` file at all (its flag names
+the slug and says it had no file).
 
 A re-tiered unit's prices aren't in the cost diff, so they are checked option by option,
 against the range of the option's old prices: a new price above the old highest is
 measured from that highest, and one below the old lowest from that lowest, by the value
 rules above. So it is flagged at three times the old highest or more (any price at all
 above an old highest of 0), and at a third of the old lowest or less, 0 included.
+
+A cost option new to its unit has no old value, so it is measured against the unit's old
+options, by price per model (`points / models`; add-ons and rows of no models have none
+and aren't measured): a misread model count turns a row into a removed one and a new one,
+and the new one's price per model gives it away. A removed row brings no value to check:
+the misread it could come from is the new row beside it. The five real updates had 21 new
+rows; the furthest from its unit's old range was ×2.55 per model. See
+[0037](../docs/decisions/0037-a-new-cost-row-is-checked-per-model.md).
 
 The PR body lists the flags in a **Needs attention** warning (a GitHub `> [!WARNING]`
 alert), straight after the title and before everything else, one line each: the faction
@@ -235,7 +258,7 @@ flag that several factions share word for word (a sub-faction carrying its paren
 roster) is one line naming them all. At most 50 lines are listed, then how many more
 there are, which `mfm attention <before> <after>` lists in full. The warning is part of
 the body's head, so fitting GitHub's limit never cuts it. A flag alone makes a body,
-and a Discord message: a faction gone from the index changes no data file, so without it
+and a Discord message: the index flag can come with no data file changed, so without it
 the body would say `No changes detected.` and nothing would be announced. Such an update
 has no changelog entry either (`mfm changelog` writes none), so its body's blurb says
 the PR commits none, and that `meta.yaml` is the whole change. The warning isn't in the
@@ -256,8 +279,11 @@ carry, ties going to the higher version.
 
 The window is the days, read from the data, never from "now": `updateWindow()` takes the
 earliest and latest `firstSeen` stamps of the factions in the change set (today for one
-without a stamp), and `windowLabel()` renders `2026-08-31`, or `2026-08-31 → 2026-09-02`
-once the PR has accumulated changes across several days.
+without a stamp), and today again when a rules panel changed, since `meta.yaml` has no
+stamp of its own. A change of the site version or `schemaVersion` alone doesn't count: it
+moves with the factions' stamps, or comes from a model change. `windowLabel()` renders
+`2026-08-31`, or `2026-08-31 → 2026-09-02` once the PR has accumulated changes across
+several days. See [0038](../docs/decisions/0038-a-rules-change-dates-the-update.md).
 
 A re-scrape must not re-stamp what the open PRs already captured. The workflow hands the
 scrape every open update branch's `data/` via `--dates-from`, and `firstSeen` resolves to
