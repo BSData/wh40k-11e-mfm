@@ -148,6 +148,9 @@ render, using the Chrome already installed.
   breaks.
 - Set a `DISCORD_WEBHOOK_URL` repository secret and each update is also announced to that
   channel — one message per update, edited as the update grows. No secret, no post.
+- With an `ANTHROPIC_API_KEY` repository secret, each update PR opens with a few sentences
+  about the update, written by a model and marked as such; the changelog under them stays
+  the record. No secret, no brief.
 
 TypeScript (Node 22, ESM) · cheerio · zod · `yaml` · Vitest · Biome · pnpm.
 

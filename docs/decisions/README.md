@@ -16,7 +16,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0006](0006-one-discord-message-per-update.md) | One Discord message per update, remembered on its PR | change tracking |
 | [0007](0007-announce-how-much-moved.md) | Announce how much of each faction moved | change tracking |
 | [0008](0008-leader-and-support-lists.md) | Leader and Support lists | data model, change tracking |
-| [0009](0009-fit-the-pr-body-limit.md) | Fit the PR body under GitHub's limit | change tracking |
+| [0009](0009-fit-the-pr-body-limit.md) | Fit the PR body under GitHub's limit (revised by 0033) | change tracking |
 | [0010](0010-sub-factions-share-a-change-once.md) | A change sub-factions share is listed once | change tracking |
 | [0011](0011-a-changelog-file-per-version.md) | A changelog file per MFM version | change tracking |
 | [0012](0012-one-pr-per-version-stacked.md) | One update PR per MFM version, stacked | change tracking |
@@ -40,6 +40,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0030](0030-one-short-instruction-file.md) | One short instruction file, for every harness | (AGENTS.md) |
 | [0031](0031-the-drift-fixer-fails-loud-with-fewer-layers.md) | The drift fixer fails loud, with fewer layers (revises 0029) | change tracking |
 | [0032](0032-one-claude-code-pin.md) | One Claude Code pin: the action installs it (revises 0029) | change tracking |
+| [0033](0033-a-model-sums-up-each-update.md) | A model sums up each update in brief, and nothing depends on it (revises 0009) | change tracking |
 | [0034](0034-a-faction-the-site-drops-is-deleted.md) | A faction the site drops is deleted from the data | scraping, change tracking |
 | [0035](0035-pair-namesakes-by-content-first.md) | Pair same-named units by content before position (revises 0014) | change tracking |
 | [0036](0036-a-label-counts-once-with-its-block.md) | A block label counts once, with the block it heads (revises 0019) | scraping |

@@ -5,8 +5,8 @@ import { afterAll } from 'vitest';
 import { gitEnv } from '../src/ops/git-env.js';
 
 /**
- * Runs before every test file, to keep the tests off the developer's repository and off
- * GitHub, however they are run.
+ * Runs before every test file, to keep the tests off the developer's repository, off
+ * GitHub and off Anthropic's API, however they are run.
  *
  * Git: tests create and drive throwaway repositories, and lefthook's pre-push hook runs
  * this suite with the variables git exports to hooks (`GIT_DIR`, `GIT_WORK_TREE`,
@@ -21,11 +21,22 @@ import { gitEnv } from '../src/ops/git-env.js';
  * issues on the repository. So `gh` gets a host that can't resolve and an empty config
  * (no stored login), no GitHub token is set, and the REST API root is a closed port:
  * a test that wants GitHub stubs it, with `vi.stubEnv` or a `GitHub` of its own.
+ *
+ * Anthropic: the brief's tests stub `fetch`, and no Anthropic key is set, even one the
+ * developer exported, so a test that reaches the real API by mistake can't make a billed
+ * request.
  */
 
 const keep = gitEnv();
 for (const name of Object.keys(process.env)) if (!(name in keep)) delete process.env[name];
-for (const name of ['GH_TOKEN', 'GITHUB_TOKEN', 'GH_ENTERPRISE_TOKEN', 'GITHUB_ENTERPRISE_TOKEN'])
+for (const name of [
+  'GH_TOKEN',
+  'GITHUB_TOKEN',
+  'GH_ENTERPRISE_TOKEN',
+  'GITHUB_ENTERPRISE_TOKEN',
+  'ANTHROPIC_API_KEY',
+  'ANTHROPIC_AUTH_TOKEN',
+])
   delete process.env[name];
 
 const dir = mkdtempSync(join(tmpdir(), 'mfm-test-env-'));

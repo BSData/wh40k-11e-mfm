@@ -94,8 +94,8 @@ PR that regenerates the data with the scraper or adds a schema-change note.
 1. The `Scrape MFM` workflow scrapes the site every day at 16:00 UTC.
 2. When anything changed, it opens a PR for that MFM version on the branch
    `mfm/v<version>`, labelled `mfm-update`. The PR body is the changelog (shortened if
-   it's over GitHub's size limit), and the commit adds the full entry to
-   `changelog/v<version>.md`.
+   it's over GitHub's size limit), under a few sentences a model wrote about it, and the
+   commit adds the full entry to `changelog/v<version>.md`.
 3. While that version is live, each run that finds a change force-pushes the same branch.
    Don't push to `mfm/*` branches: the next change overwrites your commits.
 4. If GW publishes a new version before the open PR is merged, the new version's PR is

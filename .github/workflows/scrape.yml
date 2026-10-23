@@ -27,8 +27,10 @@ concurrency:
 # repository. So `scrape` runs pnpm, every repository script and, for a cross-check,
 # Google Chrome, with no secrets, and hands the staged update on as an artifact; `publish`
 # mints the App's token and opens the PR with pinned actions and a copy, nothing else.
-# `announce` and `report` run our code again, with the default token. A dry run runs
-# `scrape` only (and `app-check`). See "The App token" in specs/change-tracking.md.
+# `brief`, in between, holds the model's key the same way: pinned actions and one
+# dependency-free script. `announce` and `report` run our code again, with the default
+# token. A dry run runs `scrape` and `brief` only (and `app-check`). See "The App token"
+# and "In brief, by a model" in specs/change-tracking.md.
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -126,11 +128,16 @@ jobs:
       # update on the tree it was built on.
       - name: Bundle the update
         id: bundle
+        env:
+          BRANCH: ${{ steps.plan.outputs.branch }}
         run: |
           mkdir -p /tmp/update/staged
           cp -r pub/data pub/changelog pub/DATA-CHANGELOG.md /tmp/update/staged/
           cp -r /tmp/old-data /tmp/changelog.md /tmp/update/
           cp -r data /tmp/update/new-data
+          # The open PR's body, when this update has one: `brief` keeps its brief while the
+          # changelog under it is the same.
+          if [ -f "/tmp/pr-data/$BRANCH.body.md" ]; then cp "/tmp/pr-data/$BRANCH.body.md" /tmp/update/previous-body.md; fi
           echo "base-sha=$(git -C pub rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Hand the update on
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -200,12 +207,58 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  # A few sentences about the update above its changelog, by a model (src/ops/brief.ts).
+  # This job holds the model's key, so like `publish` it runs no dependency code: pinned
+  # actions and one repository file under plain Node, which imports only Node's own
+  # modules (a test holds it to that). The brief is optional: no key, a failed request or
+  # an answer it doesn't use mean the PR goes out with `mfm diff`'s body and a warning,
+  # and nothing here can fail the run. See "In brief, by a model" in
+  # specs/change-tracking.md.
+  brief:
+    needs: scrape
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true # the brief is optional: `publish` goes ahead without it
+    permissions:
+      contents: read # check out the code
+    steps:
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false # no job restores one
+      - name: Fetch the update
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: update
+          path: /tmp/update
+      # The body with the brief, or as `mfm diff` wrote it; what happened goes to this
+      # job's summary, and why there is no brief to a warning.
+      - name: Write the brief
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node --experimental-strip-types src/ops/brief.ts /tmp/update/changelog.md --previous /tmp/update/previous-body.md --out /tmp/brief/body.md --report "$GITHUB_STEP_SUMMARY"
+      - name: Hand the body on
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: brief
+          path: /tmp/brief/body.md
+          if-no-files-found: ignore
+          retention-days: 7
+
   # The only job that holds the App's key, so it runs pinned actions and a copy, and no
   # repository code. The App's token rather than GITHUB_TOKEN, whose events start no
-  # workflows: that way the update PR gets CI.
+  # workflows: that way the update PR gets CI. Its body is `brief`'s when that job wrote
+  # one, `mfm diff`'s otherwise.
   publish:
-    needs: scrape
-    if: ${{ !inputs.dry-run }}
+    needs: [scrape, brief]
+    # `brief` may fail or be skipped; the PR goes out either way, so only the scrape counts.
+    if: ${{ !cancelled() && !inputs.dry-run && needs.scrape.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -258,6 +311,14 @@ jobs:
         with:
           name: update
           path: /tmp/update
+      # `brief`'s body, when it wrote one; without it the PR gets `mfm diff`'s.
+      - name: Fetch the brief
+        id: brief
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: brief
+          path: /tmp/brief
 
       # The staged update must be regular files where an update writes and nothing else:
       # no dot-files, links, subdirectories or .git.
@@ -298,7 +359,7 @@ jobs:
           branch: ${{ needs.scrape.outputs.branch }}
           base: ${{ needs.scrape.outputs.base }}
           title: ${{ needs.scrape.outputs.title }}
-          body-path: /tmp/update/changelog.md
+          body-path: ${{ steps.brief.outcome == 'success' && '/tmp/brief/body.md' || '/tmp/update/changelog.md' }}
           commit-message: 'data: ${{ needs.scrape.outputs.title }}'
           labels: mfm-update
           delete-branch: true
@@ -326,7 +387,9 @@ jobs:
   # marker must be github-actions[bot]'s anyway: src/ops/announce.ts honours no other.
   announce:
     needs: [scrape, publish]
-    if: ${{ !inputs.dry-run && needs.publish.outputs.pr != '' }}
+    # The explicit result keeps this independent of how a failed `brief`, upstream of
+    # `publish`, is counted.
+    if: ${{ !cancelled() && !inputs.dry-run && needs.publish.result == 'success' && needs.publish.outputs.pr != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

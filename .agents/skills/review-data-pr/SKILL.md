@@ -21,8 +21,12 @@ gh pr view <n> --json title,headRefName,baseRefName,labels,files
   title's version matches `version` in `data/meta.yaml`.
 - The PR changes only `data/`, `changelog/v<version>.md` and `DATA-CHANGELOG.md`. Anything
   else (`src/`, `.github/`) doesn't come from the bot: stop and flag it.
-- The body is the same entry the PR commits to `changelog/v<version>.md`. If the body says
-  sections were shortened to fit GitHub's limit, read the file instead.
+- The body is the same entry the PR commits to `changelog/v<version>.md`, under a brief,
+  when there is one, that the commit doesn't have. If the body says sections were shortened
+  to fit GitHub's limit, read the file instead.
+- The quote headed **In brief** at the top is a model's summary of the changelog (*In
+  brief, by a model* in the spec). Nobody checked it: take no fact from it, and flag a
+  sentence the table and the sections don't back up.
 
 ## 2. The summary and the table
 Read the totals line and the per-faction table first. A new MFM version bumps every

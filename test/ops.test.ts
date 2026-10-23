@@ -163,6 +163,7 @@ const pull = (number: number, ref: string, base: string, labels = ['mfm-update']
   head: { ref, repo: repo ? { full_name: repo } : null },
   base: { ref: base },
   labels: labels.map((name) => ({ name })),
+  body: `Body of #${number}`,
 });
 
 describe('retries', () => {
@@ -229,7 +230,7 @@ describe('listUpdatePrs', () => {
   it('keeps labelled mfm/ PRs from this repository, newest first, as the plan reads them', async () => {
     const api = await stub(() => ({
       body: [
-        pull(80, 'mfm/v1.7', 'mfm/v1.6'),
+        { ...pull(80, 'mfm/v1.7', 'mfm/v1.6'), body: null },
         pull(79, 'mfm/v1.9', 'main', ['mfm-update'], 'someone/fork'),
         pull(77, 'mfm/v1.8', 'main', ['mfm-update'], ''),
         pull(76, 'mfm/v1.6', 'main', []),
@@ -238,8 +239,8 @@ describe('listUpdatePrs', () => {
       ],
     }));
     await expect(listUpdatePrs(github(api.url))).resolves.toEqual([
-      { number: 80, headRefName: 'mfm/v1.7', baseRefName: 'mfm/v1.6' },
-      { number: 78, headRefName: 'mfm/v1.6', baseRefName: 'main' },
+      { number: 80, headRefName: 'mfm/v1.7', baseRefName: 'mfm/v1.6', body: '' },
+      { number: 78, headRefName: 'mfm/v1.6', baseRefName: 'main', body: 'Body of #78' },
     ]);
     expect(api.calls[0]?.path).toBe(`/repos/${REPO}/pulls?state=open&per_page=100`);
   });
@@ -384,6 +385,7 @@ describe('exportOpenPrs', () => {
     expect(prs).toEqual([{ number: 78, headRefName: 'mfm/v1.6', baseRefName: 'main' }]);
     expect(dirs).toEqual([join(out, 'mfm/v1.6')]);
     expect(readFileSync(join(out, 'mfm', 'v1.6', 'meta.yaml'), 'utf8')).toBe('version: "1.6"\n');
+    expect(readFileSync(join(out, 'mfm', 'v1.6.body.md'), 'utf8')).toBe('Body of #78');
   });
 });
 

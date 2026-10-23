@@ -5,12 +5,14 @@ import { git } from './git.js';
 import { type GitHub, paginate } from './github.js';
 
 /**
- * The open update PRs, and a copy of each one's `data/`. Update PRs are sticky: their
- * branches are force-pushed on every run while their version is live, and their `data/`
- * already carries the `firstSeen` stamps of the changes they captured. The scrape
+ * The open update PRs, and a copy of each one's `data/` and body. Update PRs are sticky:
+ * their branches are force-pushed on every run while their version is live, and their
+ * `data/` already carries the `firstSeen` stamps of the changes they captured. The scrape
  * matches against those copies as well as against `main` (`--dates-from`), so a run that
  * finds nothing new reproduces each branch byte for byte, and a later change widens an
- * update's dates instead of resetting them to today.
+ * update's dates instead of resetting them to today. The body goes to the brief
+ * (`src/ops/brief.ts`), which keeps the open PR's brief while the changelog under it is the
+ * same.
  */
 
 /** The label every update PR carries. */
@@ -22,13 +24,15 @@ interface PullRequest {
   head: { ref: string; repo: { full_name: string } | null };
   base: { ref: string };
   labels: { name: string }[];
+  body: string | null;
 }
 
 /**
- * The open update PRs, newest first: labelled `mfm-update`, from an `mfm/` branch of
- * this repository. Never a fork's, whose branch could carry anything.
+ * The open update PRs, newest first, with their bodies (`''` for none): labelled
+ * `mfm-update`, from an `mfm/` branch of this repository. Never a fork's, whose branch
+ * could carry anything.
  */
-export async function listUpdatePrs(gh: GitHub): Promise<UpdatePr[]> {
+export async function listUpdatePrs(gh: GitHub): Promise<(UpdatePr & { body: string })[]> {
   const prs = await paginate<PullRequest>(gh, '/pulls?state=open&per_page=100');
   return prs
     .filter(
@@ -37,7 +41,12 @@ export async function listUpdatePrs(gh: GitHub): Promise<UpdatePr[]> {
         p.head.repo?.full_name.toLowerCase() === gh.repo.toLowerCase() &&
         p.head.ref.startsWith('mfm/'),
     )
-    .map((p) => ({ number: p.number, headRefName: p.head.ref, baseRefName: p.base.ref }));
+    .map((p) => ({
+      number: p.number,
+      headRefName: p.head.ref,
+      baseRefName: p.base.ref,
+      body: p.body ?? '',
+    }));
 }
 
 /**
@@ -78,7 +87,10 @@ export async function exportBranchData(branch: string, dir: string, cwd = '.'): 
   }
 }
 
-/** Every open update PR, with the directory its `data/` was copied into: `<out>/<branch>`. */
+/**
+ * Every open update PR, with the directory its `data/` was copied into: `<out>/<branch>`.
+ * Its body goes beside that directory, in `<out>/<branch>.body.md`.
+ */
 export async function exportOpenPrs(
   gh: GitHub,
   out: string,
@@ -91,7 +103,12 @@ export async function exportOpenPrs(
     if (!dir.startsWith(resolve(out) + sep))
       throw new Error(`Unsafe branch name: ${pr.headRefName}`);
     await exportBranchData(pr.headRefName, dir, cwd);
+    mkdirSync(dirname(dir), { recursive: true });
+    writeFileSync(`${dir}.body.md`, pr.body);
     dirs.push(join(out, pr.headRefName));
   }
-  return { prs, dirs };
+  return {
+    prs: prs.map(({ number, headRefName, baseRefName }) => ({ number, headRefName, baseRefName })),
+    dirs,
+  };
 }

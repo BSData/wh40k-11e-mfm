@@ -1,5 +1,7 @@
 # MFM v1.6 update — 2026-10-20
 
+<!-- mfm-brief -->
+
 _Automated Munitorum Field Manual scrape. The YAML diff is canonical; this is the readable summary — the same entry this PR commits to `changelog/v1.6.md`._
 
 **8 factions changed** · units ~9 · 8 units re-tiered

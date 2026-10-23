@@ -6,7 +6,7 @@ import { movedTo } from './moved.js';
  * `meta.yaml`) feeds three renderers here:
  *  - `changelog()` — the rich PR body (dated title, summary line, per-faction table,
  *    and the sections, folded away once they get long and shortened to fit GitHub's
- *    PR body limit);
+ *    PR body limit, less the room kept for the brief a model may write above it);
  *  - `changelogEntry()` — the same entry in full, for the version's file under
  *    `changelog/` (`src/changelog.ts` assembles the files and their index);
  *  - `failuresReport()` — the per-faction parse errors for the workflow's issue (and
