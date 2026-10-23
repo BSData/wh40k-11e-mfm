@@ -232,18 +232,24 @@ export function applyPatch(dir: string, patchPath: string): PatchFile[] {
 export interface RunMeta {
   turns?: number;
   costUsd?: number;
+  /** False when the agent stopped short: its turn or time limit, or an error. */
+  finished: boolean;
 }
 
-/** The run's turns and cost, from the agent job's JSON; whatever isn't a plausible number is left out. */
+/**
+ * The run's turns, cost and whether the agent finished, from the agent job's JSON; a number
+ * that isn't plausible is left out, and anything short of `finished: true` is unfinished.
+ */
 export function readMeta(json: string): RunMeta {
   let raw: unknown;
   try {
     raw = JSON.parse(json);
   } catch {
-    return {};
+    return { finished: false };
   }
+  const field = (key: string) => (raw as Record<string, unknown> | null)?.[key];
   const value = (key: string, max: number) => {
-    const v = (raw as Record<string, unknown> | null)?.[key];
+    const v = field(key);
     return typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= max ? v : undefined;
   };
   const turns = value('turns', 10_000);
@@ -251,6 +257,7 @@ export function readMeta(json: string): RunMeta {
   return {
     ...(turns === undefined ? {} : { turns: Math.round(turns) }),
     ...(costUsd === undefined ? {} : { costUsd }),
+    finished: field('finished') === true,
   };
 }
 
@@ -302,6 +309,12 @@ export function prBody({
     '',
     '> [!CAUTION]',
     '> A model wrote this from pages of the live site, which are untrusted input. It stays a draft until a maintainer has read every line.',
+    ...(meta.finished
+      ? []
+      : [
+          '>',
+          '> **The agent did not finish** (its turn or time limit, or an error): this is the work it had done when it stopped.',
+        ]),
     '',
     '### Files',
     ...files.map((f) => `- ${describe(f)}`),

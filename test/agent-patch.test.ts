@@ -390,14 +390,14 @@ describe('applyPatch — the tree changes exactly where the patch says', () => {
 });
 
 describe('the PR body', () => {
-  const body = (notes: string) =>
+  const body = (notes: string, finished = true) =>
     prBody({
       files: [
         { path: 'src/parse.ts', change: 'modify' },
         { path: 'src/b.ts', change: 'rename', from: 'src/a.ts' },
       ],
       notes,
-      meta: { turns: 17, costUsd: 1.234 },
+      meta: { turns: 17, costUsd: 1.234, finished },
       scrapeRunUrl: 'https://github.com/o/r/actions/runs/1',
       agentRunUrl: 'https://github.com/o/r/actions/runs/2',
       issue: 96,
@@ -413,6 +413,12 @@ describe('the PR body', () => {
     expect(text).toContain('```text\nThe site added a footer.\n```');
     expect(text).toContain('Agent run: https://github.com/o/r/actions/runs/2 · 17 turns · $1.23');
     expect(text).toContain('- [ ] Commit that page as the fixture');
+    expect(text).not.toContain('did not finish');
+  });
+
+  it('says so when the agent stopped short', () => {
+    expect(body('', false)).toContain('> **The agent did not finish**');
+    expect(body('', false)).toContain('```text\n(no note)\n```');
   });
 
   it("keeps the agent's note inside its code block, whatever it holds", () => {
@@ -427,10 +433,17 @@ describe('the PR body', () => {
     expect(cleanNotes('x'.repeat(30_000))).toMatch(/^x{20000}\n\[… cut\]$/);
   });
 
-  it('reads only plausible numbers from the run', () => {
-    expect(readMeta('{"turns": 12, "cost": 0.5}')).toEqual({ turns: 12, costUsd: 0.5 });
-    expect(readMeta('{"turns": "12", "cost": -1}')).toEqual({});
-    expect(readMeta('not json')).toEqual({});
+  it('reads only plausible numbers from the run, and only a plain true as finished', () => {
+    expect(readMeta('{"turns": 12, "cost": 0.5, "finished": true}')).toEqual({
+      turns: 12,
+      costUsd: 0.5,
+      finished: true,
+    });
+    expect(readMeta('{"turns": "12", "cost": -1, "finished": "true"}')).toEqual({
+      finished: false,
+    });
+    expect(readMeta('{}')).toEqual({ finished: false });
+    expect(readMeta('not json')).toEqual({ finished: false });
   });
 });
 

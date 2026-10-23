@@ -446,8 +446,11 @@ part holds only what it needs. See
    The prompt points at the `diagnose-parse` skill (its section "In the drift-fix
    workflow") and hands it the artifact as untrusted data; never an issue, a comment or a
    PR. The job uploads what the agent changed as a patch (`git diff`, with the new files
-   under the allowed paths), with the agent's closing note and the run's turns and cost.
-   The run's full record stays in the job.
+   under the allowed paths), with the agent's closing note, the run's turns and cost, and
+   whether it finished; a run cut short by its limits still hands on what it changed, and
+   its draft says so. The run's full record stays in the job. Since `pnpm verify` runs
+   tests the model wrote, the rest of this job is within its reach; see *No dependency
+   cache*.
 4. **The PR** (job `pr`) holds the App's key and no model credential. Like `publish`, it
    runs pinned actions and `gh`, plus one repository file: `src/ops/agent-patch.ts`, under
    plain Node, which imports only Node's own modules (a test checks), so no dependency
@@ -526,6 +529,19 @@ captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after an
 Every job starts with `step-security/harden-runner` in audit mode: it records the job's
 outbound connections and processes, and blocks nothing. The drift fixer's agent is the
 exception: it blocks.
+
+### No dependency cache
+No workflow restores a dependency cache: `pnpm/setup` runs with `cache: false` in every
+job, and `setup-node` with `package-manager-cache: false`, so each job installs from the
+registry. A workflow run on `main` writes cache entries that every later run on `main`,
+and every PR, restores. The drift fixer's agent job is such a run, and `pnpm verify` there
+runs tests a model wrote, which can reach the job's later steps and the Actions runtime
+token they get, and so write a cache entry. With nothing restored, there is nothing to
+poison. It costs each job its install, a few seconds. pnpm/setup still restores its
+lockfile-verification log, a memo of the lockfile entries it has checked against the
+registry; a forged one could only skip that check for the committed lockfile, whose
+integrity hashes pnpm checks every download against. See
+[0027](../docs/decisions/0027-a-failed-scrape-drafts-its-fix.md).
 
 A human reviews and merges the PR — giving reviewable, auditable history of every
 points change.

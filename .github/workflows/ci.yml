@@ -27,7 +27,7 @@ jobs:
         with:
           runtime: node
           node-version-file: .node-version
-          cache: true
+          cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
       - run: pnpm verify
 
       # The workflow lints run even when verify fails, so one push reports both.

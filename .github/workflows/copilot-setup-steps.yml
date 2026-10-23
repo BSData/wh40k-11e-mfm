@@ -28,6 +28,6 @@ jobs:
         with:
           runtime: node
           node-version-file: .node-version
-          cache: true
+          cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
           install: false # scripts/setup installs, so this runs the same setup as everywhere else
       - run: scripts/setup

@@ -50,12 +50,24 @@ is too large to write through edits, and an edited page would be fabricated evid
 the check rejects any change under `test/fixtures/`. It copies the markup that drifted
 into a test instead, and the maintainer commits the refreshed page before merging.
 
-What the egress block can't stop: GitHub and its artifact storage are allowed, and an
-injected agent with credentials of its own could write to them, and code the agent runs
-can read the model's key from the job's memory. The key's spend limit bounds that. The
-patch check rejects anything in the patch or the note that looks like a key or a token,
-but not one encoded to hide it, so a draft that looks odd means rotating the key. The
-agent's token only reads, and the App's key is never in its job.
+The agent's tool list is not a boundary: `pnpm verify` runs tests it wrote, as the same
+user as every other step, so from its step on the rest of its job is within reach: later
+steps and post steps, the Actions runtime token they get, files the job uploads, the
+model's key in the job's memory. Three things follow:
+- **No workflow restores a dependency cache.** The agent's job runs on `main`, so a cache
+  entry its code wrote would be restored by every later run on `main` and every PR. With
+  `cache: false` everywhere, there is nothing to poison; each job pays for its install.
+- **The key can leak.** GitHub and its artifact storage are allowed, and code the agent
+  runs could send the key to an account of its own there, or into the run's public
+  artifacts. The patch check rejects a patch or a note with anything that looks like a
+  key or a token, but not one encoded to hide it. The key's $10 spend limit bounds the
+  loss; a draft or a run that looks odd means rotating the key.
+- **Nothing else is there to take.** The agent's token only reads, and the App's key is
+  never in its job.
+
+Claude Code's sandbox for the agent's commands (bubblewrap) would keep them from the rest
+of the job, and close the key's leaks. It needs packages installed with sudo before
+harden-runner turns sudo off, and hasn't been tried on a runner, so it is left for later.
 
 The marker that limits a run per outage is a comment, so anyone who can make
 `github-actions[bot]` post one could suppress the agent; nobody can make it run more.

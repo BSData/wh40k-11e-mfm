@@ -32,8 +32,11 @@ permissions: {}
 
 # One at a time, queued: a run's gate checks for an open agent-fix PR and a run recorded
 # on the failure issue, which only holds if no other run is between its gate and its PR.
+# Every completed scrape starts this workflow, and a pending run in a group replaces the
+# one pending before it, so the runs that do nothing (a scrape that didn't fail) keep out
+# of the queue rather than bump a failure from it.
 concurrency:
-  group: drift-fix
+  group: ${{ (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'failure') && 'drift-fix' || format('drift-fix-idle-{0}', github.run_id) }}
   cancel-in-progress: false
 
 jobs:
@@ -66,7 +69,7 @@ jobs:
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           runtime: node@22
-          cache: true
+          cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
 
       - name: Decide
         id: gate
@@ -88,6 +91,11 @@ jobs:
   # `git diff` and `git diff --stat`; its prompt points at the diagnose-parse skill and
   # hands it the failure report and the refreshed pages as untrusted data, never an issue
   # or a comment. What it changed leaves the job as a patch, for `pr` to check.
+  #
+  # `pnpm verify` runs tests the model wrote, so from the agent's step on, anything in
+  # this job may be the model's: later steps, post steps, the Actions runtime token they
+  # get. That is why the job holds nothing else, and why no workflow here restores a
+  # dependency cache, which this job could write for main (specs/change-tracking.md).
   agent:
     needs: gate
     if: needs.gate.outputs.run == 'true'
@@ -116,12 +124,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # The store is restored, never saved: this job runs code the model wrote.
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           runtime: node@22
-          cache: true
-          save-cache: false
+          cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
 
       # The version claude-code-action v1.0.251 would install itself, but from the npm
       # registry (npm versions are immutable), so its installer's hosts needn't be allowed.
@@ -143,9 +149,12 @@ jobs:
           ls "$RUNNER_TEMP/drift/fixtures"/*.html
 
       # Sonnet, a few dozen turns, one try: a run costs a dollar or two of the key's $10.
+      # A run cut short at its turn or time limit still hands on what it changed, as a
+      # draft that says so: the outage gets no second run.
       - name: Draft the fix
         id: agent
         timeout-minutes: 20
+        continue-on-error: true
         uses: anthropics/claude-code-action@374f254f5efaf968abfe15d399fd90972e8138b9 # v1.0.251
         env:
           # Keep the model's key and the token out of what the agent's commands run.
@@ -180,33 +189,40 @@ jobs:
           git diff --no-ext-diff --no-textconv HEAD > "$RUNNER_TEMP/agent/fix.patch"
           git diff --stat HEAD
 
-      # The note and the cost, from the run's record; the record itself stays here, since
-      # it holds every tool result.
+      # The note, the cost and whether the agent finished, from the run's record; the
+      # record itself stays here, since it holds every tool result. The summary shows the
+      # note escaped, in a <pre>, so nothing in it renders.
       - name: Keep the note and the cost
-        if: always() && steps.agent.outputs.execution_file != ''
         env:
           EXECUTION_FILE: ${{ steps.agent.outputs.execution_file }}
         run: |
           mkdir -p "$RUNNER_TEMP/agent"
-          result='[.[] | select(.type == "result")] | last'
-          jq -r "$result | .result // \"\"" "$EXECUTION_FILE" > "$RUNNER_TEMP/agent/notes.md"
-          jq "$result | {turns: .num_turns, cost: .total_cost_usd}" "$EXECUTION_FILE" > "$RUNNER_TEMP/agent/meta.json"
+          : > "$RUNNER_TEMP/agent/notes.md"
+          echo '{}' > "$RUNNER_TEMP/agent/meta.json"
+          if [ -n "$EXECUTION_FILE" ] && [ -f "$EXECUTION_FILE" ]; then
+            result='[.[] | select(.type == "result")] | last'
+            jq -r "$result | .result // \"\"" "$EXECUTION_FILE" > "$RUNNER_TEMP/agent/notes.md"
+            jq "$result | {turns: .num_turns, cost: .total_cost_usd, finished: (.subtype == \"success\" and (.is_error | not))}" \
+              "$EXECUTION_FILE" > "$RUNNER_TEMP/agent/meta.json"
+          fi
           {
             echo '## Drift fix'
             echo
-            jq -r '"\(.turns // "?") turns, $\(.cost // "?")"' "$RUNNER_TEMP/agent/meta.json"
+            jq -r '"\(.turns // "?") turns, $\(.cost // "?"), \(if .finished then "finished" else "did not finish" end)"' "$RUNNER_TEMP/agent/meta.json"
             echo
-            echo '~~~~~~~~text'
-            cat "$RUNNER_TEMP/agent/notes.md"
-            echo
-            echo '~~~~~~~~'
+            echo '<pre>'
+            sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' "$RUNNER_TEMP/agent/notes.md"
+            echo '</pre>'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Hand the patch on
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: agent-patch
-          path: ${{ runner.temp }}/agent
+          path: |
+            ${{ runner.temp }}/agent/fix.patch
+            ${{ runner.temp }}/agent/notes.md
+            ${{ runner.temp }}/agent/meta.json
           if-no-files-found: error
           retention-days: 7
 
@@ -237,6 +253,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .node-version
+          package-manager-cache: false # no job restores one
       - name: Fetch the patch
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
