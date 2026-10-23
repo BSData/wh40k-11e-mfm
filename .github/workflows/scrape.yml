@@ -55,7 +55,8 @@ jobs:
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           runtime: node@22
-          cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
+          cache: false # "No dependency cache" in specs/change-tracking.md
+          cache-dependency-path: .github/no-dependency-cache # matches no file: no cache at all
 
       # Every step below with logic in it runs one `mfm` command (src/bin/mfm.ts; see
       # `--help` on each). `pnpm scrape` is `mfm scrape`; the rest are called as
@@ -341,7 +342,8 @@ jobs:
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           runtime: node@22
-          cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
+          cache: false # "No dependency cache" in specs/change-tracking.md
+          cache-dependency-path: .github/no-dependency-cache # matches no file: no cache at all
       - name: Fetch the update
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -430,7 +432,8 @@ jobs:
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           runtime: node@22
-          cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
+          cache: false # "No dependency cache" in specs/change-tracking.md
+          cache-dependency-path: .github/no-dependency-cache # matches no file: no cache at all
 
       # Absent when the scrape failed before writing it; report-failure then says so.
       - name: Fetch the failure report

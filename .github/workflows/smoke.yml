@@ -39,7 +39,8 @@ jobs:
         with:
           runtime: node
           node-version-file: .node-version
-          cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
+          cache: false # "No dependency cache" in specs/change-tracking.md
+          cache-dependency-path: .github/no-dependency-cache # matches no file: no cache at all
           install: false # scripts/setup installs, so this runs the same setup as everywhere else
       - run: scripts/setup
 

@@ -436,12 +436,13 @@ part holds only what it needs. See
 3. **The agent** (job `agent`) holds the model's key, the repository secret
    `ANTHROPIC_API_KEY`, and no other secret. Its token has `contents: read` and
    `actions: read`, the checkout keeps no credentials, and harden-runner blocks egress
-   except to the model's API, GitHub (`github.com`, `api.github.com`, its release and
-   artifact storage), the npm registry and `nodejs.org`, with sudo and containers off.
+   except to the model's API, GitHub (`github.com`, `api.github.com` and its release
+   downloads), the npm registry and `nodejs.org`, with sudo and containers off;
+   harden-runner itself always allows GitHub's Actions service and its storage.
    The dependencies, and Claude Code from npm (`npm ci`, with the version and integrity
    hashes pinned by `.github/drift-fix/package-lock.json`), are installed before
-   the agent starts. `anthropics/claude-code-action` runs Claude Sonnet 5.5 for at most
-   30 turns and 20 minutes, once. Its tools are Read, Edit, Glob and Grep, and Bash for
+   the agent starts. `anthropics/claude-code-action` runs Claude Sonnet 5.5 once, for at
+   most 30 turns, 20 minutes and $2 (`--max-budget-usd`). Its tools are Read, Edit, Glob and Grep, and Bash for
    exactly `pnpm verify`, `git diff` and `git diff --stat`: no web tools and no Write.
    Its commands run with the model's key and the token scrubbed from their environment.
    The prompt points at the `diagnose-parse` skill (its section "In the drift-fix
@@ -470,13 +471,20 @@ part holds only what it needs. See
    labelled `agent-fix` (the label is created if missing), so CI runs on it, and the
    default token links it from the failure issue. The body names the scrape run, the
    files, the agent's note in a code block (where nothing in it renders), the run's turns
-   and cost, and what is left to do. An empty patch opens nothing.
-5. **A maintainer** reviews it, commits the refreshed page that shows the drift as the
+   and cost, and what is left to do, and stays under GitHub's 65,536-character limit
+   (the note is cut to fit). An empty patch opens nothing.
+5. **The caches** (job `caches`, `actions: write`, `gh` only) runs after the agent, however
+   it ended, and deletes every Actions cache entry written since the gate finished (see
+   *No dependency cache*).
+6. **A maintainer** reviews it, commits the refreshed page that shows the drift as the
    fixture, and merges. The next successful scrape closes the failure issue, as always.
 
 The model is the cheaper tier on purpose: Claude Sonnet 5.5 costs $2 per million input
-tokens and $10 per million output tokens, so a run should cost a dollar or two of the
-key's $10 spend limit. The PR body and the run's summary say what each run cost.
+tokens and $10 per million output tokens. A run is expected to cost $1–2 of the key's $10
+spend limit. Claude Code stops at the turn that takes it past $2, so the worst case is $2
+and that last turn: about $3 with the context cached, at most about $5 for a turn that
+re-read a near-million-token context uncached. The PR body and the run's summary say what
+each run cost.
 
 To replay a failure: `gh workflow run drift-fix.yml -f run-id=<run id>`. With
 `--ref <branch>`, it replays a failed scrape run on that branch (a dry run's will do) and
@@ -532,16 +540,24 @@ outbound connections and processes, and blocks nothing. The drift fixer's agent 
 exception: it blocks.
 
 ### No dependency cache
-No workflow restores a dependency cache: `pnpm/setup` runs with `cache: false` in every
-job, and `setup-node` with `package-manager-cache: false`, so each job installs from the
-registry. A workflow run on `main` writes cache entries that every later run on `main`,
-and every PR, restores. The drift fixer's agent job is such a run, and `pnpm verify` there
-runs tests a model wrote, which can reach the job's later steps and the Actions runtime
-token they get, and so write a cache entry. With nothing restored, there is nothing to
-poison. It costs each job its install, a few seconds. pnpm/setup still restores its
-lockfile-verification log, a memo of the lockfile entries it has checked against the
-registry; a forged one could only skip that check for the committed lockfile, whose
-integrity hashes pnpm checks every download against. See
+No workflow restores or saves an Actions cache. A workflow run on `main` writes cache
+entries that every later run on `main`, and every PR, restores, and a cache entry is an
+archive that is unpacked at whatever paths it names. The drift fixer's agent job is such
+a run, and `pnpm verify` there runs tests a model wrote, which can reach the job's later
+steps and the Actions runtime token they get, and harden-runner always lets a job reach
+GitHub's Actions service and its storage. So:
+- `pnpm/setup` runs with `cache: false` and `cache-dependency-path:
+  .github/no-dependency-cache`, a file that never exists, in every job. `cache: false`
+  alone still restores and saves pnpm's lockfile-verification log, keyed on the
+  lockfile's hash; with no lockfile to hash, there is no key, and neither cache is
+  touched. Each job installs from the registry, which costs it a few seconds.
+- `setup-node` runs with `package-manager-cache: false`, and no workflow uses
+  `actions/cache`.
+- The drift fixer's `caches` job deletes every cache entry written while its agent ran,
+  since the agent's code can still write one, and CodeQL's default setup restores its
+  own on `main` (`codeql-overlay-base-database-*`).
+
+`test/workflows.test.ts` holds every workflow to the first two. See
 [0028](../docs/decisions/0028-a-failed-scrape-drafts-its-fix.md).
 
 A human reviews and merges the PR — giving reviewable, auditable history of every

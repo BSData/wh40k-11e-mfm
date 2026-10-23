@@ -284,20 +284,34 @@ export interface BodyInput {
   issue?: number;
 }
 
-/** The draft PR's body. Everything the agent wrote is in a code block, where nothing in it renders. */
-export function prBody({
-  files,
-  notes,
-  meta,
-  scrapeRunUrl,
-  agentRunUrl,
-  issue,
-}: BodyInput): string {
+/** GitHub's limit on a PR body, in characters. */
+export const BODY_LIMIT = 65_536;
+
+/**
+ * The draft PR's body. Everything the agent wrote is in a code block, where nothing in it
+ * renders. Under `BODY_LIMIT` whatever the note holds: the file list is bounded by
+ * `MAX_FILES` and the paths' length, and the note (with its fence, which a run of
+ * backticks lengthens) is cut until the body fits.
+ */
+export function prBody(input: BodyInput): string {
+  let text = cleanNotes(input.notes) || '(no note)';
+  let body = renderBody(input, text);
+  while (body.length > BODY_LIMIT && text.length > 100) {
+    text = `${text.slice(0, Math.floor(text.length / 2))}\n[… cut]`;
+    body = renderBody(input, text);
+  }
+  if (body.length > BODY_LIMIT) throw new PatchRejected('the PR body is over GitHub’s limit');
+  return body;
+}
+
+function renderBody(
+  { files, meta, scrapeRunUrl, agentRunUrl, issue }: BodyInput,
+  text: string,
+): string {
   const describe = (f: PatchFile) =>
     f.change === 'rename'
       ? `\`${f.from}\` → \`${f.path}\` (renamed)`
       : `\`${f.path}\` (${f.change === 'add' ? 'added' : f.change === 'delete' ? 'deleted' : 'changed'})`;
-  const text = cleanNotes(notes) || '(no note)';
   const tick = fence(text);
   const run = [
     `Agent run: ${agentRunUrl}`,

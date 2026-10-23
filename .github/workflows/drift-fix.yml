@@ -7,6 +7,7 @@ name: Drift fix
 # - `gate` decides from GitHub's records whether to run, and records the run;
 # - `agent` holds the model's key and nothing else: a token that only reads, and an egress
 #   allowlist. It never reaches the site: the failed scrape already saved the pages;
+# - `caches` deletes every Actions cache entry written while the agent ran;
 # - `pr` holds the App's key and no model: it checks the agent's patch with one
 #   dependency-free script, then opens the draft PR.
 #
@@ -32,11 +33,12 @@ permissions: {}
 
 # One at a time, queued: a run's gate checks for an open agent-fix PR and a run recorded
 # on the failure issue, which only holds if no other run is between its gate and its PR.
-# Every completed scrape starts this workflow, and a pending run in a group replaces the
-# one pending before it, so the runs that do nothing (a scrape that didn't fail) keep out
-# of the queue rather than bump a failure from it.
+# Every completed "Scrape MFM" starts this workflow, a fork's workflow of that name
+# included, and a pending run in a group replaces the one pending before it. So only a
+# replay, or a failed run of this repository's scrape.yml, joins the queue; the rest,
+# which do nothing, can't bump one from it.
 concurrency:
-  group: ${{ (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'failure') && 'drift-fix' || format('drift-fix-idle-{0}', github.run_id) }}
+  group: ${{ (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.head_repository.full_name == github.repository && startsWith(github.event.workflow_run.path, '.github/workflows/scrape.yml'))) && 'drift-fix' || format('drift-fix-idle-{0}', github.run_id) }}
   cancel-in-progress: false
 
 jobs:
@@ -47,7 +49,7 @@ jobs:
   # It records the run it lets through on that issue before the agent starts
   # (src/ops/drift-fix.ts).
   gate:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'failure'
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.head_repository.full_name == github.repository && startsWith(github.event.workflow_run.path, '.github/workflows/scrape.yml'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -59,6 +61,7 @@ jobs:
       run: ${{ steps.gate.outputs.run }}
       issue: ${{ steps.gate.outputs.issue }}
       artifact: ${{ steps.gate.outputs.artifact }}
+      started: ${{ steps.clock.outputs.started }}
     steps:
       - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
@@ -69,7 +72,8 @@ jobs:
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           runtime: node@22
-          cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
+          cache: false # "No dependency cache" in specs/change-tracking.md
+          cache-dependency-path: .github/no-dependency-cache # matches no file: no cache at all
 
       - name: Decide
         id: gate
@@ -82,20 +86,27 @@ jobs:
           if [ "$EVENT" = workflow_dispatch ]; then manual=(--manual); fi
           node_modules/.bin/tsx src/bin/mfm.ts drift-fix-gate --run-id "$RUN_ID" "${manual[@]}" --output "$GITHUB_OUTPUT"
 
+      # When the agent's job begins, at the latest: `caches` deletes what was written since.
+      - name: Note the time
+        id: clock
+        run: echo "started=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
   # The only job with the model's key, and the only one that runs the model. Its token
   # only reads, it gets no other secret, and harden-runner blocks every host but the
-  # model's API, GitHub (with its artifact storage) and the npm registry and Node.js
-  # downloads the setup needs, with sudo off so the block holds. Everything is installed
-  # before the agent starts: the dependencies, and Claude Code itself, each from a lockfile. The
-  # agent's tools are Read, Edit, Glob, Grep, and Bash for exactly `pnpm verify`,
-  # `git diff` and `git diff --stat`; its prompt points at the diagnose-parse skill and
-  # hands it the failure report and the refreshed pages as untrusted data, never an issue
-  # or a comment. What it changed leaves the job as a patch, for `pr` to check.
+  # model's API, GitHub and the npm registry and Node.js downloads the setup needs, with
+  # sudo off so the block holds. Everything is installed before the agent starts: the
+  # dependencies, and Claude Code itself, each from a lockfile. The agent's tools are
+  # Read, Edit, Glob, Grep, and Bash for exactly `pnpm verify`, `git diff` and
+  # `git diff --stat`; its prompt points at the diagnose-parse skill and hands it the
+  # failure report and the refreshed pages as untrusted data, never an issue or a comment.
+  # What it changed leaves the job as a patch, for `pr` to check.
   #
   # `pnpm verify` runs tests the model wrote, so from the agent's step on, anything in
   # this job may be the model's: later steps, post steps, the Actions runtime token they
-  # get. That is why the job holds nothing else, and why no workflow here restores a
-  # dependency cache, which this job could write for main (specs/change-tracking.md).
+  # get, which can write a cache entry for main (harden-runner always lets a job reach
+  # GitHub's Actions service and its storage). That is why the job holds nothing else, why
+  # no workflow here restores a cache, and why `caches` deletes what this job wrote
+  # ("No dependency cache" in specs/change-tracking.md).
   agent:
     needs: gate
     if: needs.gate.outputs.run == 'true'
@@ -109,15 +120,15 @@ jobs:
         with:
           egress-policy: block
           disable-sudo-and-containers: true
-          # The artifact downloads and uploads go to GitHub's storage on Azure.
+          # On top of these, harden-runner always allows GitHub's Actions service
+          # (*.actions.githubusercontent.com) and its storage
+          # (productionresultssa*.blob.core.windows.net), which the artifacts use.
           allowed-endpoints: >
             api.anthropic.com:443
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443
             release-assets.githubusercontent.com:443
-            results-receiver.actions.githubusercontent.com:443
-            *.blob.core.windows.net:443
             registry.npmjs.org:443
             nodejs.org:443
 
@@ -127,7 +138,8 @@ jobs:
       - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
         with:
           runtime: node@22
-          cache: false # no job restores one: "No dependency cache" in specs/change-tracking.md
+          cache: false # "No dependency cache" in specs/change-tracking.md
+          cache-dependency-path: .github/no-dependency-cache # matches no file: no cache at all
 
       # The version claude-code-action v1.0.251 would install itself, but from the npm
       # registry, with its version and integrity hashes pinned by the lockfile in
@@ -151,9 +163,10 @@ jobs:
           test -s "$RUNNER_TEMP/drift/failures.md"
           ls "$RUNNER_TEMP/drift/fixtures"/*.html
 
-      # Sonnet, a few dozen turns, one try: a run costs a dollar or two of the key's $10.
-      # A run cut short at its turn or time limit still hands on what it changed, as a
-      # draft that says so: the outage gets no second run.
+      # Sonnet, one try, at most 30 turns and $2 (Claude Code stops at the turn that
+      # crosses it): a run is expected to cost $1-2 of the key's $10. A run cut short at
+      # a limit still hands on what it changed, as a draft that says so: the outage gets
+      # no second run.
       - name: Draft the fix
         id: agent
         timeout-minutes: 20
@@ -171,6 +184,7 @@ jobs:
           claude_args: |
             --model claude-sonnet-5-5
             --max-turns 30
+            --max-budget-usd 2
             --add-dir ${{ runner.temp }}/drift
             --allowedTools "Read,Edit,Glob,Grep,Bash(pnpm verify),Bash(git diff),Bash(git diff --stat)"
             --disallowedTools "WebFetch,WebSearch,Write,NotebookEdit,Task,Agent,Read(//proc/**)"
@@ -228,6 +242,37 @@ jobs:
             ${{ runner.temp }}/agent/meta.json
           if-no-files-found: error
           retention-days: 7
+
+  # Code the model wrote ran in `agent`, which holds the Actions runtime token for main, so
+  # every cache entry written while that job ran is deleted, whatever wrote it. No
+  # workflow here restores a cache, but CodeQL's default setup restores its own on main.
+  # The rest of the job is gh; deleting a cache someone else just wrote costs them a miss.
+  caches:
+    needs: [gate, agent]
+    if: always() && needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write # list and delete the repository's Actions caches
+    steps:
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+      - name: Delete the caches written since the gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SINCE: ${{ needs.gate.outputs.started }}
+        run: |
+          set -euo pipefail
+          [[ "$SINCE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]] || { echo "::error::Not a time: '$SINCE'"; exit 1; }
+          ids=$(gh cache list --limit 1000 --json id,createdAt \
+            --jq '.[] | select((.createdAt | sub("\\.[0-9]+"; "") | fromdate) >= ($ENV.SINCE | fromdate)) | .id')
+          for id in $ids; do
+            echo "Deleting cache $id"
+            gh cache delete "$id" || echo "::warning::Couldn't delete cache $id (deleted already?)"
+          done
+          echo "Deleted $(wc -w <<< "$ids") cache entries written since $SINCE."
 
   # The only job with the App's key, and no model credential. Like scrape.yml's
   # `publish`, it runs pinned actions and gh, plus one repository file:

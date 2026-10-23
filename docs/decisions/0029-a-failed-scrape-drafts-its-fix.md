@@ -37,13 +37,20 @@ A model can make the judgment, but three things make it risky to run one in CI:
   file must be a regular file under `src/`, `specs/`, `test/` or `docs/decisions/`,
   outside `test/fixtures/`, and the patch must read exactly as `git diff` writes one.
   Then it opens the draft PR with the App's token, so CI runs on it.
+- No workflow restores an Actions cache, and a last job deletes every cache entry written
+  while the agent ran (below).
 - A maintainer reviews, commits the refreshed page as the fixture, and merges.
 
-Claude Sonnet 5.5 through `anthropics/claude-code-action`, at most 30 turns, no retry.
+Claude Sonnet 5.5 through `anthropics/claude-code-action`, at most 30 turns and $2
+(`--max-budget-usd`), no retry.
 
 ## Consequences
-An outage costs one agent run, a dollar or two of the key's $10, and the maintainer
-starts from a draft that passes CI, or from the agent's note on why it changed nothing.
+An outage costs one agent run, and the maintainer starts from a draft that passes CI, or
+from the agent's note on why it changed nothing. A run is expected to cost $1–2 of the
+key's $10. Claude Code stops at the turn that takes it past $2, so the worst case is $2
+and that last turn: about $3 with the context cached, at most about $5 if the turn
+re-read a near-million-token context uncached. Without the budget, 30 turns near a large
+cached context could have spent most of the key in one run.
 
 The agent can't commit the fixture its fix needs. It can't download pages, a saved page
 is too large to write through edits, and an edited page would be fabricated evidence, so
@@ -53,21 +60,38 @@ into a test instead, and the maintainer commits the refreshed page before mergin
 The agent's tool list is not a boundary: `pnpm verify` runs tests it wrote, as the same
 user as every other step, so from its step on the rest of its job is within reach: later
 steps and post steps, the Actions runtime token they get, files the job uploads, the
-model's key in the job's memory. Three things follow:
-- **No workflow restores a dependency cache.** The agent's job runs on `main`, so a cache
-  entry its code wrote would be restored by every later run on `main` and every PR. With
-  `cache: false` everywhere, there is nothing to poison; each job pays for its install.
-- **The key can leak.** GitHub and its artifact storage are allowed, and code the agent
-  runs could send the key to an account of its own there, or into the run's public
-  artifacts. The patch check rejects a patch or a note with anything that looks like a
-  key or a token, but not one encoded to hide it. The key's $10 spend limit bounds the
-  loss; a draft or a run that looks odd means rotating the key.
-- **Nothing else is there to take.** The agent's token only reads, and the App's key is
-  never in its job.
+model's key in the job's memory. Four things follow:
+- **The cache service stays in reach.** harden-runner always allows GitHub's Actions
+  service (`*.actions.githubusercontent.com`) and its storage
+  (`productionresultssa*.blob.core.windows.net`), whatever the job's allowlist says
+  (`addImplicitEndpoints` in step-security/agent v0.17.0, the agent v2.22.1 installs). So
+  the agent's code can write a cache entry for `main`: an archive that the job restoring
+  it unpacks at whatever absolute paths it names, such as another action's code. Taking
+  the artifacts out of the agent's job wouldn't change that, so they stay.
+- **So no workflow restores a cache.** `pnpm/setup` restores and saves its
+  lockfile-verification log even with `cache: false`; it is keyed on the lockfile's
+  hash, so every workflow also points `cache-dependency-path` at a file that never
+  exists, and `pnpm/setup` touches no cache at all. A test holds every workflow to it.
+  Each job pays for its install, a few seconds.
+- **And the agent's cache entries are deleted.** CodeQL's default setup, which the
+  workflows don't configure, restores its own entries on `main`
+  (`codeql-overlay-base-database-*`), the same kind of archive. The `caches` job deletes
+  every entry written while the agent ran, as soon as its job ends. That leaves a window
+  of seconds, between the agent's job writing one and `caches` deleting it, in which a
+  CodeQL analysis on `main` could restore it. Turning off CodeQL's overlay analysis, or
+  moving it to advanced setup without its cache, would close it; that is a setting.
+- **The key can leak.** Code the agent runs can send the key to an account of its own on
+  GitHub or in GitHub's storage, into the run's public artifacts, or through
+  `api.anthropic.com` itself, with a key of its own. The patch check rejects a patch or a
+  note with anything that looks like a key or a token, but not one encoded to hide it.
+  The key's $10 spend limit bounds the loss; a draft or a run that looks odd means
+  rotating the key. Nothing else is there to take: the agent's token only reads, and the
+  App's key is never in its job.
 
 Claude Code's sandbox for the agent's commands (bubblewrap) would keep them from the rest
-of the job, and close the key's leaks. It needs packages installed with sudo before
-harden-runner turns sudo off, and hasn't been tried on a runner, so it is left for later.
+of the job: from the runtime token, and so from the cache, and from the key. It needs
+packages installed with sudo before harden-runner turns sudo off, and hasn't been tried
+on a runner, so it is left for later.
 
 The marker that limits a run per outage is a comment, so anyone who can make
 `github-actions[bot]` post one could suppress the agent; nobody can make it run more.
@@ -92,3 +116,5 @@ Rejected:
   pages would come from the job that runs the model.
 - The agent replacing fixtures with the refreshed pages: most pin v1.1 data on purpose,
   and their tests would break for reasons other than the drift.
+- Handing the patch to the PR job as a job output, to take the artifact hosts out of the
+  agent's allowlist: harden-runner allows them anyway (above).

@@ -14,10 +14,12 @@ import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
   applyPatch,
+  BODY_LIMIT,
   checkPatch,
   cleanNotes,
   disallowed,
   fence,
+  MAX_FILES,
   MAX_PATCH_BYTES,
   main,
   PatchRejected,
@@ -426,6 +428,26 @@ describe('the PR body', () => {
     const text = body(note);
     expect(fence(note)).toBe('`````');
     expect(text).toContain(`\`\`\`\`\`text\n${note}\n\`\`\`\`\``);
+  });
+
+  it("stays under GitHub's body limit, whatever the note and the files", () => {
+    const files = Array.from({ length: MAX_FILES }, (_, i) => ({
+      path: `src/${String(i).padStart(2, '0')}${'x'.repeat(190)}.ts`,
+      change: 'rename' as const,
+      from: `src/${String(i).padStart(2, '0')}${'y'.repeat(190)}.ts`,
+    }));
+    // A long run of backticks lengthens the fence the note sits in, twice over.
+    for (const notes of ['`'.repeat(19_000), `${'n'.repeat(19_000)}\n${'`'.repeat(800)}`]) {
+      const body = prBody({
+        files,
+        notes,
+        meta: { finished: true },
+        scrapeRunUrl: 'https://github.com/o/r/actions/runs/1',
+        agentRunUrl: 'https://github.com/o/r/actions/runs/2',
+      });
+      expect(body.length).toBeLessThanOrEqual(BODY_LIMIT);
+      expect(body).toContain('### Before it is ready');
+    }
   });
 
   it('cleans and cuts the note', () => {
