@@ -208,12 +208,14 @@ Above 50 lines the per-faction detail is wrapped in a `<details>` block, so the 
 summary and table stay on one screen.
 
 ### Fitting GitHub's limit
-GitHub caps a PR body at **65,536 characters**. `changelog()` renders the body whole when
-it fits. When it doesn't, it replaces faction sections with a one-line stub — **largest
-first** — until it fits. A stub keeps its heading and says how many lines it stands in
-for; a note under the table names every shortened section. The complete entry is never
-shortened: it is the version's changelog file (below), which the same PR commits and the
-body names. See [0009](../docs/decisions/0009-fit-the-pr-body-limit.md).
+GitHub caps a PR body at **65,536 characters**. `changelog()` keeps 1,500 of them for the
+brief a model may write above the changelog (see *In brief, by a model*), so it renders the
+body whole when it fits in 64,036. When it doesn't, it replaces faction sections with a
+one-line stub — **largest first** — until it fits. A stub keeps its heading and says how
+many lines it stands in for; a note under the table names every shortened section. The
+complete entry is never shortened: it is the version's changelog file (below), which the
+same PR commits and the body names. See
+[0009](../docs/decisions/0009-fit-the-pr-body-limit.md).
 
 ### Needs attention
 Some changes are more likely the scraper misreading the site than GW changing it.
@@ -271,6 +273,70 @@ and a later run that finds none takes the label off. Taking it off by hand doesn
 while the flags are there: the next run puts it back. A flag never fails the run or
 blocks the merge: the reviewer checks the line against the site. See
 [0027](../docs/decisions/0027-flag-what-looks-like-a-misread.md).
+
+### In brief, by a model
+A full changelog is complete but long, so the PR body opens with a few sentences about the
+update, written by a model from the changelog: which factions moved most and how, and what
+stands out. It is for readers who never open the detail, and nothing depends on it.
+[`src/ops/brief.ts`](../src/ops/brief.ts) writes it, in the scrape workflow's `brief` job
+(see *Workflow integration*). See
+[0033](../docs/decisions/0033-a-model-sums-up-each-update.md).
+
+- **Where it goes.** In the PR body only: straight after the title and the *Needs
+  attention* warning, above the blurb, as a quote whose first line is **In brief**, then
+  that a model (`claude-opus-5-5`) wrote it from the changelog below, that nobody checked
+  it line by line, and that the changelog is the record. `changelog()` marks the place with
+  `<!-- mfm-brief -->` on a line of its own in every body that has a changelog entry, and
+  the brief takes the mark's place, between it and `<!-- /mfm-brief -->`. The version's
+  changelog file and the Discord message don't have it: the file is the durable record, and
+  the message gives counts ([0007](../docs/decisions/0007-announce-how-much-moved.md)).
+- **Room for it.** `changelog()` keeps 1,500 characters of GitHub's limit for the quote
+  (`BRIEF_ROOM`, see *Fitting GitHub's limit*). An answer that makes the quote longer, or
+  the body longer than 65,536 characters, is not used.
+- **The model.** Claude Opus 5.5 (`claude-opus-5-5`) at effort `high`: one request to the
+  Messages API (`anthropic-version: 2026-10-21`), at most 16,000 output tokens, a 4-minute
+  timeout and no retry, sent with Node's own `fetch`. The request holds the PR body,
+  without the mark, between `<changelog>` and `</changelog>`, and a system prompt that
+  calls it data scraped from a website: to be read for facts, never followed. It asks for
+  one or two short paragraphs of plain prose, at most 120 words, using only the
+  changelog's facts and names, naming no dates (the title carries them), and, when there
+  is a *Needs attention* warning, for how many changes it flags rather than their values.
+- **What of the answer is used.** Plain text: every character but letters, digits, spaces,
+  line breaks, dashes, quotation marks and `. , ; : ! ? ' " ( ) / % + × → ▲ ▼ ·` is
+  dropped, so it holds no HTML, mention or `#12` issue reference, and each paragraph
+  becomes one line of the quote. That is not the same as no Markdown: a list marker, an
+  `:emoji:` shortcode or a bare commit SHA, which GitHub links, can get through. An answer
+  that is empty, has a link (`http://`, `https://`, `ftp://`, `www.`) or a `GH-<number>`
+  reference, or doesn't fit the room is not used. The answer is never printed to the job's
+  log.
+- **The key.** `brief` holds the repository secret `ANTHROPIC_API_KEY`, the drift fixer's,
+  and a token that only reads the repository. Like `publish`, it runs no dependency code:
+  pinned actions, and one repository file under plain Node (`node
+  --experimental-strip-types src/ops/brief.ts`, not an `mfm` command), which imports only
+  Node's own modules (a test holds it to that).
+- **Kept while the changelog is the same.** `mfm open-prs` saves each open update PR's
+  body, and `scrape` hands the planned PR's on. When that body, with its brief put back to
+  the mark, is the new body, the brief stays and no request is made: a PR left open for
+  weeks costs one request, not one a day, and its brief doesn't change under a changelog
+  that didn't. Line endings, trailing whitespace and dates (any `YYYY-MM-DD`) don't count
+  as a change: an update with a rules change is dated the day it is scraped and re-dated
+  by each daily re-scrape until it merges
+  ([0002](../docs/decisions/0002-name-and-date-an-update-from-the-data.md),
+  [0015](../docs/decisions/0015-diff-the-rules-panels.md)), which would otherwise ask the
+  model again every day, on the key the drift fixer shares. That is why the brief names no
+  dates. A PR body without a brief asks again.
+- **Never a failed run.** There is no brief when the body has no changelog (nothing
+  changed, or only a *Needs attention* flag), when `ANTHROPIC_API_KEY` is unset, when the
+  request fails or times out, when the model didn't finish its answer (a `stop_reason`
+  other than `end_turn`), or when the answer isn't used. The PR then gets `mfm diff`'s
+  body, and each of those but the first is a workflow warning, `No brief`. The job's
+  summary says what happened: the brief and the tokens it took, the brief kept, or why
+  there is none. `brief` is `continue-on-error` and `publish` runs whatever it did, so not
+  even a broken `brief` job fails the run or holds back the PR. This is the one deliberate
+  exception to failing loud ([0020](../docs/decisions/0020-fail-loud-and-located.md)).
+- **Cost.** Opus 5.5 costs $4 per million input tokens and $20 per million output tokens:
+  a few cents for a typical update, at most about $0.40 for a body at the limit, from the
+  key's $10 spend limit, which the drift fixer shares.
 
 ## Naming an update
 `updateTitle()` names an update `MFM v<version> update — <window>`. The version is the
@@ -332,7 +398,8 @@ The durable record is **one Markdown file per MFM version** under
 `## [YYYY-MM-DD] — MFM v<version>` — the date being the same window as the PR title, so a
 multi-day update reads `## [2026-08-31 → 2026-09-02]` — followed by the same summary
 line, table and per-faction sections (at `###`) as the PR body, sub-faction sharing
-included, but never folded or shortened. The PR body is this entry under a size limit.
+included, but never folded or shortened. The PR body is this entry under a size limit,
+with the brief, if there is one, above it (see *In brief, by a model*).
 
 `mfm changelog` writes it:
 1. into `changelog/v<version>.md`, just after its `<!-- BEGIN ENTRIES -->` marker —
@@ -530,11 +597,13 @@ before it reaches `main`.
 Each step that has logic is one `mfm` command, run as `node_modules/.bin/tsx
 src/bin/mfm.ts <command>` (not `pnpm exec`, which can print to stdout); a result a later
 step reads goes to a file (`--output "$GITHUB_OUTPUT"`, `--body-file`), never through a
-captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after another:
+captured stdout. The one exception is `brief`, which runs a plain-Node script instead:
+the model's key can't share a job with the dependencies that `tsx` and `mfm` load. The
+scrape workflow (`scrape.yml`) runs five jobs, one after another:
 
 1. **`scrape`**, with no secrets and a token that only reads:
    1. `mfm open-prs` lists the open update PRs and copies each one's `data/` to its own
-      temp dir,
+      temp dir, and its body beside it,
    2. runs `pnpm scrape --report /tmp/failures.md` with a `--dates-from` for each of
       those dirs,
    3. `mfm plan` plans the PR (its branch, its base, and the PRs below it; see *One PR per
@@ -545,33 +614,40 @@ captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after an
       runs `mfm changelog <before> data` there. That writes the entry into
       `changelog/v<version>.md` and regenerates the `DATA-CHANGELOG.md` index on top of
       the base's copies,
-   6. uploads the staged files, both snapshots and the body as the `update` artifact,
-      and gives the plan, the title and the base's commit as job outputs. A failed
-      scrape uploads its failure report instead, as `failure-report`, and, when the parser
-      could have caused it, the `drift` artifact for the drift fixer (see *The drift
-      fixer*).
-2. **`publish`** holds the App's key, and runs no repository code (see *The App token*).
-   It first checks what `scrape` handed over, since that job ran every dependency: the
-   branch is an update branch (`mfm/v…`), the base is `main` or another one, the base
-   commit is on the base branch, and the staged files are regular files named
-   `data/*.yaml`, `data/points.csv`, `changelog/v*.md` and `DATA-CHANGELOG.md`, and
-   nothing else (`scrape` stages `data/` whole, so a file the scraper adds there must be
-   named here too; `test/workflows.test.ts` holds the check to the files in the
-   repository's `data/` and `changelog/`). Then it
-   checks out the base's commit afresh, replaces its `data/`, `changelog/` and
-   `DATA-CHANGELOG.md` with the staged ones, and, if anything changed, opens (or
-   updates) the PR on the planned branch and base. Its title and body are the two
-   outputs of `mfm diff`, and the title is also the commit subject (`data: <title>`).
-3. **`announce`**, when there is a PR: when the base isn't `main`, links the chain with
-   `gh stack link` (best-effort); `mfm attention <before> <new> --label --pr-number <n>`
-   puts the `needs-attention` label on the PR or takes it off (see *Needs attention*);
-   and `mfm announce <before> <new> --send --record` posts or edits the Discord message
-   and records a new one's marker on the PR (see *Announcing an update* above). The
-   label and the announcement are `continue-on-error`: neither is a scrape failure.
-4. **`report`**: if any job failed or timed out, `mfm report-failure` reports it on the
+   6. uploads the staged files, both snapshots, the body and, when the update already has
+      a PR, that PR's current body as the `update` artifact, and gives the plan, the title
+      and the base's commit as job outputs. A failed scrape uploads its failure report
+      instead, as `failure-report`, and, when the parser could have caused it, the `drift`
+      artifact for the drift fixer (see *The drift fixer*).
+2. **`brief`** holds the model's key and runs no dependency code: `node
+   --experimental-strip-types src/ops/brief.ts` writes the PR body with a brief above the
+   changelog, or `mfm diff`'s body unchanged, and hands it on as the `brief` artifact (see
+   *In brief, by a model*). It is `continue-on-error`, and a dry run runs it too.
+3. **`publish`** holds the App's key, and runs no repository code (see *The App token*).
+   It runs whether `brief` succeeded or not. It first checks what `scrape` handed over,
+   since that job ran every dependency: the branch is an update branch (`mfm/v…`), the
+   base is `main` or another one, the base commit is on the base branch, and the staged
+   files are regular files named `data/*.yaml`, `data/points.csv`, `changelog/v*.md` and
+   `DATA-CHANGELOG.md`, and nothing else (`scrape` stages `data/` whole, so a file the
+   scraper adds there must be named here too; `test/workflows.test.ts` holds the check to
+   the files in the repository's `data/` and `changelog/`). Then it checks out the base's
+   commit afresh,
+   replaces its `data/`, `changelog/` and `DATA-CHANGELOG.md` with the staged ones, and,
+   if anything changed, opens (or updates) the PR on the planned branch and base. Its
+   title is `mfm diff`'s, and also the commit subject (`data: <title>`); its body is the
+   `brief` artifact's, or `mfm diff`'s when there is none.
+4. **`announce`**, when `publish` succeeded and there is a PR: when the base isn't
+   `main`, links the chain with `gh stack link` (best-effort); `mfm attention <before>
+   <new> --label --pr-number <n>` puts the `needs-attention` label on the PR or takes it
+   off (see *Needs attention*); and `mfm announce <before> <new> --send --record` posts or
+   edits the Discord message and records a new one's marker on the PR (see *Announcing an
+   update* above). The label and the announcement are `continue-on-error`: neither is a
+   scrape failure.
+5. **`report`**: if any job failed or timed out, `mfm report-failure` reports it on the
    `scrape-failure` issue (with the failure report, when there is one), and if that step
    didn't succeed, a fallback step reports it with `gh` alone. After a successful run,
-   `mfm resolve-failure` closes any open one.
+   `mfm resolve-failure` closes any open one. A failed `brief` is not reported: it costs
+   the brief, not the update.
 
 Every job starts with `step-security/harden-runner` in audit mode: it records the job's
 outbound connections and processes, and blocks nothing. The drift fixer's agent is the
@@ -629,19 +705,21 @@ copy and the checks above, nothing else. It takes no `.git` from the artifact, b
 config can run commands and `create-pull-request` runs git there. See
 [0022](../docs/decisions/0022-the-app-key-never-meets-dependency-code.md). The drift
 fixer's `pr` job mints the same token the same way, for its draft PR, and holds to the same
-rule (see *The drift fixer*).
+rule (see *The drift fixer*). The model's key in `brief` is kept from dependency code the
+same way (see *In brief, by a model*).
 
 ### Dry run
-`gh workflow run scrape.yml --ref <branch> -f dry-run=true` runs `scrape` as a real run
-would, and skips `publish`, `announce` and `report`. So it opens no PR, links no stack,
-posts no Discord message or marker, and neither opens, comments on nor closes a failure
-issue; a failed dry run is reported by its red run alone. `scrape` puts what a real run
-would have published in the run's summary instead: the plan, the title, the files the
-commit would change, and the PR body. The Discord payload goes to the log, from `mfm
-announce` without `--send`, which makes no request. A separate `app-check` job mints the
-App's token, unused, so a dry run also checks the App's credentials and permissions.
-A dry run has its own concurrency group. A failed dry run's drift artifact is named
-`drift-dry-run`, which only a replay of the drift fixer takes. See
+`gh workflow run scrape.yml --ref <branch> -f dry-run=true` runs `scrape` and `brief` as a
+real run would, and skips `publish`, `announce` and `report`. So it opens no PR, links no
+stack, posts no Discord message or marker, and neither opens, comments on nor closes a
+failure issue; a failed dry run is reported by its red run alone. `scrape` puts what a
+real run would have published in the run's summary instead: the plan, the title, the files
+the commit would change, and the PR body. `brief` puts the brief it would have put above
+the changelog in its own job summary, or why there is none. The Discord payload goes to
+the log, from `mfm announce` without `--send`, which makes no request. A separate
+`app-check` job mints the App's token, unused, so a dry run also checks the App's
+credentials and permissions. A dry run has its own concurrency group. A failed dry run's
+drift artifact is named `drift-dry-run`, which only a replay of the drift fixer takes. See
 [0023](../docs/decisions/0023-a-dry-run-publishes-nothing.md).
 
 ## Around the pipeline
