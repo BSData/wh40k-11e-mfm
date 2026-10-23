@@ -59,7 +59,10 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
 - **The write token never meets project code**, as the App key doesn't in the scrape
   ([0022](0022-the-app-key-never-meets-dependency-code.md)). `release-assets` runs `mfm
   release` with a read-only token; `publish` downloads its artifact and runs `gh release
-  create`, and is the only job with `contents: write`. A compromised dependency could still
+  create`, and is the only job that can write. It does so with the App's token, scoped to
+  this repository with contents and workflows write: the first real run showed the default
+  token refused (HTTP 403) a tag on a past commit, whose workflow files differ from `main`'s,
+  and the default token can't be given the workflows permission. A compromised dependency could still
   shape what a real run on `main` publishes, since `release-assets` makes every file, but
   it can't reach the token, push to the repository, or publish from a dry run or another
   branch. Nor can it choose where a release goes, or in what order: a past release must be

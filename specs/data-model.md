@@ -398,8 +398,11 @@ own, with the reason; the check steps over those.
 
 The workflow has two jobs. `release-assets` runs `mfm release` with the default read-only
 token and a full clone, and uploads the result as an artifact; it isn't called `build`,
-which is the name of CI's required check. `publish`, the only job with `contents: write`,
-runs no code from the repository or its dependencies, only pinned actions, `gh` and `jq`.
+which is the name of CI's required check. `publish`, the only job that can write, mints the
+GitHub App's token for this repository with contents and workflows write (a tag on a commit
+whose workflow files differ from `main`'s needs the workflows permission, which the default
+token can't have), and runs no code from the repository or its dependencies, only pinned
+actions, `gh` and `jq`.
 It doesn't take the artifact's word for what to publish. First it checks the whole plan,
 before publishing any of it: every tag of the release form, every target a commit, the
 past releases rows (tag and commit) of `release/history.json` as committed at the

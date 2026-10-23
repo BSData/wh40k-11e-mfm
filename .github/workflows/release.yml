@@ -130,8 +130,11 @@ jobs:
     # 500 KB: a few minutes. A hung upload must not hold the release queue for hours; a
     # timeout can leave a draft behind (see "Publishing" in specs/data-model.md).
     timeout-minutes: 30
+    # The releases are created with the App's token, not this job's: a tag on a commit
+    # whose workflow files differ from main's (every past release, or a release that main
+    # has moved past) needs the workflows permission, which GITHUB_TOKEN can't have.
     permissions:
-      contents: write # create the tags and the releases, and mark the latest
+      contents: read
     steps:
       # Audit only, as in every job (see "Workflow integration" in specs/change-tracking.md).
       - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
@@ -143,9 +146,20 @@ jobs:
           name: release
           path: ${{ runner.temp }}/release
 
+      # Scoped to this repository (no owner or repositories given) and to what a release
+      # takes; revoked when the job ends. Only the next step, gh alone, gets it.
+      - name: Mint the App's token
+        id: token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.BSDATA_AUTOMATON_APP_CLIENT_ID }}
+          private-key: ${{ secrets.BSDATA_AUTOMATON_APP_PRIVATE_KEY }}
+          permission-contents: write # create the tags and the releases, and mark the latest
+          permission-workflows: write # tag commits whose workflow files differ from main's
+
       - name: Publish the releases
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.token.outputs.token }}
           GH_REPO: ${{ github.repository }}
           COMMIT: ${{ github.sha }}
           PLAN: ${{ runner.temp }}/release
