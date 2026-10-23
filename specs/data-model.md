@@ -353,8 +353,12 @@ Real runs share one concurrency group and run one at a time. GitHub keeps one pe
 per group, so a third push while one runs and another waits cancels the waiting one; its
 data is in the newer release, and re-running the cancelled run releases its own entry. A
 `workflow_dispatch` with `dry-run` builds and prints everything, the release check
-included, and publishes nothing. `publish` runs only on `main`, and a dry run or a run on
-another branch has a concurrency group of its own, so it can't cancel a real one. See
+included, and publishes nothing. So does every pull request that changes `data/`,
+`changelog/`, `schema/`, `src/`, the dependencies or the workflow: its run summary shows
+the tag and notes its merge would publish, and the check fails on the PR, before the
+merge, when `data/` changes without a new entry. `publish` runs only for a push or a
+dispatch on `main`, and a dry run, a PR or a run on another branch has a concurrency group
+of its own, so it can't cancel a real one. See
 [0028](../docs/decisions/0028-a-schema-version-and-releases-for-consumers.md).
 
 ## Index (in-memory only, not written)

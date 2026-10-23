@@ -50,6 +50,11 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
   whether to publish) is in `mfm release`, under test. A dry run runs `build` as a real
   run would and skips `publish`, as in the scrape
   ([0023](0023-a-dry-run-publishes-nothing.md)).
+- **A preview on every PR that feeds a release.** GitHub dispatches only workflows that
+  exist on the default branch, so a dry run can't try a change to the workflow before it
+  merges. A `pull_request` run of `build` can, and on an update or regeneration PR it
+  shows the tag and notes the merge would publish, and fails while `data/` changes
+  without a new entry: before the merge, where it can still be fixed.
 
 ## Consequences
 - A data change that lands on `main` without a new changelog entry fails the release: its

@@ -12,6 +12,18 @@ on:
     # edit that adds no entry publishes nothing, since its tag is released with the
     # same data/.
     paths: ['data/**', 'changelog/**']
+  # A preview on a PR that changes what a release is made from: `build` runs as on main,
+  # so the PR shows the tag and notes its merge would publish, and fails early when its
+  # data/ changes without a new changelog entry. `publish` never runs for a PR.
+  pull_request:
+    paths:
+      - 'data/**'
+      - 'changelog/**'
+      - 'schema/**'
+      - 'src/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/release.yml'
   workflow_dispatch:
     inputs:
       dry-run:
@@ -23,9 +35,9 @@ permissions: {}
 
 # One real release at a time. GitHub keeps one pending run per group, so a third push
 # while one runs and one waits cancels the waiting one: its data is in the newer
-# release, and a re-run of the cancelled run releases its own entry. A dry run, or a run
-# on another branch, can publish nothing, so it gets a group of its own and never
-# cancels a real one.
+# release, and a re-run of the cancelled run releases its own entry. A dry run, a PR's
+# preview or a run on another branch can publish nothing, so it gets a group of its own
+# and never cancels a real one.
 concurrency:
   group: ${{ github.ref == 'refs/heads/main' && !inputs.dry-run && 'release' || format('release-preview-{0}', github.run_id) }}
   cancel-in-progress: false
@@ -110,8 +122,9 @@ jobs:
   # point releases/latest at older data.
   publish:
     needs: build
-    # A real run on main only: a dry run, or a run on another branch, publishes nothing.
-    if: ${{ needs.build.outputs.publish == 'true' && github.ref == 'refs/heads/main' && !inputs.dry-run }}
+    # A real run on main only: a dry run, a PR's preview or a run on another branch
+    # publishes nothing.
+    if: ${{ needs.build.outputs.publish == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && !inputs.dry-run }}
     runs-on: ubuntu-latest
     permissions:
       contents: write # create the tag and the release
