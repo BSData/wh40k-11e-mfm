@@ -150,10 +150,30 @@ jobs:
       # open is reported as a comment on it, and the next successful run (below) closes it
       # (src/ops/failure-issue.ts).
       - name: Report the failure
+        id: report
         if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
         run: node_modules/.bin/tsx src/bin/mfm.ts report-failure --details /tmp/failures.md
+
+      # The report above needs the checkout and node_modules. When the run failed before
+      # it had them (checkout, pnpm/setup, the install), or the report itself failed, this
+      # files the failure with gh alone, the same way: a comment on the open issue, or a
+      # new one. The one place the workflow keeps logic, because it must run without mfm.
+      - name: Report the failure without mfm
+        if: failure() && steps.report.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          body="The scheduled MFM scrape failed before mfm could report it (in checkout or setup, or in the report step itself), so there is no per-faction detail: $RUN"
+          open=$(gh issue list --label scrape-failure --state open --json number --jq 'map(.number) | min // empty')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body "$body"
+          else
+            gh issue create --label scrape-failure --title "Scrape failed ($(date -u +%F))" --body "$body"
+          fi
 
       - name: Close the failure issue
         if: success()

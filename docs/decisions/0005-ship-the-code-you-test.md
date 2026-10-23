@@ -32,6 +32,14 @@ own there.
 
 ## Consequences
 The workflow reads as a list of commands, and `mfm <command> --help` documents each one.
-The failure handler needs the dependencies installed, so a run that fails before
-`pnpm/setup` finishes (checkout or install) can't open the failure issue; the run still
-fails, visibly, in the Actions tab.
+
+The one exception is the failure report's fallback. `mfm report-failure` needs the
+checkout and the dependencies, so a run that failed before it had them (checkout,
+`pnpm/setup`, the install) could otherwise file no failure issue at all, and an outage
+would go unreported. A last step, run only when the report step didn't succeed, files it
+with `gh` alone: a comment on the open `scrape-failure` issue, or a new one. It is a few
+lines of shell, kept because it must run when nothing else can.
+
+`mfm` loads a command's module only when it runs, so the GitHub chores, which hold
+`GH_TOKEN`, import no parser, browser or YAML library, and a broken import elsewhere can't
+take out the failure report.

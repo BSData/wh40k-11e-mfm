@@ -343,6 +343,11 @@ issue only when there isn't. After a successful run, `mfm resolve-failure` comme
 every open one with a link to that run, and closes it. See
 [0013](../docs/decisions/0013-one-failure-issue-per-outage.md).
 
+A run that fails before `mfm` can report it (in checkout or setup, or in the report step
+itself) still files the failure, the same way, from a fallback step that needs only `gh`:
+the issue then links the run and says there is no per-faction detail. A failure is never
+silent.
+
 ## Workflow integration
 Each step that has logic is one `mfm` command, run as `node_modules/.bin/tsx
 src/bin/mfm.ts <command>` (not `pnpm exec`, which can print to stdout); a result a later
@@ -366,8 +371,9 @@ captured stdout. The scrape GitHub Action:
 7. when the base isn't `main`, links the chain with `gh stack link` (best-effort),
 8. `mfm announce <before> <new> --send --record` posts or edits the Discord message and
    records a new one's marker on the PR (see *Announcing an update* above),
-9. if the scrape fails, `mfm report-failure` reports it on the `scrape-failure` issue;
-   after a successful run, `mfm resolve-failure` closes any open one.
+9. if the scrape fails, `mfm report-failure` reports it on the `scrape-failure` issue,
+   and if that step didn't succeed, a fallback step reports it with `gh` alone; after a
+   successful run, `mfm resolve-failure` closes any open one.
 
 A human reviews and merges the PR — giving reviewable, auditable history of every
 points change.
