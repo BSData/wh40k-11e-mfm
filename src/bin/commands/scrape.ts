@@ -17,6 +17,8 @@ a full run meta.yaml. Legends units and the rules panels need a browser (Playwri
   --report <file>      write the per-faction failure report there, for
                        \`mfm report-failure\`
   --dates-from <dir>   another snapshot to match firstSeen against (repeatable)
+  --ignore-name-case   match firstSeen ignoring how names are cased, to regenerate
+                       data/ after a change to the Names rule (specs/data-model.md)
 `,
   options: {
     faction: { type: 'string' },
@@ -26,6 +28,7 @@ a full run meta.yaml. Legends units and the rules panels need a browser (Playwri
     order: { type: 'string' },
     report: { type: 'string' },
     'dates-from': { type: 'string', multiple: true },
+    'ignore-name-case': { type: 'boolean' },
   },
   positionals: 0,
   async run(values) {
@@ -43,6 +46,7 @@ a full run meta.yaml. Legends units and the rules panels need a browser (Playwri
       legends: !flag(values, 'no-legends'),
       order,
       datesFrom: list(values, 'dates-from'),
+      ignoreNameCase: flag(values, 'ignore-name-case'),
     };
     const faction = text(values, 'faction');
     if (faction) opts.faction = faction;

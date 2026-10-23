@@ -37,7 +37,7 @@ detachments:
       - { name: Blinding Aura, points: 10 }
       - { name: Purity of Purpose, points: 15 }
       - { name: Tome of Forbidden Ways, points: 25 }
-  - name: Fires Of Purgation
+  - name: Fires of Purgation
     dp: 1
     objectives:
       - DISRUPTION
@@ -168,7 +168,7 @@ units:
     leaderTo:
       - Brotherhood Terminator Squad
       - Paladin Squad
-  - name: Grand Master In Nemesis Dreadknight
+  - name: Grand Master in Nemesis Dreadknight
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost

@@ -56,7 +56,7 @@ detachments:
     enhancements:
       - { name: "'Ardboyz (Upgrade)", points: 25 }
       - { name: Ferocious Show Off, points: 15 }
-  - name: Kult Of Speed
+  - name: Kult of Speed
     dp: 1
     objectives:
       - RECONNAISSANCE
@@ -157,7 +157,7 @@ units:
           - { models: 1, points: 85 }
     leaderTo:
       - Beast Snagga Boyz
-  - name: Beastboss On Squigosaur
+  - name: Beastboss on Squigosaur
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -194,7 +194,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 180 }
-  - name: Big Mek In Mega Armour
+  - name: Big Mek in Mega Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -203,7 +203,7 @@ units:
     leaderTo:
       - Meganobz
       - Mek Gunz
-  - name: Big Mek With Shokk Attack Gun
+  - name: Big Mek with Shokk Attack Gun
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -225,7 +225,7 @@ units:
         costs:
           - { models: 1, points: 90 }
     legends: true
-  - name: Big’Ed Bossbunka
+  - name: Big’ed Bossbunka
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -691,7 +691,7 @@ units:
       - Boyz
       - Breaka Boyz
       - Nobz
-  - name: Warboss In Mega Armour
+  - name: Warboss in Mega Armour
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -703,7 +703,7 @@ units:
           - { models: 1, points: 130 }
     leaderTo:
       - Meganobz
-  - name: Warboss On Warbike
+  - name: Warboss on Warbike
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

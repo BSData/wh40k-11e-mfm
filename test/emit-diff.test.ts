@@ -16,6 +16,7 @@ import {
 import {
   factionFromYaml,
   factionToYaml,
+  mapNames,
   metaFromYaml,
   metaToYaml,
   type SiteMeta,
@@ -92,6 +93,57 @@ describe('emit', () => {
     const yaml = metaToYaml(meta);
     expect(metaFromYaml(yaml)).toEqual(meta);
     expect(yaml.indexOf('notes:')).toBeLessThan(yaml.indexOf('muster:'));
+  });
+
+  it('maps every name the Names rule cases, and nothing else', () => {
+    // Every string field filled in: the names in lower case, everything else not.
+    const content: FactionContent = {
+      name: 'Faction',
+      slug: 'faction',
+      version: '1.0',
+      parent: 'parent',
+      detachments: [
+        {
+          name: 'detachment',
+          dp: 1,
+          objectives: ['OBJECTIVE'],
+          unique: 'unique',
+          enhancements: [
+            { name: 'Enhancement', points: 10, leaderTo: ['led'], supportTo: ['supported'] },
+          ],
+        },
+      ],
+      units: [
+        {
+          name: 'unit',
+          groupTitle: 'group',
+          pricing: [{ range: '[1,)', label: 'Your Unit Costs', costs: [{ models: 1, points: 5 }] }],
+          leaderTo: ['leads'],
+          supportTo: ['supports'],
+          wargear: [{ item: 'Wargear', points: 5 }],
+        },
+      ],
+    };
+    const seen: string[] = [];
+    const mapped = mapNames(content, (name) => {
+      seen.push(name);
+      return name.toUpperCase();
+    });
+    expect(seen.sort()).toEqual(
+      [
+        'detachment',
+        'group',
+        'led',
+        'leads',
+        'parent',
+        'supported',
+        'supports',
+        'unique',
+        'unit',
+      ].sort(),
+    );
+    // Mapping the names back gives the original: nothing else was touched.
+    expect(mapNames(mapped, (name) => name.toLowerCase())).toEqual(content);
   });
 });
 
@@ -905,7 +957,7 @@ describe('unit identity (names are not unique within a faction)', () => {
     const inquisitors = after.units.filter((u) => u.name === 'Inquisitor');
     expect(inquisitors.map((u) => u.groupTitle)).toEqual([
       undefined,
-      'Every Model Has The Imperium Keyword',
+      'Every Model Has the Imperium Keyword',
     ]);
     const cost = inquisitors[0]?.pricing[0]?.costs[0];
     if (!cost) throw new Error('data changed');
@@ -923,7 +975,7 @@ describe('unit identity (names are not unique within a faction)', () => {
     if (!cost) throw new Error('data changed');
     cost.points += 5;
     expect(changelog([before], [after])).toContain(
-      '- Inquisitor (Every Model Has The Imperium Keyword) — 1 model: 65 → 70 (+5)\n',
+      '- Inquisitor (Every Model Has the Imperium Keyword) — 1 model: 65 → 70 (+5)\n',
     );
   });
 
@@ -1192,7 +1244,7 @@ describe('the rules panels (meta.yaml)', () => {
 
 describe('sort order (independent of the process locale)', () => {
   /**
-   * Run `fn` as if the process locale were POSIX, where "Big’Ed Bossbunka" sorts before
+   * Run `fn` as if the process locale were POSIX, where "Big’ed Bossbunka" sorts before
    * "Big Mek" — the opposite of the committed (English) order.
    */
   const underPosix = <T>(fn: () => T): T => {
@@ -1224,7 +1276,7 @@ describe('sort order (independent of the process locale)', () => {
   });
 
   it('orders the report the same way', () => {
-    const names = ['Big’Ed Bossbunka', 'Big Mek'];
+    const names = ['Big’ed Bossbunka', 'Big Mek'];
     const before = names.map((name) => ({ ...asOrks(necronsContent()), slug: name, name }));
     const after = before.map((f) => {
       const g = structuredClone(f);
@@ -1232,7 +1284,7 @@ describe('sort order (independent of the process locale)', () => {
       return g;
     });
     const log = underPosix(() => changelog(before, after));
-    expect(log.indexOf('| Big Mek |')).toBeLessThan(log.indexOf('| Big’Ed Bossbunka |'));
+    expect(log.indexOf('| Big Mek |')).toBeLessThan(log.indexOf('| Big’ed Bossbunka |'));
   });
 });
 

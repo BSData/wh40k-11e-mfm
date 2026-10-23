@@ -57,7 +57,7 @@ detachments:
       - { name: Psychostatic Disruption (Aura), points: 30 }
       - { name: Synaptic Control, points: 20 }
       - { name: The Dirgeheart of Kharis, points: 15 }
-  - name: Talons Of The Norn Queen
+  - name: Talons of the Norn Queen
     dp: 1
     objectives:
       - TAKE AND HOLD
@@ -343,7 +343,7 @@ units:
           - { models: 1, points: 130 }
     leaderTo:
       - Carnifexes
-  - name: Parasite Of Mortrex
+  - name: Parasite of Mortrex
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -463,7 +463,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 135 }
-  - name: Tyranid Prime With Lash Whip
+  - name: Tyranid Prime with Lash Whip
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -472,16 +472,16 @@ units:
     leaderTo:
       - Hormagaunts
       - Termagants
-      - Tyranid Warriors With Melee Bio-Weapons
-      - Tyranid Warriors With Ranged Bio-Weapons
-  - name: Tyranid Warriors With Melee Bio-Weapons
+      - Tyranid Warriors with Melee Bio-Weapons
+      - Tyranid Warriors with Ranged Bio-Weapons
+  - name: Tyranid Warriors with Melee Bio-Weapons
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 3, points: 75 }
           - { models: 6, points: 150 }
-  - name: Tyranid Warriors With Ranged Bio-Weapons
+  - name: Tyranid Warriors with Ranged Bio-Weapons
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -525,7 +525,7 @@ units:
         costs:
           - { models: 3, points: 55 }
           - { models: 6, points: 110 }
-  - name: Von Ryan’S Leapers
+  - name: Von Ryan’s Leapers
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -546,8 +546,8 @@ units:
           - { models: 1, points: 65 }
     leaderTo:
       - Gargoyles
-      - Tyranid Warriors With Melee Bio-Weapons
-      - Tyranid Warriors With Ranged Bio-Weapons
+      - Tyranid Warriors with Melee Bio-Weapons
+      - Tyranid Warriors with Ranged Bio-Weapons
   - name: Zoanthropes
     pricing:
       - range: "[1,)"

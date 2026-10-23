@@ -12,7 +12,7 @@ detachments:
       - { name: Master Nemesine, points: 5 }
       - { name: Master Regenesist, points: 25 }
       - { name: Master Repugnomancer, points: 15 }
-  - name: Exhibition Of Slaughter
+  - name: Exhibition of Slaughter
     dp: 1
     objectives:
       - RECONNAISSANCE
@@ -44,7 +44,7 @@ detachments:
       - { name: Dark Vitality, points: 20 }
       - { name: Eye of Spite, points: 15 }
       - { name: Labyrinthine Cunning, points: 25 }
-  - name: Reaper’S Wager
+  - name: Reaper’s Wager
     dp: 3
     objectives:
       - PRIORITY ASSETS
@@ -63,7 +63,7 @@ detachments:
       - { name: Phantasmal Smoke, points: 15 }
       - { name: Sadistic Fulcrum, points: 15 }
       - { name: Spiteful Raider, points: 10 }
-  - name: Spectacle Of Spite
+  - name: Spectacle of Spite
     dp: 2
     objectives:
       - PURGE THE FOE
@@ -72,7 +72,7 @@ detachments:
       - { name: Morghenna’s Curse, points: 20 }
       - { name: Periapt of Torments, points: 25 }
       - { name: Pharmacophex, points: 15 }
-  - name: Tools Of Torment
+  - name: Tools of Torment
     dp: 1
     objectives:
       - TAKE AND HOLD
@@ -87,8 +87,8 @@ units:
         costs:
           - { models: 1, points: 80 }
     leaderTo:
-      - Court Of The Archon
-      - Hand Of The Archon
+      - Court of the Archon
+      - Hand of the Archon
       - Incubi
       - Kabalite Warriors
   - name: Beastmaster
@@ -98,7 +98,7 @@ units:
         costs:
           - { models: 7, points: 135 }
     legends: true
-  - name: Court Of The Archon
+  - name: Court of the Archon
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -136,7 +136,7 @@ units:
           - { models: 1, points: 50 }
     leaderTo:
       - Wracks
-  - name: Hand Of The Archon
+  - name: Hand of the Archon
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -179,7 +179,7 @@ units:
         costs:
           - { models: 1, points: 100 }
     leaderTo:
-      - Hand Of The Archon
+      - Hand of the Archon
       - Incubi
       - Kabalite Warriors
   - name: Lelith Hesperax
@@ -252,7 +252,7 @@ units:
         costs:
           - { models: 3, points: 85 }
           - { models: 6, points: 160 }
-  - name: Scourges With Heavy Weapons
+  - name: Scourges with Heavy Weapons
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -265,7 +265,7 @@ units:
     wargear:
       - { item: Haywire blaster, points: 5 }
       - { item: Dark Lance, points: 5 }
-  - name: Scourges With Shardcarbines
+  - name: Scourges with Shardcarbines
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost

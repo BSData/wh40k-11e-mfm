@@ -9,7 +9,14 @@ import {
   renderWithLegends,
 } from './browser.js';
 import { failuresReport } from './diff.js';
-import { contentKey, factionFromYaml, factionToYaml, metaToYaml, type OrderMode } from './emit.js';
+import {
+  contentKey,
+  factionFromYaml,
+  factionToYaml,
+  mapNames,
+  metaToYaml,
+  type OrderMode,
+} from './emit.js';
 import { BASE_URL, factionUrl, fetchText } from './fetch.js';
 import { Faction, type FactionContent } from './model.js';
 import {
@@ -54,6 +61,11 @@ export interface ScrapeOptions {
   report?: string;
   /** More snapshots to match `firstSeen` against. */
   datesFrom: string[];
+  /**
+   * Match `firstSeen` ignoring how names are cased, for regenerating `data/` after a
+   * change to the Names rule (specs/data-model.md).
+   */
+  ignoreNameCase: boolean;
 }
 
 /** Run `fn` over `items` with at most `limit` in flight at once. */
@@ -80,21 +92,25 @@ async function mapPool<T>(
  * workflow points those at the open update PR's `data/`, so a change that PR already
  * captured keeps the day it was first seen instead of being re-stamped on every run —
  * and a value that reverts to the committed one still resolves to the committed date.
+ * With `ignoreNameCase`, names are compared upper-cased, as the site writes them.
  */
 function resolveFirstSeen(
   content: FactionContent,
   dirs: string[],
   today: string,
   order: OrderMode,
+  ignoreNameCase: boolean,
 ): string {
-  const key = contentKey(content, order);
+  const keyOf = (c: FactionContent) =>
+    contentKey(ignoreNameCase ? mapNames(c, (name) => name.toUpperCase()) : c, order);
+  const key = keyOf(content);
   const dates: string[] = [];
   for (const dir of dirs) {
     const path = join(dir, `${content.slug}.yaml`);
     if (!existsSync(path)) continue;
     try {
       const existing = factionFromYaml(readFileSync(path, 'utf8'));
-      if (contentKey(existing, order) === key) dates.push(existing.firstSeen);
+      if (keyOf(existing) === key) dates.push(existing.firstSeen);
     } catch {
       // Unreadable/old-format file → treat as changed and re-stamp.
     }
@@ -212,6 +228,7 @@ export async function scrape(args: ScrapeOptions): Promise<number> {
           [args.out, ...args.datesFrom],
           today,
           args.order,
+          args.ignoreNameCase,
         );
         const faction = Faction.parse({ ...content, firstSeen });
         writeFileSync(join(args.out, `${f.slug}.yaml`), factionToYaml(faction, args.order));

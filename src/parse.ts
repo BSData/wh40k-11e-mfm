@@ -12,13 +12,14 @@
  *  - `page.ts` — the page put back together (`hydrate`), the change layer stripped
  *    (`deannotate`), and the cards;
  *  - `cards.ts` — a unit or detachment card, with `values.ts` (points, DP, ranges, cost
- *    rows), `names.ts` (`titleCase`) and `text.ts`;
+ *    rows), `names.ts` (`nameCase`, `titleCase`) and `text.ts`;
  *  - `coverage.ts` — the completeness check;
  *  - `panels.ts` — the rules panels as Markdown;
  *  - `faction.ts` — a faction page and the index, and the Legends.
  */
 
 export { markLegends, parseFaction, parseIndex } from './parse/faction.js';
+export { nameCase, OFFICIAL_SPELLINGS } from './parse/names.js';
 export {
   CARD_SELECTOR,
   TIER_LABEL_RE,

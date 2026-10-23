@@ -57,7 +57,7 @@ units:
           - { models: 5, points: 110 }
           - { models: 10, points: 210 }
   - name: Aquila Kill Team
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -71,7 +71,7 @@ units:
         costs:
           - { models: 1, points: 100 }
   - name: Callidus Assassin
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -84,7 +84,7 @@ units:
         costs:
           - { models: 1, points: 180 }
   - name: Corvus Blackstar
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -97,7 +97,7 @@ units:
         costs:
           - { models: 1, points: 85 }
   - name: Culexus Assassin
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -127,7 +127,7 @@ units:
           - { models: 5, points: 115 }
           - { models: 10, points: 220 }
   - name: Deathwatch Kill Team
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -149,7 +149,7 @@ units:
         costs:
           - { models: 1, points: 100 }
   - name: Eversor Assassin
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -162,7 +162,7 @@ units:
         costs:
           - { models: 11, points: 90 }
   - name: Exaction Squad
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -185,7 +185,7 @@ units:
     wargear:
       - { item: Psycannon, points: 5 }
   - name: Grey Knights Terminator Squad
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -200,7 +200,7 @@ units:
         costs:
           - { models: 10, points: 90 }
   - name: Imperial Navy Breachers
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -217,7 +217,7 @@ units:
         costs:
           - { models: 1, points: 75 }
   - name: Imperial Rhino
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,3]"
         label: Your 1st To 3rd Units Cost
@@ -249,11 +249,11 @@ units:
       - Imperial Navy Breachers
       - Inquisitorial Agents
       - Sanctifiers
-      - Sisters Of Battle Squad
+      - Sisters of Battle Squad
       - Subductor Squad
       - Vigilant Squad
   - name: Inquisitor
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -267,7 +267,7 @@ units:
       - Imperial Navy Breachers
       - Inquisitorial Agents
       - Sanctifiers
-      - Sisters Of Battle Squad
+      - Sisters of Battle Squad
       - Subductor Squad
       - Vigilant Squad
   - name: Inquisitor Coteaz
@@ -285,7 +285,7 @@ units:
       - Subductor Squad
       - Vigilant Squad
   - name: Inquisitor Coteaz
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -314,7 +314,7 @@ units:
       - Subductor Squad
       - Vigilant Squad
   - name: Inquisitor Draxus
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -360,11 +360,11 @@ units:
       - Imperial Navy Breachers
       - Inquisitorial Agents
       - Sanctifiers
-      - Sisters Of Battle Squad
+      - Sisters of Battle Squad
       - Subductor Squad
       - Vigilant Squad
   - name: Inquisitor Greyfax
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -376,10 +376,10 @@ units:
       - Imperial Navy Breachers
       - Inquisitorial Agents
       - Sanctifiers
-      - Sisters Of Battle Squad
+      - Sisters of Battle Squad
       - Subductor Squad
       - Vigilant Squad
-  - name: Inquisitor In Terminator Armour
+  - name: Inquisitor in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -395,7 +395,7 @@ units:
       - Indomitor Kill Team
       - Inquisitorial Agents
       - Proteus Kill Team
-      - Sisters Of Battle Squad
+      - Sisters of Battle Squad
       - Spectrus Kill Team
       - Subductor Squad
       - Vigilant Squad
@@ -414,7 +414,7 @@ units:
         costs:
           - { models: 1, points: 100 }
   - name: Inquisitor Kroyle
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -430,7 +430,7 @@ units:
       - Exaction Squad
       - Imperial Navy Breachers
       - Inquisitorial Agents
-      - Sisters Of Battle Squad
+      - Sisters of Battle Squad
       - Subductor Squad
       - Vigilant Squad
     legends: true
@@ -442,7 +442,7 @@ units:
           - { models: 6, points: 50 }
           - { models: 12, points: 100 }
   - name: Inquisitorial Agents
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -460,7 +460,7 @@ units:
         costs:
           - { models: 1, points: 70 }
   - name: Inquisitorial Chimera
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,3]"
         label: Your 1st To 3rd Units Cost
@@ -478,7 +478,7 @@ units:
           - { models: 1, points: 40 }
     leaderTo:
       - Imperial Navy Breachers
-      - Voidsmen-At-Arms
+      - Voidsmen-at-Arms
     legends: true
   - name: Jokaero Weaponsmith
     pricing:
@@ -507,11 +507,11 @@ units:
       - Imperial Navy Breachers
       - Inquisitorial Agents
       - Sanctifiers
-      - Sisters Of Battle Squad
+      - Sisters of Battle Squad
       - Subductor Squad
       - Vigilant Squad
   - name: Ministorum Priest
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -522,7 +522,7 @@ units:
       - Imperial Navy Breachers
       - Inquisitorial Agents
       - Sanctifiers
-      - Sisters Of Battle Squad
+      - Sisters of Battle Squad
       - Subductor Squad
       - Vigilant Squad
   - name: Navigator
@@ -533,9 +533,9 @@ units:
           - { models: 1, points: 60 }
     leaderTo:
       - Imperial Navy Breachers
-      - Voidsmen-At-Arms
+      - Voidsmen-at-Arms
   - name: Navigator
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -543,7 +543,7 @@ units:
           - { models: 1, points: 75 }
     leaderTo:
       - Imperial Navy Breachers
-      - Voidsmen-At-Arms
+      - Voidsmen-at-Arms
   - name: Neyam Shai Murad
     pricing:
       - range: "[1,)"
@@ -552,7 +552,7 @@ units:
           - { models: 1, points: 40 }
     leaderTo:
       - Imperial Navy Breachers
-      - Voidsmen-At-Arms
+      - Voidsmen-at-Arms
     legends: true
   - name: Proteus Kill Team
     pricing:
@@ -570,9 +570,9 @@ units:
           - { models: 4, points: 75 }
     leaderTo:
       - Imperial Navy Breachers
-      - Voidsmen-At-Arms
+      - Voidsmen-at-Arms
   - name: Rogue Trader Entourage
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -580,7 +580,7 @@ units:
           - { models: 4, points: 105 }
     leaderTo:
       - Imperial Navy Breachers
-      - Voidsmen-At-Arms
+      - Voidsmen-at-Arms
   - name: Sanctifiers
     pricing:
       - range: "[1,)"
@@ -588,13 +588,13 @@ units:
         costs:
           - { models: 9, points: 100 }
   - name: Sanctifiers
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 9, points: 100 }
-  - name: Sisters Of Battle Immolator
+  - name: Sisters of Battle Immolator
     pricing:
       - range: "[1,3]"
         label: Your 1st To 3rd Units Cost
@@ -606,8 +606,8 @@ units:
           - { models: 1, points: 100 }
     wargear:
       - { item: Twin Multi-melta, points: 15 }
-  - name: Sisters Of Battle Immolator
-    groupTitle: Every Model Has The Imperium Keyword
+  - name: Sisters of Battle Immolator
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,3]"
         label: Your 1st To 3rd Units Cost
@@ -619,14 +619,14 @@ units:
           - { models: 1, points: 115 }
     wargear:
       - { item: Twin Multi-melta, points: 15 }
-  - name: Sisters Of Battle Squad
+  - name: Sisters of Battle Squad
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 10, points: 100 }
-  - name: Sisters Of Battle Squad
-    groupTitle: Every Model Has The Imperium Keyword
+  - name: Sisters of Battle Squad
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -647,13 +647,13 @@ units:
         costs:
           - { models: 11, points: 85 }
   - name: Subductor Squad
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 11, points: 100 }
-  - name: Ur-025
+  - name: UR-025
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -675,7 +675,7 @@ units:
         costs:
           - { models: 11, points: 85 }
   - name: Vigilant Squad
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -688,20 +688,20 @@ units:
         costs:
           - { models: 1, points: 110 }
   - name: Vindicare Assassin
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 125 }
-  - name: Voidsmen-At-Arms
+  - name: Voidsmen-at-Arms
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 6, points: 50 }
-  - name: Voidsmen-At-Arms
-    groupTitle: Every Model Has The Imperium Keyword
+  - name: Voidsmen-at-Arms
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -722,7 +722,7 @@ units:
       - Proteus Kill Team
       - Spectrus Kill Team
   - name: Watch Captain Artemis
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -751,7 +751,7 @@ units:
       - Proteus Kill Team
       - Spectrus Kill Team
   - name: Watch Master
-    groupTitle: Every Model Has The Imperium Keyword
+    groupTitle: Every Model Has the Imperium Keyword
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

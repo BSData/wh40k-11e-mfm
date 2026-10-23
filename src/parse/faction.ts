@@ -2,7 +2,7 @@ import { load } from 'cheerio';
 import type { Detachment, FactionContent, SiteIndex, Unit } from '../model.js';
 import { parseDetachment, parseUnit } from './cards.js';
 import { assertFactionCovered } from './coverage.js';
-import { titleCase } from './names.js';
+import { nameCase } from './names.js';
 import { CARD_SELECTOR, deannotate, hydrate, isUnitCard, topCards } from './page.js';
 import { clean } from './text.js';
 import { parseVersion } from './values.js';
@@ -37,7 +37,7 @@ export function parseFaction(
   $(`h3.font-header, ${CARD_SELECTOR}`).each((_i, el) => {
     if ((el as { tagName?: string }).tagName === 'h3') {
       const isSection = ($(el).attr('class') ?? '').includes('break-after');
-      currentGroup = isSection ? undefined : titleCase($(el).text());
+      currentGroup = isSection ? undefined : nameCase($(el).text());
       if (currentGroup) groupTitles.push(currentGroup);
     } else if (isUnitCard($, $(el))) {
       groupByCard.set(el, currentGroup);

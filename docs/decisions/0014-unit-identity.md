@@ -5,7 +5,7 @@
 
 ## Context
 A unit's name is not unique within its faction. Imperial Agents lists 29 names twice, once
-on the base roster and again under the `Every Model Has The Imperium Keyword` sub-group,
+on the base roster and again under the `Every Model Has the Imperium Keyword` sub-group,
 and 14 of those pairs differ in content. Space Wolves has two different `Venerable
 Dreadnought` entries in the same group. Keyed by name, the second entry overwrote the
 first: repricing the first Inquisitor reported `No changes detected.`, and two identical

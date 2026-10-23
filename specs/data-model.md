@@ -80,8 +80,9 @@ costs:
   [0008](../docs/decisions/0008-leader-and-support-lists.md)).
 - `wargear`: per-item point costs from the unit's "Wargear Options" block (`per` stripped).
 - `legends: true`: marks Legends (deprecated) units — see specs/scraping.md.
-- `groupTitle`: the page sub-group the unit is listed under, Title-Cased from its army-group
-  header (`h3.font-header:not([class*="break-after"])`) — e.g. `Harlequins`/`Ynnari` on
+- `groupTitle`: the page sub-group the unit is listed under, cased as a name (see
+  [Names](#names)) from its army-group header
+  (`h3.font-header:not([class*="break-after"])`) — e.g. `Harlequins`/`Ynnari` on
   Aeldari, a Chapter on Space Marines, `Space Marines` for a successor's shared roster.
   Omitted for the base roster (units under the bare UNITS section, with no sub-group header).
 
@@ -95,7 +96,7 @@ is the first that names a faction.
 
 ### `unique` (detachment) / `leaderTo` · `supportTo` (enhancement) — optional extras
 - `unique`: the sub-faction keyword a detachment is restricted to, from its `UNIQUE: X`
-  banner (the `UNIQUE:` prefix stripped, Title-Cased). Omitted when absent.
+  banner (the `UNIQUE:` prefix stripped, cased as a name). Omitted when absent.
 - `leaderTo` / `supportTo`: live on the **enhancement**, not the detachment — the units that
   enhancement unlocks the Leader (resp. Support) ability for, from the `LEADER:`/`SUPPORT:`
   list shown beside it (source order preserved). Buying the enhancement is what grants the
@@ -111,6 +112,14 @@ actually changes — so it records when each set of values came into effect, and
 unchanged scrape produces no git diff. Implemented in `src/scrape.ts` (`resolveFirstSeen`)
 via the content fingerprint `contentKey()` in `src/emit.ts`, which ignores `firstSeen`.
 
+A change to how the scraper writes names (see [Names](#names)) is not new MFM content, so
+it must not move `firstSeen` either. For that regeneration, `mfm scrape --ignore-name-case`
+compares content with every name upper-cased, as the site writes it (`mapNames()` in
+`src/emit.ts` holds the list of name fields). A file whose only difference is the case of
+its names keeps its date, and so does `meta.yaml`'s `lastUpdated`. Any other difference
+still stamps the run date. Enhancement names are verbatim, so they are compared as they
+are.
+
 ### Rules
 - **One file per faction**; git is the change history
   ([0001](../docs/decisions/0001-git-is-the-change-history.md)).
@@ -124,10 +133,40 @@ via the content fingerprint `contentKey()` in `src/emit.ts`, which ignores `firs
   `label` is the verbatim site heading kept for humans.
 - **`costs` preserve source order** (ascending size). The core is `models`/`points`;
   `desc` is kept only where it adds information (named/composite/add-on rows).
-- **Names** (`unit.name`, `detachment.name`, `objective`) are Title-Cased deterministically
-  from the source's ALL-CAPS. Enhancement names are kept verbatim (already mixed case).
+- **Names** follow one rule (see [Names](#names)). Enhancement names and wargear items
+  are kept verbatim (already mixed case), and objectives as the site writes them, in
+  ALL CAPS (`PURGE THE FOE`).
 - **Faithful characters** — the source's typographic apostrophe `’` (U+2019) is preserved
   (e.g. `T’au Empire`), not normalised to `'`.
+
+### Names
+The site writes unit, detachment and sub-group names in ALL CAPS. The scraper writes them
+in a fixed case that reads like the official names (`nameCase()` in `src/parse/names.ts`;
+why, and how it compares with the official names:
+[0021](../docs/decisions/0021-names-match-the-official-ones.md)). The rule applies wherever
+a name appears: `unit.name`, `groupTitle`, `parent`, the unit and enhancement
+`leaderTo`/`supportTo` lists, `detachment.name` and `unique`.
+- Each word starts with a capital, and so does each part of a hyphenated word (`-`, or the
+  non-breaking `‑` U+2011): `Shield-Captain`, `Ûthar the Destined`. An opening quote or
+  bracket (`‘ “ " ' ’ (`) is not part of the word: `‘Iron Hand’ Straken`.
+- A letter after an apostrophe inside a word stays lower-case: `Emperor’s Champion`,
+  `C’tan Shard of the Deceiver`, `Be’lakor`.
+- `a`, `an`, `and`, `at`, `by`, `for`, `from`, `in`, `into`, `of`, `on`, `or`, `the`, `to`
+  and `with` stay lower-case, also inside a hyphenated word, unless the name starts with
+  one: `Anrakyr the Traveller`, `Voidsmen-at-Arms`, `The Phaeron's Armoury`.
+- A short list of words takes the official spelling, which no rule gives
+  (`OFFICIAL_SPELLINGS`): `El’Jonson`, and the initialisms `AFV`, `ATVs`, `AX-1-0`, `RSV`,
+  `TX42`, `UR-025` and `XV9`. A word matches whatever the style of its apostrophes and
+  hyphens, and only its letters change. Add a word only when the official names spell it
+  that way.
+- Punctuation around a word, opening (`‘ “ " ' ’ (`) or closing (`’ ' ” " ) ] , . ; : ! ?`),
+  doesn't hide it from the minor words or the official spellings: `Centaur (RSV)`,
+  `Banner of, and for, the Chapter`.
+- The rest is the site's own text, characters included (its `’` or `'`, its hyphens). So
+  `name.toUpperCase()` gives back the name as the page shows it.
+
+Tier labels are not names: every word of them is capitalised (`Your 1st To 2nd Units
+Cost`).
 
 ## Meta file (`data/meta.yaml`)
 
