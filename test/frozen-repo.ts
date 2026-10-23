@@ -34,6 +34,9 @@ export function frozenRepository(parent: string, edit: (root: string) => void = 
   writeFileSync(join(data, POINTS_CSV), pointsCsv(loadFactionDir(data)));
   mkdirSync(join(root, 'schema'));
   for (const s of jsonSchemas()) writeFileSync(join(root, 'schema', s.name), s.text);
+  // No past releases: a test that wants some writes its own table, and commits.
+  mkdirSync(join(root, 'release'));
+  writeFileSync(join(root, 'release', 'history.json'), '[]\n');
   mkdirSync(join(root, 'changelog'));
   writeFileSync(join(root, 'changelog', 'v1.6.md'), V16_CHANGELOG);
   writeFileSync(

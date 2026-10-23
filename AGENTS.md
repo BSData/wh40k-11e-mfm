@@ -56,7 +56,8 @@ the AI angle is purely this maintenance harness.
 - `src/emit.ts` — deterministic YAML in/out.
 - `src/csv.ts`, `src/schema.ts`, `src/release.ts` — the outputs for consumers (pure):
   `data/points.csv`, the JSON Schemas in `schema/` (`mfm schema`), and the release of
-  `data/` (`mfm release`, run by `.github/workflows/release.yml`).
+  `data/` (`mfm release`, run by `.github/workflows/release.yml`). `src/history.ts` and
+  `release/history.json`: the past releases, from before releases existed.
 - `src/diff.ts` — changelog from two snapshots (pure; modules under `src/diff/`): the PR
   body, kept under GitHub's 65,536-character limit, and the entry for the version's file.
 - `src/changelog.ts` — places an entry in `changelog/v<version>.md` and regenerates the

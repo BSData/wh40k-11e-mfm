@@ -70,3 +70,62 @@ export async function checkRelease(gh: GitHub, tag: string, commit: string): Pro
   const [theirs, ours] = await Promise.all([dataTree(gh, at), dataTree(gh, commit)]);
   return verdict(tag, commit, { commit: at, sameData: theirs !== undefined && theirs === ours });
 }
+
+/** A published release's asset, as GitHub lists it: `digest` is `sha256:<hex>`. */
+export interface PublishedAsset {
+  name: string;
+  digest?: string | null;
+}
+
+/**
+ * The verdict for a past release from the history table (`tag` at `commit`, with `ours`,
+ * the asset names and SHA-256s the current tools build): publish it when GitHub has no
+ * release by that tag. One that exists must be the table's, at its commit with the same
+ * asset names, or the run fails. Its bytes may differ once the tools have changed (a new
+ * schema description, say): a published release can't change, so that is reported, not
+ * failed, or every later run would fail.
+ */
+export function historicalVerdict(
+  tag: string,
+  commit: string,
+  ours: { name: string; sha256: string }[],
+  released: { commit: string; assets: PublishedAsset[] } | undefined,
+): Verdict {
+  if (released === undefined) return { publish: true, reason: `no release is tagged ${tag} yet` };
+  if (released.commit !== commit) {
+    throw new Error(
+      `${tag} is released at ${released.commit}, but release/history.json says ${commit}`,
+    );
+  }
+  const names = (xs: { name: string }[]) => xs.map((x) => x.name).sort();
+  if (JSON.stringify(names(released.assets)) !== JSON.stringify(names(ours))) {
+    throw new Error(
+      `${tag} is released with the assets ${names(released.assets).join(', ')}, not ${names(ours).join(', ')}`,
+    );
+  }
+  const differ = ours.filter(
+    (o) => released.assets.find((a) => a.name === o.name)?.digest !== `sha256:${o.sha256}`,
+  );
+  return {
+    publish: false,
+    reason:
+      differ.length === 0
+        ? `${tag} is released already, with identical assets`
+        : `${tag} is released already; the current tools build ${differ.map((d) => d.name).join(', ')} differently, and the published ones stand`,
+  };
+}
+
+/** Ask GitHub what is released under a past release's `tag`, and give the verdict. */
+export async function checkHistorical(
+  gh: GitHub,
+  tag: string,
+  commit: string,
+  ours: { name: string; sha256: string }[],
+): Promise<Verdict> {
+  type Published = { assets?: PublishedAsset[] };
+  const release = await find<Published>(gh, `/releases/tags/${encodeURIComponent(tag)}`);
+  if (release === undefined) return historicalVerdict(tag, commit, ours, undefined);
+  const at = await tagCommit(gh, tag);
+  if (at === undefined) throw new Error(`${tag} has a release but no tag`);
+  return historicalVerdict(tag, commit, ours, { commit: at, assets: release.assets ?? [] });
+}

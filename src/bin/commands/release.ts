@@ -1,14 +1,22 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkData, readGeneratedFiles } from '../../check-data.js';
 import { changelogFile } from '../../diff.js';
 import { factionFromYaml, metaFromYaml } from '../../emit.js';
+import {
+  fieldsUsed,
+  HISTORY_FILE,
+  parseHistory,
+  type Snapshot,
+  snapshotOf,
+} from '../../history.js';
+import { filesAt } from '../../ops/git.js';
 import { githubFromEnv } from '../../ops/github.js';
 import { writeOutputs } from '../../ops/outputs.js';
-import { checkRelease } from '../../ops/release.js';
-import { buildRelease } from '../../release.js';
+import { checkHistorical, checkRelease, type Verdict } from '../../ops/release.js';
+import { currentRelease, historicalRelease, type Release } from '../../release.js';
 import { REPO_URL } from '../../schema.js';
 import { type Command, required, text, UsageError } from '../command.js';
 
@@ -16,42 +24,54 @@ import { type Command, required, text, UsageError } from '../command.js';
 const REPO_ROOT = fileURLToPath(new URL('../../..', import.meta.url));
 
 export const command: Command = {
-  help: `usage: mfm release --assets <dir> --notes-file <file> [--commit <sha>]
-                   [--root <dir>] [--output <file>]
+  help: `usage: mfm release --out <dir> [--commit <sha>] [--root <dir>] [--output <file>]
+                   [--today <date>]
 
-Builds the release of the repository's data (see "Releases" in specs/data-model.md):
-its tag, mfm-v<version>+<the last day of the newest entry in changelog/v<version>.md>
-(and .2, .3, … for a later entry ending the same day), its title, its notes (that
-entry), and its assets: all.json, points.csv, the JSON Schemas and data.zip. Fails,
-publishing nothing, unless \`mfm check-data\` passes. Prints all of it; publishing is
-the workflow's \`gh release create\`.
+Builds every release the repository's data calls for, in the order they are published
+(see "Releases" in specs/data-model.md): the past ones listed in ${HISTORY_FILE},
+oldest first, each from its commit's data/ (so git needs those commits: a full clone),
+then the current one, named by the newest entry in changelog/v<version>.md. Fails,
+publishing nothing, unless \`mfm check-data\` passes. Writes into --out:
 
-  --assets <dir>       where the assets go: a new or empty directory
-  --notes-file <file>  where the notes go
-  --commit <sha>       the commit the release is for: the notes link to it, and GitHub
-                       (GH_TOKEN, GITHUB_REPOSITORY) is asked whether the tag is
-                       released already. Not yet: publish=true. At this commit, or at
-                       another with the same data/: publish=false. At another commit
-                       with other data/: it fails, since data/ changed without a new
-                       changelog entry.
-  --root <dir>         the repository (default: the one this command is in)
-  --output <file>      append tag=…, title=… and, with --commit, publish=… and
-                       reason=… to a step-output file, such as $GITHUB_OUTPUT
+  plan.tsv           the releases to publish, in order, one per line: the tag, the
+                     commit it goes on, "history" or "current", and its directory
+  <nn>/title.txt     each release's title, notes and assets, numbered in order
+  <nn>/notes.md
+  <nn>/assets/*
+  summary.md         the whole plan, as printed
+
+Publishing is the workflow's \`gh release create\`, one release at a time.
+
+  --out <dir>      where it all goes: a new or empty directory
+  --commit <sha>   the commit the current release is for. The notes link to it, and
+                   GitHub (GH_TOKEN, GITHUB_REPOSITORY) is asked which releases exist
+                   (see the spec): only the missing ones are planned, and a release
+                   that is already there with other data fails the run. Without it,
+                   every release is planned, and GitHub isn't asked.
+  --root <dir>     the repository (default: the one this command is in)
+  --output <file>  append tag=… and title=… (the current release), publish=… (whether
+                   any is planned) and reason=… to a step-output file, such as
+                   $GITHUB_OUTPUT
+  --today <date>   the day the past releases are backfilled on, for their notes
+                   (default: today, UTC)
 `,
   options: {
-    assets: { type: 'string' },
-    'notes-file': { type: 'string' },
+    out: { type: 'string' },
     commit: { type: 'string' },
     root: { type: 'string' },
     output: { type: 'string' },
+    today: { type: 'string' },
   },
   positionals: 0,
   async run(values, _, io) {
-    const assetsDir = required(values, 'assets');
-    const notesFile = required(values, 'notes-file');
+    const out = required(values, 'out');
     const commit = text(values, 'commit');
     if (commit !== undefined && !/^[0-9a-f]{40}$/.test(commit)) {
       throw new UsageError(`--commit must be a full commit SHA, got: ${commit}`);
+    }
+    const today = text(values, 'today') ?? new Date().toISOString().slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(today)) {
+      throw new UsageError(`--today must be a date, YYYY-MM-DD, got: ${today}`);
     }
     const root = text(values, 'root') ?? REPO_ROOT;
 
@@ -61,54 +81,135 @@ the workflow's \`gh release create\`.
       io.err('mfm release: the generated files are not what the tools write (mfm check-data).\n');
       return 1;
     }
+    if (existsSync(out) && readdirSync(out).length > 0) {
+      throw new Error(`--out ${out} isn't empty: its plan would be published`);
+    }
 
+    // The current data, as committed.
     const dataDir = join(root, 'data');
-    const names = readdirSync(dataDir, { withFileTypes: true })
-      .filter((d) => d.isFile())
-      .map((d) => d.name);
-    const read = (name: string) => readFileSync(join(dataDir, name));
-    const meta = metaFromYaml(read('meta.yaml').toString('utf8'));
-    const factions = names
-      .filter((name) => name.endsWith('.yaml') && name !== 'meta.yaml')
-      .map((name) => factionFromYaml(read(name).toString('utf8')));
-    const file = changelogFile(meta.version);
-    if (!existsSync(join(root, file))) throw new Error(`${file} doesn't exist`);
-    const release = buildRelease({
-      meta,
-      factions,
-      files: names.map((name) => ({ name, data: read(name) })),
-      changelog: readFileSync(join(root, file), 'utf8'),
-      changelogUrl: `${REPO_URL}/blob/${commit ?? 'main'}/${file}`,
-    });
+    const yamls = readdirSync(dataDir).filter((n) => n.endsWith('.yaml'));
+    const read = (name: string) => readFileSync(join(dataDir, name), 'utf8');
+    const now: Snapshot = {
+      meta: metaFromYaml(read('meta.yaml')),
+      factions: yamls.filter((n) => n !== 'meta.yaml').map((n) => factionFromYaml(read(n))),
+    };
+    const ref = commit ?? 'main';
+    const changelogOf = (version: string) => {
+      const file = changelogFile(version);
+      if (!existsSync(join(root, file))) throw new Error(`${file} doesn't exist`);
+      return {
+        text: readFileSync(join(root, file), 'utf8'),
+        url: `${REPO_URL}/blob/${ref}/${file}`,
+      };
+    };
 
-    if (existsSync(assetsDir) && readdirSync(assetsDir).length > 0) {
-      throw new Error(`--assets ${assetsDir} isn't empty: every file in it would be uploaded`);
+    // Every release, oldest first: the history table's, then the current one.
+    const planned: { release: Release; target: string | undefined; kind: string }[] = [];
+    const fieldsNow = fieldsUsed(now);
+    const history = parseHistory(readFileSync(join(root, HISTORY_FILE), 'utf8'));
+    for (const entry of history) {
+      const files = (await filesAt(root, entry.commit, 'data')).map((f) => ({
+        name: f.name,
+        text: f.data.toString('utf8'),
+      }));
+      let snapshot: Snapshot;
+      try {
+        snapshot = snapshotOf(files, entry.schema1);
+      } catch (err) {
+        throw new Error(`${entry.tag} (${entry.commit}): ${(err as Error).message}`);
+      }
+      const log = changelogOf(entry.version);
+      const release = historicalRelease({
+        entry,
+        snapshot,
+        changelog: log.text,
+        changelogUrl: log.url,
+        fieldsNow,
+        today,
+      });
+      planned.push({ release, target: entry.commit, kind: 'history' });
     }
-    mkdirSync(assetsDir, { recursive: true });
-    for (const a of release.assets) writeFileSync(join(assetsDir, a.name), a.data);
-    mkdirSync(dirname(notesFile), { recursive: true });
-    writeFileSync(notesFile, release.notes);
-
-    const width = Math.max(...release.assets.map((a) => a.name.length));
-    const assets = release.assets.map((a) => {
-      const sha = createHash('sha256').update(a.data).digest('hex');
-      return `  ${a.name.padEnd(width)}  ${String(a.data.length).padStart(9)} bytes  sha256:${sha}`;
-    });
-    io.out(
-      `Tag:   ${release.tag}\nTitle: ${release.title}\n\nAssets, in ${assetsDir}:\n${assets.join('\n')}\n\n` +
-        `Notes, in ${notesFile}:\n\n${release.notes}\n`,
-    );
-
-    let check: { publish: string; reason: string } | undefined;
-    if (commit === undefined) {
-      io.out('Not checked against GitHub: no --commit.\n');
-    } else {
-      const { publish, reason } = await checkRelease(githubFromEnv(), release.tag, commit);
-      io.out(`${publish ? 'To publish' : 'Nothing to publish'}: ${reason}.\n`);
-      check = { publish: String(publish), reason };
+    const log = changelogOf(now.meta.version);
+    const current = currentRelease({ snapshot: now, changelog: log.text, changelogUrl: log.url });
+    if (history.some((h) => h.tag === current.tag)) {
+      throw new Error(`${current.tag} is both the current release and a row of ${HISTORY_FILE}`);
     }
+    planned.push({ release: current, target: commit, kind: 'current' });
+
+    const sha256 = (data: Uint8Array) => createHash('sha256').update(data).digest('hex');
+    // What GitHub has: each release's verdict, in order.
+    const verdicts: (Verdict | undefined)[] = [];
+    const gh = commit === undefined ? undefined : githubFromEnv();
+    for (const { release, target, kind } of planned) {
+      if (!gh || !target) verdicts.push(undefined);
+      else if (kind === 'current') verdicts.push(await checkRelease(gh, release.tag, target));
+      else {
+        const ours = release.assets.map((a) => ({ name: a.name, sha256: sha256(a.data) }));
+        verdicts.push(await checkHistorical(gh, release.tag, target, ours));
+      }
+    }
+
+    // Write each one out, and the plan of those to publish.
+    mkdirSync(out, { recursive: true });
+    const plan: string[] = [];
+    const summary: string[] = [
+      `## Release plan: ${planned.length} release${planned.length === 1 ? '' : 's'}, oldest first`,
+      '',
+      gh ? '' : '_Not checked against GitHub (no `--commit`): every release is listed as planned._',
+    ];
+    planned.forEach(({ release, target, kind }, i) => {
+      const dir = String(i + 1).padStart(2, '0');
+      mkdirSync(join(out, dir, 'assets'), { recursive: true });
+      writeFileSync(join(out, dir, 'title.txt'), release.title);
+      writeFileSync(join(out, dir, 'notes.md'), release.notes);
+      for (const a of release.assets) writeFileSync(join(out, dir, 'assets', a.name), a.data);
+      const verdict = verdicts[i];
+      const publish = verdict?.publish ?? true;
+      if (publish) plan.push([release.tag, target ?? '', kind, dir].join('\t'));
+      const width = Math.max(...release.assets.map((a) => a.name.length));
+      summary.push(
+        `### ${i + 1}. \`${release.tag}\`: ${publish ? 'publish' : 'skip'}${verdict ? ` (${verdict.reason})` : ''}`,
+        '',
+        '```text',
+        `target:  ${target ?? '(the commit the workflow runs on)'} (${kind})`,
+        `title:   ${release.title}`,
+        `latest:  ${kind === 'current' ? 'decided at publish: yes unless a later commit on main changed data/ or changelog/' : 'no'}`,
+        ...release.assets.map(
+          (a, j) =>
+            `${j === 0 ? 'assets:  ' : '         '}${a.name.padEnd(width)}  ${String(a.data.length).padStart(9)} bytes  sha256:${sha256(a.data)}`,
+        ),
+        ...release.notes
+          .split('\n')
+          .filter((line) => line.trim() !== '')
+          .slice(0, 3)
+          .map((line) => (line.length > 100 ? `${line.slice(0, 99)}…` : line))
+          .map((line, j) => `${j === 0 ? 'notes:   ' : '         '}${line}`),
+        '```',
+        '',
+      );
+    });
+    writeFileSync(join(out, 'plan.tsv'), plan.map((l) => `${l}\n`).join(''));
+    const printed = `${summary.filter((l, i) => l !== '' || summary[i - 1] !== '').join('\n')}\n`;
+    writeFileSync(join(out, 'summary.md'), printed);
+    io.out(printed);
+
+    const reason =
+      plan.length === 0
+        ? 'nothing to publish'
+        : `${plan.length} of ${planned.length} releases to publish`;
+    io.out(`${reason[0]?.toUpperCase()}${reason.slice(1)}.\n`);
     const output = text(values, 'output');
-    if (output) writeOutputs({ tag: release.tag, title: release.title, ...check }, output, io.out);
+    if (output) {
+      writeOutputs(
+        {
+          tag: current.tag,
+          title: current.title,
+          ...(gh ? { publish: String(plan.length > 0), reason } : {}),
+        },
+        output,
+        io.out,
+      );
+    }
     return 0;
   },
 };

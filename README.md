@@ -28,9 +28,11 @@ faction's URL slug on the MFM site: `data/necrons.yaml` is
 Every change to the data on `main` is published as a
 [release](https://github.com/BSData/wh40k-11e-mfm/releases), tagged
 `mfm-v<version>+<date>` after the last day of the change (`mfm-v1.5+2026-10-05`; a second
-change ending the same day adds `.2`), with that change's changelog entry as its notes. A
-release never changes once published. Each one has the same assets, so the newest is
-always at the same URL:
+change ending the same day adds `.2`), with that change's changelog entry as its notes.
+The releases go back to the first scrape (`mfm-v1.0+2026-06-17`): the ones from before
+releases existed were backfilled from `main`'s history, in today's shape, and their notes
+say what differs from today's data. A release never changes once published. Each one has
+the same assets, so the newest is always at the same URL:
 
 ```text
 https://github.com/BSData/wh40k-11e-mfm/releases/latest/download/all.json

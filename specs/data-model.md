@@ -296,16 +296,18 @@ files beside it.
 
 ## Releases
 Each push to `main` that changes `data/` publishes a GitHub release of the dataset, from
-`.github/workflows/release.yml`. Its parts come from the files, never from the clock:
+`.github/workflows/release.yml`. Before the first one, the data `main` had after each
+earlier update is released too, oldest first (see [Past releases](#past-releases)), so the
+list reads oldest to newest. A release's parts come from the files, never from the clock:
 - **Tag:** `mfm-v<version>+<date>`: `version` from `meta.yaml`, and the last day of the
   newest entry's window in `changelog/v<version>.md` (`## [2026-10-02 → 2026-10-05]` gives
   `mfm-v1.5+2026-10-05`). That is the last day of the update window (see
   [Naming an update](change-tracking.md#naming-an-update)), since the entry is dated by it.
-  Two entries can end on the same day (a format change and an update, say, as v1.4's two
-  2026-09-02 entries do), so the second entry to end on a day, counted in the file from the
-  oldest, adds `.2`, the third `.3`: `mfm-v1.4+2026-09-02.2`. Hand-written entries count
-  too, released or not. Entries are only ever added on top, so an entry's tag never
-  changes. Tags sort by date as text, except that `.10` sorts before `.2`.
+  Two entries can end on the same day (a format change and an update, say), so the second
+  entry to end on a day, counted in the file from the oldest, adds `.2`, the third `.3`.
+  Hand-written entries count too, released or not. Entries are only ever added on top, so
+  an entry's tag never changes. Tags sort by date as text, except that `.10` sorts before
+  `.2`.
 - **Title:** `MFM v<version> — <window>`, plus the entry's own label when it isn't the
   version (`MFM v1.6 — 2026-10-23: Name casing, schema version, points table and
   releases`).
@@ -322,45 +324,89 @@ Each push to `main` that changes `data/` publishes a GitHub release of the datas
   | `all.json` | `{ "schemaVersion": 2, "meta": <meta.yaml>, "factions": [<every faction file>] }`, factions by slug, keys in the files' order, on one line |
   | `points.csv` | `data/points.csv` |
   | `faction.schema.json`, `meta.schema.json`, `all.schema.json` | the JSON Schemas |
-  | `data.zip` | every file in `data/`, under `data/`, dated `lastUpdated`, so the same data zips to the same bytes |
+  | `data.zip` | `data/` as the tools write it (each faction file, `meta.yaml`, `points.csv`), under `data/`, dated `lastUpdated`, so the same data zips to the same bytes |
 
-`mfm release` (`src/release.ts`) builds all of it into a directory, after the same checks
-as `mfm check-data`, and prints it. With `--commit`, it asks GitHub whether the tag is
-released already (`checkRelease()` in `src/ops/release.ts`):
+### Past releases
+`release/history.json` is a reviewed table of the releases from before releases existed:
+one row per update that reached `main`, from the first scrape (v1.0, 2026-06-17) to MFM
+v1.6's 2026-10-22 update. Each row gives the tag, the commit on `main` whose `data/` the
+release holds, its PR, the version and title, the headings of the changelog entries that
+are its notes (or, for the first scrape, which no entry describes, notes of its own),
+whether its data is in schema 1, and any caveat a reader needs. A test holds the table to
+the rules above: each tag and title is what its first entry gives (v1.4's update and #41's
+schema change, both of 2026-09-02, are one release, so the update isn't `.2`), every
+changelog entry is in exactly one release, the dates only go up, and every tag is dated
+before the current release, so no later entry can take one.
 
-| the tag is | `publish` |
+A past release is built from `git` (`filesAt()` in `src/ops/git.ts`), so the build needs
+the whole history. Its data is brought to the current shape (`snapshotOf()` in
+`src/history.ts`): a schema-1 snapshot, from before #41, is converted with #41's mapping
+(a unit's `role` and `attachTo` become `leaderTo` or `supportTo`, a detachment's
+`objective` becomes `objectives`), which gives MFM v1.3's data exactly as #41 migrated it.
+`meta.yaml` gets the current `schemaVersion`. A field the model doesn't know fails the
+build rather than being dropped. The assets are then built as for the current release.
+Its notes are its entries, then a **Backfilled** paragraph: the commit and PR it comes
+from, the date it was backfilled, and what differs from today's data. That paragraph is
+worked out from the data where it can be (the conversion, how many names are cased as
+before #88, the fields later scrapes added) and taken from the table's caveats where it
+can't (Space Wolves' second Venerable Dreadnought, not yet marked Legends before
+2026-10-22). It is the one part of a release that reads the clock.
+
+### Publishing
+`mfm release` (`src/release.ts`) builds every release into a directory, after the same
+checks as `mfm check-data`: the table's, oldest first, then the current one. It writes a
+plan, `plan.tsv`, of the ones to publish, in order, and prints the whole plan: each tag,
+the commit it goes on, its title, whether it is to be latest, its assets with their
+SHA-256, and the first lines of its notes. With `--commit`, it asks GitHub which releases
+exist (`src/ops/release.ts`):
+
+| a past release (`checkHistorical()`) | |
 |---|---|
-| not released | yes |
-| released at this commit (a re-run) | no |
-| released at another commit with the same `data/` tree (a dry run, a change outside `data/`) | no |
+| not released | published |
+| released at its row's commit, with the same asset names | skipped; when the current tools build different bytes (a change to them since), that is reported, and the published assets stand |
+| released at another commit, or with other assets | the run fails |
+
+| the current release (`checkRelease()`) | |
+|---|---|
+| not released | published |
+| released at this commit (a re-run) | skipped |
+| released at another commit with the same `data/` tree (a dry run, a change outside `data/`) | skipped |
 | released at another commit with other `data/` | the run fails |
 
 The last case means `data/` changed without a new changelog entry, and a release is named
 by its entry. So a PR that changes `data/` adds one, as update PRs do by themselves and a
 regeneration does by hand (see the `change-data-model` skill). The workflow also runs on a
-push that changes `changelog/`, so the PR that adds a missing entry releases the data it
-describes; one that only edits an entry finds its tag released with the same data, and
-publishes nothing.
+push that changes `changelog/` or `release/`, so the PR that adds a missing entry (or a
+row) releases what it describes; one that only edits an entry finds its tag released with
+the same data, and publishes nothing.
 
 The workflow has two jobs. `release-assets` runs `mfm release` with the default read-only
-token and uploads the result as an artifact; it isn't called `build`, which is the name of
-CI's required check. `publish`, the only job with `contents: write`, runs no code from the
-repository or its dependencies, only pinned actions and `gh`: it downloads the artifact,
-checks the tag's form, and runs `gh release create`, which uploads the assets to a draft
-and publishes it once they are all there. Both jobs start with `harden-runner` in audit
-mode, like the scrape's. The release is marked latest only while its commit is `main`'s
-head, so a late re-run of an older run can't point `releases/latest` at older data.
-Releases are immutable on this repository, so a published release, its tag and its assets
-never change.
+token and a full clone, and uploads the result as an artifact; it isn't called `build`,
+which is the name of CI's required check. `publish`, the only job with `contents: write`,
+runs no code from the repository or its dependencies, only pinned actions, `gh` and `jq`.
+It publishes the plan's releases one at a time, in order, and stops at the first that
+fails, so the order can't break. For each, it checks the tag's form; a past release must
+be a row, tag and commit, of `release/history.json` as committed at the workflow's commit
+(read through the API, not from the artifact), and the current release must be for that
+commit. `gh release create --target <its commit>` uploads the assets to a draft and
+publishes it once they are all there. Both jobs start with `harden-runner` in audit mode,
+like the scrape's. Releases are immutable on this repository, so a published release, its
+tag and its assets never change, and a deleted release's tag can't be used again.
+
+A past release is never marked latest. The current one is, unless a commit on `main`
+after its own changed `data/` or `changelog/` (from the compare API, `$COMMIT...main`): an
+unrelated merge in the meantime doesn't demote the newest release, and a late re-run of an
+older run can't promote older data. A failed call, or a file list GitHub may have cut short
+(300 files), counts as not latest.
 
 Real runs share one concurrency group and run one at a time. GitHub keeps one pending run
 per group, so a third push while one runs and another waits cancels the waiting one; its
 data is in the newer release, and re-running the cancelled run releases its own entry. A
-`workflow_dispatch` with `dry-run` builds and prints everything, the release check
+`workflow_dispatch` with `dry-run` builds and prints everything, the checks against GitHub
 included, and publishes nothing. So does every pull request that changes `data/`,
-`changelog/`, `schema/`, `src/`, the dependencies or the workflow: its run summary shows
-the tag and notes its merge would publish, and the check fails on the PR, before the
-merge, when `data/` changes without a new entry. `publish` runs only for a push or a
+`changelog/`, `release/`, `schema/`, `src/`, the dependencies or the workflow: its run
+summary shows the releases its merge would publish, and the check fails on the PR, before
+the merge, when `data/` changes without a new entry. `publish` runs only for a push or a
 dispatch on `main`, and a dry run, a PR or a run on another branch has a concurrency group
 of its own, so it can't cancel a real one. See
 [0028](../docs/decisions/0028-a-schema-version-and-releases-for-consumers.md).
