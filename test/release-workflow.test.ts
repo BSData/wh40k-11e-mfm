@@ -132,39 +132,48 @@ describe.skipIf(!hasBash)('the publish script', () => {
   /**
    * A stand-in for gh. It records each call, one per line, in `calls`; serves the history
    * table and the compare response from files; knows the releases in `published` (lines of
-   * tag and commit), adding each one it creates; keeps the latest tag in `latest`; and
-   * fails `release create` for the tag in `fail`.
+   * tag and commit; a release's id is its line number), adding each one it creates; keeps
+   * the latest tag in `latest`, which `make_latest` sets; and fails `release create` for
+   * the tag in `fail`.
    */
   const STUB_GH = `#!/usr/bin/env bash
 set -eu
 printf '%s\\n' "$*" >> "$STUB/calls"
-published() { # the commit a published tag is on, from its URI-encoded form
+published() { # "<id> <commit>" of a published tag, from its URI-encoded form
+  n=0
   while read -r t c; do
-    [ "$(jq -rn --arg s "$t" '$s | @uri')" = "$1" ] && { echo "$c"; return 0; }
+    n=$((n + 1))
+    [ "$(jq -rn --arg s "$t" '$s | @uri')" = "$1" ] && { echo "$n $c"; return 0; }
   done < "$STUB/published"
   return 1
 }
 if [ "$1" = api ]; then
-  path= query=
+  path= query= method=GET field=
   shift
   while [ $# -gt 0 ]; do
     case "$1" in
       -H) shift ;;
+      -X) method=$2; shift ;;
+      -f) field=$2; shift ;;
       --jq) query=$2; shift ;;
       *) path=$1 ;;
     esac
     shift
   done
-  case "$path" in
-    */contents/release/history.json*) cat "$STUB/table.json" ;;
-    */compare/*)
+  case "$method $path" in
+    'GET '*/contents/release/history.json*) cat "$STUB/table.json" ;;
+    'GET '*/compare/*)
       [ -f "$STUB/compare.json" ] || { echo 'HTTP 502' >&2; exit 1; }
       jq -r "$query" "$STUB/compare.json" ;;
-    */releases/latest) [ -s "$STUB/latest" ] || exit 1; cat "$STUB/latest" ;;
-    */releases/tags/*)
-      commit=$(published "\${path##*/}") || { echo 'HTTP 404' >&2; exit 1; }
-      [ "$query" = .id ] && echo 1 || echo "$commit" ;;
-    *) echo "unexpected: $path" >&2; exit 1 ;;
+    'GET '*/releases/latest) [ -s "$STUB/latest" ] || exit 1; cat "$STUB/latest" ;;
+    'GET '*/releases/tags/*)
+      found=$(published "\${path##*/}") || { echo 'HTTP 404' >&2; exit 1; }
+      [ "$query" = .id ] && echo "\${found% *}" || echo "\${found#* }" ;;
+    'PATCH '*/releases/*)
+      [ "$field" = make_latest=true ] || { echo "unexpected field: $field" >&2; exit 1; }
+      [ ! -f "$STUB/patch-fails" ] || { echo 'HTTP 422' >&2; exit 1; }
+      sed -n "\${path##*/}p" "$STUB/published" | cut -d' ' -f1 > "$STUB/latest" ;;
+    *) echo "unexpected: $method $path" >&2; exit 1 ;;
   esac
 elif [ "$1 $2" = 'release create' ]; then
   tag= target= latest= seen=
@@ -176,8 +185,6 @@ elif [ "$1 $2" = 'release create' ]; then
   [ "$tag" != "$(cat "$STUB/fail" 2>/dev/null)" ] || { echo 'HTTP 422' >&2; exit 1; }
   echo "$tag $target" >> "$STUB/published"
   [ "$latest" != true ] || echo "$tag" > "$STUB/latest"
-elif [ "$1 $2" = 'release edit' ]; then
-  echo "$3" > "$STUB/latest"
 else
   echo "unexpected: $*" >&2; exit 1
 fi
@@ -192,6 +199,8 @@ fi
     published?: [string, string][];
     /** The latest release's tag. */
     latest?: string;
+    /** Whether marking a release latest fails. */
+    patchFails?: boolean;
   }
 
   /**
@@ -223,6 +232,7 @@ fi
       writeFileSync(join(stub, 'compare.json'), JSON.stringify(opts.compare));
     }
     if (opts.fail) writeFileSync(join(stub, 'fail'), opts.fail);
+    if (opts.patchFails) writeFileSync(join(stub, 'patch-fails'), '');
     const lines = plan.map(([tag, target, kind], i) => {
       const n = String(i + 1).padStart(2, '0');
       mkdirSync(join(planDir, n, 'assets'), { recursive: true });
@@ -337,14 +347,31 @@ fi
       latest: 'mfm-v1.0+2026-06-22',
     });
     expect(run.status).toBe(0);
-    expect(run.calls).toContain(`release edit ${CURRENT} --latest`);
+    // Only make_latest, by the release's id: an immutable release takes no other change.
+    expect(run.calls).toContain(
+      'api -X PATCH repos/BSData/wh40k-11e-mfm/releases/3 -f make_latest=true',
+    );
+    expect(run.calls.some((c) => c.startsWith('release edit'))).toBe(false);
     expect(run.latest).toBe(CURRENT);
     const again = publishPlan([], {
       compare: IDENTICAL,
       published: [...PAST, [CURRENT, '9'.repeat(40)]],
       latest: CURRENT,
     });
-    expect(again.calls.some((c) => c.startsWith('release edit'))).toBe(false);
+    expect(again.calls.some((c) => c.includes('-X PATCH'))).toBe(false);
+  });
+
+  it('fails, saying what to do, when marking it latest fails', () => {
+    const run = publishPlan([], {
+      compare: IDENTICAL,
+      published: [...PAST, [CURRENT, '9'.repeat(40)]],
+      latest: 'mfm-v1.0+2026-06-22',
+      patchFails: true,
+    });
+    expect(run.status).toBe(1);
+    expect(run.stdout).toContain(
+      `::error title=Not latest::marking ${CURRENT} latest failed: re-run this job, or mark it latest on its release page`,
+    );
   });
 
   it('stops at the first release that fails, so the order holds', () => {

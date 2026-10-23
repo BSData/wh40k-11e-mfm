@@ -310,6 +310,12 @@ export function historicalRelease(input: {
   const used = fieldsUsed(snapshot);
   const absent = [...input.fieldsNow].filter((f) => !used.has(f)).sort();
   const cased = namesCasedOtherwise(snapshot);
+  // The clearest example: a capital after an apostrophe (`Emperor’S Champion`), the case
+  // readers met most, if the snapshot has one.
+  const example =
+    cased.find((n) => n === 'Emperor’S Champion') ??
+    cased.find((n) => /\p{L}[’']\p{Lu}/u.test(n)) ??
+    cased[0];
   const short = entry.commit.slice(0, 7);
   const from = `[\`${short}\`](${REPO_URL}/commit/${entry.commit})${entry.pr ? `, from #${entry.pr}` : ''}`;
   const facts = [
@@ -319,10 +325,10 @@ export function historicalRelease(input: {
             "`leaderTo` or `supportTo`, and a detachment's `objective` became `objectives`.",
         ]
       : []),
-    ...(cased[0] !== undefined
+    ...(example !== undefined
       ? [
-          `${cased.length} names are cased as they were before #88, such as \`${cased[0]}\` (now ` +
-            `\`${nameCase(cased[0].toUpperCase())}\`): compare names upper-cased across releases.`,
+          `${cased.length} names are cased as they were before #88, such as \`${example}\` (now ` +
+            `\`${nameCase(example.toUpperCase())}\`): compare names upper-cased across releases.`,
         ]
       : []),
     ...(absent.length > 0

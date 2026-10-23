@@ -426,7 +426,18 @@ and the job then fails, so that a re-run, which skips what is published, decides
 When main has moved on, the job warns and passes: the later run marks its own release.
 `publish` runs on every real run, even with nothing to publish, and when the rule says the
 current release should be latest and it isn't (it was published while a change to
-`changelog/` alone was merging), it marks it latest.
+`changelog/` alone was merging), it marks it latest. It does that with the one field,
+`make_latest`, patched on the release by id, since an immutable release takes no other
+change. If that fails, or the job can't tell, the error says to re-run the job; marking
+the release latest on its page on GitHub is the fallback.
+
+Both jobs have a timeout, so a hung `gh` call doesn't hold the one release queue for
+GitHub's six hours: 15 minutes to build, 30 to publish (the first run's twelve releases
+take a few minutes). A timeout or a cancel during an upload can leave a draft behind,
+which nothing publishes and the next attempt doesn't reuse: list the releases, drafts
+included, with `gh release list` (or on the releases page), and delete the draft with
+`gh release delete <tag>` before re-running. A draft has no tag yet, so its tag stays
+free.
 
 A tag is burnt when a publish fails after GitHub applied it: gh's cleanup deletes what it
 takes for a draft, and the tag can't be used again. A burnt current release's entry goes

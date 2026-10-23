@@ -51,6 +51,9 @@ jobs:
   # release's assets and notes, and which releases GitHub lacks (src/bin/commands/release.ts).
   release-assets:
     runs-on: ubuntu-latest
+    # A few minutes at most (a full clone, an install, twelve builds): a hang must not hold
+    # the one release queue for GitHub's six hours.
+    timeout-minutes: 15
     permissions:
       contents: read # check out the code, and look the tags up among the releases
     outputs:
@@ -121,6 +124,10 @@ jobs:
     # publishes nothing.
     if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && !inputs.dry-run }}
     runs-on: ubuntu-latest
+    # The first run publishes twelve releases, 10 s apart, each with six uploads of under
+    # 500 KB: a few minutes. A hung upload must not hold the release queue for hours; a
+    # timeout can leave a draft behind (see "Publishing" in specs/data-model.md).
+    timeout-minutes: 30
     permissions:
       contents: write # create the tags and the releases, and mark the latest
     steps:
@@ -237,13 +244,14 @@ jobs:
           #    the job fails after publishing: a re-run skips what is published and decides
           #    again.
           if [ "$changes" = unknown ]; then
-            fail 'Not latest' "couldn't tell whether main has changed since $COMMIT, so $CURRENT isn't marked latest: re-run this job"
+            fail 'Not latest' "couldn't tell whether main has changed since $COMMIT, so $CURRENT isn't marked latest: re-run this job, or, if main hasn't changed data/ or changelog/ since, mark it latest on its release page"
           elif [ "$latest" != true ]; then
             echo "::warning title=Not latest::$CURRENT isn't marked latest: main has $changes later changes to data/ or changelog/, and their run marks its own release"
           elif [ "$(api "repos/$GH_REPO/releases/latest" --jq .tag_name 2>/dev/null || true)" != "$CURRENT" ]; then
-            if api "repos/$GH_REPO/releases/tags/$(uri "$CURRENT")" --jq .id >/dev/null 2>&1; then
+            # Only make_latest is sent: an immutable release takes no other change.
+            if id=$(api "repos/$GH_REPO/releases/tags/$(uri "$CURRENT")" --jq .id 2>/dev/null); then
               echo "Marking $CURRENT latest"
-              gh release edit "$CURRENT" --latest </dev/null \
-                || fail 'Not latest' "marking $CURRENT latest failed: re-run this job"
+              api -X PATCH "repos/$GH_REPO/releases/$id" -f make_latest=true >/dev/null \
+                || fail 'Not latest' "marking $CURRENT latest failed: re-run this job, or mark it latest on its release page"
             fi
           fi

@@ -100,7 +100,11 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
   listed, with the reason, in `release/unreleased.json`, a reviewed escape hatch.
 - When the latest check can't tell (the compare call fails), the release goes out not
   latest and the job fails, so a re-run decides again; it doesn't pass with no release
-  marked latest.
+  marked latest. Correcting latest later patches `make_latest` alone, by the release's id,
+  rather than `gh release edit`, which sends the tag name too; the release page is the
+  fallback.
+- Each job has a timeout (15 and 30 minutes), so a hung upload frees the release queue.
+  A cancel or timeout mid-upload can leave a draft, deleted by hand before the re-run.
 - #6's 2026-06-22 changelog entry was written later and describes the first scrape, so
   its release takes notes of its own, generated from the two commits, and the entry
   itself is left as it is.
