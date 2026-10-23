@@ -22,16 +22,20 @@ for a maintainer, with one comment saying why.
 - The base's rules require `build`. Auto-merge waits only for required checks, so without
   that rule it would merge an untested update at once.
 - When the update changes what the live smoke test covers (the dependencies, in
-  practice), that commit's smoke test passed. The job waits for it, up to 25 minutes.
+  practice), that commit's smoke test, run in this repository, passed. The job waits for
+  it, up to 45 minutes, longer than the smoke test's own timeout.
   Auto-merge can't wait for it, because it isn't a required check
-  ([0024](0024-a-live-smoke-test-reports-and-never-gates.md)), and a cheerio or Playwright
+  ([0024](0024-a-live-smoke-test-reports-and-gates-only-auto-merge.md)), and a cheerio or Playwright
   update that misreads today's site would otherwise merge and fail the next scrape.
 
 The author check uses the PR's author, not `github.actor`: the actor is whoever caused the
-event, and Dependabot can be made the actor on someone else's PR. The job fails closed:
-when an update stops qualifying, or a run fails, it turns off the auto-merge an earlier
-run turned on. Auto-merge a maintainer turned on, say after reviewing a major update, is
-theirs, and stays.
+event, and Dependabot can be made the actor on someone else's PR. The job fails closed.
+Each run starts by turning off the auto-merge an earlier run turned on: Dependabot keeps
+auto-merge on when it pushes, so the earlier commit's decision would otherwise merge the
+new one as soon as `build` passed, before its smoke test finished. Only a merge decision
+turns it on again, for the commit it checked (`--match-head-commit`). A run that fails
+leaves it off; a run for an older commit, such as a re-run, does nothing. Auto-merge a
+maintainer turned on, say after reviewing a major update, is theirs, and stays.
 
 ## Consequences
 The weekly npm minor and patch group merges itself. The weekly GitHub Actions group

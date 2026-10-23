@@ -19,11 +19,11 @@ jobs:
     # Dependabot can be made the actor on someone else's PR.
     if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'BSData/wh40k-11e-mfm'
     runs-on: ubuntu-latest
-    timeout-minutes: 40 # the wait for the smoke test gives up after 25
+    timeout-minutes: 60 # the wait for the smoke test gives up after 45
     permissions:
       contents: write # auto-merge squashes the PR into main
       pull-requests: write # turn auto-merge on or off, and comment on a held update
-      checks: read # wait for the smoke test
+      actions: read # find this commit's smoke test run
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
@@ -32,15 +32,37 @@ jobs:
       # Auto-merge this job turned on. One a maintainer turned on is theirs to keep.
       OURS: '.autoMergeRequest.enabledBy.login // "" | IN("github-actions", "github-actions[bot]")'
     steps:
+      # A run for an older commit (a re-run, say) decides nothing: the run for the PR's
+      # head does. Otherwise start closed: auto-merge that an earlier run turned on, for an
+      # earlier commit, is turned off while this one is decided, so that commit's checks
+      # can't merge this one. Only a merge decision turns it on again, for this commit.
+      - name: Start closed
+        id: head
+        run: |
+          set -euo pipefail
+          view=$(gh pr view "$PR" --json headRefOid,autoMergeRequest)
+          if [ "$(jq -r .headRefOid <<< "$view")" != "$SHA" ]; then
+            echo "::notice::The PR's head has moved on from $SHA, so the run for the new head decides."
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "current=true" >> "$GITHUB_OUTPUT"
+          if [ "$(jq "$OURS" <<< "$view")" = true ]; then
+            gh pr merge "$PR" --disable-auto
+          fi
+
       # Fails unless the PR's author is Dependabot and its first commit carries GitHub's
       # signature. The rest of the commits are checked below.
       - name: Read the update's metadata
         id: meta
+        if: steps.head.outputs.current == 'true'
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
 
-      # One decision, closed by default: an empty reason means merge, anything else holds.
+      # One decision, closed by default: merge only when nothing below gives a reason to
+      # hold.
       - name: Decide
         id: decide
+        if: steps.head.outputs.current == 'true'
         env:
           DEPS: ${{ steps.meta.outputs.updated-dependencies-json }}
         run: |
@@ -62,22 +84,28 @@ jobs:
             <<< "$pr" > /dev/null; then
             # The paths smoke.yml runs on (keep the two lists in step). Auto-merge waits
             # only for required checks, and smoke can't be one, since it doesn't run on
-            # every PR: so wait here for this commit's live scrape, and hold unless it
-            # passed. A cheerio or Playwright update that misreads today's site would
-            # otherwise merge, and the next scheduled scrape would fail.
-            deadline=$((SECONDS + 1500))
+            # every PR: so wait here for this commit's live scrape, in this repository,
+            # and hold unless it passed. A cheerio or Playwright update that misreads
+            # today's site would otherwise merge, and the next scheduled scrape would fail.
+            # The wait outlasts smoke's own 30-minute timeout.
+            deadline=$((SECONDS + 2700))
             smoke=""
             while [ -z "$smoke" ] && [ "$SECONDS" -lt "$deadline" ]; do
-              smoke=$(gh api "repos/$GH_REPO/commits/$SHA/check-runs?check_name=smoke&app_id=15368" \
-                --jq '.check_runs | max_by(.id) // {} | select(.status == "completed") | .conclusion')
+              smoke=$(gh api "repos/$GH_REPO/actions/workflows/smoke.yml/runs?head_sha=$SHA&event=pull_request" \
+                --jq '[.workflow_runs[] | select(.head_repository.full_name == env.GH_REPO)] | max_by(.id) // {} | select(.status == "completed") | .conclusion')
               [ -n "$smoke" ] || sleep 30
             done
-            [ "$smoke" = success ] || reason="its live smoke test didn't pass (${smoke:-not finished within 25 minutes})"
+            [ "$smoke" = success ] || reason="its live smoke test didn't pass (${smoke:-not finished within 45 minutes})"
           fi
-          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          if [ -n "$reason" ]; then
+            echo "decision=hold" >> "$GITHUB_OUTPUT"
+            echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          else
+            echo "decision=merge" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Auto-merge once build passes
-        if: steps.decide.outputs.reason == ''
+        if: steps.decide.outputs.decision == 'merge'
         env:
           BASE: ${{ github.event.pull_request.base.ref }}
         run: |
@@ -90,18 +118,15 @@ jobs:
             echo "::error title=No required build check::$BASE has no rule requiring the build check, so auto-merge would not wait for it. Add it to the ruleset, then re-run this job."
             exit 1
           fi
-          gh pr merge "$PR" --auto --squash
+          # For this commit only: if Dependabot has pushed since, GitHub refuses.
+          gh pr merge "$PR" --auto --squash --match-head-commit "$SHA"
 
       - name: Hold for a maintainer
-        if: steps.decide.outputs.reason != ''
+        if: steps.decide.outputs.decision == 'hold'
         env:
           REASON: ${{ steps.decide.outputs.reason }}
         run: |
           set -euo pipefail
-          # An earlier run may have turned auto-merge on before a push changed the answer.
-          if [ "$(gh pr view "$PR" --json autoMergeRequest --jq "$OURS")" = true ]; then
-            gh pr merge "$PR" --disable-auto
-          fi
           # One comment per PR, however often Dependabot rebases it. Only this job's own
           # count, so nobody else's comment can stand in for it.
           held=$(gh pr view "$PR" --json comments \
@@ -111,9 +136,10 @@ jobs:
           fi
 
       # Closed on failure too: an auto-merge an earlier run turned on mustn't outlive a
-      # decision this run couldn't make.
+      # decision this run couldn't make. A run for an older commit leaves it to the
+      # current one.
       - name: Turn auto-merge off after a failure
-        if: failure()
+        if: failure() && steps.head.outputs.current != 'false'
         run: |
           set -euo pipefail
           if [ "$(gh pr view "$PR" --json autoMergeRequest --jq "$OURS")" = true ]; then

@@ -435,7 +435,7 @@ when they differ. A difference never fails the job; a scrape that fails does, wi
 failure report in the summary. It is not a required check, but Dependabot auto-merge
 waits for it (below). The job has `contents: read` and no secrets, so a PR from a fork
 runs it the same way. See
-[0024](../docs/decisions/0024-a-live-smoke-test-reports-and-never-gates.md).
+[0024](../docs/decisions/0024-a-live-smoke-test-reports-and-gates-only-auto-merge.md).
 
 ### Dependabot auto-merge
 `dependabot-automerge.yml` runs on each PR whose author (not `github.actor`) is
@@ -446,10 +446,11 @@ check passes, only when all of these hold:
 - every commit in it is Dependabot's;
 - it changes no workflow file, which the job's `GITHUB_TOKEN` may not merge;
 - the rules of the PR's base require `build`;
-- when it changes a path the smoke test runs on, this commit's smoke test passed. The job
-  waits for it, up to 25 minutes.
+- when it changes a path the smoke test runs on, this commit's smoke test, run in this
+  repository, passed. The job waits for it, up to 45 minutes.
 
-Otherwise it waits for a maintainer. The PR gets one comment saying why, and auto-merge
-that an earlier run of this job turned on is turned off; a run that fails turns it off
-too. Auto-merge a maintainer turned on is left alone. See
+Each run starts by turning off the auto-merge an earlier run of this job turned on, and
+only a merge decision turns it on again, for the commit that was checked. A run for an
+older commit than the PR's head does nothing. Otherwise the PR waits for a maintainer,
+with one comment saying why. Auto-merge a maintainer turned on is left alone. See
 [0025](../docs/decisions/0025-dependabot-minor-and-patch-updates-merge-themselves.md).
