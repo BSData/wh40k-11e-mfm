@@ -69,7 +69,7 @@ jobs:
             else
               echo "The live site scrapes differently from the committed \`data/\`. That is expected if this PR changes the output, or if the site has changed since \`data/\` was last updated (an open \`mfm-update\` PR would hold that change)."
               echo
-              node_modules/.bin/tsx src/diff.ts data "$out"
+              node_modules/.bin/tsx src/bin/mfm.ts diff data "$out"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
           if [ "$differs" = true ]; then

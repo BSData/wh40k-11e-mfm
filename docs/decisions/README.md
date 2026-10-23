@@ -4,7 +4,7 @@ Why the project works the way it does. The specs under [`specs/`](../../specs) s
 the contract is; each record here says why one part of it was chosen, what it replaced,
 and what it costs. A spec links the records behind it.
 
-One file per decision, numbered in the order they were written up: change tracking first, then scraping.
+One file per decision, numbered in the order they were written up: change tracking first, then scraping, then the automation around the pipeline.
 
 | # | Decision | Spec |
 | --- | --- | --- |
@@ -28,6 +28,10 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0018](0018-the-change-layer-is-not-data.md) | The "changed since the last MFM" layer is not data | scraping |
 | [0019](0019-account-for-every-visible-string.md) | Account for every visible string on the page | scraping, data model |
 | [0020](0020-fail-loud-and-located.md) | Fail loud and located, one faction at a time | scraping |
+| [0021](0021-the-app-key-never-meets-dependency-code.md) | Update PRs are opened with the App's token, in a job that runs no dependency code | change tracking |
+| [0022](0022-a-dry-run-publishes-nothing.md) | A dry run publishes nothing | change tracking |
+| [0023](0023-a-live-smoke-test-reports-and-never-gates.md) | A live smoke test reports, and never gates | change tracking |
+| [0024](0024-dependabot-minor-and-patch-updates-merge-themselves.md) | Dependabot's minor and patch updates merge themselves | change tracking |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and
