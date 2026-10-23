@@ -9,13 +9,21 @@ them, especially if a parse has started failing. Why each rule below exists is i
 ## Source
 - Landing page: `https://mfm.warhammer-community.com/en`
 - Faction page: `https://mfm.warhammer-community.com/en/<slug>`
-- The site is **Next.js (App Router), server-rendered**. The **base** data is present in
-  the initial HTML, so a plain GET covers it — no JS execution required. (Legends units
-  and the rules panels — the "Welcome…" notes and "Muster Armies" — are client-only and
-  need a headless browser — see below.)
+- The site is **Next.js (App Router), server-rendered**. Everything the scraper reads is in
+  the HTML of a plain GET, with no JS execution and no browser:
+  - the units and detachments, in the server-rendered markup;
+  - the Legends units, server-rendered too when the request carries the
+    `isLegendsDisplayed=true` cookie (see [Legends](#legends-over-http));
+  - the rules panels ("Welcome…" and "Muster Armies"), in the page's React Server
+    Components payload (see [The rules panels](#the-rules-panels-over-http)).
+
+  A browser is only for tests and troubleshooting (see [The browser](#the-browser-tests-and-troubleshooting-only)).
+  See [0026](../docs/decisions/0026-http-only-a-browser-for-tests-and-troubleshooting.md).
 
 ## Fetch policy
 - Native `fetch` with a descriptive User-Agent.
+- One GET per page: the index, then each faction page, which is sent with the cookie
+  `isLegendsDisplayed=true` (`LEGENDS_COOKIE`). A full run makes 31 requests.
 - Retry transient failures (network error, HTTP 429, HTTP 5xx) with exponential backoff;
   fail fast on other 4xx. Pacing between pages comes from the scrape's concurrency pool,
   not a fixed delay.
@@ -103,8 +111,11 @@ fixing one.
 | An enhancement without a name | `"<slug>", detachment "<CARD>": unreadable enhancement row "…"` |
 | An enhancement whose points aren't `NN pts` (e.g. `FREE`) | `"<slug>", detachment "<CARD>": enhancement "<name>" has unreadable points "…"` |
 | Any visible string no parse step consumed (an unknown change note, a new field, a DP badge that isn't `NDP`) | `Unconsumed content on "<slug>"`, one line per card: `unit "<CARD>": "<leftover>"` (see below) |
-| A base unit missing from the Legends render | `"<slug>": base units missing from the Legends render: …` |
-| The rules panels failing to render, or rendering without text, on a full browser run | A failure named `rules panels` (see below) |
+| A page fetched with the Legends cookie that ships the Legends toggle but no `LEGENDS` section | `"<slug>": the page has the Legends toggle but no LEGENDS section …` |
+| A page whose every unit is in the `LEGENDS` section | `"<slug>": every unit is in the LEGENDS section, so the base roster is missing` |
+| A rules panel not found in the page's RSC payload, found more than once, holding something the decoder can't render, or without text, on a full run | A failure named `rules panels` (see [The rules panels](#the-rules-panels-over-http)) |
+| With `--browser`: a faction or the rules panels differing from the browser render | `"<slug>": the browser render differs from the HTTP page, from line <n>: …` (for a panel, the `rules panels` failure) |
+| With `--browser`: a base unit missing from the browser's Legends render | `"<slug>": base units missing from the Legends render: …` |
 
 `<CARD>` is the card's name as the page shows it (upper case), so it can be searched for in
 the fixture or the live page. Each failure fails that faction (or, for the rules panels,
@@ -132,10 +143,10 @@ interpret) is not consumed, so it is left over and fails the parse.
 The coverage runs on the **de-annotated** DOM, so only an *unrecognised* change note is
 left of the annotation layer, and it is caught here.
 - **Page level** — after dropping the parsed cards, the site chrome (`header`/`nav`, the
-  `footer` of legal links, the OneTrust cookie dialog on browser renders, the open rules
-  panels captured into `meta.notes`/`meta.muster`), the army-group title (`parent`), the
-  known content-area headings (`UNITS`/`DETACHMENTS`/`LEGENDS`), and the rules panels'
-  button labels (shown whether open or not), *nothing* may remain.
+  `footer` of legal links, the OneTrust cookie dialog on browser renders, the rules panels
+  when a browser has opened them), the army-group title (`parent`), the known content-area
+  headings (`UNITS`/`DETACHMENTS`/`LEGENDS`), and the rules panels' button labels (shown
+  whether open or not), *nothing* may remain.
 
 The allowlists (`UNIT_BOILERPLATE`, `DETACHMENT_BOILERPLATE`, `PAGE_BOILERPLATE`, and the
 `CHANGE_BADGE_TEXT` notes stripped by `deannotate()`) live on their own in
@@ -143,50 +154,95 @@ The allowlists (`UNIT_BOILERPLATE`, `DETACHMENT_BOILERPLATE`, `PAGE_BOILERPLATE`
 chrome is added there, as the exact string, in a reviewed commit; new *data* is taught to
 the parser. Keep the allowlists tight.
 
-## Legends & the rules panels (browser-only)
-Two things are **not** in any HTTP response — they're rendered client-side:
-- **Legends units**: revealed by the client-only "Show Legends" toggle.
-- **The two collapsible rules panels**: "Welcome…" (help text on reading the MFM) and
-  "Muster Armies" (the army-building rules, including the battle-size table).
+## Legends (over HTTP)
+A visitor sees a faction's Legends units after clicking the "Show Legends" toggle, which the
+server ships (`input#show-legends`) only for factions that have Legends. The toggle calls a
+server action that sets the cookie `isLegendsDisplayed=true` and re-renders the page. A GET
+that sends the cookie gets that page server-rendered: the base roster as without it, then
+the Legends in a section of their own under a `LEGENDS` section heading (an
+`h3.font-header` with the break-after class), streamed in a Suspense chunk like the rest of
+the page, which `hydrate()` puts in place.
+- `parseFaction` reads the sections in the same document-order walk that assigns
+  `groupTitle`: every unit under the `LEGENDS` section heading gets `legends: true`, until
+  another section heading. A sub-group header inside the section sets `groupTitle` as it
+  does anywhere else.
+- The scrape fetches every faction page with the cookie (`legendsShown`), so a toggle with no
+  `LEGENDS` section means the cookie no longer worked, and fails the faction. A page whose
+  every unit is in the `LEGENDS` section fails too, on any page: the base roster is missing.
+- One request can't show that a single base unit drops out when the Legends are shown:
+  that takes the page without the cookie as well. The browser cross-check makes that
+  comparison on demand (see [The browser](#the-browser-tests-and-troubleshooting-only)).
 
-`src/browser.ts` (Playwright, headless Chromium) handles both, interacting only with the
-buttons and the rendered DOM, never with the request/response shape. See
-[0017](../docs/decisions/0017-http-first-a-browser-only-where-needed.md).
-- **Detecting Legends** is done from the *raw HTML*: `hasLegends(html)` checks for the
-  `show-legends` toggle markup, which the server ships only for factions that have Legends.
-  So base data is parsed from plain HTTP, and **only Legends factions open the browser**.
-- `renderWithLegends()` loads the page, declines cookies (`#onetrust-reject-all-handler`),
-  clicks `#show-legends-label`, and waits for the number of **unit cards** to exceed the
-  current one. A unit card is counted the way the parser recognises one — the card
+## The rules panels (over HTTP)
+The two collapsible panels, "Welcome…" (help text on reading the MFM) and "Muster Armies"
+(the army-building rules, including the battle-size table), aren't in the page's HTML until
+a visitor opens them, and opening them makes no request: their content is already in the
+page's **React Server Components payload**, the "flight" data Next.js streams into the page
+for React. `rulesPanels()` in `src/parse/panels.ts` decodes it with `src/parse/rsc.ts`:
+- **The payload** is the JSON strings of the page's `self.__next_f.push([1,"…"])` scripts,
+  joined. It is a list of rows: `<hex id>:<JSON>` up to a newline, or
+  `<hex id>:T<hex byte length>,<text>` for a long text. A row starting `I` names a client
+  component: `I[<module>, <chunks>, "<export name>"]`.
+- **An element** is `["$", type, key, props]`. A type that is a tag name (`"div"`) is an
+  HTML element; a type `"$L<id>"` is the client component that row `<id>` names. A string
+  `"$<id>"` or `"$L<id>"` stands for row `<id>`'s value, `"$$…"` is a string starting `$`,
+  and `"$undefined"` is nothing.
+- **A panel** is found through its collapsible, not its headings: the `Collapsible` element
+  whose `CollapsibleTrigger` child's text (its `render` element, the button) starts with
+  the panel's button label (`RULES_PANELS` in `src/parse/panels.ts`). Its
+  `CollapsibleContent` child's children are the panel.
+- **Rendering** the panel to HTML takes its tags, their string, number and `true` props as
+  attributes (`className` → `class`, `htmlFor` → `for`), and its text, escaped. A client
+  component, `dangerouslySetInnerHTML`, or a `$` reference other than those above inside
+  the panel fails it: plain HTTP can't know what those render to.
+- That HTML goes through the same Markdown conversion as a panel a browser has opened:
+  `extractNotesMarkdown()` / `extractMusterMarkdown()` find an open panel on a rendered page
+  (button label → `aria-controls` → panel), and both paths convert with
+  [node-html-markdown](https://github.com/crosstype/node-html-markdown) — `<b>` →
+  `**bold**`, `<ul>/<li>` → bullets, `<table>` → GFM tables. The one project-specific step:
+  the site marks section labels up as a plain `<b>` alone on its line, so an all-caps one is
+  promoted to a `##` heading first. → `meta.notes` and `meta.muster`.
+- The panels are identical across pages, so a full run decodes them from the first
+  faction's page, with no request of its own. They are required: if either panel isn't
+  found exactly once, can't be rendered, or has no text, the run records a failure named
+  `rules panels` (in the `--report` file, exit code 1) and does **not** write `meta.yaml`.
+  The factions are still scraped and written. A `--faction` run writes no `meta.yaml`.
+
+## The browser (tests and troubleshooting only)
+`src/browser.ts` drives Google Chrome with
+[`playwright-core`](https://playwright.dev/docs/browsers#google-chrome--microsoft-edge),
+`channel: 'chrome'`: the Chrome installed on the machine, which GitHub's Ubuntu runner
+images ship and contributors have. Nothing installs a browser: not `pnpm install`, not a
+workflow, not `scripts/setup`. The scrape loads it only with `--browser`. It is used by:
+- `mfm scrape --browser`: the cross-check below; the scrape workflow's `cross-check` input
+  runs it on the runner's Chrome;
+- `mfm render <slug>`: a faction page as Chrome renders it, for troubleshooting;
+- `mfm refresh-fixtures`, for the two browser-render fixtures (`necrons-legends.html`,
+  `necrons-panels.html`).
+
+A render interacts only with the page's buttons and reads the rendered DOM, never the
+request or response. Each faction page gets a fresh browser context, so no Legends cookie
+carries over from another page.
+- **Legends**: decline cookies (`#onetrust-reject-all-handler`), keep the page's default
+  render, click `#show-legends-label`, and wait for the number of **unit cards** to exceed the
+  default one. A unit card is counted the way the parser recognises one — the card
   container holding a `div.bg-slate-200` label matching `/COST/` — not by the plain
   `div.bg-slate-500.text-xl` header, which "changed"-style headers don't have. The Legends
   render in a single React commit, so the count jumps straight to the full total.
-- `markLegends()` then diffs the HTTP base against the rendered full DOM — units present only
-  with Legends on get `legends: true`. Units are matched on `groupTitle` + `name` +
-  occurrence (the *n*-th unit of that name in that sub-group, in page order), because one
-  page can list two units of the same name. This relies on the Legends render listing the
-  Legends after the base roster, under their own `LEGENDS` section heading, so of two
-  same-named units the base one always comes first. Every base unit must be found in the
-  full render; one that is missing fails the faction rather than being dropped.
-- `renderRulesPanels()` clicks each panel's button (`RULES_PANELS` in
-  `src/parse/panels.ts`) and waits for the panel that button controls (`aria-controls`) to
-  have content, then hands the rendered HTML to the pure `extractNotesMarkdown()` /
-  `extractMusterMarkdown()`. Those find the open panel the same way (button label →
-  `aria-controls` → panel) and convert it to **Markdown** with
-  [node-html-markdown](https://github.com/crosstype/node-html-markdown) — `<b>` → `**bold**`,
-  `<ul>/<li>` → bullets, `<table>` → GFM tables. The one project-specific step: the site marks
-  section labels up as a plain `<b>` alone on its line, so an all-caps one is promoted to a
-  `##` heading first. Identical across pages, rendered once → `meta.notes` and `meta.muster`.
-- On a full browser run, the rules panels are required. If the render fails, or either
-  panel yields no text, after one retry, the run records a failure named `rules panels` (in
-  the `--report` file, exit code 1) and does **not** write `meta.yaml`. The factions are
-  still scraped and written. A `--faction` run and a `--no-legends` run don't render the
-  panels and never write them (the former writes no `meta.yaml`; the latter writes one
-  without `notes` and `muster`).
+- **The rules panels**: click each panel's button and wait for the panel it controls
+  (`aria-controls`) to have content.
 
-`pnpm scrape` renders Legends factions in the browser at `--concurrency` (default 4) in
-parallel; `--no-legends` skips the browser entirely. CI installs Chromium via
-`playwright install --with-deps chromium`.
+**The cross-check** (`--browser`) compares the HTTP result with what Chrome shows a visitor:
+- For each faction, `markLegends(default, toggled)` finds the Legends the other way: by
+  difference, the units only the toggled render has, matched on `groupTitle` + `name` +
+  occurrence (the *n*-th unit of that name in that sub-group, in page order), because one
+  page can list two units of the same name. Every unit of the default render must be in the
+  toggled one, or the faction fails. The result must equal the HTTP result, compared as
+  YAML in page order; a faction without Legends compares its default render.
+- On a full run, the panels Chrome opens, converted by `extractNotesMarkdown()` /
+  `extractMusterMarkdown()`, must equal the decoded ones.
+- A difference fails that faction, which then isn't written (or `rules panels`, and
+  `meta.yaml` isn't written), naming the first line that differs.
 
 ## Known faction count
 30 faction slugs as of v1.0. If `parseIndex` returns a very different number, the index

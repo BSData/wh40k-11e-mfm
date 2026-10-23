@@ -1,7 +1,7 @@
 # 0017. Plain HTTP first, a browser only where the page needs one
 
-- **Status:** accepted, with the Legends and notes capture (`c097799`); the rules panels in [#52](https://github.com/BSData/wh40k-11e-mfm/pull/52)
-- **Spec:** [scraping — Legends & the rules panels](../../specs/scraping.md#legends--the-rules-panels-browser-only)
+- **Status:** superseded by [0026](0026-http-only-a-browser-for-tests-and-troubleshooting.md); accepted with the Legends and notes capture (`c097799`), the rules panels in [#52](https://github.com/BSData/wh40k-11e-mfm/pull/52)
+- **Spec:** [scraping — the browser](../../specs/scraping.md#the-browser-tests-and-troubleshooting-only)
 
 ## Context
 The MFM is server-rendered: a plain GET returns every unit and detachment a faction page
