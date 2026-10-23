@@ -42,6 +42,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0032](0032-one-claude-code-pin.md) | One Claude Code pin: the action installs it (revises 0029) | change tracking |
 | [0035](0035-pair-namesakes-by-content-first.md) | Pair same-named units by content before position (revises 0014) | change tracking |
 | [0036](0036-a-label-counts-once-with-its-block.md) | A block label counts once, with the block it heads (revises 0019) | scraping |
+| [0037](0037-a-new-cost-row-is-checked-per-model.md) | A new cost row is checked against its unit, per model | change tracking |
 | [0038](0038-a-rules-change-dates-the-update.md) | A rules change dates the update, beside the factions too (revises 0002, 0015) | change tracking |
 
 ## Writing one

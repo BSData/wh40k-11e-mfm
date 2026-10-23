@@ -226,6 +226,7 @@ Some changes are more likely the scraper misreading the site than GW changing it
 | only the version changed | the site or the factions moved to a new version, and nothing else changed: no faction content and no rules panel |
 | a value dropped to 0 | a cost option, wargear item or enhancement went from more than 0 to 0 |
 | a value changed threefold | it went to at least three times what it was, or to a third of it or less, or up from 0 |
+| a new cost option priced off its unit | a cost option its unit didn't have (a new row, or an option new in a re-tier) costs per model three times the most, or a third of the least, that the unit's old options cost per model, or it costs 0 |
 
 The scraper writes a file for each faction the index lists and deletes none, so a
 faction the index stops listing keeps its old file, unchanged, and the diff never sees it
@@ -236,6 +237,14 @@ against the range of the option's old prices: a new price above the old highest 
 measured from that highest, and one below the old lowest from that lowest, by the value
 rules above. So it is flagged at three times the old highest or more (any price at all
 above an old highest of 0), and at a third of the old lowest or less, 0 included.
+
+A cost option new to its unit has no old value, so it is measured against the unit's old
+options, by price per model (`points / models`; add-ons and rows of no models have none
+and aren't measured): a misread model count turns a row into a removed one and a new one,
+and the new one's price per model gives it away. A removed row brings no value to check:
+the misread it could come from is the new row beside it. The five real updates had 21 new
+rows; the furthest from its unit's old range was ×2.55 per model. See
+[0037](../docs/decisions/0037-a-new-cost-row-is-checked-per-model.md).
 
 The PR body lists the flags in a **Needs attention** warning (a GitHub `> [!WARNING]`
 alert), straight after the title and before everything else, one line each: the faction
