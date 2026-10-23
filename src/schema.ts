@@ -36,13 +36,18 @@ const SCHEMAS: Record<string, { schema: ZodType; title: string; description: str
   },
 };
 
+/** A schema's `$id`: the committed file on `main`, so it names the current shape. */
+const schemaId = (name: string) =>
+  `https://raw.githubusercontent.com/BSData/wh40k-11e-mfm/main/schema/${name}`;
+
 /** Every schema file's name and text, in the order above. */
 export function jsonSchemas(): { name: string; text: string }[] {
   return Object.entries(SCHEMAS).map(([name, { schema, title, description }]) => {
     const { $schema, ...rest } = z.toJSONSchema(schema, { io: 'input' });
+    const $id = schemaId(name);
     return {
       name,
-      text: `${JSON.stringify({ $schema, title, description, ...rest }, null, 2)}\n`,
+      text: `${JSON.stringify({ $schema, $id, title, description, ...rest }, null, 2)}\n`,
     };
   });
 }

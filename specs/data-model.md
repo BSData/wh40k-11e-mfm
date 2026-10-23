@@ -259,7 +259,9 @@ compare across a bump, `loadMeta()` reads a snapshot's `meta.yaml` as `SnapshotM
 
 `pnpm mfm schema` writes them; run it after changing `src/model.ts`. `mfm check-data` fails
 while a committed schema differs from the generated one, and on a file in `schema/` that
-nothing generates. Each release attaches them.
+nothing generates. Each release attaches them. Each schema's `$id` is its file on `main`
+(`https://raw.githubusercontent.com/BSData/wh40k-11e-mfm/main/schema/<file>`), and its
+`title` and `description` give the `schemaVersion` it describes.
 
 The schemas describe what the model's parser accepts (`io: 'input'`), so they allow keys
 they don't list. That is deliberate: data with an optional field added later still
@@ -299,13 +301,14 @@ Each push to `main` that changes `data/` publishes a GitHub release of the datas
   newest entry's window in `changelog/v<version>.md` (`## [2026-10-02 → 2026-10-05]` gives
   `mfm-v1.5+2026-10-05`). That is the last day of the update window (see
   [Naming an update](change-tracking.md#naming-an-update)), since the entry is dated by it.
-  Two entries can end on the same day (a format change and an update, say), so the second
-  entry to end on a day, counted in the file from the oldest, adds `.2`, the third `.3`:
-  `v1.6.md` has a `Name casing` entry and then a `Schema version` entry on 2026-10-23, so
-  the second is `mfm-v1.6+2026-10-23.2`. Entries are only ever added on top, so an entry's
-  tag never changes.
+  Two entries can end on the same day (a format change and an update, say, as v1.4's two
+  2026-09-02 entries do), so the second entry to end on a day, counted in the file from the
+  oldest, adds `.2`, the third `.3`: `mfm-v1.4+2026-09-02.2`. Hand-written entries count
+  too, released or not. Entries are only ever added on top, so an entry's tag never
+  changes. Tags sort by date as text, except that `.10` sorts before `.2`.
 - **Title:** `MFM v<version> — <window>`, plus the entry's own label when it isn't the
-  version (`MFM v1.6 — 2026-10-23: Name casing`).
+  version (`MFM v1.6 — 2026-10-23: Name casing, schema version, points table and
+  releases`).
 - **Notes:** that newest entry, with its relative links pointing at the release's commit,
   and a footer giving the `schemaVersion`, a link to the README's "Using the data" and the
   attribution. An entry over GitHub's 125,000-character limit is replaced by a link to the
@@ -339,12 +342,13 @@ push that changes `changelog/`, so the PR that adds a missing entry releases the
 describes; one that only edits an entry finds its tag released with the same data, and
 publishes nothing.
 
-The workflow has two jobs. `build` runs `mfm release` with the default read-only token and
-uploads the result as an artifact. `publish`, the only job with `contents: write`, runs no
-code from the repository or its dependencies, only pinned actions and `gh`: it downloads
-the artifact, checks the tag's form, and runs `gh release create`, which uploads the
-assets to a draft and publishes it once they are all there. Both jobs start with
-`harden-runner` in audit mode, like the scrape's. The release is marked latest only while its commit is `main`'s
+The workflow has two jobs. `release-assets` runs `mfm release` with the default read-only
+token and uploads the result as an artifact; it isn't called `build`, which is the name of
+CI's required check. `publish`, the only job with `contents: write`, runs no code from the
+repository or its dependencies, only pinned actions and `gh`: it downloads the artifact,
+checks the tag's form, and runs `gh release create`, which uploads the assets to a draft
+and publishes it once they are all there. Both jobs start with `harden-runner` in audit
+mode, like the scrape's. The release is marked latest only while its commit is `main`'s
 head, so a late re-run of an older run can't point `releases/latest` at older data.
 Releases are immutable on this repository, so a published release, its tag and its assets
 never change.

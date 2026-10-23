@@ -44,8 +44,10 @@ https://github.com/BSData/wh40k-11e-mfm/releases/latest/download/points.csv
 | `faction.schema.json`, `meta.schema.json`, `all.schema.json` | the JSON Schemas |
 | `data.zip` | all of `data/` |
 
-To pin a release, download from its tag instead of `latest`, with the `+` written `%2B`:
-`https://github.com/BSData/wh40k-11e-mfm/releases/download/<tag>/all.json`.
+To pin a release, download from its tag instead of `latest`:
+`https://github.com/BSData/wh40k-11e-mfm/releases/download/mfm-v1.6+2026-10-23/all.json`.
+The `+` works as it is in a URL; `%2B` works too. A version's tags sort by date as text,
+except that a `.10` sorts before a `.2`.
 
 ### Schema version
 `schemaVersion` (in `meta.yaml` and `all.json`) goes up by one whenever the files change in

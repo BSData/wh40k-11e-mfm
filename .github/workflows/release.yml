@@ -12,9 +12,11 @@ on:
     # edit that adds no entry publishes nothing, since its tag is released with the
     # same data/.
     paths: ['data/**', 'changelog/**']
-  # A preview on a PR that changes what a release is made from: `build` runs as on main,
-  # so the PR shows the tag and notes its merge would publish, and fails early when its
-  # data/ changes without a new changelog entry. `publish` never runs for a PR.
+  # A preview on a PR that changes what a release is made from: `release-assets` runs as
+  # on main, so the PR shows the tag and notes its merge would publish, and fails early
+  # when its data/ changes without a new changelog entry. `publish` never runs for a PR.
+  # The job isn't called `build`: that name is CI's required check, which this job,
+  # running no tests, must never stand in for.
   pull_request:
     paths:
       - 'data/**'
@@ -45,7 +47,7 @@ concurrency:
 jobs:
   # Everything that runs the project's code, with a read-only token: the checks, the
   # assets, the notes, and whether the tag is released already (src/bin/commands/release.ts).
-  build:
+  release-assets:
     runs-on: ubuntu-latest
     permissions:
       contents: read # check out the code, and look the tag up among the releases
@@ -121,10 +123,10 @@ jobs:
   # only while its commit is still main's head, so a late re-run of an older run can't
   # point releases/latest at older data.
   publish:
-    needs: build
+    needs: release-assets
     # A real run on main only: a dry run, a PR's preview or a run on another branch
     # publishes nothing.
-    if: ${{ needs.build.outputs.publish == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && !inputs.dry-run }}
+    if: ${{ needs.release-assets.outputs.publish == 'true' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && !inputs.dry-run }}
     runs-on: ubuntu-latest
     permissions:
       contents: write # create the tag and the release
@@ -143,8 +145,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TAG: ${{ needs.build.outputs.tag }}
-          TITLE: ${{ needs.build.outputs.title }}
+          TAG: ${{ needs.release-assets.outputs.tag }}
+          TITLE: ${{ needs.release-assets.outputs.title }}
           COMMIT: ${{ github.sha }}
         run: |
           if ! [[ "$TAG" =~ ^mfm-v[0-9]+(\.[0-9]+)*\+[0-9]{4}-[0-9]{2}-[0-9]{2}(\.[0-9]+)?$ ]]; then

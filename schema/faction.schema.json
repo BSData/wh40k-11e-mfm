@@ -1,5 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/BSData/wh40k-11e-mfm/main/schema/faction.schema.json",
   "title": "Munitorum Field Manual faction",
   "description": "One faction file, data/<slug>.yaml, at schemaVersion 2. See https://github.com/BSData/wh40k-11e-mfm/blob/main/specs/data-model.md",
   "type": "object",

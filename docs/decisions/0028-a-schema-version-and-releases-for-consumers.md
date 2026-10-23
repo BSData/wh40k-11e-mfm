@@ -33,26 +33,26 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
 - **A release per data change on `main`, named by the newest changelog entry.** The tag
   `mfm-v<version>+<last day of the entry's window>` and the notes come from the same
   entry, so they always agree, and nothing is read from the clock. Entries ending on the
-  same day are common (v1.4's update and its schema change, v1.6's two notes of
-  2026-10-23), so the second one adds `.2`, counted from the file, not from GitHub. Asset
-  names stay the same from one release to the next, so `releases/latest/download/all.json`
-  is a stable URL.
+  same day happen (v1.4's update and its schema change, both 2026-09-02), so the second
+  one adds `.2`, counted from the file, not from GitHub. Asset names stay the same from one
+  release to the next, so `releases/latest/download/all.json` is a stable URL.
 - **The write token never meets project code**, as the App key doesn't in the scrape
-  ([0022](0022-the-app-key-never-meets-dependency-code.md)). `build` runs `mfm release`
-  with a read-only token; `publish` downloads its artifact and runs `gh release create`,
-  and is the only job with `contents: write`. A compromised dependency could still shape
-  what a real run on `main` publishes, since `build` makes every file, but it can't reach
-  the token, push to the repository, or publish from a dry run or another branch, and the
-  release's commit is the workflow's, not the artifact's. This is the second exception to
+  ([0022](0022-the-app-key-never-meets-dependency-code.md)). `release-assets` runs `mfm
+  release` with a read-only token; `publish` downloads its artifact and runs `gh release
+  create`, and is the only job with `contents: write`. A compromised dependency could still
+  shape what a real run on `main` publishes, since `release-assets` makes every file, but
+  it can't reach the token, push to the repository, or publish from a dry run or another
+  branch, and the release's commit is the workflow's, not the artifact's. This is the second exception to
   [0005](0005-ship-the-code-you-test.md) after the failure report's fallback: a tag check,
   a "latest" check and one `gh` command, kept out of TypeScript so that the token never
   shares a process with the dependencies. The logic before it (the tag, the notes,
-  whether to publish) is in `mfm release`, under test. A dry run runs `build` as a real
-  run would and skips `publish`, as in the scrape
+  whether to publish) is in `mfm release`, under test. A dry run runs `release-assets` as
+  a real run would and skips `publish`, as in the scrape
   ([0023](0023-a-dry-run-publishes-nothing.md)).
 - **A preview on every PR that feeds a release.** GitHub dispatches only workflows that
   exist on the default branch, so a dry run can't try a change to the workflow before it
-  merges. A `pull_request` run of `build` can, and on an update or regeneration PR it
+  merges. A `pull_request` run of `release-assets` can, and on an update or regeneration
+  PR it
   shows the tag and notes the merge would publish, and fails while `data/` changes
   without a new entry: before the merge, where it can still be fixed.
 
@@ -64,8 +64,14 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
 - A run that finds its tag released with the same `data/` (a dry run, a fix to the
   workflow) publishes nothing and passes, so a dry run stays useful after the first
   release.
-- The first release, from #75's own entry, is `mfm-v1.6+2026-10-23.2`: #88's name casing
-  note was the first entry of that day, though it was never released.
+- Hand-written entries count towards the `.2`, released or not. #88's name-casing note of
+  2026-10-23 was never released, so #75 folded its own note into it rather than add a
+  second entry that day: the first release is `mfm-v1.6+2026-10-23`, with both as notes.
+- A release is immutable from the moment it is published, and so is its tag, even after
+  the release is deleted. `gh release create` uploads the assets to a draft and then
+  publishes it; if that last request fails after GitHub applied it, gh's cleanup deletes
+  what it takes for a draft, and the tag is burnt. It is rare, and the way out is a new
+  entry, whose tag gets the next number.
 - A release is only as fresh as `main`: update PRs wait for review (see the README), so the
   newest values are still on the `mfm/v<version>` branch.
 - Faction files carry no `schemaVersion`: a consumer reading a single faction file has to
