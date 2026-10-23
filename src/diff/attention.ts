@@ -178,7 +178,8 @@ export function collectAttention(
   }
 
   // A new version and nothing else: what changed in it is likely what the scraper missed.
-  const bumped = rules?.version ?? (sharedHead(changes) || changes[0]?.head[0]);
+  // `||`, not `??`: `rules.version` is `''` when the site version didn't move.
+  const bumped = rules?.version || sharedHead(changes) || changes[0]?.head[0];
   if (
     bumped &&
     (rules?.panels.length ?? 0) === 0 &&

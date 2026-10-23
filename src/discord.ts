@@ -295,7 +295,9 @@ export function announcement(
 ): DiscordMessage | null {
   const changes = collectChanges(before, after);
   const rules = collectRules(opts.meta?.before, opts.meta?.after);
-  if (changes.length === 0 && !rules) return null;
+  // A flag alone is announced too: a faction gone from the index changes no data file.
+  const attention = collectAttention(changes, rules, before, after, opts.meta).length;
+  if (changes.length === 0 && !rules && attention === 0) return null;
 
   // Dated from the update's own window, like the title and the changelog heading, so
   // re-rendering an unchanged update yields a byte-identical message to edit with.
@@ -304,13 +306,7 @@ export function announcement(
     title: clip(updateTitle(before, after, opts), LIMIT.title),
     url: opts.prUrl ?? opts.changelogUrl ?? SOURCE_URL,
     description: clip(
-      describe(
-        changes,
-        rules,
-        totals(changes, rules),
-        collectAttention(changes, rules, before, after, opts.meta).length,
-        opts,
-      ),
+      describe(changes, rules, totals(changes, rules), attention, opts),
       LIMIT.description,
     ),
     color: COLOR,

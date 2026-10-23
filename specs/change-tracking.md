@@ -231,10 +231,13 @@ in bold, then what moved, as `**Orks**: Nobz — 5 models: 100 → 350 (×3.5)`.
 flag that several factions share word for word (a sub-faction carrying its parent's
 roster) is one line naming them all. At most 50 lines are listed, then how many more
 there are, which `mfm attention <before> <after>` lists in full. The warning is part of
-the body's head, so fitting GitHub's limit never cuts it. A flag alone makes a body: a
-faction gone from the index changes no data file, so without it the body would say
-`No changes detected.` The warning isn't in the changelog file: it is for the reviewer,
-and every other change it names is in the entry anyway.
+the body's head, so fitting GitHub's limit never cuts it. A flag alone makes a body,
+and a Discord message: a faction gone from the index changes no data file, so without it
+the body would say `No changes detected.` and nothing would be announced. Such an update
+has no changelog entry either (`mfm changelog` writes none), so its body's blurb says
+the PR commits none, and that `meta.yaml` is the whole change. The warning isn't in the
+changelog file: it is for the reviewer, and every other change it names is in the entry
+anyway.
 
 The Discord message says how many lines there are. When there are any, the workflow
 labels the update PR `needs-attention`, creating the label if the repository has none,
@@ -357,7 +360,7 @@ single Discord embed: the update title, the summary totals, then **every faction
 moved with the number of units and detachments that moved in it**, busiest first, and the
 factions a global revision swept up without touching named separately. When some changes
 need attention (see *Needs attention*), the summary opens with how many. It is `null`, and
-nothing is posted, when nothing changed.
+nothing is posted, when nothing changed and nothing needs attention.
 
 The changelog link points at the **PR**, not at the version's changelog file on `main`.
 Discord's embed limits (title 256, description 4096, field value 1024, 6000 total) are

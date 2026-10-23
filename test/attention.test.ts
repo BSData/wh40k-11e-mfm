@@ -11,6 +11,8 @@ import {
   attentionSection,
   changelog,
   changelogEntry,
+  collectAttention,
+  collectChanges,
   type Flag,
   loadFactionDir,
   loadMeta,
@@ -268,6 +270,16 @@ describe('the rules', () => {
     expect(bumped((f) => f.slug === 'orks')).toEqual(want);
   });
 
+  it("a version-only update whose rules diff carries no site version ('')", () => {
+    const after = structuredClone(base);
+    for (const f of after) f.version = '1.7';
+    const rules = { version: '', panels: [] };
+    const flags = collectAttention(collectChanges(base, after), rules, base, after);
+    expect(flags.map((f) => [f.kind, f.what.split(':')[0]])).toEqual([
+      ['version-only', 'Only the version changed (v1.6 → v1.7)'],
+    ]);
+  });
+
   it('a rules panel change is not version-only either', () => {
     const flags = flagsFor((fs, meta) => {
       meta.version = '1.7';
@@ -353,9 +365,26 @@ describe('the warning', () => {
     };
     const body = changelog(base, base, { meta, today: '2026-10-23' });
     expect(body).toContain("> - **Necrons** is gone from the site's index");
+    // `mfm changelog` writes no entry for it, so the blurb names none.
+    expect(changelogEntry(base, base, { meta, today: '2026-10-23' })).toBe('');
+    expect(body).not.toContain('changelog/');
+    expect(body).toContain('this PR commits no changelog entry');
     expect(changelog(base, base, { meta: { before: baseMeta, after: baseMeta } })).toBe(
       'No changes detected.\n',
     );
+  });
+
+  it('is announced on its own too, when no data file changed', () => {
+    const meta = {
+      before: baseMeta,
+      after: { ...baseMeta, factions: baseMeta.factions.filter((s) => s !== 'necrons') },
+    };
+    const message = announcement(base, base, { meta, today: '2026-10-23' });
+    expect(message?.embeds[0]?.description.split('\n').slice(0, 2)).toEqual([
+      '⚠️ **1 change needs attention** — check it on the PR before relying on this update',
+      '**No faction changes**',
+    ]);
+    expect(announcement(base, base, { meta: { before: baseMeta, after: baseMeta } })).toBeNull();
   });
 
   it('is counted at the top of the Discord summary', () => {

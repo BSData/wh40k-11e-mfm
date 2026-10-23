@@ -104,6 +104,10 @@ export const BODY_LIMIT = 65_536;
 const blurb = (file: string): string =>
   `_Automated Munitorum Field Manual scrape. The YAML diff is canonical; this is the readable summary — the same entry this PR commits to \`${file}\`._`;
 
+/** The blurb of a body with flags and nothing the changelog records (see `changelog()`). */
+const NO_ENTRY =
+  '_Automated Munitorum Field Manual scrape. No faction or rules data changed, so this PR commits no changelog entry: the YAML diff, in `meta.yaml` only, is the whole change._';
+
 /**
  * Collapse a long per-faction detail body behind a `<details>` toggle, so the summary
  * and table stay readable without scrolling past hundreds of bullets. GitHub renders
@@ -184,7 +188,9 @@ export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpt
   const file = changelogFile(updateVersion(after, opts));
   // The warning is part of the head, which fitting the body to GitHub's limit never cuts.
   const warning = attentionSection(flags);
-  const head = `# ${updateTitle(before, after, opts)}\n\n${warning ? `${warning}\n\n` : ''}${blurb(file)}`;
+  // Without a data or rules change `mfm changelog` writes no entry, so the blurb can't name one.
+  const entry = changes.length > 0 || rules !== null;
+  const head = `# ${updateTitle(before, after, opts)}\n\n${warning ? `${warning}\n\n` : ''}${entry ? blurb(file) : NO_ENTRY}`;
   const all = [...rulesSection(rules), ...sections(changes)];
   return fitted(head, summary(changes, rules), all, changes.length, file);
 }
