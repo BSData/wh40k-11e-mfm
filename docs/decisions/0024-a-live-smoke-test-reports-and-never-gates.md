@@ -9,12 +9,17 @@ change, or an update of cheerio or Playwright, can pass every test and still mis
 today's site. The first anyone heard of it was the next day's failed scrape.
 
 ## Decision
-`smoke.yml` scrapes the live site with a PR's code, on each PR that touches `src/` or
-`pnpm-lock.yaml`. It reports how the result differs from the committed `data/`, as the
-`mfm diff` changelog in the job summary. A difference never fails the job: a PR that
-changes the output is meant to differ, and so does any PR while the site has an update
-that `main` doesn't have yet. A scrape that fails does fail it. It is not a required
-check, and it is read-only: `contents: read` and no secrets.
+`smoke.yml` scrapes the live site with a PR's code, on each PR that touches `src/`, the
+dependencies (`package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`) or `.node-version`.
+It reports how the result differs from the committed `data/`, as the `mfm diff` changelog
+in the job summary. A difference never fails the job: a PR that changes the output is
+meant to differ, and so does any PR while the site has an update that `main` doesn't have
+yet. A scrape that fails does fail it. It is read-only: `contents: read` and no secrets.
+
+It is not a required check, since it doesn't run on every PR, so a person decides what a
+red one means. The one merge no person makes, Dependabot's
+([0025](0025-dependabot-minor-and-patch-updates-merge-themselves.md)), waits for it
+instead.
 
 ## Consequences
 A reviewer sees what a parser change does to today's data before merging it. On #91 the

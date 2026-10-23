@@ -191,10 +191,14 @@ jobs:
           egress-policy: audit
 
       # Everything `scrape` hands over is untrusted, since that job ran every dependency.
-      # So the names that steer the App's token are checked first, in plain bash: the
-      # branch is an update branch, and the base is main or another one.
+      # So the plan that steers the App's token is checked first, in plain bash and before
+      # anything is checked out: the branch is an update branch, the base is main or
+      # another one, and the base commit is on the base branch, not any commit the
+      # repository can fetch (the base branch is it, or ahead of it).
       - name: Check the plan
         env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           BRANCH: ${{ needs.scrape.outputs.branch }}
           BASE: ${{ needs.scrape.outputs.base }}
           BASE_SHA: ${{ needs.scrape.outputs.base-sha }}
@@ -207,6 +211,11 @@ jobs:
             exit 1
           fi
           [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::Not a commit: '$BASE_SHA'"; exit 1; }
+          status=$(gh api "repos/$GH_REPO/compare/$BASE_SHA...$BASE" --jq .status)
+          if [[ "$status" != identical && "$status" != ahead ]]; then
+            echo "::error::$BASE_SHA is not on $BASE ($status)"
+            exit 1
+          fi
 
       # A fresh checkout of the commit `scrape` staged on, never a .git from the artifact:
       # git config can run commands, and create-pull-request runs git here. With `base`
@@ -223,20 +232,11 @@ jobs:
           name: update
           path: /tmp/update
 
-      # The base commit must be on the base branch, not any commit the repository can
-      # fetch. And the staged update must be regular files where an update writes and
-      # nothing else: no dot-files, links, subdirectories or .git.
+      # The staged update must be regular files where an update writes and nothing else:
+      # no dot-files, links, subdirectories or .git.
       - name: Check what scrape handed over
-        env:
-          BASE: ${{ needs.scrape.outputs.base }}
-          BASE_SHA: ${{ needs.scrape.outputs.base-sha }}
         run: |
           set -euo pipefail
-          git -C pub fetch --no-tags --depth=50 origin "+refs/heads/$BASE:refs/remotes/origin/$BASE"
-          if ! git -C pub merge-base --is-ancestor "$BASE_SHA" "refs/remotes/origin/$BASE"; then
-            echo "::error::$BASE_SHA is not on $BASE"
-            exit 1
-          fi
           cd /tmp/update/staged
           allowed='^(d \./(data|changelog)|f \./DATA-CHANGELOG\.md|f \./data/[a-z0-9-]+\.yaml|f \./changelog/v[0-9.]+\.md)$'
           while IFS= read -r -d '' entry; do
@@ -326,6 +326,9 @@ jobs:
       # GitHub doesn't document whether GITHUB_TOKEN may create stacks, and the
       # base-branch chain stands without it (GitHub retargets the PR above when the
       # branch below is deleted on merge).
+      #
+      # gh pins a binary extension only by its release tag, and gh-stack's releases aren't
+      # immutable, so the binary is checked against its SHA-256 and installed from disk.
       - name: Link the update stack
         if: needs.scrape.outputs.below != ''
         continue-on-error: true
@@ -335,10 +338,18 @@ jobs:
           GH_STACK_NO_UPDATE_NOTIFIER: '1'
           BELOW: ${{ needs.scrape.outputs.below }}
           PR: ${{ needs.publish.outputs.pr }}
+          VERSION: v0.2.1
+          SHA256: ffe9d48b6342faffc3b0cb420202ff1df32e24faf32693debd7423274bbdf859 # linux-amd64
         run: |
-          gh extension install github/gh-stack --pin v0.2.1
-          # $BELOW is unquoted on purpose: the PRs below, bottom first, as separate args.
-          gh stack link $BELOW "$PR"
+          set -euo pipefail
+          dir="$RUNNER_TEMP/gh-stack"
+          mkdir -p "$dir"
+          gh release download "$VERSION" --repo github/gh-stack --pattern linux-amd64 --output "$dir/gh-stack"
+          echo "$SHA256  $dir/gh-stack" | sha256sum --check --strict
+          chmod +x "$dir/gh-stack"
+          (cd "$dir" && gh extension install .)
+          read -ra below <<< "$BELOW" # the PRs below, bottom first
+          gh stack link "${below[@]}" "$PR"
 
       # One Discord message per MFM update, not per scrape run: `--record` keeps its id
       # in a hidden marker on an update PR comment, and edits that message on later runs

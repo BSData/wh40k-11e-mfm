@@ -431,9 +431,10 @@ A dry run has its own concurrency group. See
 scrapes the live site with the PR's code into `$RUNNER_TEMP`, with `--dates-from data` so
 a faction that matches its committed file keeps its date, and puts the `mfm diff`
 changelog from the committed `data/` to that scrape in the job summary, with a notice
-when they differ. A difference never fails the job; a scrape that fails
-does, with its failure report in the summary. It is not a required check. The job has
-`contents: read` and no secrets, so a PR from a fork runs it the same way. See
+when they differ. A difference never fails the job; a scrape that fails does, with its
+failure report in the summary. It is not a required check, but Dependabot auto-merge
+waits for it (below). The job has `contents: read` and no secrets, so a PR from a fork
+runs it the same way. See
 [0024](../docs/decisions/0024-a-live-smoke-test-reports-and-never-gates.md).
 
 ### Dependabot auto-merge
@@ -444,7 +445,9 @@ check passes, only when all of these hold:
 - every dependency in it is a minor or patch update, checked per dependency;
 - every commit in it is Dependabot's;
 - it changes no workflow file, which the job's `GITHUB_TOKEN` may not merge;
-- the rules of the PR's base require `build`.
+- the rules of the PR's base require `build`;
+- when it changes a path the smoke test runs on, this commit's smoke test passed. The job
+  waits for it, up to 25 minutes.
 
 Otherwise it waits for a maintainer. The PR gets one comment saying why, and auto-merge
 that an earlier run of this job turned on is turned off; a run that fails turns it off

@@ -19,13 +19,16 @@ jobs:
     # Dependabot can be made the actor on someone else's PR.
     if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'BSData/wh40k-11e-mfm'
     runs-on: ubuntu-latest
+    timeout-minutes: 40 # the wait for the smoke test gives up after 25
     permissions:
       contents: write # auto-merge squashes the PR into main
       pull-requests: write # turn auto-merge on or off, and comment on a held update
+      checks: read # wait for the smoke test
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       PR: ${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
       # Auto-merge this job turned on. One a maintainer turned on is theirs to keep.
       OURS: '.autoMergeRequest.enabledBy.login // "" | IN("github-actions", "github-actions[bot]")'
     steps:
@@ -55,6 +58,21 @@ jobs:
             # GITHUB_TOKEN may not merge a change to a workflow, and the App's key isn't
             # readable from a run Dependabot started.
             reason="it changes workflow files, which this job's token isn't allowed to merge"
+          elif jq -e 'any(.files[].path; test("^(src/|package\\.json$|pnpm-lock\\.yaml$|pnpm-workspace\\.yaml$|\\.node-version$)"))' \
+            <<< "$pr" > /dev/null; then
+            # The paths smoke.yml runs on (keep the two lists in step). Auto-merge waits
+            # only for required checks, and smoke can't be one, since it doesn't run on
+            # every PR: so wait here for this commit's live scrape, and hold unless it
+            # passed. A cheerio or Playwright update that misreads today's site would
+            # otherwise merge, and the next scheduled scrape would fail.
+            deadline=$((SECONDS + 1500))
+            smoke=""
+            while [ -z "$smoke" ] && [ "$SECONDS" -lt "$deadline" ]; do
+              smoke=$(gh api "repos/$GH_REPO/commits/$SHA/check-runs?check_name=smoke&app_id=15368" \
+                --jq '.check_runs | max_by(.id) // {} | select(.status == "completed") | .conclusion')
+              [ -n "$smoke" ] || sleep 30
+            done
+            [ "$smoke" = success ] || reason="its live smoke test didn't pass (${smoke:-not finished within 25 minutes})"
           fi
           echo "reason=$reason" >> "$GITHUB_OUTPUT"
 

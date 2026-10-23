@@ -21,6 +21,11 @@ for a maintainer, with one comment saying why.
   one, and the App's key can't help: a run Dependabot starts can't read Actions secrets.
 - The base's rules require `build`. Auto-merge waits only for required checks, so without
   that rule it would merge an untested update at once.
+- When the update changes what the live smoke test covers (the dependencies, in
+  practice), that commit's smoke test passed. The job waits for it, up to 25 minutes.
+  Auto-merge can't wait for it, because it isn't a required check
+  ([0024](0024-a-live-smoke-test-reports-and-never-gates.md)), and a cheerio or Playwright
+  update that misreads today's site would otherwise merge and fail the next scrape.
 
 The author check uses the PR's author, not `github.actor`: the actor is whoever caused the
 event, and Dependabot can be made the actor on someone else's PR. The job fails closed:
