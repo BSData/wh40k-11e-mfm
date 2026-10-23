@@ -26,7 +26,7 @@ machine (playwright-core, channel "chrome"); nothing downloads a browser.
         io.out(await renderRulesPanels(browser, url));
         return 0;
       }
-      const render = await renderFaction(browser, url);
+      const render = await renderFaction(browser, url, { legends });
       if (legends && render.legends === undefined) {
         io.err(`${url} has no Legends toggle.\n`);
         return 1;

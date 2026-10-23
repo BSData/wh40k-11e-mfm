@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { RULES_PANELS, rulesPanels } from '../src/parse/panels.js';
 import { collapsibleContent, readFlight, renderHtml } from '../src/parse/rsc.js';
 
 // The RSC payload decoder on small hand-written payloads, in the shapes the saved pages
@@ -129,9 +130,54 @@ describe('the RSC payload decoder (src/parse/rsc.ts)', () => {
     );
   });
 
+  it.each([
+    ['a row the stream never sent', '$L99', []],
+    ['an E (error) row', '$7', ['7:E{"digest":"boom"}\n']],
+    ['an I (component) row', '$1', []],
+  ])('fails on a reference to %s, rather than dropping the text', (_what, ref, rows) => {
+    const content = ['before ', ref, ' after'];
+    expect(() => panel([row('6', collapsible('Muster Armies', content)), ...rows])).toThrow(
+      `the panel: "${ref}" refers to row ${ref.replace(/^\$L?/, '')}, which holds no value`,
+    );
+    // In a prop too: the attribute would be lost.
+    const link = ['$', 'a', null, { href: ref, children: 'x' }];
+    expect(() => panel([row('6', collapsible('Muster Armies', link)), ...rows])).toThrow(
+      'which holds no value',
+    );
+  });
+
+  it('names a component by its own row, not a neighbour', () => {
+    const content = ['$', '$12', null, { children: 'x' }];
+    expect(() => panel([row('6', collapsible('Muster Armies', content))])).toThrow(
+      'the panel: a component, "$12"',
+    );
+  });
+
   it('renders $undefined, null and booleans as nothing', () => {
     expect(
       panel([row('6', collapsible('Muster Armies', ['a', '$undefined', null, false, 'b']))]),
     ).toBe('ab');
+  });
+});
+
+describe('rulesPanels on a hand-written payload', () => {
+  const both = (notes: unknown, muster: unknown) =>
+    page(
+      ...COMPONENTS,
+      row('6', [collapsible(RULES_PANELS.notes, notes), collapsible(RULES_PANELS.muster, muster)]),
+    );
+
+  it('converts each panel to Markdown', () => {
+    const notes = ['$', 'div', null, { children: [['$', 'b', null, { children: 'UNITS' }]] }];
+    expect(rulesPanels(both(notes, 'Bring an army.'))).toEqual({
+      notes: '## UNITS',
+      muster: 'Bring an army.',
+    });
+  });
+
+  it('fails a panel with no text', () => {
+    expect(() => rulesPanels(both('Read this.', ['$', 'div', null, { children: ' ' }]))).toThrow(
+      'rules panel "Muster Armies" has no text',
+    );
   });
 });

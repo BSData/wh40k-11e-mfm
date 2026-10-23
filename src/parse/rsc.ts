@@ -77,6 +77,7 @@ function rowValue(flight: Flight, id: string): unknown {
 
 /** `I[<module>, <chunks>, "<export name>"]`: the client component a `$L<id>` type names. */
 function clientName(flight: Flight, type: string): string | undefined {
+  if (!type.startsWith('$L')) return undefined;
   const row = flight.get(type.slice(2));
   if (!row || 'text' in row || !row.raw.startsWith('I[')) return undefined;
   try {
@@ -198,15 +199,34 @@ const escapeText = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const escapeAttr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 
-/** An element's props as HTML attributes: strings, numbers and `true`; the rest is dropped. */
+/**
+ * The value of the row a `$<id>` or `$L<id>` reference names. Throws if the row holds no
+ * value: missing (a stream cut short), an `E` error row, or an `I` component row. Rendered
+ * as nothing, it would drop the panel's text without a word.
+ */
+function resolveRef(flight: Flight, ref: string, where: string): unknown {
+  const id = ROW_REF_RE.exec(ref)?.[1] as string;
+  const value = rowValue(flight, id);
+  if (value === undefined) {
+    throw new Error(`${where}: "${ref}" refers to row ${id}, which holds no value`);
+  }
+  return value;
+}
+
+/**
+ * An element's props as HTML attributes: strings, numbers and `true`. Other values, and
+ * props that are references other than to a row (an action such as `$h1`, `$undefined`),
+ * aren't attributes and are dropped.
+ */
 function attributes(flight: Flight, props: Record<string, unknown>, where: string): string {
   let out = '';
   for (const [key, raw] of Object.entries(props)) {
     if (key === 'children' || key === 'key' || key === 'ref') continue;
     if (key === 'dangerouslySetInnerHTML') throw new Error(`${where}: dangerouslySetInnerHTML`);
-    let value = typeof raw === 'string' && ROW_REF_RE.test(raw) ? deref(flight, raw) : raw;
+    let value =
+      typeof raw === 'string' && ROW_REF_RE.test(raw) ? resolveRef(flight, raw, where) : raw;
     if (typeof value === 'string' && value.startsWith('$')) {
-      if (!value.startsWith('$$')) continue; // a reference (an action, `$undefined`, …)
+      if (!value.startsWith('$$')) continue;
       value = value.slice(1);
     }
     const name = ATTRIBUTE_NAMES[key] ?? key;
@@ -220,7 +240,8 @@ function attributes(flight: Flight, props: Record<string, unknown>, where: strin
 /**
  * Render a value from the payload as HTML: tags with their attributes, and escaped text.
  * `where` names it in errors. A client component inside it throws, since what it renders
- * isn't in the payload, and so does any `$` reference this decoder doesn't know.
+ * isn't in the payload, and so does any `$` reference this decoder doesn't know, or a row
+ * reference to a row that holds no value.
  */
 export function renderHtml(flight: Flight, node: unknown, where: string): string {
   if (node === null || node === undefined || typeof node === 'boolean') return '';
@@ -228,7 +249,7 @@ export function renderHtml(flight: Flight, node: unknown, where: string): string
   if (typeof node === 'string') {
     if (node.startsWith('$$')) return escapeText(node.slice(1));
     if (node === '$undefined') return '';
-    if (ROW_REF_RE.test(node)) return renderHtml(flight, deref(flight, node), where);
+    if (ROW_REF_RE.test(node)) return renderHtml(flight, resolveRef(flight, node, where), where);
     if (node.startsWith('$'))
       throw new Error(`${where}: an RSC reference it can't render, "${node}"`);
     return escapeText(node);

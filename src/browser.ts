@@ -16,6 +16,8 @@ import { CARD_SELECTOR, RULES_PANELS, TIER_LABEL_RE, TIER_LABEL_SELECTOR } from 
  * so pages settle fast. See "The browser" in specs/scraping.md.
  */
 
+/** The Legends toggle: its input, in the server HTML; its label, once React hydrates. */
+const LEGENDS_INPUT = 'input#show-legends';
 const LEGENDS_TOGGLE = '#show-legends-label';
 const NAV_TIMEOUT = 45_000;
 const ACTION_TIMEOUT = 15_000;
@@ -61,37 +63,57 @@ async function open(page: Page, url: string): Promise<void> {
   });
 }
 
+/** Whether the page has Legends: the server ships the toggle's input only for those. */
+const hasLegends = async (page: Page): Promise<boolean> =>
+  (await page.locator(LEGENDS_INPUT).count()) > 0;
+
+/**
+ * Click "Show Legends" and wait for the Legends, on a page that has them. The toggle's
+ * label appears once React has hydrated. The Legends render in a single React commit, so
+ * the unit-card count jumps straight to its full total: waiting for it to exceed the
+ * default count is exact, not a timed guess. Unit cards are counted the way the parser
+ * tells them apart (`isUnitCard` in src/parse/page.ts): a card holding a pricing-tier
+ * label. Header styles vary with the annotation layer, so they are no signal.
+ */
+async function showLegends(page: Page): Promise<void> {
+  const toggle = page.locator(LEGENDS_TOGGLE);
+  await toggle.waitFor({ timeout: NAV_TIMEOUT });
+  const unitCards = page
+    .locator(CARD_SELECTOR)
+    .filter({ has: page.locator(TIER_LABEL_SELECTOR, { hasText: TIER_LABEL_RE }) });
+  const before = await unitCards.count();
+  await toggle.click({ timeout: ACTION_TIMEOUT }).catch(async () => {
+    // A lingering cookie overlay can intercept the click: force it.
+    await toggle.click({ force: true, timeout: ACTION_TIMEOUT });
+  });
+  // The (before + 1)-th unit card exists once the count exceeds `before`.
+  await unitCards.nth(before).waitFor({ state: 'attached', timeout: NAV_TIMEOUT });
+}
+
 /** A faction page as Chrome renders it: by default, and with "Show Legends" clicked. */
 export interface FactionRender {
   page: string;
-  /** Only for a page that ships the Legends toggle. */
+  /** Only for a page that has Legends, and only when asked for. */
   legends?: string;
 }
 
 /**
- * Render a faction page as a visitor sees it, and, if it ships the Legends toggle, again
- * after clicking it. The Legends render in a single React commit, so the unit-card count
- * jumps straight to its full total: waiting for it to exceed the default count is exact,
- * not a timed guess. Unit cards are counted the way the parser tells them apart
- * (`isUnitCard` in src/parse/page.ts): a card holding a pricing-tier label. Header styles
- * vary with the annotation layer, so they are no signal.
+ * Render a faction page as a visitor sees it and, unless `legends` is false, again after
+ * clicking "Show Legends" on a page that has Legends (`showLegends`).
  */
-export async function renderFaction(browser: Browser, url: string): Promise<FactionRender> {
+export async function renderFaction(
+  browser: Browser,
+  url: string,
+  { legends = true }: { legends?: boolean } = {},
+): Promise<FactionRender> {
   return withPage(browser, async (page) => {
     await open(page, url);
+    const toggled = legends && (await hasLegends(page));
+    // Hydrated first, so the default render is the page the toggle is clicked on.
+    if (toggled) await page.locator(LEGENDS_TOGGLE).waitFor({ timeout: NAV_TIMEOUT });
     const html = await page.content();
-    const toggle = page.locator(LEGENDS_TOGGLE);
-    if ((await toggle.count()) === 0) return { page: html };
-    const unitCards = page
-      .locator(CARD_SELECTOR)
-      .filter({ has: page.locator(TIER_LABEL_SELECTOR, { hasText: TIER_LABEL_RE }) });
-    const before = await unitCards.count();
-    await toggle.click({ timeout: ACTION_TIMEOUT }).catch(async () => {
-      // A lingering cookie overlay can intercept the click: force it.
-      await toggle.click({ force: true, timeout: ACTION_TIMEOUT });
-    });
-    // The (before + 1)-th unit card exists once the count exceeds `before`.
-    await unitCards.nth(before).waitFor({ state: 'attached', timeout: NAV_TIMEOUT });
+    if (!toggled) return { page: html };
+    await showLegends(page);
     return { page: html, legends: await page.content() };
   });
 }
@@ -100,11 +122,17 @@ export async function renderFaction(browser: Browser, url: string): Promise<Fact
  * Render a faction page with its rules panels (`RULES_PANELS`: the "Welcome…" notes and
  * "Muster Armies") open, returning the page HTML for the pure `extractNotesMarkdown` /
  * `extractMusterMarkdown`. It clicks each panel's button, then waits for the panel it
- * controls (`aria-controls`) to have content: a deterministic signal, not a timeout.
+ * controls (`aria-controls`) to have content: a deterministic signal, not a timeout. With
+ * `legends`, it shows the Legends first, as `necrons-panels.html` was saved.
  */
-export async function renderRulesPanels(browser: Browser, url: string): Promise<string> {
+export async function renderRulesPanels(
+  browser: Browser,
+  url: string,
+  { legends = false }: { legends?: boolean } = {},
+): Promise<string> {
   return withPage(browser, async (page) => {
     await open(page, url);
+    if (legends && (await hasLegends(page))) await showLegends(page);
     for (const label of Object.values(RULES_PANELS)) {
       await page.getByRole('button', { name: label }).click({ timeout: ACTION_TIMEOUT });
       await page.waitForFunction(

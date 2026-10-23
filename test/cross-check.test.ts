@@ -108,8 +108,19 @@ describe('the browser cross-check', () => {
 
   it('renders a page once more when the first render fails', async () => {
     vi.mocked(renderFaction).mockRejectedValueOnce(new Error('Timeout 45000ms exceeded'));
+    vi.mocked(renderRulesPanels).mockRejectedValueOnce(new Error('Timeout 15000ms exceeded'));
     const check = await openCrossCheck();
     await expect(check.faction(URL_, http(), new Set())).resolves.toBeUndefined();
+    await expect(
+      check.panels(URL_, rulesPanels(fixture('necrons-panels-rsc.html'))),
+    ).resolves.toBeUndefined();
     expect(renderFaction).toHaveBeenCalledTimes(2);
+    expect(renderRulesPanels).toHaveBeenCalledTimes(2);
+  });
+
+  it('fails with the render error when the second render fails too', async () => {
+    vi.mocked(renderFaction).mockRejectedValue(new Error('Timeout 45000ms exceeded'));
+    const check = await openCrossCheck();
+    await expect(check.faction(URL_, http(), new Set())).rejects.toThrow('Timeout 45000ms');
   });
 });

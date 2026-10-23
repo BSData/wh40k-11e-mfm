@@ -149,6 +149,15 @@ describe('mfm scrape --browser — the cross-check', () => {
     expect(report()).toMatch(/rules panels[\s\S]*in the browser differs/);
     expect(check.close).toHaveBeenCalledOnce();
   });
+
+  it('stops before any faction page when Chrome does not start', async () => {
+    vi.mocked(openCrossCheck).mockRejectedValue(new Error('Google Chrome did not start.'));
+    serve(() => fixture('necrons-legends-cookie.html'));
+    await expect(scrape('--browser')).rejects.toThrow('Google Chrome did not start.');
+    expect(vi.mocked(fetchText).mock.calls).toEqual([[BASE_URL]]);
+    expect(existsSync(join(out, 'necrons.yaml'))).toBe(false);
+    expect(meta()).toBe(OLD_META);
+  });
 });
 
 describe('mfm scrape — its options', () => {

@@ -53,8 +53,12 @@ export const RENDERS: { name: string; render(browser: Browser, url: string): Pro
       return legends;
     },
   },
-  // necrons-panels (both rules panels open) pins the notes/muster Markdown.
-  { name: 'necrons-panels.html', render: renderRulesPanels },
+  // necrons-panels (both rules panels open) pins the notes/muster Markdown. It shows the
+  // Legends too: the tests use it as the v1.6 render after "Show Legends" was clicked.
+  {
+    name: 'necrons-panels.html',
+    render: (browser, url) => renderRulesPanels(browser, url, { legends: true }),
+  },
 ];
 
 /** Where the fixtures live: `test/fixtures/`. */

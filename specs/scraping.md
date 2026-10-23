@@ -113,7 +113,7 @@ fixing one.
 | Any visible string no parse step consumed (an unknown change note, a new field, a DP badge that isn't `NDP`) | `Unconsumed content on "<slug>"`, one line per card: `unit "<CARD>": "<leftover>"` (see below) |
 | A page fetched with the Legends cookie that ships the Legends toggle but no `LEGENDS` section | `"<slug>": the page has the Legends toggle but no LEGENDS section …` |
 | A page whose every unit is in the `LEGENDS` section | `"<slug>": every unit is in the LEGENDS section, so the base roster is missing` |
-| A rules panel not found in the page's RSC payload, found more than once, holding something the decoder can't render, or without text, on a full run | A failure named `rules panels` (see [The rules panels](#the-rules-panels-over-http)) |
+| On a full run, a rules panel not found in the page's RSC payload, found more than once, holding something the decoder can't render, or without text, or the page it is read from not loading | A failure named `rules panels` (see [The rules panels](#the-rules-panels-over-http)) |
 | With `--browser`: a faction or the rules panels differing from the browser render | `"<slug>": the browser render differs from the HTTP page, from line <n>: …` (for a panel, the `rules panels` failure) |
 | With `--browser`: a base unit missing from the browser's Legends render | `"<slug>": base units missing from the Legends render: …` |
 
@@ -192,9 +192,12 @@ for React. `rulesPanels()` in `src/parse/panels.ts` decodes it with `src/parse/r
   the panel's button label (`RULES_PANELS` in `src/parse/panels.ts`). Its
   `CollapsibleContent` child's children are the panel.
 - **Rendering** the panel to HTML takes its tags, their string, number and `true` props as
-  attributes (`className` → `class`, `htmlFor` → `for`), and its text, escaped. A client
-  component, `dangerouslySetInnerHTML`, or a `$` reference other than those above inside
-  the panel fails it: plain HTTP can't know what those render to.
+  attributes (`className` → `class`, `htmlFor` → `for`), and its text, escaped. Props that
+  are other references (an action such as `"$h1"`, `"$undefined"`) aren't attributes and
+  are dropped. Inside the panel, a client component, `dangerouslySetInnerHTML`, a `$`
+  reference other than those above, or a row reference to a row with no value (missing, an
+  `E` error row, an `I` row) fails it: plain HTTP can't know what those render to, and
+  rendering them as nothing would drop rules text without a word.
 - That HTML goes through the same Markdown conversion as a panel a browser has opened:
   `extractNotesMarkdown()` / `extractMusterMarkdown()` find an open panel on a rendered page
   (button label → `aria-controls` → panel), and both paths convert with
@@ -204,9 +207,10 @@ for React. `rulesPanels()` in `src/parse/panels.ts` decodes it with `src/parse/r
   promoted to a `##` heading first. → `meta.notes` and `meta.muster`.
 - The panels are identical across pages, so a full run decodes them from the first
   faction's page, with no request of its own. They are required: if either panel isn't
-  found exactly once, can't be rendered, or has no text, the run records a failure named
-  `rules panels` (in the `--report` file, exit code 1) and does **not** write `meta.yaml`.
-  The factions are still scraped and written. A `--faction` run writes no `meta.yaml`.
+  found exactly once, can't be rendered, or has no text, or that page doesn't load, the
+  run records a failure named `rules panels` (in the `--report` file, exit code 1) and does
+  **not** write `meta.yaml`. The factions are still scraped and written. A `--faction` run
+  writes no `meta.yaml`.
 
 ## The browser (tests and troubleshooting only)
 `src/browser.ts` drives Google Chrome with
@@ -216,15 +220,19 @@ images ship and contributors have. Nothing installs a browser: not `pnpm install
 workflow, not `scripts/setup`. The scrape loads it only with `--browser`. It is used by:
 - `mfm scrape --browser`: the cross-check below; the scrape workflow's `cross-check` input
   runs it on the runner's Chrome;
-- `mfm render <slug>`: a faction page as Chrome renders it, for troubleshooting;
-- `mfm refresh-fixtures`, for the two browser-render fixtures (`necrons-legends.html`,
-  `necrons-panels.html`).
+- `mfm render <slug> [--legends | --panels]`: a faction page as Chrome renders it, for
+  troubleshooting;
+- `mfm refresh-fixtures`, for the two browser-render fixtures: `necrons-legends.html`
+  (after "Show Legends") and `necrons-panels.html` (the Legends shown, then both panels
+  opened; the tests use it as the toggled v1.6 render).
 
 A render interacts only with the page's buttons and reads the rendered DOM, never the
-request or response. Each faction page gets a fresh browser context, so no Legends cookie
-carries over from another page.
-- **Legends**: decline cookies (`#onetrust-reject-all-handler`), keep the page's default
-  render, click `#show-legends-label`, and wait for the number of **unit cards** to exceed the
+request or response. Each page gets a fresh browser context, so no Legends cookie
+carries over from another page; a render first declines cookies
+(`#onetrust-reject-all-handler`).
+- **Legends**, on a page that has them (it ships `input#show-legends`): wait for the
+  toggle's label `#show-legends-label`, which appears once React hydrates, keep the page's
+  default render, click the label, and wait for the number of **unit cards** to exceed the
   default one. A unit card is counted the way the parser recognises one — the card
   container holding a `div.bg-slate-200` label matching `/COST/` — not by the plain
   `div.bg-slate-500.text-xl` header, which "changed"-style headers don't have. The Legends
@@ -242,7 +250,9 @@ carries over from another page.
 - On a full run, the panels Chrome opens, converted by `extractNotesMarkdown()` /
   `extractMusterMarkdown()`, must equal the decoded ones.
 - A difference fails that faction, which then isn't written (or `rules panels`, and
-  `meta.yaml` isn't written), naming the first line that differs.
+  `meta.yaml` isn't written), naming the first line that differs. So does a render that
+  fails twice. If Chrome doesn't start at all, the run stops after the index, before any
+  faction page, with no `--report` file.
 
 ## Known faction count
 30 faction slugs as of v1.0. If `parseIndex` returns a very different number, the index
