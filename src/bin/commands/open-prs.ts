@@ -8,9 +8,10 @@ export const command: Command = {
   help: `usage: mfm open-prs --out <dir> --json <file> [--output <file>]
 
 Lists the open update PRs (label mfm-update, an mfm/ branch of this repository) into
-<file>, for \`mfm plan\`, and copies each one's data/ into <dir>/<branch>. Prints a
-step output, dates=…, with a --dates-from for each copy, for \`pnpm scrape\`. Needs
-GITHUB_REPOSITORY and GH_TOKEN, and runs git in a checkout whose origin is GitHub.
+<file>, for \`mfm plan\`, and copies each one's data/ into <dir>/<branch>, and its body
+into <dir>/<branch>.body.md, for the brief (src/ops/brief.ts). Prints a step output,
+dates=…, with a --dates-from for each copy, for \`pnpm scrape\`. Needs GITHUB_REPOSITORY
+and GH_TOKEN, and runs git in a checkout whose origin is GitHub.
 
   --out <dir>      where the copies go
   --json <file>    where the list goes
