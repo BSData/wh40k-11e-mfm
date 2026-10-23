@@ -24,10 +24,11 @@ No faction has left the index yet: all 12 revisions of `data/meta.yaml` list the
 slugs.
 
 ## Decision
-When a full run writes `meta.yaml`, it also deletes each `*.yaml` in `--out`, other than
-`meta.yaml`, whose name isn't a slug the index lists, and logs it. The slugs come from the
-index, not from the factions scraped: a listed faction that failed keeps its old file, and
-the run exits 1, so no update PR is made from it. A `--faction` run, and a full run whose
+When a full run writes `meta.yaml`, it also deletes each faction file in `--out` whose name
+isn't a slug the index lists, and logs it. A `*.yaml` other than `meta.yaml` that doesn't
+read as a faction (`--out .` holds `pnpm-lock.yaml`) is not deleted: the run fails, naming
+the file. The slugs come from the index, not from the factions scraped: a listed faction
+that failed keeps its old file, and the run exits 1, so no update PR is made from it. A `--faction` run, and a full run whose
 rules panels failed, write no `meta.yaml` and delete nothing.
 
 The diff then reports the faction as removed, in the PR body and the changelog entry, as:

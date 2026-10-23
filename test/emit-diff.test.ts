@@ -1087,6 +1087,24 @@ describe('unit identity (names are not unique within a faction)', () => {
     expect(log).not.toContain('group:');
   });
 
+  it('pairs by group before it pairs by content, so a reprice that meets its twin is no move', () => {
+    const before = committed('imperial-agents');
+    const after = committed('imperial-agents');
+    // Both Inquisitors (55 and 65 points) go up by 10: the base's new content is now the
+    // sub-group's old content, which a content-first pairing would take for a move.
+    for (const u of after.units.filter((u) => u.name === 'Inquisitor')) {
+      const cost = u.pricing[0]?.costs[0];
+      if (!cost) throw new Error('data changed');
+      cost.points += 10;
+    }
+    const log = changelog([before], [after]);
+    expect(log).toContain('- Inquisitor — 1 model: 55 → 65 (+10)\n');
+    expect(log).toContain(
+      '- Inquisitor (Every Model Has the Imperium Keyword) — 1 model: 65 → 75 (+10)\n',
+    );
+    expect(log).not.toContain('group:');
+  });
+
   it('a base roster dropped beside its sub-group copies is 29 removals', () => {
     const before = committed('imperial-agents');
     const after = committed('imperial-agents');

@@ -283,7 +283,7 @@ without a stamp), and today again when a rules panel changed, since `meta.yaml` 
 stamp of its own. A change of the site version or `schemaVersion` alone doesn't count: it
 moves with the factions' stamps, or comes from a model change. `windowLabel()` renders
 `2026-08-31`, or `2026-08-31 → 2026-09-02` once the PR has accumulated changes across
-several days.
+several days. See [0038](../docs/decisions/0038-a-rules-change-dates-the-update.md).
 
 A re-scrape must not re-stamp what the open PRs already captured. The workflow hands the
 scrape every open update branch's `data/` via `--dates-from`, and `firstSeen` resolves to

@@ -20,8 +20,8 @@ version's file (changelog/v1.6.md), then regenerates the ${INDEX} index. Leaves 
 untouched when nothing changed.
 
   --date <date>  the entry's date (default: the days the changed factions were first
-                 seen, and today for a rules change, so a re-scrape of the update PR
-                 keeps the first day)
+                 seen, stable across re-scrapes of the update PR; a rules panel change
+                 adds today)
   --root <dir>   the repository to write into (default: the current directory)
 `,
   options: { date: { type: 'string' }, root: { type: 'string' } },

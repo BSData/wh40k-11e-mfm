@@ -146,7 +146,8 @@ interpret) is not consumed, so it is left over and fails the parse.
 
 A label is consumed only by the step that read its block, and only when it reads exactly as
 listed: a second copy (an unknown note `SUPPORT`), a label with no list, or a renamed label
-is left over, and is reported whole (`LEADER UPDATED`, not `UPDATED`).
+is left over, and is reported whole (`LEADER UPDATED`, not `UPDATED`). See
+[0036](../docs/decisions/0036-a-label-counts-once-with-its-block.md).
 
 The coverage runs on the **de-annotated** DOM, so only an *unrecognised* change note is
 left of the annotation layer, and it is caught here.
@@ -225,7 +226,9 @@ for React. `rulesPanels()` in `src/parse/panels.ts` decodes it with `src/parse/r
   every listed faction is scraped, `--out` holds exactly the factions `meta.yaml` names. A
   listed faction that fails keeps the file it had, which `factions` then leaves out, and
   the run exits 1, so no update PR is made from it. A run that writes no `meta.yaml`
-  deletes nothing. See [0034](../docs/decisions/0034-a-faction-the-site-drops-is-deleted.md).
+  deletes nothing. A `*.yaml` in `--out` that doesn't read as a faction file (and isn't
+  `meta.yaml`) is never deleted: the run throws, naming it. See
+  [0034](../docs/decisions/0034-a-faction-the-site-drops-is-deleted.md).
 
 ## The browser (tests and troubleshooting only)
 `src/browser.ts` drives Google Chrome with

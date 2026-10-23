@@ -72,6 +72,9 @@ function repeated(snapshots: Unit[][], pick: (u: Unit) => string): Set<string> {
  * reads as changed, not as two reprices, and one that changed sub-group reads as changed
  * rather than as one unit removed and another added.
  *
+ * `removed` keeps the old snapshot's own ids, which may coincide with a pair's (the old
+ * side of a pair takes its partner's id), so rows must be keyed by `pairs` only.
+ *
  * A label is the bare name unless another unit in either snapshot carries it; then it
  * adds the group, `Inquisitor (Every Model Has the Imperium Keyword)`, and, if that
  * still doesn't tell them apart, the position: `Venerable Dreadnought (#2)`.

@@ -211,13 +211,21 @@ export async function scrape(args: ScrapeOptions): Promise<number> {
     );
     // A faction the index no longer lists loses its file, so the files are the factions
     // meta.yaml names and the diff reports it removed. The slugs are the index's, not the
-    // scraped ones: a listed faction that failed keeps its file (and the run exits 1).
+    // scraped ones: a listed faction that failed keeps its file (and the run exits 1). A
+    // `*.yaml` that doesn't read as a faction isn't ours to delete (`--out .` holds
+    // pnpm-lock.yaml): the run fails there, as `loadFactionDir` always did.
     const listed = new Set(index.factions.map((f) => f.slug));
     for (const file of readdirSync(args.out).sort()) {
       if (!file.endsWith('.yaml') || file === 'meta.yaml') continue;
       const slug = file.slice(0, -'.yaml'.length);
       if (listed.has(slug)) continue;
-      rmSync(join(args.out, file));
+      const path = join(args.out, file);
+      try {
+        factionFromYaml(readFileSync(path, 'utf8'));
+      } catch (err) {
+        throw new Error(`${path} isn't a faction file; not deleting it`, { cause: err });
+      }
+      rmSync(path);
       console.log(`  - ${slug.padEnd(22)} no longer in the index: ${file} removed`);
     }
   }

@@ -42,6 +42,9 @@ and list stream in separate chunks.
   headings to.
 - The browser render still waits on a count of cards holding a tier label, without the
   `ul.leaders` condition: every unit card has one, and the count only needs to grow.
+- The cost of the anchored `TIER_LABEL_RE`: if GW rewords a tier label so it no longer
+  reads `YOUR … COST(S)`, that unit card reads as a detachment. Still loud, but named
+  `detachment "<UNIT>"`, the mirror image of the message this change fixed.
 
 Rejected:
 - **Counting each allowlisted label at most once per card**, without tying it to its block.
