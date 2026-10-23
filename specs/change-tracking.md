@@ -438,11 +438,14 @@ part holds only what it needs. See
    `ANTHROPIC_API_KEY`, and no other secret. Its token has `contents: read` and
    `actions: read`, the checkout keeps no credentials, and harden-runner blocks egress
    except to the model's API, GitHub (`github.com`, `api.github.com` and its release
-   downloads), the npm registry and `nodejs.org`, with sudo and containers off;
-   harden-runner itself always allows GitHub's Actions service and its storage.
-   The dependencies, and Claude Code from npm (`npm ci`, with the version and integrity
-   hashes pinned by `.github/drift-fix/package-lock.json`), are installed before
-   the agent starts. `anthropics/claude-code-action` runs Claude Sonnet 5.5 once, for at
+   downloads), the npm registry, `nodejs.org`, and Claude Code's installer (`claude.ai`)
+   and releases (`downloads.claude.ai`), with sudo and containers off; harden-runner
+   itself always allows GitHub's Actions service and its storage. The dependencies are
+   installed from the lockfile before the agent starts, and the action installs Claude
+   Code itself, at the version its release pins: the installer checks the binary's
+   SHA-256 against the release's manifest. So the action's pin is the only one, and
+   Dependabot's bump of it moves both ([0032](../docs/decisions/0032-one-claude-code-pin.md)).
+   `anthropics/claude-code-action` runs Claude Sonnet 5.5 once, for at
    most 30 turns, 20 minutes and $2 (`--max-budget-usd`). Its tools are Read, Edit, Glob and Grep, and Bash for
    exactly `pnpm verify`, `git diff` and `git diff --stat`: no web tools and no Write.
    The prompt points at the `diagnose-parse` skill (its section "In the drift-fix

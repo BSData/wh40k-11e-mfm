@@ -87,9 +87,10 @@ jobs:
 
   # The only job with the model's key, and the only one that runs the model. Its token
   # only reads, it gets no other secret, and harden-runner blocks every host but the
-  # model's API, GitHub and the npm registry and Node.js downloads the setup needs, with
-  # sudo off so the block holds. Everything is installed before the agent starts: the
-  # dependencies, and Claude Code itself, each from a lockfile. The agent's tools are
+  # model's API, GitHub, the npm registry and Node.js downloads the setup needs, and
+  # Claude Code's installer, with sudo off so the block holds. Everything is installed
+  # before the agent starts: the dependencies from the lockfile, and Claude Code by the
+  # action, at the version its release pins (0032). The agent's tools are
   # Read, Edit, Glob, Grep, and Bash for exactly `pnpm verify`, `git diff` and
   # `git diff --stat`; its prompt points at the diagnose-parse skill and hands it the
   # failure report and the refreshed pages as untrusted data, never an issue or a comment.
@@ -116,8 +117,11 @@ jobs:
           # On top of these, harden-runner always allows GitHub's Actions service
           # (*.actions.githubusercontent.com) and its storage
           # (productionresultssa*.blob.core.windows.net), which the artifacts use.
+          # claude.ai serves Claude Code's installer, and downloads.claude.ai its releases.
           allowed-endpoints: >
             api.anthropic.com:443
+            claude.ai:443
+            downloads.claude.ai:443
             api.github.com:443
             github.com:443
             objects.githubusercontent.com:443
@@ -133,16 +137,6 @@ jobs:
           runtime: node@22
           cache: false # "No dependency cache" in specs/change-tracking.md
           cache-dependency-path: .github/no-dependency-cache # matches no file: no cache at all
-
-      # The version claude-code-action v1.0.251 would install itself, but from the npm
-      # registry, with its version and integrity hashes pinned by the lockfile in
-      # .github/drift-fix, so the action's installer's hosts needn't be allowed. Outside
-      # the checkout, which the agent edits.
-      - name: Install Claude Code
-        run: |
-          mkdir -p "$RUNNER_TEMP/claude-code"
-          cp .github/drift-fix/package.json .github/drift-fix/package-lock.json "$RUNNER_TEMP/claude-code/"
-          npm ci --prefix "$RUNNER_TEMP/claude-code" --no-audit --no-fund
 
       - name: Fetch the drift
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -161,7 +155,8 @@ jobs:
       # its turn or budget limit still hands on what it changed, as a draft that says so:
       # the outage gets no second run. That is all `continue-on-error` is for: the job's
       # last step fails it for any other end, the 20-minute timeout included, which leaves
-      # no record of the run.
+      # no record of the run. The action installs Claude Code itself, at the version its
+      # release pins, so Dependabot's bump of the action moves both (0032).
       - name: Draft the fix
         id: agent
         timeout-minutes: 20
@@ -176,7 +171,6 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ github.token }}
-          path_to_claude_code_executable: ${{ runner.temp }}/claude-code/node_modules/.bin/claude
           claude_args: |
             --model claude-sonnet-5-5
             --max-turns 30

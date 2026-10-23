@@ -21,6 +21,7 @@ interface Step {
   uses?: string;
   run?: string;
   env?: { EXECUTION_FILE?: string; CLAUDE_CODE_SUBPROCESS_ENV_SCRUB?: string };
+  with?: { path_to_claude_code_executable?: string };
   'continue-on-error'?: boolean;
 }
 interface Job {
@@ -58,6 +59,11 @@ describe('the drift fixer workflow', () => {
 
   it("asks Claude Code for nothing it can't start with on a runner", () => {
     expect(draft?.env ?? {}).not.toHaveProperty('CLAUDE_CODE_SUBPROCESS_ENV_SCRUB');
+  });
+
+  // docs/decisions/0032: a second pin drifts from the action's, and nothing bumps it.
+  it('lets the action install the Claude Code its release pins', () => {
+    expect(draft?.with ?? {}).not.toHaveProperty('path_to_claude_code_executable');
   });
 
   it('opens the PR only after the agent job succeeded', () => {
