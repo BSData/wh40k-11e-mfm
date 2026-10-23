@@ -1,6 +1,6 @@
 # 0026. Scrape over HTTP only; a browser for tests and troubleshooting
 
-- **Status:** accepted, for [#92](https://github.com/BSData/wh40k-11e-mfm/issues/92); supersedes [0017](0017-http-first-a-browser-only-where-needed.md)
+- **Status:** accepted, [#95](https://github.com/BSData/wh40k-11e-mfm/pull/95) (for [#92](https://github.com/BSData/wh40k-11e-mfm/issues/92)); supersedes [0017](0017-http-first-a-browser-only-where-needed.md)
 - **Spec:** [scraping — Legends](../../specs/scraping.md#legends-over-http), [the rules panels](../../specs/scraping.md#the-rules-panels-over-http) and [the browser](../../specs/scraping.md#the-browser-tests-and-troubleshooting-only)
 
 ## Context
