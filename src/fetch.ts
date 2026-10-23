@@ -31,6 +31,14 @@ export interface FetchOptions {
   cookie?: string;
 }
 
+/**
+ * Whether an error message is one `fetchText` gives up with (or the scrape's for a page
+ * that never arrived): the site didn't serve the page, which is an outage rather than a
+ * change of markup, so the drift fixer leaves it alone.
+ */
+export const isFetchFailure = (message: string): boolean =>
+  /^(Failed to fetch |HTTP \d{3} for )/.test(message);
+
 /** Fetch a URL as text, retrying transient (network / 5xx / 429) failures. */
 export async function fetchText(url: string, opts: FetchOptions = {}): Promise<string> {
   const { retries = 3, backoffMs = 1000, timeoutMs = 30_000, cookie } = opts;

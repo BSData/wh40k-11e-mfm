@@ -9,7 +9,8 @@ import { movedTo } from './moved.js';
  *    PR body limit);
  *  - `changelogEntry()` — the same entry in full, for the version's file under
  *    `changelog/` (`src/changelog.ts` assembles the files and their index);
- *  - `failuresReport()` — the per-faction parse errors for the workflow's issue.
+ *  - `failuresReport()` — the per-faction parse errors for the workflow's issue (and
+ *    `readFailuresReport()`, which reads one back for the drift fixer).
  * The first two share `sections()`, which lists each change a sub-faction shares with
  * its family once.
  * and a fourth next door: `announcement()` in `src/discord.ts` builds the webhook embed
@@ -39,7 +40,7 @@ export {
   needsAttention,
 } from './diff/attention.js';
 export { collectChanges, type FactionChanges, type Snapshot } from './diff/collect.js';
-export { failuresReport } from './diff/failures.js';
+export { failuresReport, RULES_PANELS_FAILURE, readFailuresReport } from './diff/failures.js';
 export { loadFactionDir, loadMeta, loadSnapshots, loadVersion } from './diff/load.js';
 export { BODY_LIMIT, changelog, changelogEntry } from './diff/markdown.js';
 export {

@@ -80,4 +80,8 @@ export const COMMANDS: Record<string, Entry> = {
     'close the open scrape-failure issues after a successful run',
     () => import('./commands/resolve-failure.js'),
   ),
+  'drift-fix-gate': lazy(
+    "whether the drift fixer's agent runs for a failed scrape, recorded on its issue",
+    () => import('./commands/drift-fix-gate.js'),
+  ),
 };

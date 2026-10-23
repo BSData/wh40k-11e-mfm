@@ -3,21 +3,30 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Browser } from 'playwright-core';
 import { launchBrowser, renderFaction, renderRulesPanels } from './browser.js';
-import { BASE_URL, factionUrl, fetchText, LEGENDS_COOKIE, sleep } from './fetch.js';
+import { RULES_PANELS_FAILURE, readFailuresReport } from './diff/failures.js';
+import { BASE_URL, factionUrl, fetchText, isFetchFailure, LEGENDS_COOKIE, sleep } from './fetch.js';
 
 /**
  * The HTML fixtures the parser tests run against, and re-downloading them
  * (`pnpm refresh-fixtures`, which is `mfm refresh-fixtures`). Run it when the source site
  * changes and a test needs to be re-baselined; `--only <name>` (repeatable) fetches just
  * those fixtures and leaves the rest as they are, to add one without re-baselining the
- * others.
+ * others. `--failed <report>` picks the pages a failed scrape names instead, for the drift
+ * fixer (`fixturesForFailures`).
  *
  * Keep the fixture set small and representative — it exists to pin parser
  * behaviour, not to mirror the whole site. `necrons` covers simple units,
  * multi-model-count units, per-instance tiered pricing, and detachments.
  */
 
-export const FIXTURES: { name: string; url: string; cookie?: string }[] = [
+/** A page saved for the tests: its file name under `test/fixtures/`, and how it is fetched. */
+export interface Fixture {
+  name: string;
+  url: string;
+  cookie?: string;
+}
+
+export const FIXTURES: Fixture[] = [
   { name: 'index.html', url: BASE_URL },
   // necrons: simple units, multi-model counts, per-instance tiered pricing.
   { name: 'necrons.html', url: factionUrl('necrons') },
@@ -64,6 +73,56 @@ export const RENDERS: { name: string; render(browser: Browser, url: string): Pro
 /** Where the fixtures live: `test/fixtures/`. */
 export const FIXTURES_DIR = fileURLToPath(new URL('../test/fixtures', import.meta.url));
 
+/** The fixture that holds the rules panels as the scrape reads them (a plain page's payload). */
+const PANELS_FIXTURE = 'necrons-panels-rsc.html';
+
+/**
+ * The pages that show why a scrape failed, from its failures report (`pnpm scrape
+ * --report`), for the drift fixer: each failed faction's fixtures, or its page as the
+ * scrape fetches it (with the Legends cookie, saved as `<slug>-legends-cookie.html`, the
+ * name the add-fixture skill gives one) when no fixture covers it, and `PANELS_FIXTURE` for
+ * the rules panels. A failure to fetch a page is an outage, not drift, so it picks nothing.
+ * Over HTTP only: no browser renders. Throws on a heading that is not a faction's slug,
+ * since the slugs come from the site.
+ */
+export function fixturesForFailures(report: string): Fixture[] {
+  const picked = new Map<string, Fixture>();
+  const pick = (fx: Fixture) => picked.set(fx.name, fx);
+  for (const { slug, error } of readFailuresReport(report)) {
+    if (isFetchFailure(error)) continue;
+    if (slug === RULES_PANELS_FAILURE) {
+      FIXTURES.filter((fx) => fx.name === PANELS_FIXTURE).forEach(pick);
+      continue;
+    }
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      throw new Error(`Not a faction slug in the failure report: ${JSON.stringify(slug)}`);
+    }
+    const own = FIXTURES.filter((fx) => fx.url === factionUrl(slug));
+    if (own.length > 0) own.forEach(pick);
+    else
+      pick({ name: `${slug}-legends-cookie.html`, url: factionUrl(slug), cookie: LEGENDS_COOKIE });
+  }
+  return [...picked.values()];
+}
+
+/**
+ * Download `fixtures` over HTTP, one at a time, then save them all into `dir`: a run that
+ * fails part-way saves nothing. Returns how many were saved.
+ */
+export async function downloadFixtures(fixtures: readonly Fixture[], dir: string): Promise<number> {
+  const pages: { fx: Fixture; html: string }[] = [];
+  for (const [i, fx] of fixtures.entries()) {
+    if (i > 0) await sleep(750);
+    pages.push({ fx, html: await fetchText(fx.url, fx.cookie ? { cookie: fx.cookie } : {}) });
+  }
+  if (pages.length > 0) mkdirSync(dir, { recursive: true });
+  for (const { fx, html } of pages) {
+    writeFileSync(join(dir, fx.name), html);
+    console.log(`saved ${fx.name} (${html.length} bytes) from ${fx.url}`);
+  }
+  return pages.length;
+}
+
 /**
  * Download the fixtures named in `only` (every one when empty) into `dir`. Throws on a
  * name that isn't a fixture, before downloading anything: a typo must not fall back to
@@ -76,16 +135,14 @@ export async function refreshFixtures(only: readonly string[], dir = FIXTURES_DI
   const unknown = only.filter((name) => !known.includes(name));
   if (unknown.length > 0) throw new Error(`Unknown fixture(s): ${unknown.join(', ')}`);
 
-  mkdirSync(dir, { recursive: true });
-  for (const [i, fx] of FIXTURES.filter((fx) => wanted(fx.name)).entries()) {
-    if (i > 0) await sleep(750);
-    const html = await fetchText(fx.url, fx.cookie ? { cookie: fx.cookie } : {});
-    writeFileSync(join(dir, fx.name), html);
-    console.log(`saved ${fx.name} (${html.length} bytes) from ${fx.url}`);
-  }
+  await downloadFixtures(
+    FIXTURES.filter((fx) => wanted(fx.name)),
+    dir,
+  );
 
   const renders = RENDERS.filter((r) => wanted(r.name));
   if (renders.length > 0) {
+    mkdirSync(dir, { recursive: true });
     const browser = await launchBrowser();
     try {
       for (const { name, render } of renders) {

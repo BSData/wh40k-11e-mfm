@@ -97,7 +97,7 @@ describe('a command loads only what it uses', () => {
     expect(calls).toContain('PATCH /repos/BSData/wh40k-11e-mfm/issues/85');
   });
 
-  it.each(['open-prs', 'branch-data'])('mfm %s still loads', async (name) => {
+  it.each(['open-prs', 'branch-data', 'drift-fix-gate'])('mfm %s still loads', async (name) => {
     expect((await mfm(name, '--help')).code).toBe(0);
   });
 });

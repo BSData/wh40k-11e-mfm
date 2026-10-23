@@ -398,6 +398,87 @@ failure the same way: the issue then links the run and says there is no per-fact
 detail. So a failure is reported unless the run itself was cancelled, or GitHub can't be
 reached.
 
+A failed scrape also leaves the drift fixer (below) the pages that show why, when the
+report names a failure the parser could have caused: the `drift` artifact.
+
+## The drift fixer
+When the site changes its markup, the fix takes judgment: find what moved, change the
+parser or an allowlist, update the spec. `drift-fix.yml` has a model draft it as a draft
+PR for a maintainer to review; everything around the model is plain Actions, and each
+part holds only what it needs. See
+[0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md).
+
+1. **The failure artifact**, in `scrape` (no secrets, no model). When the scrape fails,
+   `mfm refresh-fixtures --failed /tmp/failures.md --out /tmp/drift/fixtures` downloads,
+   over HTTP, the pages that show why: each failed faction's fixtures, or its page as the
+   scrape fetches it (`<slug>-legends-cookie.html`) when no fixture covers it, and
+   `necrons-panels-rsc.html` for the rules panels. A failed fetch is an outage, not drift
+   (`isFetchFailure()` in `src/fetch.ts`), so it gets nothing, and neither does a run with
+   no report. Nothing is saved unless every page downloads. The pages and the report are
+   uploaded as the `drift` artifact (`drift-dry-run` from a dry run); with nothing saved
+   there is none. This is the drift fixer's only access to the site.
+2. **The gate** (`mfm drift-fix-gate`, `src/ops/drift-fix.ts`). `drift-fix.yml` runs on
+   every `Scrape MFM` run on `main` that fails (`workflow_run`), and on
+   `workflow_dispatch` with the id of a failed run to replay, one run at a time (its own
+   concurrency group). The agent runs only when:
+   - the run is this repository's `scrape.yml`, on the branch the workflow runs on, and
+     it failed;
+   - it has an unexpired `drift` artifact (a replay also takes `drift-dry-run`);
+   - no open PR is labelled `agent-fix`;
+   - for a failed scrape, not a replay: there is an open `scrape-failure` issue, and it
+     records no drift-fix run yet. A record counts only in a comment by
+     `github-actions[bot]` that starts with it.
+
+   The gate records the run it lets through on that issue
+   (`<!-- drift-fix-run: <run id> -->`, with the command to replay it) before the agent
+   starts, so an outage gets one agent run however long it lasts, even when that run
+   fails.
+3. **The agent** (job `agent`) holds the model's key, the repository secret
+   `ANTHROPIC_API_KEY`, and no other secret. Its token has `contents: read` and
+   `actions: read`, the checkout keeps no credentials, and harden-runner blocks egress
+   except to the model's API, GitHub (`github.com`, `api.github.com`, its release and
+   artifact storage), the npm registry and `nodejs.org`, with sudo and containers off.
+   The dependencies, and Claude Code from npm at a pinned version, are installed before
+   the agent starts. `anthropics/claude-code-action` runs Claude Sonnet 5.5 for at most
+   30 turns and 20 minutes, once. Its tools are Read, Edit, Glob and Grep, and Bash for
+   exactly `pnpm verify`, `git diff` and `git diff --stat`: no web tools and no Write.
+   Its commands run with the model's key and the token scrubbed from their environment.
+   The prompt points at the `diagnose-parse` skill (its section "In the drift-fix
+   workflow") and hands it the artifact as untrusted data; never an issue, a comment or a
+   PR. The job uploads what the agent changed as a patch (`git diff`, with the new files
+   under the allowed paths), with the agent's closing note and the run's turns and cost.
+   The run's full record stays in the job.
+4. **The PR** (job `pr`) holds the App's key and no model credential. Like `publish`, it
+   runs pinned actions and `gh`, plus one repository file: `src/ops/agent-patch.ts`, under
+   plain Node, which imports only Node's own modules (a test checks), so no dependency
+   code meets the key. The script rejects the whole patch unless:
+   - it reads exactly as `git diff` writes a patch, every line where `git apply` expects
+     it, so the two can't disagree about which files it touches;
+   - every file in it is a regular file (mode `100644`: no links, submodules, mode
+     changes, copies or binary changes) under `src/`, `specs/`, `test/` or
+     `docs/decisions/`, and not under `test/fixtures/`, since a saved page is a download
+     and the maintainer commits the refreshed one; a rename counts at both ends;
+   - nothing it adds, and nothing in the agent's note, looks like a credential.
+
+   It applies the patch to a fresh checkout of the commit the agent worked on, and checks
+   that the tree changed exactly there. Then the App's token, scoped as in `publish`,
+   opens a draft PR from `agent-fix/scrape-<run id>` to the branch the workflow ran on,
+   labelled `agent-fix` (the label is created if missing), so CI runs on it, and the
+   default token links it from the failure issue. The body names the scrape run, the
+   files, the agent's note in a code block (where nothing in it renders), the run's turns
+   and cost, and what is left to do. An empty patch opens nothing.
+5. **A maintainer** reviews it, commits the refreshed page that shows the drift as the
+   fixture, and merges. The next successful scrape closes the failure issue, as always.
+
+The model is the cheaper tier on purpose: Claude Sonnet 5.5 costs $2 per million input
+tokens and $10 per million output tokens, so a run should cost a dollar or two of the
+key's $10 spend limit. The PR body and the run's summary say what each run cost.
+
+To replay a failure: `gh workflow run drift-fix.yml -f run-id=<run id>`. With
+`--ref <branch>`, it replays a failed scrape run on that branch (a dry run's will do) and
+the draft PR targets that branch, which is how a change to the drift fixer is tried out
+before it reaches `main`.
+
 ## Workflow integration
 Each step that has logic is one `mfm` command, run as `node_modules/.bin/tsx
 src/bin/mfm.ts <command>` (not `pnpm exec`, which can print to stdout); a result a later
@@ -419,7 +500,9 @@ captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after an
       the base's copies,
    6. uploads the staged files, both snapshots and the body as the `update` artifact,
       and gives the plan, the title and the base's commit as job outputs. A failed
-      scrape uploads its failure report instead, as `failure-report`.
+      scrape uploads its failure report instead, as `failure-report`, and, when the parser
+      could have caused it, the `drift` artifact for the drift fixer (see *The drift
+      fixer*).
 2. **`publish`** holds the App's key, and runs no repository code (see *The App token*).
    It first checks what `scrape` handed over, since that job ran every dependency: the
    branch is an update branch (`mfm/v…`), the base is `main` or another one, the base
@@ -441,7 +524,8 @@ captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after an
    `mfm resolve-failure` closes any open one.
 
 Every job starts with `step-security/harden-runner` in audit mode: it records the job's
-outbound connections and processes, and blocks nothing.
+outbound connections and processes, and blocks nothing. The drift fixer's agent is the
+exception: it blocks.
 
 A human reviews and merges the PR — giving reviewable, auditable history of every
 points change.
@@ -459,7 +543,9 @@ Discord marker, which needn't start anything.
 The key never shares a job with dependency code: `publish` runs pinned actions, a file
 copy and the checks above, nothing else. It takes no `.git` from the artifact, because git
 config can run commands and `create-pull-request` runs git there. See
-[0022](../docs/decisions/0022-the-app-key-never-meets-dependency-code.md).
+[0022](../docs/decisions/0022-the-app-key-never-meets-dependency-code.md). The drift
+fixer's `pr` job mints the same token the same way, for its draft PR, and holds to the same
+rule (see *The drift fixer*).
 
 ### Dry run
 `gh workflow run scrape.yml --ref <branch> -f dry-run=true` runs `scrape` as a real run
@@ -470,7 +556,8 @@ would have published in the run's summary instead: the plan, the title, the file
 commit would change, and the PR body. The Discord payload goes to the log, from `mfm
 announce` without `--send`, which makes no request. A separate `app-check` job mints the
 App's token, unused, so a dry run also checks the App's credentials and permissions.
-A dry run has its own concurrency group. See
+A dry run has its own concurrency group. A failed dry run's drift artifact is named
+`drift-dry-run`, which only a replay of the drift fixer takes. See
 [0023](../docs/decisions/0023-a-dry-run-publishes-nothing.md).
 
 ## Around the pipeline

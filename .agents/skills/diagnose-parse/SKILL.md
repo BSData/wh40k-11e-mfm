@@ -119,3 +119,29 @@ Reference the failing scrape run / issue. Summarise what the site changed and th
 selector fix. Commit the one refreshed fixture with the fix, with an assertion that covers
 the drift, so CI tests the new markup; the other fixtures stay as they were. Run
 `pnpm verify` before asking for review.
+
+## In the drift-fix workflow
+`drift-fix.yml` runs this skill with a model when the scheduled scrape fails (see "The
+drift fixer" in [`specs/change-tracking.md`](../../../specs/change-tracking.md)). The failed
+scrape has already done the refresh of step 2, and the rest differs:
+- **The evidence** is outside the checkout, in the directory the prompt names:
+  `failures.md`, and `fixtures/` with the failed factions' pages as the site serves them
+  now, fetched over HTTP as the scrape fetches them: refreshed copies of their fixtures,
+  or `<slug>-legends-cookie.html` for a faction no fixture covers. The pages are large:
+  Grep them rather than reading them whole. `test/fixtures/` is as committed.
+- **No network, and no git but `git diff`.** The tools are Read, Edit, Glob, Grep, and
+  Bash for exactly `pnpm verify`, `git diff` and `git diff --stat`: no probe script, no
+  `pnpm test -u`, no scrape. Add tests to the existing test files.
+- **Evidence without a new fixture.** You can't add, replace or edit files in
+  `test/fixtures/`. Copy the exact markup that drifted from the refreshed page into a test
+  that injects it into an existing fixture, the way "throws, located, when the page has
+  content no selector captured" in `test/parse.test.ts` does, and name the page in a
+  comment. The maintainer commits the refreshed page before merging.
+- **Where you may change files:** `src/`, `specs/`, `test/` (not `test/fixtures/`) and
+  `docs/decisions/`. A change anywhere else rejects the whole patch.
+- **Few turns.** Find the drift, make the smallest fix the evidence supports, with its
+  spec change, run `pnpm verify` once it is done, fix what fails, and stop. Edit a
+  snapshot by hand only for a change you can explain, to exactly what the test now gives.
+- **When it isn't drift** (a page that didn't load, a change no refreshed page shows),
+  change nothing and say why.
+- The workflow opens the draft PR from your changes and quotes your closing note in it.

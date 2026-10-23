@@ -72,6 +72,8 @@ the AI angle is purely this maintenance harness.
   (`diff`, `announce`, `plan`, `changelog`), `check-data`, `refresh-fixtures`, and the
   workflow's GitHub chores, which live in `src/ops/` (tested against stub servers).
   `pnpm mfm --help` lists them.
+- `src/ops/agent-patch.ts` — the drift fixer's patch check (`drift-fix.yml`). It runs in
+  the job that holds the App's key, so it imports only Node's own modules.
 - `specs/` — **source-of-truth prose**. Change the spec first, then the code.
 - `docs/decisions/` — why the specs say what they do: one record per decision, linked
   from the spec section it explains.
@@ -120,6 +122,8 @@ use the Google Chrome already on the machine (GitHub's Ubuntu runners have one).
 The MFM site changing its markup is the expected failure mode. Don't guess — follow the
 [`diagnose-parse`](.agents/skills/diagnose-parse/SKILL.md) skill: read
 `specs/scraping.md`, refresh the fixture, locate the drifted selector, fix, re-test.
+When the scheduled scrape fails, `drift-fix.yml` has a model follow the same skill and
+draft the fix as an `agent-fix` PR (see "The drift fixer" in `specs/change-tracking.md`).
 
 ## Harness files
 Each harness gets the same instructions and skills, with no copies to drift apart:

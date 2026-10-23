@@ -179,6 +179,26 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+      # For drift-fix.yml, whose agent never reaches the site: the pages that show why the
+      # parse failed, as they are now, with the report. Only for a failure the parser could
+      # have caused: with no report, or only failed fetches in it, this saves nothing (an
+      # outage, not drift), and with nothing saved there is no artifact and no agent run. A
+      # dry run's artifact has its own name, which only a manual replay takes. See "The
+      # drift fixer" in specs/change-tracking.md.
+      - name: Refresh the failing factions' pages
+        if: failure()
+        run: |
+          node_modules/.bin/tsx src/bin/mfm.ts refresh-fixtures --failed /tmp/failures.md --out /tmp/drift/fixtures
+          if [ -d /tmp/drift/fixtures ]; then cp /tmp/failures.md /tmp/drift/; fi
+      - name: Hand the drift on
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ inputs.dry-run && 'drift-dry-run' || 'drift' }}
+          path: /tmp/drift
+          if-no-files-found: ignore
+          retention-days: 7
+
   # The only job that holds the App's key, so it runs pinned actions and a copy, and no
   # repository code. The App's token rather than GITHUB_TOKEN, whose events start no
   # workflows: that way the update PR gets CI.
