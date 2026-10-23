@@ -1,4 +1,4 @@
-## [2026-10-28] — MFM v1.7
+## [2026-10-21 → 2026-10-23] — MFM v1.7
 
 **31 factions changed** · site v1.6 → v1.7 · 1 new · rules ~1 · units +4 ~1 · 1 point change (▲1 ▼0, net +10 pts)
 

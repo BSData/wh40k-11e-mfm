@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
@@ -9,6 +9,8 @@ import { promisify } from 'node:util';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { COMMANDS } from '../src/bin/commands.js';
 import { main } from '../src/bin/mfm.js';
+import { loadMeta } from '../src/diff.js';
+import { factionFromYaml, factionToYaml, metaToYaml } from '../src/emit.js';
 import { jsonSchemas } from '../src/schema.js';
 // The frozen v1.6 dataset, so the expectations below don't move with data updates.
 import { DATA, frozenRepository } from './frozen-repo.js';
@@ -129,6 +131,45 @@ describe('step outputs', () => {
     expect(stdout).toBe('No changes detected.\n');
     expect(readFileSync(body, 'utf8')).toBe(stdout);
     expect(readFileSync(output, 'utf8')).toMatch(/^title=MFM v1\.6 update — \d{4}-\d\d-\d\d\n$/);
+  });
+});
+
+describe('mfm changelog and mfm diff read meta.yaml', () => {
+  it('date the entry to today when a rules panel changed beside a faction', async () => {
+    const after = join(scratch, 'rules-after');
+    cpSync(DATA, after, { recursive: true });
+    const orks = factionFromYaml(readFileSync(join(after, 'orks.yaml'), 'utf8'));
+    orks.firstSeen = '2026-10-20';
+    const cost = orks.units[0]?.pricing[0]?.costs[0];
+    if (!cost) throw new Error('data changed');
+    cost.points += 5;
+    writeFileSync(join(after, 'orks.yaml'), factionToYaml(orks));
+    const meta = loadMeta(after);
+    if (!meta) throw new Error('no meta');
+    writeFileSync(
+      join(after, 'meta.yaml'),
+      metaToYaml({ ...meta, schemaVersion: 2, muster: `${meta.muster}\n\nOne more rule.` }),
+    );
+    const { code, stdout } = await mfm(
+      'changelog',
+      DATA,
+      after,
+      '--root',
+      join(scratch, 'rules-root'),
+    );
+    expect(code).toBe(0);
+    // Today is the real clock's, always after the 20th.
+    expect(stdout).toMatch(/^Wrote a 2026-10-20 → \d{4}-\d{2}-\d{2} entry to changelog\/v1\.6\.md/);
+  });
+
+  it('fail on an unreadable meta.yaml instead of comparing without it', async () => {
+    const after = join(scratch, 'broken-after');
+    cpSync(DATA, after, { recursive: true });
+    writeFileSync(
+      join(after, 'meta.yaml'),
+      'version: "1.6"\nlastUpdated: 2026-10-22\nmuster: 5\nfactions: [necrons]\n',
+    );
+    await expect(mfm('diff', DATA, after)).rejects.toThrow(/meta\.yaml is invalid/);
   });
 });
 

@@ -161,10 +161,12 @@ each of their sections. See [0010](../docs/decisions/0010-sub-factions-share-a-c
 `meta.yaml` carries the site version and two rules panels: `notes` (the "Welcome…" text)
 and `muster` (Muster Armies: battle sizes, DP, unit limits). `loadMeta()` reads a
 snapshot's `meta.yaml`, and every command that compares snapshots (`mfm diff`, `mfm
-announce`, `mfm changelog`) passes both snapshots' to the renderers. `lastUpdated` and
-`factions` are derived from the faction files, so they aren't compared. A change of
-`schemaVersion` is the summary line's first clause after the count of factions, in the
-reports and the Discord summary alike: a bump breaks readers of the files (see
+announce`, `mfm changelog`) passes both snapshots' to the renderers. A `meta.yaml` that
+doesn't parse, or fails `SnapshotMeta`, fails the command, naming the file; a snapshot
+without one is compared without it. `lastUpdated` and `factions` are derived from the
+faction files, so they aren't compared. A change of `schemaVersion` is the summary line's
+first clause after the count of factions, in the reports and the Discord summary alike: a
+bump breaks readers of the files (see
 [Schema version](data-model.md#schema-version-schemaversion)).
 
 A changed panel is listed in a **Rules** section, ahead of the factions, as a compact
@@ -189,9 +191,11 @@ moved), and the Discord summary names them (`Rules: Muster Armies changed`). The
 row in the table, which is per faction.
 
 The site version is named in the summary line (`site v1.5 → v1.6`) unless the factions
-already say it (`all v1.5 → v1.6`). A rules-only change has no `firstSeen` of its own, so
-its window falls back to today, like a removed faction's. See
-[0015](../docs/decisions/0015-diff-the-rules-panels.md).
+already say it (`all v1.5 → v1.6`). A changed panel has no `firstSeen` of its own, so it
+counts as today, like a removed faction: alone, it dates the update today; beside faction
+changes, it stretches the window to today. Either way each re-scrape re-dates it until the
+PR merges. See [0015](../docs/decisions/0015-diff-the-rules-panels.md) and
+[0038](../docs/decisions/0038-a-rules-change-dates-the-update.md).
 
 ### Order
 Wherever the report or the dataset orders names (factions, units, the added and removed
@@ -261,8 +265,11 @@ carry, ties going to the higher version.
 
 The window is the days, read from the data, never from "now": `updateWindow()` takes the
 earliest and latest `firstSeen` stamps of the factions in the change set (today for one
-without a stamp), and `windowLabel()` renders `2026-08-31`, or `2026-08-31 → 2026-09-02`
-once the PR has accumulated changes across several days.
+without a stamp), and today again when a rules panel changed, since `meta.yaml` has no
+stamp of its own. A change of the site version or `schemaVersion` alone doesn't count: it
+moves with the factions' stamps, or comes from a model change. `windowLabel()` renders
+`2026-08-31`, or `2026-08-31 → 2026-09-02` once the PR has accumulated changes across
+several days.
 
 A re-scrape must not re-stamp what the open PRs already captured. The workflow hands the
 scrape every open update branch's `data/` via `--dates-from`, and `firstSeen` resolves to

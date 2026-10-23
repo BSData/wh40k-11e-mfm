@@ -203,8 +203,8 @@ export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpt
  * `''` when nothing changed. Written by `mfm changelog` on each scrape PR. `date`
  * defaults to the update's own window (see `updateWindow`), so a re-scrape that finds
  * nothing new rewrites the file byte-identically instead of churning the heading to
- * today and force-pushing the sticky PR. A rules-only update is the exception: it has no
- * stamp to date it by (see `updateWindow`).
+ * today and force-pushing the sticky PR. An update with a rules panel change is the
+ * exception: it has no stamp to date it by (see `updateWindow`).
  */
 export function changelogEntry(
   before: Snapshot[],

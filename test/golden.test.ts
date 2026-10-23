@@ -76,7 +76,7 @@ interface Case {
   name: string;
   /** Turns a copy of the committed snapshot into the scraped one. */
   scrape: (factions: Faction[], meta: SiteMeta) => Faction[];
-  /** Dated partly by today (a removed faction, a rules-only change): no CLI run here. */
+  /** Dated partly by today (a removed faction, a rules panel change): no CLI run here. */
   datedToday?: boolean;
 }
 
@@ -144,10 +144,12 @@ const CASES: Case[] = [
   },
   {
     // A new MFM revision: every faction bumped, a new faction, the Muster Armies rules
-    // changed, and one reprice.
+    // changed, and one reprice. The factions are stamped the 21st; the rules change has no
+    // stamp, so it dates the update's last day as today.
     name: 'revision',
+    datedToday: true,
     scrape: (fs, meta) => {
-      for (const f of fs) Object.assign(f, { version: '1.7', firstSeen: '2026-10-28' });
+      for (const f of fs) Object.assign(f, { version: '1.7', firstSeen: '2026-10-21' });
       reprice(unit(faction(fs, 'orks'), 'Nobz'), 10);
       const newcomer: Faction = {
         ...structuredClone(faction(fs, 'chaos-titan-legions')),
@@ -166,7 +168,7 @@ const CASES: Case[] = [
       );
       Object.assign(meta, {
         version: '1.7',
-        lastUpdated: '2026-10-28',
+        lastUpdated: '2026-10-21',
         muster: lines.join('\n'),
         factions: [...meta.factions, newcomer.slug],
       });

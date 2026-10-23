@@ -20,7 +20,8 @@ version's file (changelog/v1.6.md), then regenerates the ${INDEX} index. Leaves 
 untouched when nothing changed.
 
   --date <date>  the entry's date (default: the days the changed factions were first
-                 seen, which is stable across re-scrapes of the update PR)
+                 seen, and today for a rules change, so a re-scrape of the update PR
+                 keeps the first day)
   --root <dir>   the repository to write into (default: the current directory)
 `,
   options: { date: { type: 'string' }, root: { type: 'string' } },
@@ -28,7 +29,7 @@ untouched when nothing changed.
   async run(values, [beforeDir = '', afterDir = ''], io) {
     const root = text(values, 'root') ?? '.';
     const { before, after, meta } = loadSnapshots(beforeDir, afterDir);
-    const date = text(values, 'date') ?? windowLabel(updateWindow(before, after));
+    const date = text(values, 'date') ?? windowLabel(updateWindow(before, after, { meta }));
     const opts = { date, meta };
     const entry = changelogEntry(before, after, opts);
     if (!entry) {

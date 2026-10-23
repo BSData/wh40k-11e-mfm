@@ -244,7 +244,8 @@ two snapshots' `schemaVersion` and name a change right after the count of factio
 summary line (`` `schemaVersion` 2 → 3 ``, or `— → 2` from a snapshot written before it
 existed). To
 compare across a bump, `loadMeta()` reads a snapshot's `meta.yaml` as `SnapshotMeta`:
-`SiteMeta` with any `schemaVersion`, or none. See
+`SiteMeta` with any `schemaVersion`, or none. An unreadable one is an error, not a
+snapshot without meta. See
 [0028](../docs/decisions/0028-a-schema-version-and-releases-for-consumers.md).
 
 ## JSON Schema (`schema/`)

@@ -1,6 +1,6 @@
 # 0015. Diff the rules panels
 
-- **Status:** accepted, [#86](https://github.com/BSData/wh40k-11e-mfm/pull/86)
+- **Status:** accepted, [#86](https://github.com/BSData/wh40k-11e-mfm/pull/86); revised by [0038](0038-a-rules-change-dates-the-update.md): a changed panel counts as today beside faction changes too
 - **Spec:** [change tracking — The rules panels](../../specs/change-tracking.md#the-rules-panels)
 
 ## Context

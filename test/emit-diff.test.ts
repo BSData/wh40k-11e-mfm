@@ -1,4 +1,6 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 import { parse as parseYaml } from 'yaml';
@@ -569,6 +571,49 @@ describe('update dates (the sticky PR keeps its start date)', () => {
   it('collapses a single-day window to one date', () => {
     expect(windowLabel({ from: '2026-08-31', to: '2026-08-31' })).toBe('2026-08-31');
     expect(windowLabel({ from: '2026-08-31', to: '2026-09-02' })).toBe('2026-08-31 → 2026-09-02');
+  });
+
+  const metaOf = (over: Partial<SnapshotMeta> = {}): SnapshotMeta => ({
+    schemaVersion: 2,
+    version: '1.1',
+    lastUpdated: '2026-08-31',
+    muster: '| STRIKE FORCE | 2000 | 3 |',
+    factions: ['necrons'],
+    ...over,
+  });
+
+  it('stretches the window to today when a rules panel changed beside the factions', () => {
+    const after = necrons('2026-08-31');
+    reprice(after, 5);
+    const opts = {
+      today: '2026-09-02',
+      meta: { before: metaOf(), after: metaOf({ muster: '| STRIKE FORCE | 2000 | 4 |' }) },
+    };
+    expect(updateWindow([necrons('2026-06-17')], [after], opts)).toEqual({
+      from: '2026-08-31',
+      to: '2026-09-02',
+    });
+    expect(updateTitle([necrons('2026-06-17')], [after], opts)).toBe(
+      'MFM v1.1 update — 2026-08-31 → 2026-09-02',
+    );
+    expect(changelogEntry([necrons('2026-06-17')], [after], opts)).toContain(
+      '## [2026-08-31 → 2026-09-02] — MFM v1.1',
+    );
+  });
+
+  it('does not move it for a site version or schemaVersion change', () => {
+    const after = necrons('2026-08-31');
+    reprice(after, 5);
+    // exactOptionalPropertyTypes is on: drop the key rather than set it to undefined.
+    const { schemaVersion: _, ...unversioned } = metaOf();
+    const opts = {
+      today: '2026-09-02',
+      meta: { before: unversioned, after: metaOf({ version: '1.2' }) },
+    };
+    expect(updateWindow([necrons('2026-06-17')], [after], opts)).toEqual({
+      from: '2026-08-31',
+      to: '2026-08-31',
+    });
   });
 });
 
@@ -1319,6 +1364,25 @@ describe('the rules panels (meta.yaml)', () => {
     expect(data?.version).toMatch(/^\d+\.\d+$/);
     expect(data?.muster).toContain('## SELECT BATTLE SIZE');
     expect(loadMeta(fileURLToPath(new URL('./fixtures/', import.meta.url)))).toBeUndefined();
+  });
+
+  it.each([
+    [
+      'a non-string muster',
+      'version: "1.6"\nlastUpdated: 2026-10-22\nmuster: 5\nfactions: [necrons]\n',
+      /muster/,
+    ],
+    ['broken YAML', 'version: "1.6\nfactions: [\n', /meta\.yaml is invalid/],
+    ['an empty file', '', /meta\.yaml is invalid/],
+  ])('fails on an unreadable meta.yaml (%s), naming it', (_, text, detail) => {
+    const dir = mkdtempSync(join(tmpdir(), 'mfm-meta-'));
+    try {
+      writeFileSync(join(dir, 'meta.yaml'), text);
+      expect(() => loadMeta(dir)).toThrow(/meta\.yaml is invalid/);
+      expect(() => loadMeta(dir)).toThrow(detail);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('loads one from another schemaVersion, or from before it, to compare across a bump', () => {

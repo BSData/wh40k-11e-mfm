@@ -1,7 +1,7 @@
 {
   "embeds": [
     {
-      "title": "MFM v1.7 update — 2026-10-28",
+      "title": "MFM v1.7 update — 2026-10-21 → 2026-10-23",
       "url": "https://github.com/BSData/wh40k-11e-mfm/pull/78",
       "description": "**31 factions changed** · site v1.6 → v1.7 · 🆕 1 new\nUnits: 1 changed, 4 added · Rules: Muster Armies changed\n**1 point change** — ▲1 raised · ▼0 cut\n\n[Full changelog · PR #78](https://github.com/BSData/wh40k-11e-mfm/pull/78) · [MFM](https://mfm.warhammer-community.com/en)",
       "color": 11570519,
@@ -18,7 +18,7 @@
       "footer": {
         "text": "Unofficial · Warhammer 40,000 and the Munitorum Field Manual are © Games Workshop"
       },
-      "timestamp": "2026-10-28T00:00:00.000Z"
+      "timestamp": "2026-10-23T00:00:00.000Z"
     }
   ],
   "allowed_mentions": {

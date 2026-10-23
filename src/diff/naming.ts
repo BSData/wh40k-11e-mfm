@@ -1,6 +1,7 @@
 import { compareNames } from '../emit.js';
 import type { SnapshotMeta } from '../model.js';
 import { collectChanges, type Snapshot } from './collect.js';
+import { collectRules } from './rules.js';
 
 /**
  * Naming an update: the MFM version it lands on, and the days it spans, read from the
@@ -43,8 +44,11 @@ export function updateVersion(after: Snapshot[], opts: RenderOpts = {}): string 
  * stamping "now" on every run keeps the first day stable across re-scrapes that find
  * nothing new, and widens to a range only once a later scrape genuinely adds
  * something. Entries with no stamp (a removed faction, or bare parser content) count
- * as today, and so does a rules-only update: `meta.yaml` carries no stamp of its own, so
- * each re-scrape re-dates it until it merges.
+ * as today, and so does a changed rules panel, alone or beside faction changes:
+ * `meta.yaml` carries no stamp of its own, so each re-scrape re-dates it until it merges.
+ * A change of the site version or `schemaVersion` alone doesn't count: a version bump
+ * moves with the factions' own stamps, and counting it would re-date every version PR on
+ * each daily re-scrape.
  */
 export function updateWindow(
   before: Snapshot[],
@@ -53,6 +57,8 @@ export function updateWindow(
 ): { from: string; to: string } {
   const today = opts.today ?? new Date().toISOString().slice(0, 10);
   const dates = collectChanges(before, after).map((c) => c.firstSeen ?? today);
+  if ((collectRules(opts.meta?.before, opts.meta?.after)?.panels.length ?? 0) > 0)
+    dates.push(today);
   if (dates.length === 0) return { from: today, to: today };
   return {
     from: dates.reduce((a, b) => (b < a ? b : a)),
@@ -68,7 +74,8 @@ export const windowLabel = (w: { from: string; to: string }): string =>
  * What to call this update: `MFM v1.3 update — 2026-08-26`. Used verbatim as the PR
  * title, the changelog's `# ` heading and the commit subject, so the version and the
  * days it covers are legible from the merged history alone. Stable across re-scrapes,
- * widening as days accrue, except for a rules-only update (see `updateWindow`).
+ * widening as days accrue, except for an update with a rules panel change (see
+ * `updateWindow`).
  */
 export function updateTitle(before: Snapshot[], after: Snapshot[], opts: RenderOpts = {}): string {
   const version = updateVersion(after, opts);

@@ -9,7 +9,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | # | Decision | Spec |
 | --- | --- | --- |
 | [0001](0001-git-is-the-change-history.md) | Git is the change history | data model, change tracking |
-| [0002](0002-name-and-date-an-update-from-the-data.md) | Name and date an update from the data | change tracking |
+| [0002](0002-name-and-date-an-update-from-the-data.md) | Name and date an update from the data (revised by 0038) | change tracking |
 | [0003](0003-a-re-tiering-is-a-change.md) | A re-tiering is a change, not an add plus a remove | change tracking |
 | [0004](0004-the-table-explains-every-row.md) | The summary table explains every row | change tracking |
 | [0005](0005-ship-the-code-you-test.md) | Ship the code you test: workflow logic in TypeScript | change tracking |
@@ -22,7 +22,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0012](0012-one-pr-per-version-stacked.md) | One update PR per MFM version, stacked | change tracking |
 | [0013](0013-one-failure-issue-per-outage.md) | One failure issue per outage | change tracking |
 | [0014](0014-unit-identity.md) | A unit is its group, name and position (revised by 0035) | change tracking |
-| [0015](0015-diff-the-rules-panels.md) | Diff the rules panels | change tracking |
+| [0015](0015-diff-the-rules-panels.md) | Diff the rules panels (revised by 0038) | change tracking |
 | [0016](0016-one-english-collation.md) | One English collation | change tracking |
 | [0017](0017-http-first-a-browser-only-where-needed.md) | Plain HTTP first, a browser only where the page needs one (superseded by 0026) | scraping |
 | [0018](0018-the-change-layer-is-not-data.md) | The "changed since the last MFM" layer is not data | scraping |
@@ -41,6 +41,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0031](0031-the-drift-fixer-fails-loud-with-fewer-layers.md) | The drift fixer fails loud, with fewer layers (revises 0029) | change tracking |
 | [0032](0032-one-claude-code-pin.md) | One Claude Code pin: the action installs it (revises 0029) | change tracking |
 | [0035](0035-pair-namesakes-by-content-first.md) | Pair same-named units by content before position (revises 0014) | change tracking |
+| [0038](0038-a-rules-change-dates-the-update.md) | A rules change dates the update, beside the factions too (revises 0002, 0015) | change tracking |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and
