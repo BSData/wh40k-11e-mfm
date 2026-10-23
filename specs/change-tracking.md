@@ -427,10 +427,11 @@ A dry run has its own concurrency group. See
 ## Around the pipeline
 ### Live smoke test
 `smoke.yml` runs on each PR that touches `src/`, the dependencies (`package.json`,
-`pnpm-lock.yaml`, `pnpm-workspace.yaml`), `.node-version` or `smoke.yml` itself. It scrapes the live site with the PR's code into `$RUNNER_TEMP`, with
-`--dates-from data` so a faction that matches its committed file keeps its date, and puts
-the `mfm diff` changelog from the committed `data/` to that scrape in the job summary,
-with a notice when they differ. A difference never fails the job; a scrape that fails
+`pnpm-lock.yaml`, `pnpm-workspace.yaml`), `.node-version` or `smoke.yml` itself. It
+scrapes the live site with the PR's code into `$RUNNER_TEMP`, with `--dates-from data` so
+a faction that matches its committed file keeps its date, and puts the `mfm diff`
+changelog from the committed `data/` to that scrape in the job summary, with a notice
+when they differ. A difference never fails the job; a scrape that fails
 does, with its failure report in the summary. It is not a required check. The job has
 `contents: read` and no secrets, so a PR from a fork runs it the same way. See
 [0024](../docs/decisions/0024-a-live-smoke-test-reports-and-never-gates.md).
