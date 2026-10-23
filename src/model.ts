@@ -142,7 +142,8 @@ export type FactionSummary = z.infer<typeof FactionSummary>;
 /**
  * The shape version of the files, as `schemaVersion` states it. Bumped by one for a change
  * that can break a reader of the current files: a field or file removed or renamed, a type
- * changed (specs/data-model.md, "Schema version"). An added optional field doesn't bump it.
+ * or a meaning changed, a required field made optional (specs/data-model.md, "Schema
+ * version"). An added optional field doesn't bump it.
  * Version 1 was the shape before #41 renamed `role`, `attachTo` and `objective`; no file
  * ever said 1.
  */

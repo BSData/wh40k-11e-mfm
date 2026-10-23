@@ -27,9 +27,10 @@ faction's URL slug on the MFM site: `data/necrons.yaml` is
 ### Releases
 Every change to the data on `main` is published as a
 [release](https://github.com/BSData/wh40k-11e-mfm/releases), tagged
-`mfm-v<version>+<date>` (`mfm-v1.6+2026-10-23`), with that update's changelog as its
-notes. A release never changes once published. Each one has the same assets, so the
-newest is always at the same URL:
+`mfm-v<version>+<date>` after the last day of the change (`mfm-v1.5+2026-10-05`; a second
+change ending the same day adds `.2`), with that change's changelog entry as its notes. A
+release never changes once published. Each one has the same assets, so the newest is
+always at the same URL:
 
 ```text
 https://github.com/BSData/wh40k-11e-mfm/releases/latest/download/all.json
@@ -43,14 +44,13 @@ https://github.com/BSData/wh40k-11e-mfm/releases/latest/download/points.csv
 | `faction.schema.json`, `meta.schema.json`, `all.schema.json` | the JSON Schemas |
 | `data.zip` | all of `data/` |
 
-To pin a version, download from its tag instead of `latest`:
-`https://github.com/BSData/wh40k-11e-mfm/releases/download/mfm-v1.6%2B2026-10-23/all.json`
-(the `+` is written `%2B`).
+To pin a release, download from its tag instead of `latest`, with the `+` written `%2B`:
+`https://github.com/BSData/wh40k-11e-mfm/releases/download/<tag>/all.json`.
 
 ### Schema version
 `schemaVersion` (in `meta.yaml` and `all.json`) goes up by one whenever the files change in
-a way that can break a reader: a field removed, renamed or retyped. Added fields don't
-change it. Check it before reading the rest, and validate against the JSON Schema of the
+a way that can break a reader: a field removed or renamed, or its type or meaning changed
+(a required field becoming optional counts). Added fields don't change it. Check it before reading the rest, and validate against the JSON Schema of the
 same release if you want the shape checked; the schemas accept fields they don't list, so
 a later addition doesn't fail them. A bump is announced in its release notes and on
 Discord. The policy is in [`specs/data-model.md`](specs/data-model.md#schema-version-schemaversion).

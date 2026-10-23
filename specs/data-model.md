@@ -299,7 +299,13 @@ Each push to `main` that changes `data/` publishes a GitHub release of the datas
   newest entry's window in `changelog/v<version>.md` (`## [2026-10-02 → 2026-10-05]` gives
   `mfm-v1.5+2026-10-05`). That is the last day of the update window (see
   [Naming an update](change-tracking.md#naming-an-update)), since the entry is dated by it.
-- **Title:** `MFM v<version> — <window>`.
+  Two entries can end on the same day (a format change and an update, say), so the second
+  entry to end on a day, counted in the file from the oldest, adds `.2`, the third `.3`:
+  `v1.6.md` has a `Name casing` entry and then a `Schema version` entry on 2026-10-23, so
+  the second is `mfm-v1.6+2026-10-23.2`. Entries are only ever added on top, so an entry's
+  tag never changes.
+- **Title:** `MFM v<version> — <window>`, plus the entry's own label when it isn't the
+  version (`MFM v1.6 — 2026-10-23: Name casing`).
 - **Notes:** that newest entry, with its relative links pointing at the release's commit,
   and a footer giving the `schemaVersion`, a link to the README's "Using the data" and the
   attribution. An entry over GitHub's 125,000-character limit is replaced by a link to the
@@ -317,20 +323,38 @@ Each push to `main` that changes `data/` publishes a GitHub release of the datas
 
 `mfm release` (`src/release.ts`) builds all of it into a directory, after the same checks
 as `mfm check-data`, and prints it. With `--commit`, it asks GitHub whether the tag is
-released already: not yet, it is published; at this commit (a re-run), there is nothing to
-do; at another commit, it fails. That last case means `data/` changed on `main` without a
-new changelog entry, and a release is named by its entry: so a PR that changes `data/`
-adds one, as update PRs do by themselves, and a regeneration does by hand (see the
-`change-data-model` skill).
+released already (`checkRelease()` in `src/ops/release.ts`):
+
+| the tag is | `publish` |
+|---|---|
+| not released | yes |
+| released at this commit (a re-run) | no |
+| released at another commit with the same `data/` tree (a dry run, a change outside `data/`) | no |
+| released at another commit with other `data/` | the run fails |
+
+The last case means `data/` changed without a new changelog entry, and a release is named
+by its entry. So a PR that changes `data/` adds one, as update PRs do by themselves and a
+regeneration does by hand (see the `change-data-model` skill). The workflow also runs on a
+push that changes `changelog/`, so the PR that adds a missing entry releases the data it
+describes; one that only edits an entry finds its tag released with the same data, and
+publishes nothing.
 
 The workflow has two jobs. `build` runs `mfm release` with the default read-only token and
 uploads the result as an artifact. `publish`, the only job with `contents: write`, runs no
-code from the repository or its dependencies: it downloads the artifact and runs `gh
-release create`, which uploads the assets to a draft and publishes it once they are all
-there. Releases are immutable on this repository, so a published release, its tag and its
-assets never change. A `workflow_dispatch` with `dry-run` builds and prints everything,
-the release check included, and publishes nothing; `publish` also runs only on `main`.
-See [0022](../docs/decisions/0022-a-schema-version-and-releases-for-consumers.md).
+code from the repository or its dependencies: it downloads the artifact, checks the tag's
+form, and runs `gh release create`, which uploads the assets to a draft and publishes it
+once they are all there. The release is marked latest only while its commit is `main`'s
+head, so a late re-run of an older run can't point `releases/latest` at older data.
+Releases are immutable on this repository, so a published release, its tag and its assets
+never change.
+
+Real runs share one concurrency group and run one at a time. GitHub keeps one pending run
+per group, so a third push while one runs and another waits cancels the waiting one; its
+data is in the newer release, and re-running the cancelled run releases its own entry. A
+`workflow_dispatch` with `dry-run` builds and prints everything, the release check
+included, and publishes nothing. `publish` runs only on `main`, and a dry run or a run on
+another branch has a concurrency group of its own, so it can't cancel a real one. See
+[0022](../docs/decisions/0022-a-schema-version-and-releases-for-consumers.md).
 
 ## Index (in-memory only, not written)
 `SiteIndex` = `{ version, factions: [{ slug, name }] }`, parsed from the landing page

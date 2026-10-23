@@ -7,7 +7,7 @@ import { changelogFile } from '../../diff.js';
 import { factionFromYaml, metaFromYaml } from '../../emit.js';
 import { githubFromEnv } from '../../ops/github.js';
 import { writeOutputs } from '../../ops/outputs.js';
-import { releasedAt, shouldPublish } from '../../ops/release.js';
+import { checkRelease } from '../../ops/release.js';
 import { buildRelease } from '../../release.js';
 import { REPO_URL } from '../../schema.js';
 import { type Command, required, text, UsageError } from '../command.js';
@@ -20,21 +20,23 @@ export const command: Command = {
                    [--root <dir>] [--output <file>]
 
 Builds the release of the repository's data (see "Releases" in specs/data-model.md):
-its tag, mfm-v<version>+<the last day of the newest entry in changelog/v<version>.md>,
-its title, its notes (that entry), and its assets: all.json, points.csv, the JSON
-Schemas and data.zip. Fails, publishing nothing, unless \`mfm check-data\` passes.
-Prints all of it; publishing is the workflow's \`gh release create\`.
+its tag, mfm-v<version>+<the last day of the newest entry in changelog/v<version>.md>
+(and .2, .3, … for a later entry ending the same day), its title, its notes (that
+entry), and its assets: all.json, points.csv, the JSON Schemas and data.zip. Fails,
+publishing nothing, unless \`mfm check-data\` passes. Prints all of it; publishing is
+the workflow's \`gh release create\`.
 
   --assets <dir>       where the assets go: a new or empty directory
   --notes-file <file>  where the notes go
   --commit <sha>       the commit the release is for: the notes link to it, and GitHub
                        (GH_TOKEN, GITHUB_REPOSITORY) is asked whether the tag is
-                       released already. Not yet: publish=true. At this commit (a
-                       re-run): publish=false. At another commit: it fails, since that
-                       commit changed data/ without a new changelog entry.
+                       released already. Not yet: publish=true. At this commit, or at
+                       another with the same data/: publish=false. At another commit
+                       with other data/: it fails, since data/ changed without a new
+                       changelog entry.
   --root <dir>         the repository (default: the one this command is in)
-  --output <file>      append tag=…, title=… and, with --commit, publish=… to a
-                       step-output file, such as $GITHUB_OUTPUT
+  --output <file>      append tag=…, title=… and, with --commit, publish=… and
+                       reason=… to a step-output file, such as $GITHUB_OUTPUT
 `,
   options: {
     assets: { type: 'string' },
@@ -97,30 +99,16 @@ Prints all of it; publishing is the workflow's \`gh release create\`.
         `Notes, in ${notesFile}:\n\n${release.notes}\n`,
     );
 
-    let publish: boolean | undefined;
+    let check: { publish: string; reason: string } | undefined;
     if (commit === undefined) {
       io.out('Not checked against GitHub: no --commit.\n');
     } else {
-      const released = await releasedAt(githubFromEnv(), release.tag);
-      publish = shouldPublish(release.tag, commit, released);
-      io.out(
-        publish
-          ? `To publish: no release is tagged ${release.tag} yet.\n`
-          : `Nothing to publish: ${release.tag} is released already, at this commit.\n`,
-      );
+      const { publish, reason } = await checkRelease(githubFromEnv(), release.tag, commit);
+      io.out(`${publish ? 'To publish' : 'Nothing to publish'}: ${reason}.\n`);
+      check = { publish: String(publish), reason };
     }
     const output = text(values, 'output');
-    if (output) {
-      writeOutputs(
-        {
-          tag: release.tag,
-          title: release.title,
-          ...(publish === undefined ? {} : { publish: String(publish) }),
-        },
-        output,
-        io.out,
-      );
-    }
+    if (output) writeOutputs({ tag: release.tag, title: release.title, ...check }, output, io.out);
     return 0;
   },
 };

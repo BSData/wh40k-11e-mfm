@@ -17,8 +17,9 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
 - **`schemaVersion`, an integer, starting at 2.** #41 was the first breaking change, so the
   shape before it is 1, though no file ever said so. It is in `meta.yaml` and `all.json`,
   not in each faction file: one place to check, and a faction diff stays about points.
-  `SiteMeta` accepts only the current value, so a model change that forgets to bump, or a
-  bump that forgets to regenerate, fails `check-data`.
+  `SiteMeta` accepts only the current value, so a bump without regenerated data fails
+  `check-data`. Nothing catches a breaking change that forgets to bump: that is the first
+  step of the `change-data-model` skill, and review's.
 - **Bump on what can break a reader**: a removal, a rename, a type change, a field that
   becomes optional, a changed meaning. An addition doesn't bump, and neither does a change
   of values (points, or name casing, which #88 changed without one).
@@ -31,23 +32,32 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
   files' order, so the YAML's one-line-per-change property carries over.
 - **A release per data change on `main`, named by the newest changelog entry.** The tag
   `mfm-v<version>+<last day of the entry's window>` and the notes come from the same
-  entry, so they always agree, and nothing is read from the clock. Asset names stay the
-  same from one release to the next, so `releases/latest/download/all.json` is a stable
-  URL.
-- **The job that can write runs no project code.** `build` runs `mfm release` with a
+  entry, so they always agree, and nothing is read from the clock. Entries ending on the
+  same day are common (v1.4's update and its schema change, v1.6's two notes of
+  2026-10-23), so the second one adds `.2`, counted from the file, not from GitHub. Asset
+  names stay the same from one release to the next, so `releases/latest/download/all.json`
+  is a stable URL.
+- **The write token never meets project code.** `build` runs `mfm release` with a
   read-only token; `publish` downloads its artifact and runs `gh release create`, and is
-  the only job with `contents: write`. A compromised dependency can't create or alter a
-  release. This is the second exception to [0005](0005-ship-the-code-you-test.md) after the
-  failure report's fallback: one `gh` command, kept out of TypeScript so that the token
-  never shares a process with the dependencies. The logic around it (the tag, the notes,
+  the only job with `contents: write`. A compromised dependency could still shape what a
+  real run on `main` publishes, since `build` makes every file, but it can't reach the
+  token, push to the repository, or publish from a dry run or another branch, and the
+  release's commit is the workflow's, not the artifact's. This is the second exception to
+  [0005](0005-ship-the-code-you-test.md) after the failure report's fallback: a tag check,
+  a "latest" check and one `gh` command, kept out of TypeScript so that the token never
+  shares a process with the dependencies. The logic before it (the tag, the notes,
   whether to publish) is in `mfm release`, under test.
 
 ## Consequences
-- A data change that lands on `main` without a new changelog entry fails the release, since
-  its tag is taken and a release is immutable. Update PRs always carry an entry; a
-  regeneration has to add one by hand. A second update merged on the same day as the first,
-  for the same version and with the same window end, would hit the same wall; it hasn't
-  happened, and the fix would be a suffix on the tag.
+- A data change that lands on `main` without a new changelog entry fails the release: its
+  tag is taken, with other data, and a release is immutable. Update PRs always carry an
+  entry; a regeneration has to add one by hand. The PR that adds the missing entry
+  releases the data, since a change to `changelog/` runs the workflow too.
+- A run that finds its tag released with the same `data/` (a dry run, a fix to the
+  workflow) publishes nothing and passes, so a dry run stays useful after the first
+  release.
+- The first release, from #75's own entry, is `mfm-v1.6+2026-10-23.2`: #88's name casing
+  note was the first entry of that day, though it was never released.
 - A release is only as fresh as `main`: update PRs wait for review (see the README), so the
   newest values are still on the `mfm/v<version>` branch.
 - Faction files carry no `schemaVersion`: a consumer reading a single faction file has to
@@ -55,4 +65,6 @@ GitHub API and pinned bare commit SHAs. Spreadsheet users couldn't read nested Y
 - Rejected: a strict schema (above); `all.json` without a top-level `schemaVersion` (a
   reader would have to know to look inside `meta`); a third-party release action, which
   would have been one more pinned dependency holding a write token; tagging by merge date,
-  which would put a different date on the release than on its notes.
+  which would put a different date on the release than on its notes; numbering same-day
+  tags by what GitHub already has, which would make a tag depend on what was released
+  before rather than on the file.

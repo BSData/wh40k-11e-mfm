@@ -8,7 +8,10 @@ name: Release
 on:
   push:
     branches: [main]
-    paths: ['data/**']
+    # changelog/ too: a PR that adds a missing entry releases the data it describes. An
+    # edit that adds no entry publishes nothing, since its tag is released with the
+    # same data/.
+    paths: ['data/**', 'changelog/**']
   workflow_dispatch:
     inputs:
       dry-run:
@@ -18,10 +21,13 @@ on:
 
 permissions: {}
 
-# One release at a time, in push order. A dry run has a group of its own, so it never
-# holds up, or is held up by, a real one.
+# One real release at a time. GitHub keeps one pending run per group, so a third push
+# while one runs and one waits cancels the waiting one: its data is in the newer
+# release, and a re-run of the cancelled run releases its own entry. A dry run, or a run
+# on another branch, can publish nothing, so it gets a group of its own and never
+# cancels a real one.
 concurrency:
-  group: ${{ inputs.dry-run && 'release-dry-run' || 'release' }}
+  group: ${{ github.ref == 'refs/heads/main' && !inputs.dry-run && 'release' || format('release-preview-{0}', github.run_id) }}
   cancel-in-progress: false
 
 jobs:
@@ -35,6 +41,7 @@ jobs:
       tag: ${{ steps.release.outputs.tag }}
       title: ${{ steps.release.outputs.title }}
       publish: ${{ steps.release.outputs.publish }}
+      reason: ${{ steps.release.outputs.reason }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -58,14 +65,15 @@ jobs:
           TAG: ${{ steps.release.outputs.tag }}
           TITLE: ${{ steps.release.outputs.title }}
           PUBLISH: ${{ steps.release.outputs.publish }}
+          REASON: ${{ steps.release.outputs.reason }}
           DRY_RUN: ${{ inputs.dry-run }}
         run: |
           if [ "$PUBLISH" != true ]; then
-            what="Nothing to publish: $TAG is released already, at this commit."
+            what="Nothing to publish: $REASON."
           elif [ "$DRY_RUN" = true ] || [ "$GITHUB_REF" != refs/heads/main ]; then
-            what="A real run on main would publish $TAG. This one publishes nothing."
+            what="A real run on main would publish $TAG ($REASON). This one publishes nothing."
           else
-            what="Publishing $TAG."
+            what="Publishing $TAG ($REASON)."
           fi
           {
             echo "## $TITLE"
@@ -91,8 +99,10 @@ jobs:
           retention-days: 7
 
   # The only job that can write, and it runs no code from the repository or its
-  # dependencies: the artifact, and one gh command. gh uploads the assets to a draft and
-  # publishes it once they are all there, which immutable releases need.
+  # dependencies: the artifact, and gh. gh uploads the assets to a draft and publishes it
+  # once they are all there, which immutable releases need. The release is marked latest
+  # only while its commit is still main's head, so a late re-run of an older run can't
+  # point releases/latest at older data.
   publish:
     needs: build
     # A real run on main only: a dry run, or a run on another branch, publishes nothing.
@@ -113,4 +123,15 @@ jobs:
           TAG: ${{ needs.build.outputs.tag }}
           TITLE: ${{ needs.build.outputs.title }}
           COMMIT: ${{ github.sha }}
-        run: gh release create "$TAG" --target "$COMMIT" --title "$TITLE" --notes-file "$RUNNER_TEMP/release/notes.md" --latest "$RUNNER_TEMP"/release/assets/*
+        run: |
+          if ! [[ "$TAG" =~ ^mfm-v[0-9]+(\.[0-9]+)*\+[0-9]{4}-[0-9]{2}-[0-9]{2}(\.[0-9]+)?$ ]]; then
+            echo "::error title=Not a release tag::$TAG"
+            exit 1
+          fi
+          latest=false
+          if [ "$(gh api "repos/$GH_REPO/commits/main" --jq .sha)" = "$COMMIT" ]; then
+            latest=true
+          fi
+          gh release create --target "$COMMIT" --title "$TITLE" \
+            --notes-file "$RUNNER_TEMP/release/notes.md" --latest="$latest" \
+            -- "$TAG" "$RUNNER_TEMP"/release/assets/*

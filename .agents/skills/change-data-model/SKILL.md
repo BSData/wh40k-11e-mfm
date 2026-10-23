@@ -88,10 +88,14 @@ pnpm exec tsx -e "import {readdirSync as r,readFileSync as f,writeFileSync as w}
 ```
 The entry is not optional when `data/` changes: once the PR merges, the release workflow
 names the release after the newest entry and uses it as the notes, and it fails rather
-than reuse a tag (see "Releases" in `specs/data-model.md`). So date it a day no release of
-this version is tagged with yet, usually the day it merges. Say "Breaking" in the PR
-description when it is, and give the `schemaVersion` change in the entry.
+than reuse a tag for other data (see "Releases" in `specs/data-model.md`). Date it the day
+you write it; a second entry ending on the same day gets a `.2` tag by itself. Say
+"Breaking" in the PR description when it is, and give the `schemaVersion` change in the
+entry.
 
 ## Done
 `pnpm verify` is green, the spec says what the code does, and you have read the snapshot
-and `data/` diffs line by line.
+and `data/` diffs line by line. For a `schemaVersion` bump, also ask a maintainer to send
+the Discord announcement after the merge: `pnpm mfm announce <before> <after> --send`, with
+the old and new `data/` and `DISCORD_WEBHOOK_URL` set. A model change merges through an
+ordinary PR, which the scrape workflow's announcement never sees.

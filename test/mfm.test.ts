@@ -9,6 +9,7 @@ import { promisify } from 'node:util';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { COMMANDS } from '../src/bin/commands.js';
 import { main } from '../src/bin/mfm.js';
+import { jsonSchemas } from '../src/schema.js';
 // The frozen v1.6 dataset, so the expectations below don't move with data updates.
 import { DATA, frozenRepository } from './frozen-repo.js';
 
@@ -126,6 +127,21 @@ describe('step outputs', () => {
     expect(stdout).toBe('No changes detected.\n');
     expect(readFileSync(body, 'utf8')).toBe(stdout);
     expect(readFileSync(output, 'utf8')).toMatch(/^title=MFM v1\.6 update — \d{4}-\d\d-\d\d\n$/);
+  });
+});
+
+describe('mfm schema', () => {
+  it('writes the schemas the model generates, which check-data then accepts', async () => {
+    const root = frozenRepository(scratch, (r) => rmSync(join(r, 'schema'), { recursive: true }));
+    expect((await mfm('check-data', '--root', root)).code).toBe(1);
+    const out = join(root, 'schema');
+    const { code, stdout } = await mfm('schema', '--out', out);
+    expect(code).toBe(0);
+    expect(stdout).toBe(
+      `Wrote faction.schema.json, meta.schema.json, all.schema.json to ${out}.\n`,
+    );
+    for (const s of jsonSchemas()) expect(readFileSync(join(out, s.name), 'utf8')).toBe(s.text);
+    expect((await mfm('check-data', '--root', root)).code).toBe(0);
   });
 });
 

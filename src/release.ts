@@ -29,29 +29,51 @@ export interface Release {
   assets: ReleaseFile[];
 }
 
-/** The newest entry of a version's changelog file: its window (`[…]`) and its text. */
-export function newestEntry(file: string): { window: string; text: string } {
+/** A window's last day: `2026-10-05` for `2026-10-02 → 2026-10-05`. */
+const lastDay = (window: string): string => window.split(' → ').at(-1) ?? '';
+
+/**
+ * The newest entry of a version's changelog file: its window (`[…]`), its label (what
+ * follows ` — `: `MFM v1.6`, `Name casing`), its text, and its place among the entries
+ * whose window ends the same day (`nth`: 1 for the first such entry, 2 for the second,
+ * counting from the oldest).
+ */
+export function newestEntry(file: string): {
+  window: string;
+  label: string;
+  text: string;
+  nth: number;
+} {
   const at = file.indexOf(ENTRIES_MARKER);
   const entries = at === -1 ? '' : file.slice(at + ENTRIES_MARKER.length);
-  const heading = entries.match(/^## \[([^\]\n]+)\].*$/m);
+  const headings = [...entries.matchAll(/^## \[([^\]\n]+)\](.*)$/gm)];
+  const [heading] = headings;
   if (!heading || heading.index === undefined || !heading[1]) {
     throw new Error(`the changelog file has no entry under "${ENTRIES_MARKER}"`);
   }
+  const window = heading[1];
   const rest = entries.slice(heading.index + heading[0].length);
   const next = rest.search(/^## \[/m);
   const text = `${heading[0]}${next === -1 ? rest : rest.slice(0, next)}`.trim();
-  return { window: heading[1], text };
+  const nth = headings.filter((h) => lastDay(h[1] ?? '') === lastDay(window)).length;
+  const label = (heading[2] ?? '').replace(/^\s*—\s*/, '').trim();
+  return { window, label, text, nth };
 }
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const VERSION = /^\d+(?:\.\d+)*$/;
 
-/** `mfm-v<version>+<the window's last day>`: `mfm-v1.5+2026-10-05` for `2026-10-02 → 2026-10-05`. */
-export function releaseTag(version: string, window: string): string {
+/**
+ * `mfm-v<version>+<the window's last day>`: `mfm-v1.5+2026-10-05` for `2026-10-02 →
+ * 2026-10-05`. The `nth` entry to end on the same day, from the second on, adds `.<nth>`
+ * (`mfm-v1.6+2026-10-23.2`), so two entries never share a tag.
+ */
+export function releaseTag(version: string, window: string, nth = 1): string {
   if (!VERSION.test(version)) throw new Error(`not an MFM version for a tag: ${version}`);
-  const last = window.split(' → ').at(-1) ?? '';
+  const last = lastDay(window);
   if (!DATE.test(last)) throw new Error(`the newest changelog entry is dated "${window}"`);
-  return `mfm-v${version}+${last}`;
+  if (!Number.isInteger(nth) || nth < 1) throw new Error(`not an entry's place: ${nth}`);
+  return `mfm-v${version}+${last}${nth > 1 ? `.${nth}` : ''}`;
 }
 
 /** A Markdown link target that isn't absolute (`../specs/data-model.md`). */
@@ -126,9 +148,12 @@ export function buildRelease(input: {
 }): Release {
   const { meta, factions } = input;
   const entry = newestEntry(input.changelog);
+  // An update's entry is labelled with the version, which the title already gives.
+  const name = `MFM v${meta.version}`;
+  const label = entry.label && entry.label !== name ? `: ${entry.label}` : '';
   return {
-    tag: releaseTag(meta.version, entry.window),
-    title: `MFM v${meta.version} — ${entry.window}`,
+    tag: releaseTag(meta.version, entry.window, entry.nth),
+    title: `${name} — ${entry.window}${label}`,
     notes: releaseNotes(entry.text, input.changelogUrl),
     assets: [
       { name: 'all.json', data: encoder.encode(datasetJson(meta, factions)) },
