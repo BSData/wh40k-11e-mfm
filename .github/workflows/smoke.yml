@@ -1,0 +1,80 @@
+# Scrapes the live site with the PR's code and reports how the result differs from the
+# committed data/. CI's tests parse saved pages, most of them from v1.1, so this is where a
+# parser change, or a parsing dependency's update, meets today's site. A difference never
+# fails the job; a failed scrape does. Not a required check, and read-only: no secrets.
+# See "Live smoke test" in specs/change-tracking.md.
+name: Live smoke test
+
+on:
+  pull_request:
+    paths:
+      - src/**
+      - package.json
+      - pnpm-lock.yaml # cheerio, Playwright and the rest of what parses the page
+      - pnpm-workspace.yaml
+      - .node-version
+      - .github/workflows/smoke.yml # a change to this check runs it
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30 # a full scrape takes about five minutes
+    permissions:
+      contents: read # check out the PR
+    steps:
+      # Audit only: records outbound connections and processes, blocks nothing.
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          runtime: node
+          node-version-file: .node-version
+          cache: true
+          install: false # scripts/setup installs, so this runs the same setup as everywhere else
+      - run: scripts/setup
+
+      # --dates-from data: a faction that matches its committed file keeps its date, so
+      # only what really differs shows up.
+      - name: Scrape the live site
+        id: scrape
+        run: pnpm scrape --out "$RUNNER_TEMP/data" --dates-from data --report "$RUNNER_TEMP/failures.md"
+
+      - name: Report the differences
+        if: ${{ !cancelled() && steps.scrape.outcome != 'skipped' }}
+        env:
+          SCRAPE: ${{ steps.scrape.outcome }}
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/data"
+          differs=false
+          if [ "$SCRAPE" = success ] && ! diff -rq data "$out" > /dev/null; then differs=true; fi
+          {
+            echo "## Live smoke test"
+            echo
+            if [ "$SCRAPE" != success ]; then
+              echo "The live scrape failed. The cause can be this PR, or the site: if the scheduled scrape on \`main\` is failing too (an open \`scrape-failure\` issue), the site changed or is down. The run log has the details."
+              if [ -s "$RUNNER_TEMP/failures.md" ]; then
+                echo
+                cat "$RUNNER_TEMP/failures.md"
+              fi
+            elif [ "$differs" = false ]; then
+              echo "The live site scrapes to exactly the committed \`data/\`."
+            else
+              echo "The live site scrapes differently from the committed \`data/\`. That is expected if this PR changes the output, or if the site has changed since \`data/\` was last updated (an open \`mfm-update\` PR would hold that change)."
+              echo
+              node_modules/.bin/tsx src/bin/mfm.ts diff data "$out"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$differs" = true ]; then
+            echo "::notice title=Live smoke test::The live scrape differs from the committed data/. The job summary lists the changes."
+          fi

@@ -4,23 +4,47 @@ on:
   schedule:
     - cron: '0 16 * * *' # daily 16:00 UTC
   workflow_dispatch: # manual trigger
+    inputs:
+      dry-run:
+        description: Scrape, plan and render the changelog, but publish nothing (no PR, comment, issue or Discord message)
+        type: boolean
+        default: false
 
 permissions: {}
 
+# A dry run publishes nothing, so it needn't wait for a real run. In the same group, a
+# queued dry run would also cancel a queued scheduled one.
 concurrency:
-  group: scrape
+  group: ${{ inputs.dry-run && 'scrape-dry-run' || 'scrape' }}
   cancel-in-progress: false
 
+# The App's private key never shares a job with dependency code: any step can read every
+# secret its job uses from the runner's memory, and the App can write to more than this
+# repository. So `scrape` runs pnpm, Playwright and every repository script with no
+# secrets and hands the staged update on as an artifact, and `publish` mints the App's
+# token and opens the PR with pinned actions and a copy, nothing else. `announce` and
+# `report` run our code again, with the default token. A dry run runs `scrape` only (and
+# `app-check`). See "The App token" in specs/change-tracking.md.
 jobs:
   scrape:
     runs-on: ubuntu-latest
+    timeout-minutes: 30 # a full scrape takes about five minutes
     permissions:
-      contents: write # push the update branch
-      pull-requests: write # open the update PR, and comment its Discord marker
-      issues: write # open, comment on and close the scrape-failure issue
+      contents: read # check out the code
+      pull-requests: read # list the open update PRs
+    outputs:
+      branch: ${{ steps.plan.outputs.branch }}
+      base: ${{ steps.plan.outputs.base }}
+      base-sha: ${{ steps.bundle.outputs.base-sha }}
+      below: ${{ steps.plan.outputs.below }}
+      title: ${{ steps.changelog.outputs.title }}
     steps:
-      # The fetches below need no credentials (the repository is public), and
-      # create-pull-request configures its own token to push.
+      # Audit only: records outbound connections and processes, blocks nothing.
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
+      # The fetches below need no credentials (the repository is public).
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -54,11 +78,6 @@ jobs:
           DATES: ${{ steps.open.outputs.dates }}
         # $DATES is unquoted on purpose: one `--dates-from <dir>` pair per open PR.
         run: pnpm scrape --report /tmp/failures.md $DATES
-
-      # The announcement is rendered after the PR step (it links to the PR), by which
-      # point create-pull-request has had the working tree. Keep it a copy.
-      - name: Snapshot scraped data
-        run: cp -r data /tmp/new-data
 
       # One PR per MFM version, stacked: the live version's open PR is updated on its own
       # base, and a new version gets a new PR on top of the open one instead of
@@ -95,36 +114,242 @@ jobs:
           cp -r ../data data
           ../node_modules/.bin/tsx ../src/bin/mfm.ts changelog /tmp/old-data data
 
+      # Everything the later jobs need, in one place: the staged files, the two snapshots
+      # and the PR body. The base's exact commit goes with them, so `publish` stages the
+      # update on the tree it was built on.
+      - name: Bundle the update
+        id: bundle
+        run: |
+          mkdir -p /tmp/update/staged
+          cp -r pub/data pub/changelog pub/DATA-CHANGELOG.md /tmp/update/staged/
+          cp -r /tmp/old-data /tmp/changelog.md /tmp/update/
+          cp -r data /tmp/update/new-data
+          echo "base-sha=$(git -C pub rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Hand the update on
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: update
+          path: /tmp/update
+          if-no-files-found: error
+          retention-days: 7
+
+      # The later jobs publish, so a dry run shows what they would have published instead.
+      - name: Show the dry run
+        if: inputs.dry-run
+        env:
+          BRANCH: ${{ steps.plan.outputs.branch }}
+          BASE: ${{ steps.plan.outputs.base }}
+          BELOW: ${{ steps.plan.outputs.below }}
+          TITLE: ${{ steps.changelog.outputs.title }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Dry run: nothing was published"
+            echo
+            echo "- Branch: \`$BRANCH\`, based on \`$BASE\`"
+            echo "- PRs below: ${BELOW:-none}"
+            echo "- Title: $TITLE"
+            echo
+            echo "Files the update commit would change, against the base:"
+            echo
+            echo '```'
+            git -C pub status --short | grep . || echo "(none: the scrape matches the base)"
+            echo '```'
+            echo
+            echo "The PR body:"
+            echo
+            cat /tmp/changelog.md
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "The Discord payload (not sent):"
+          node_modules/.bin/tsx src/bin/mfm.ts announce /tmp/update/old-data /tmp/update/new-data
+
+      # For `report`: the per-faction errors, when the scrape got as far as writing them.
+      - name: Keep the failure report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: failure-report
+          path: /tmp/failures.md
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # The only job that holds the App's key, so it runs pinned actions and a copy, and no
+  # repository code. The App's token rather than GITHUB_TOKEN, whose events start no
+  # workflows: that way the update PR gets CI.
+  publish:
+    needs: scrape
+    if: ${{ !inputs.dry-run }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # check out the base
+    outputs:
+      pr: ${{ steps.pr.outputs.pull-request-number }}
+    steps:
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
+      # Everything `scrape` hands over is untrusted, since that job ran every dependency.
+      # So the plan that steers the App's token is checked first, in plain bash and before
+      # anything is checked out: the branch is an update branch, the base is main or
+      # another one, and the base commit is on the base branch, not any commit the
+      # repository can fetch (the base branch is it, or ahead of it).
+      - name: Check the plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ needs.scrape.outputs.branch }}
+          BASE: ${{ needs.scrape.outputs.base }}
+          BASE_SHA: ${{ needs.scrape.outputs.base-sha }}
+        run: |
+          set -euo pipefail
+          update='^mfm/v[0-9]+(\.[0-9]+)*$'
+          [[ "$BRANCH" =~ $update ]] || { echo "::error::Not an update branch: '$BRANCH'"; exit 1; }
+          if ! { [[ "$BASE" == main || "$BASE" =~ $update ]] && [[ "$BASE" != "$BRANCH" ]]; }; then
+            echo "::error::Not a base for $BRANCH: '$BASE'"
+            exit 1
+          fi
+          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::Not a commit: '$BASE_SHA'"; exit 1; }
+          status=$(gh api "repos/$GH_REPO/compare/$BASE_SHA...$BASE" --jq .status)
+          if [[ "$status" != identical && "$status" != ahead ]]; then
+            echo "::error::$BASE_SHA is not on $BASE ($status)"
+            exit 1
+          fi
+
+      # A fresh checkout of the commit `scrape` staged on, never a .git from the artifact:
+      # git config can run commands, and create-pull-request runs git here. With `base`
+      # given, create-pull-request rebases the commit onto the branch's current tip.
+      - name: Check out the base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.scrape.outputs.base-sha }}
+          path: pub
+          persist-credentials: false
+      - name: Fetch the update
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: update
+          path: /tmp/update
+
+      # The staged update must be regular files where an update writes and nothing else:
+      # no dot-files, links, subdirectories or .git.
+      - name: Check what scrape handed over
+        run: |
+          set -euo pipefail
+          cd /tmp/update/staged
+          allowed='^(d \./(data|changelog)|f \./DATA-CHANGELOG\.md|f \./data/[a-z0-9-]+\.yaml|f \./changelog/v[0-9.]+\.md)$'
+          while IFS= read -r -d '' entry; do
+            [[ "$entry" =~ $allowed ]] || { echo "::error::Not part of an update: ${entry#? }"; exit 1; }
+          done < <(find . -mindepth 1 -printf '%y %p\0')
+
+      # Only the paths the update writes, each replaced whole, so the tree is the one
+      # `scrape` staged.
+      - name: Stage the update on the base
+        run: |
+          rm -rf pub/data pub/changelog pub/DATA-CHANGELOG.md
+          cp -r /tmp/update/staged/data /tmp/update/staged/changelog /tmp/update/staged/DATA-CHANGELOG.md pub/
+
+      # Scoped to this repository (the default with no `owner` or `repositories`) and to
+      # what create-pull-request needs. It expires within the hour, and is revoked when
+      # the job ends.
+      - name: Mint the App's token
+        id: token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.BSDATA_AUTOMATON_APP_CLIENT_ID }}
+          private-key: ${{ secrets.BSDATA_AUTOMATON_APP_PRIVATE_KEY }}
+          permission-contents: write # push the update branch
+          permission-pull-requests: write # open or update the PR, and label it
+
       - name: Open pull request on change
         id: pr
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
+          token: ${{ steps.token.outputs.token }}
           path: pub
-          branch: ${{ steps.plan.outputs.branch }}
-          base: ${{ steps.plan.outputs.base }}
-          title: ${{ steps.changelog.outputs.title }}
-          body-path: /tmp/changelog.md
-          commit-message: 'data: ${{ steps.changelog.outputs.title }}'
+          branch: ${{ needs.scrape.outputs.branch }}
+          base: ${{ needs.scrape.outputs.base }}
+          title: ${{ needs.scrape.outputs.title }}
+          body-path: /tmp/update/changelog.md
+          commit-message: 'data: ${{ needs.scrape.outputs.title }}'
           labels: mfm-update
           delete-branch: true
+
+  # A dry run skips `publish`, so this mints the same token on its own, in a job that runs
+  # nothing else. It checks the App's credentials and permissions; the token goes unused.
+  app-check:
+    if: ${{ inputs.dry-run }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+      - name: Mint the App's token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.BSDATA_AUTOMATON_APP_CLIENT_ID }}
+          private-key: ${{ secrets.BSDATA_AUTOMATON_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+  # Neither step needs to start a workflow, so both use the default token. The Discord
+  # marker must be github-actions[bot]'s anyway: src/ops/announce.ts honours no other.
+  announce:
+    needs: [scrape, publish]
+    if: ${{ !inputs.dry-run && needs.publish.outputs.pr != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # check out the code
+      pull-requests: write # link the stack, and read and write the Discord marker
+    steps:
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          runtime: node@22
+          cache: true
+      - name: Fetch the update
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: update
+          path: /tmp/update
 
       # Link the chain as a GitHub stacked PR, so it merges bottom-up. Best-effort:
       # GitHub doesn't document whether GITHUB_TOKEN may create stacks, and the
       # base-branch chain stands without it (GitHub retargets the PR above when the
       # branch below is deleted on merge).
+      #
+      # gh pins a binary extension only by its release tag, and gh-stack's releases aren't
+      # immutable, so the binary is checked against its SHA-256 and installed from disk.
       - name: Link the update stack
-        if: steps.pr.outputs.pull-request-number != '' && steps.plan.outputs.below != ''
+        if: needs.scrape.outputs.below != ''
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           GH_STACK_NO_UPDATE_NOTIFIER: '1'
-          BELOW: ${{ steps.plan.outputs.below }}
-          PR: ${{ steps.pr.outputs.pull-request-number }}
+          BELOW: ${{ needs.scrape.outputs.below }}
+          PR: ${{ needs.publish.outputs.pr }}
+          VERSION: v0.2.1
+          SHA256: ffe9d48b6342faffc3b0cb420202ff1df32e24faf32693debd7423274bbdf859 # linux-amd64
         run: |
-          gh extension install github/gh-stack --pin v0.2.1
-          # $BELOW is unquoted on purpose: the PRs below, bottom first, as separate args.
-          gh stack link $BELOW "$PR"
+          set -euo pipefail
+          dir="$RUNNER_TEMP/gh-stack"
+          mkdir -p "$dir"
+          gh release download "$VERSION" --repo github/gh-stack --pattern linux-amd64 --output "$dir/gh-stack"
+          echo "$SHA256  $dir/gh-stack" | sha256sum --check --strict
+          chmod +x "$dir/gh-stack"
+          (cd "$dir" && gh extension install .)
+          read -ra below <<< "$BELOW" # the PRs below, bottom first
+          gh stack link "${below[@]}" "$PR"
 
       # One Discord message per MFM update, not per scrape run: `--record` keeps its id
       # in a hidden marker on an update PR comment, and edits that message on later runs
@@ -132,31 +357,61 @@ jobs:
       # the comment to force a repost.
       #
       # continue-on-error, deliberately: a Discord outage must not fail this job, because
-      # the failure handler below would then open a "the source markup may have drifted"
-      # issue, which would be a lie.
+      # `report` would then open a "the source markup may have drifted" issue, which would
+      # be a lie.
       - name: Announce on Discord
-        if: steps.pr.outputs.pull-request-number != ''
         continue-on-error: true
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GH_TOKEN: ${{ github.token }}
-          PR: ${{ steps.pr.outputs.pull-request-number }}
+          PR: ${{ needs.publish.outputs.pr }}
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         # No --changelog-url: at announce time main has yesterday's changelog, not this
         # update's. The PR body is the changelog, so that is what the embed links to.
-        run: node_modules/.bin/tsx src/bin/mfm.ts announce /tmp/old-data /tmp/new-data --send --record --pr-number "$PR" --pr-url "$REPO_URL/pull/$PR"
+        run: node_modules/.bin/tsx src/bin/mfm.ts announce /tmp/update/old-data /tmp/update/new-data --send --record --pr-number "$PR" --pr-url "$REPO_URL/pull/$PR"
 
-      # One issue per outage, not per day: a failure while a `scrape-failure` issue is
-      # open is reported as a comment on it, and the next successful run (below) closes it
-      # (src/ops/failure-issue.ts).
+  # One issue per outage, not per day: a failure in any job while a `scrape-failure`
+  # issue is open is reported as a comment on it, and the next successful run closes it
+  # (src/ops/failure-issue.ts). A job that timed out, or lost its runner, ends as
+  # `cancelled` while the run goes on, so that counts as a failure here too; a run that
+  # was cancelled skips this job. A dry run touches neither: its own red run is the report.
+  report:
+    needs: [scrape, publish, announce]
+    if: ${{ !cancelled() && !inputs.dry-run }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # check out the code
+      issues: write # open, comment on and close the scrape-failure issue
+    steps:
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          runtime: node@22
+          cache: true
+
+      # Absent when the scrape failed before writing it; report-failure then says so.
+      - name: Fetch the failure report
+        if: needs.scrape.result == 'failure'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: failure-report
+          path: /tmp
+
       - name: Report the failure
         id: report
-        if: failure()
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         env:
           GH_TOKEN: ${{ github.token }}
         run: node_modules/.bin/tsx src/bin/mfm.ts report-failure --details /tmp/failures.md
 
-      # The report above needs the checkout and node_modules. When the run failed before
+      # The report above needs the checkout and node_modules. When this job failed before
       # it had them (checkout, pnpm/setup, the install), or the report itself failed, this
       # files the failure with gh alone, the same way: a comment on the open issue, or a
       # new one. The one place the workflow keeps logic, because it must run without mfm.
@@ -176,7 +431,7 @@ jobs:
           fi
 
       - name: Close the failure issue
-        if: success()
+        if: needs.scrape.result == 'success' && needs.publish.result == 'success' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
         env:
           GH_TOKEN: ${{ github.token }}
         run: node_modules/.bin/tsx src/bin/mfm.ts resolve-failure

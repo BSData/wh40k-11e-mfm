@@ -325,8 +325,9 @@ reject a whole update. See [0007](../docs/decisions/0007-announce-how-much-moved
 
 ### Failure is not scrape failure
 The announce step is `continue-on-error` and no-ops when `DISCORD_WEBHOOK_URL` is unset.
-A Discord outage must not fail the scrape job, whose failure handler reports that the
-source markup may have drifted. Secret-less runs (forks) simply skip it.
+A Discord outage must not fail the `announce` job, because `report` reports a failed job
+as a scrape that failed, and says the source markup may have drifted. Secret-less runs
+(forks) simply skip it.
 
 ## Failure reporting
 On a parse failure the scrape exits non-zero (no PR) and opens an issue. `src/scrape.ts`
@@ -343,37 +344,113 @@ issue only when there isn't. After a successful run, `mfm resolve-failure` comme
 every open one with a link to that run, and closes it. See
 [0013](../docs/decisions/0013-one-failure-issue-per-outage.md).
 
-A run that fails before `mfm` can report it (in checkout or setup, or in the report step
-itself) still files the failure, the same way, from a fallback step that needs only `gh`:
-the issue then links the run and says there is no per-faction detail. So a run that
-fails before `mfm` could start is still reported, unless GitHub itself can't be reached.
+A failure in any job, a job that timed out included, is reported by the `report` job (see
+*Workflow integration*). When that job fails before `mfm` can report (in its checkout or
+setup, or in the report step itself), a fallback step that needs only `gh` files the
+failure the same way: the issue then links the run and says there is no per-faction
+detail. So a failure is reported unless the run itself was cancelled, or GitHub can't be
+reached.
 
 ## Workflow integration
 Each step that has logic is one `mfm` command, run as `node_modules/.bin/tsx
 src/bin/mfm.ts <command>` (not `pnpm exec`, which can print to stdout); a result a later
 step reads goes to a file (`--output "$GITHUB_OUTPUT"`, `--body-file`), never through a
-captured stdout. The scrape GitHub Action:
-1. `mfm open-prs` lists the open update PRs and copies each one's `data/` to its own temp
-   dir,
-2. runs `pnpm scrape --report /tmp/failures.md` with a `--dates-from` for each of those
-   dirs, then copies the freshly scraped `data/` to a temp dir,
-3. `mfm plan` plans the PR (its branch, its base, and the PRs below it; see *One PR per
-   version, stacked*), and `mfm branch-data` copies the base's `data/` as the "before"
-   snapshot,
-4. `mfm diff <before> data` writes the changelog body and the matching PR title,
-5. checks out the base in a second directory, copies the scraped `data/` into it, and
-   runs `mfm changelog <before> data` there. That writes the entry into
-   `changelog/v<version>.md` and regenerates the `DATA-CHANGELOG.md` index on top of the
-   base's copies,
-6. if `data/` changed, opens (or updates) the PR on the planned branch and base. Its
-   title and body are the two outputs of step 4, the title is also the commit subject
-   (`data: <title>`), and the commit includes the changelog file and the index,
-7. when the base isn't `main`, links the chain with `gh stack link` (best-effort),
-8. `mfm announce <before> <new> --send --record` posts or edits the Discord message and
-   records a new one's marker on the PR (see *Announcing an update* above),
-9. if the scrape fails, `mfm report-failure` reports it on the `scrape-failure` issue,
-   and if that step didn't succeed, a fallback step reports it with `gh` alone; after a
-   successful run, `mfm resolve-failure` closes any open one.
+captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after another:
+
+1. **`scrape`**, with no secrets and a token that only reads:
+   1. `mfm open-prs` lists the open update PRs and copies each one's `data/` to its own
+      temp dir,
+   2. runs `pnpm scrape --report /tmp/failures.md` with a `--dates-from` for each of
+      those dirs,
+   3. `mfm plan` plans the PR (its branch, its base, and the PRs below it; see *One PR per
+      version, stacked*), and `mfm branch-data` copies the base's `data/` as the "before"
+      snapshot,
+   4. `mfm diff <before> data` writes the changelog body and the matching PR title,
+   5. checks out the base in a second directory, copies the scraped `data/` into it, and
+      runs `mfm changelog <before> data` there. That writes the entry into
+      `changelog/v<version>.md` and regenerates the `DATA-CHANGELOG.md` index on top of
+      the base's copies,
+   6. uploads the staged files, both snapshots and the body as the `update` artifact,
+      and gives the plan, the title and the base's commit as job outputs. A failed
+      scrape uploads its failure report instead, as `failure-report`.
+2. **`publish`** holds the App's key, and runs no repository code (see *The App token*).
+   It first checks what `scrape` handed over, since that job ran every dependency: the
+   branch is an update branch (`mfm/v…`), the base is `main` or another one, the base
+   commit is on the base branch, and the staged files are regular files named
+   `data/*.yaml`, `changelog/v*.md` and `DATA-CHANGELOG.md`, and nothing else. Then it
+   checks out the base's commit afresh, replaces its `data/`, `changelog/` and
+   `DATA-CHANGELOG.md` with the staged ones, and, if anything changed, opens (or
+   updates) the PR on the planned branch and base. Its title and body are the two
+   outputs of `mfm diff`, and the title is also the commit subject (`data: <title>`).
+3. **`announce`**, when there is a PR: when the base isn't `main`, links the chain with
+   `gh stack link` (best-effort), and `mfm announce <before> <new> --send --record`
+   posts or edits the Discord message and records a new one's marker on the PR (see
+   *Announcing an update* above).
+4. **`report`**: if any job failed or timed out, `mfm report-failure` reports it on the
+   `scrape-failure` issue (with the failure report, when there is one), and if that step
+   didn't succeed, a fallback step reports it with `gh` alone. After a successful run,
+   `mfm resolve-failure` closes any open one.
+
+Every job starts with `step-security/harden-runner` in audit mode: it records the job's
+outbound connections and processes, and blocks nothing.
 
 A human reviews and merges the PR — giving reviewable, auditable history of every
 points change.
+
+### The App token
+The update PR is opened with a token from the project's GitHub App, `bsdata-automaton`,
+so that its push starts CI like anyone else's: events made with a workflow's
+`GITHUB_TOKEN` start no workflows. In `publish`, `actions/create-github-app-token` mints
+it from the org variable `BSDATA_AUTOMATON_APP_CLIENT_ID` and the org secret
+`BSDATA_AUTOMATON_APP_PRIVATE_KEY`, scoped to this repository, with `contents: write` and
+`pull-requests: write`, and only `create-pull-request` uses it. Every other job uses its
+own `GITHUB_TOKEN`, with only the permissions it needs; so do the stack link and the
+Discord marker, which needn't start anything.
+
+The key never shares a job with dependency code: `publish` runs pinned actions, a file
+copy and the checks above, nothing else. It takes no `.git` from the artifact, because git
+config can run commands and `create-pull-request` runs git there. See
+[0022](../docs/decisions/0022-the-app-key-never-meets-dependency-code.md).
+
+### Dry run
+`gh workflow run scrape.yml --ref <branch> -f dry-run=true` runs `scrape` as a real run
+would, and skips `publish`, `announce` and `report`. So it opens no PR, links no stack,
+posts no Discord message or marker, and neither opens, comments on nor closes a failure
+issue; a failed dry run is reported by its red run alone. `scrape` puts what a real run
+would have published in the run's summary instead: the plan, the title, the files the
+commit would change, and the PR body. The Discord payload goes to the log, from `mfm
+announce` without `--send`, which makes no request. A separate `app-check` job mints the
+App's token, unused, so a dry run also checks the App's credentials and permissions.
+A dry run has its own concurrency group. See
+[0023](../docs/decisions/0023-a-dry-run-publishes-nothing.md).
+
+## Around the pipeline
+### Live smoke test
+`smoke.yml` runs on each PR that touches `src/`, the dependencies (`package.json`,
+`pnpm-lock.yaml`, `pnpm-workspace.yaml`), `.node-version` or `smoke.yml` itself. It
+scrapes the live site with the PR's code into `$RUNNER_TEMP`, with `--dates-from data` so
+a faction that matches its committed file keeps its date, and puts the `mfm diff`
+changelog from the committed `data/` to that scrape in the job summary, with a notice
+when they differ. A difference never fails the job; a scrape that fails does, with its
+failure report in the summary. It is not a required check, but Dependabot auto-merge
+waits for it (below). The job has `contents: read` and no secrets, so a PR from a fork
+runs it the same way. See
+[0024](../docs/decisions/0024-a-live-smoke-test-reports-and-gates-only-auto-merge.md).
+
+### Dependabot auto-merge
+`dependabot-automerge.yml` runs on each PR whose author (not `github.actor`) is
+Dependabot, and reads the update with `dependabot/fetch-metadata`. It turns on
+auto-merge (`gh pr merge --auto --squash`), which merges once the required `build`
+check passes, only when all of these hold:
+- every dependency in it is a minor or patch update, checked per dependency;
+- every commit in it is Dependabot's;
+- it changes no workflow file, which the job's `GITHUB_TOKEN` may not merge;
+- the rules of the PR's base require `build`;
+- when it changes a path the smoke test runs on, this commit's smoke test, run in this
+  repository, passed. The job waits for it, up to 45 minutes.
+
+Each run starts by turning off the auto-merge an earlier run of this job turned on, and
+only a merge decision turns it on again, for the commit that was checked. A run for an
+older commit than the PR's head does nothing. Otherwise the PR waits for a maintainer,
+with one comment saying why. Auto-merge a maintainer turned on is left alone. See
+[0025](../docs/decisions/0025-dependabot-minor-and-patch-updates-merge-themselves.md).
