@@ -1,9 +1,10 @@
 /**
- * Minimal, polite HTTP fetching. The MFM's base data is server-rendered, so a
- * plain GET covers it (Legends units and the rules panels need a browser —
- * see src/browser.ts). Adds a descriptive User-Agent and retry-with-backoff on
- * transient failures. Pacing between pages is the caller's job (the CLI's
- * concurrency pool; `sleep` here is only the inter-retry backoff).
+ * Minimal, polite HTTP fetching. The MFM is server-rendered, so a plain GET covers
+ * everything the scrape reads: faction pages are requested with `LEGENDS_COOKIE`, so
+ * they come back with their Legends, and the rules panels are in every page's RSC
+ * payload (see "Source" in specs/scraping.md). Adds a descriptive User-Agent and
+ * retry-with-backoff on transient failures. Pacing between pages is the caller's job
+ * (the scrape's concurrency pool; `sleep` here is only the inter-retry backoff).
  */
 
 export const BASE_URL = 'https://mfm.warhammer-community.com/en';
@@ -13,6 +14,12 @@ const USER_AGENT =
 
 export const factionUrl = (slug: string) => `${BASE_URL}/${slug}`;
 
+/**
+ * The cookie the site's "Show Legends" toggle sets. A faction page requested with it
+ * comes back with the Legends server-rendered, under a `LEGENDS` section heading.
+ */
+export const LEGENDS_COOKIE = 'isLegendsDisplayed=true';
+
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export interface FetchOptions {
@@ -20,11 +27,14 @@ export interface FetchOptions {
   /** Base backoff in ms; doubles each attempt. */
   backoffMs?: number;
   timeoutMs?: number;
+  /** A `Cookie` header to send, such as `LEGENDS_COOKIE`. */
+  cookie?: string;
 }
 
 /** Fetch a URL as text, retrying transient (network / 5xx / 429) failures. */
 export async function fetchText(url: string, opts: FetchOptions = {}): Promise<string> {
-  const { retries = 3, backoffMs = 1000, timeoutMs = 30_000 } = opts;
+  const { retries = 3, backoffMs = 1000, timeoutMs = 30_000, cookie } = opts;
+  const headers = { 'user-agent': USER_AGENT, accept: 'text/html', ...(cookie ? { cookie } : {}) };
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -33,10 +43,7 @@ export async function fetchText(url: string, opts: FetchOptions = {}): Promise<s
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        const res = await fetch(url, {
-          headers: { 'user-agent': USER_AGENT, accept: 'text/html' },
-          signal: controller.signal,
-        });
+        const res = await fetch(url, { headers, signal: controller.signal });
         if (res.status === 429 || res.status >= 500) {
           throw new Error(`HTTP ${res.status} for ${url}`);
         }

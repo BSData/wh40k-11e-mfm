@@ -1,10 +1,13 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { load } from 'cheerio';
 import { describe, expect, it } from 'vitest';
 import { factionFromYaml, mapNames } from '../src/emit.js';
 import { FactionContent, SiteIndex } from '../src/model.js';
+import { hydrate } from '../src/parse/page.js';
 import {
+  CARD_SELECTOR,
   extractMusterMarkdown,
   extractNotesMarkdown,
   markLegends,
@@ -12,6 +15,7 @@ import {
   OFFICIAL_SPELLINGS,
   parseFaction,
   parseIndex,
+  rulesPanels,
 } from '../src/parse.js';
 
 const fixture = (name: string) =>
@@ -385,6 +389,110 @@ describe('markLegends — same-named units', () => {
     const base = faction([unit('Venerable Dreadnought', 130), unit('Venerable Dreadnought', 165)]);
     const full = faction([unit('Venerable Dreadnought', 130), unit('Bjorn the Fell-Handed', 170)]);
     expect(() => markLegends(base, full)).toThrow(/"space-wolves".*Venerable Dreadnought/);
+  });
+});
+
+describe('parseFaction — the Legends over HTTP (necrons, fetched with the Legends cookie)', () => {
+  const html = fixture('necrons-legends-cookie.html');
+  const faction = parseFaction(html, 'necrons', 'Necrons', new Set(), { legendsShown: true });
+  const legends = faction.units.filter((u) => u.legends);
+
+  it('passes the schema', () => {
+    expect(() => FactionContent.parse(faction)).not.toThrow();
+  });
+
+  it('marks exactly the units under the LEGENDS section', () => {
+    expect(faction.units).toHaveLength(64);
+    expect(legends).toHaveLength(12);
+    expect(legends.map((u) => u.name)).toContain('Anrakyr the Traveller');
+    expect(faction.units.find((u) => u.name === 'Necron Warriors')?.legends).toBeUndefined();
+    // A Legends unit parses fully (pricing, role).
+    const anrakyr = legends.find((u) => u.name === 'Anrakyr the Traveller');
+    expect(anrakyr?.leaderTo?.length).toBeGreaterThan(0);
+    expect(anrakyr?.pricing[0]?.costs[0]).toEqual({ models: 1, points: 95 });
+  });
+
+  it('lists the Legends after the base roster', () => {
+    const first = faction.units.findIndex((u) => u.legends);
+    expect(faction.units.slice(first).every((u) => u.legends)).toBe(true);
+  });
+
+  it('matches the browser path: the toggled render, with the Legends found by difference', () => {
+    // necrons-panels.html is a v1.6 browser render with the Legends shown, and
+    // necrons-panels-rsc.html the plain v1.6 page: what `mfm scrape --browser` compares.
+    const base = parseFaction(fixture('necrons-panels-rsc.html'), 'necrons', 'Necrons');
+    const full = parseFaction(fixture('necrons-panels.html'), 'necrons', 'Necrons');
+    expect(markLegends(base, full)).toEqual(faction);
+  });
+
+  it('fails a page that has the Legends toggle but no LEGENDS section', () => {
+    // The plain page ships the toggle: as if the site had ignored the cookie.
+    const plain = fixture('necrons-panels-rsc.html');
+    expect(plain).toContain('id="show-legends"');
+    expect(() =>
+      parseFaction(plain, 'necrons', 'Necrons', new Set(), { legendsShown: true }),
+    ).toThrow(/"necrons": the page has the Legends toggle but no LEGENDS section/);
+    // Unasked, the same page is just the base roster.
+    expect(parseFaction(plain, 'necrons', 'Necrons').units.some((u) => u.legends)).toBe(false);
+  });
+
+  it('accepts a page with no Legends toggle and no LEGENDS section (a faction without Legends)', () => {
+    const titans = fixture('titan-legions.html');
+    expect(titans).not.toContain('show-legends');
+    expect(() =>
+      parseFaction(titans, 'titan-legions', 'Titan Legions', new Set(), { legendsShown: true }),
+    ).not.toThrow();
+  });
+
+  it('fails a page whose every unit is in the LEGENDS section', () => {
+    // The base roster's cards are taken out, leaving only the LEGENDS section's.
+    const $ = load(html);
+    hydrate($);
+    $('h3')
+      .filter((_i, h) => $(h).text() === 'UNITS')
+      .parent()
+      .find(CARD_SELECTOR)
+      .remove();
+    expect(() => parseFaction($.html(), 'necrons', 'Necrons')).toThrow(
+      /"necrons": every unit is in the LEGENDS section, so the base roster is missing/,
+    );
+  });
+});
+
+describe('rulesPanels — the rules panels from a plain page’s RSC payload', () => {
+  // The plain v1.6 page: both panels are closed, so only its RSC payload holds them.
+  const plain = fixture('necrons-panels-rsc.html');
+  const panels = rulesPanels(plain);
+
+  it('gives the Markdown a browser gets by opening them (necrons-panels.html)', () => {
+    const rendered = fixture('necrons-panels.html');
+    expect(panels.notes).toBe(extractNotesMarkdown(rendered));
+    expect(panels.muster).toBe(extractMusterMarkdown(rendered));
+  });
+
+  it('reads the same panels from the page the scrape fetches, with the Legends cookie', () => {
+    expect(rulesPanels(fixture('necrons-legends-cookie.html'))).toEqual(panels);
+  });
+
+  it('needs no open panel: the plain page renders neither', () => {
+    expect(extractNotesMarkdown(plain)).toBe('');
+    expect(extractMusterMarkdown(plain)).toBe('');
+  });
+
+  it('fails, naming the panel, when no collapsible has its trigger label', () => {
+    // v1.1 pages have the "Welcome…" panel but no "Muster Armies".
+    expect(() => rulesPanels(fixture('necrons.html'))).toThrow(
+      /rules panel "Muster Armies": no collapsible with that trigger label/,
+    );
+    // The label is looked for on the trigger, whose payload JSON sits in a JS string.
+    const label = (text: string) => `\\"children\\":\\"${text}\\"`;
+    const renamed = plain.replaceAll(label('Muster Armies'), label('Army Rules'));
+    expect(renamed).not.toBe(plain);
+    expect(() => rulesPanels(renamed)).toThrow(/rules panel "Muster Armies": no collapsible/);
+  });
+
+  it('fails a page with no RSC payload', () => {
+    expect(() => rulesPanels('<html><body><p>v1.6</p></body></html>')).toThrow(/no RSC payload/);
   });
 });
 

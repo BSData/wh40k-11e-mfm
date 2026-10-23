@@ -14,11 +14,12 @@
  *  - `cards.ts` — a unit or detachment card, with `values.ts` (points, DP, ranges, cost
  *    rows), `names.ts` (`nameCase`, `titleCase`) and `text.ts`;
  *  - `coverage.ts` — the completeness check;
- *  - `panels.ts` — the rules panels as Markdown;
+ *  - `panels.ts` — the rules panels as Markdown, with `rsc.ts` (the page's React Server
+ *    Components payload, where a plain page carries them);
  *  - `faction.ts` — a faction page and the index, and the Legends.
  */
 
-export { markLegends, parseFaction, parseIndex } from './parse/faction.js';
+export { markLegends, type PageOptions, parseFaction, parseIndex } from './parse/faction.js';
 export { nameCase, OFFICIAL_SPELLINGS } from './parse/names.js';
 export {
   CARD_SELECTOR,
@@ -29,4 +30,6 @@ export {
   extractMusterMarkdown,
   extractNotesMarkdown,
   RULES_PANELS,
+  type RulesPanels,
+  rulesPanels,
 } from './parse/panels.js';

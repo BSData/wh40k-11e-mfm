@@ -1,13 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { BrowserContext } from 'playwright';
-import {
-  createScrapeContext,
-  hasLegends,
-  launchBrowser,
-  renderRulesPanels,
-  renderWithLegends,
-} from './browser.js';
+import type { CrossCheck } from './cross-check.js';
 import { failuresReport } from './diff.js';
 import {
   contentKey,
@@ -17,31 +10,24 @@ import {
   metaToYaml,
   type OrderMode,
 } from './emit.js';
-import { BASE_URL, factionUrl, fetchText } from './fetch.js';
+import { BASE_URL, factionUrl, fetchText, LEGENDS_COOKIE } from './fetch.js';
 import { Faction, type FactionContent } from './model.js';
-import {
-  extractMusterMarkdown,
-  extractNotesMarkdown,
-  markLegends,
-  parseFaction,
-  parseIndex,
-  RULES_PANELS,
-} from './parse.js';
+import { parseFaction, parseIndex, type RulesPanels, rulesPanels } from './parse.js';
 
 /**
  * Scrape pipeline: index → faction pages → validated YAML. Run as `pnpm scrape`
  * (`mfm scrape`; its `--help` lists the options, which map onto `ScrapeOptions`).
  *
- * Legends units and the rules panels ("Welcome…" notes, "Muster Armies") aren't in
- * the server HTML, so capturing them needs a headless browser (Playwright). Without
- * `--no-legends`, each faction page is rendered, "Show Legends" is toggled, and units
- * only present then are flagged `legends: true`, and the rules panels are opened once
- * for meta.yaml. `--no-legends` falls back to plain, faster HTTP.
+ * HTTP only, one GET per page. Each faction page is requested with the Legends cookie, so
+ * it comes back with its Legends, which `parseFaction` marks `legends: true`; on a full run
+ * the rules panels ("Welcome…" notes, "Muster Armies") are decoded from the first faction
+ * page's RSC payload for meta.yaml. `--browser` also cross-checks every page against
+ * Google Chrome's render (src/cross-check.ts), the one thing that loads a browser.
  *
  * One faction failing does not abort the run; the process exits 1 at the end so CI
- * fails loudly, while still writing the factions that did parse. On a browser run the
- * rules panels are required too: if they fail, that is reported the same way (as
- * `RULES_PANELS_FAILURE`) and meta.yaml is not written.
+ * fails loudly, while still writing the factions that did parse. The rules panels are
+ * required too: if they fail, that is reported the same way (as `RULES_PANELS_FAILURE`)
+ * and meta.yaml is not written.
  */
 
 /** The name the rules panels' failure goes by in the failures report. */
@@ -54,8 +40,8 @@ export interface ScrapeOptions {
   out: string;
   /** Faction pages in flight at once. */
   concurrency: number;
-  /** Render Legends and the rules panels in a browser. */
-  legends: boolean;
+  /** Cross-check every page against Google Chrome's render. */
+  browser: boolean;
   order: OrderMode;
   /** Where to write the per-faction failure report, if anywhere. */
   report?: string;
@@ -118,69 +104,14 @@ function resolveFirstSeen(
   return dates.length > 0 ? dates.reduce((a, b) => (b < a ? b : a)) : today;
 }
 
-/**
- * Fetch + parse one faction. Base data is parsed from plain HTTP (deterministic);
- * if the page ships the Legends toggle and a browser context is available, the
- * Legends are added by rendering the toggled page and diffing.
- */
-async function scrapeFaction(
-  f: { slug: string; name: string },
-  ctx: BrowserContext | null,
-  knownFactions: ReadonlySet<string>,
-): Promise<FactionContent> {
-  const url = factionUrl(f.slug);
-  const html = await fetchText(url);
-  const base = parseFaction(html, f.slug, f.name, knownFactions);
-  if (!ctx || !hasLegends(html)) return base;
-
-  // Only Legends factions touch the browser. One retry clears transient nav flakiness.
-  let lastError: unknown;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      return markLegends(
-        base,
-        parseFaction(await renderWithLegends(ctx, url), f.slug, f.name, knownFactions),
-      );
-    } catch (err) {
-      lastError = err;
-    }
-  }
-  throw lastError;
-}
-
-/**
- * Render the rules panels and convert them to Markdown for meta.yaml. Throws if the
- * render fails or either panel has no text, after one retry: a run that cannot capture
- * them must fail rather than write a meta.yaml without them.
- */
-async function scrapeRulesPanels(
-  ctx: BrowserContext,
-  url: string,
-): Promise<{ notes: string; muster: string }> {
-  let lastError: unknown;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const html = await renderRulesPanels(ctx, url);
-      const panels = { notes: extractNotesMarkdown(html), muster: extractMusterMarkdown(html) };
-      const empty = (Object.keys(RULES_PANELS) as (keyof typeof RULES_PANELS)[]).filter(
-        (key) => !panels[key],
-      );
-      if (empty.length === 0) return panels;
-      throw new Error(
-        `no text in rules panel ${empty.map((key) => `"${RULES_PANELS[key]}"`).join(', ')}`,
-      );
-    } catch (err) {
-      lastError = err;
-    }
-  }
-  throw lastError;
-}
+/** An error's message, for the failures report. */
+const message = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
 /** Run the pipeline; resolves to the exit code (1 when any faction or the panels failed). */
 export async function scrape(args: ScrapeOptions): Promise<number> {
   console.log(`Fetching index: ${BASE_URL}`);
   const index = parseIndex(await fetchText(BASE_URL));
-  const mode = args.legends ? `browser+Legends ×${args.concurrency}` : `HTTP ×${args.concurrency}`;
+  const mode = `HTTP ×${args.concurrency}${args.browser ? ', cross-checked in Chrome' : ''}`;
   console.log(`Site version v${index.version}, ${index.factions.length} factions (${mode})`);
 
   let targets = index.factions;
@@ -198,31 +129,39 @@ export async function scrape(args: ScrapeOptions): Promise<number> {
   const today = new Date().toISOString().slice(0, 10);
   const scraped: { slug: string; firstSeen: string }[] = [];
   const failures: { slug: string; error: string }[] = [];
+  const fail = (slug: string, err: unknown) => {
+    const error = message(err);
+    failures.push({ slug, error });
+    console.error(`  ✗ ${slug.padEnd(22)} ${error}`);
+  };
 
-  const browser = args.legends ? await launchBrowser() : null;
-  let ctx: BrowserContext | null = null;
+  // The rules panels are identical across pages, so a full run reads them from the first
+  // faction's page, with no request of their own. They are required for meta.yaml.
+  const fullRun = !args.faction;
+  let panels: RulesPanels | undefined;
+  let panelsTried = false;
+
+  // Loaded only for --browser: the scrape itself never touches a browser.
+  let check: CrossCheck | undefined;
   try {
-    // Inside the `try`, so a context that fails to open still closes the browser: a
-    // browser left running would keep the process from exiting.
-    ctx = browser ? await createScrapeContext(browser) : null;
-    // The rules panels are identical across pages — render them once for a full run.
-    // A browser run needs them: if they fail, meta.yaml is left as it is.
-    let panels: { notes: string; muster: string } | undefined;
-    let panelsFailed = false;
-    if (ctx && !args.faction && targets[0]) {
-      try {
-        panels = await scrapeRulesPanels(ctx, factionUrl(targets[0].slug));
-      } catch (err) {
-        const error = err instanceof Error ? err.message : String(err);
-        failures.push({ slug: RULES_PANELS_FAILURE, error });
-        panelsFailed = true;
-        console.error(`  ✗ ${RULES_PANELS_FAILURE.padEnd(22)} ${error}`);
-      }
-    }
+    if (args.browser) check = await (await import('./cross-check.js')).openCrossCheck();
 
-    await mapPool(targets, args.concurrency, async (f) => {
+    await mapPool(targets, args.concurrency, async (f, i) => {
       try {
-        const content = await scrapeFaction(f, ctx, knownFactions);
+        const url = factionUrl(f.slug);
+        const html = await fetchText(url, { cookie: LEGENDS_COOKIE });
+        if (fullRun && i === 0) {
+          panelsTried = true;
+          try {
+            const decoded = rulesPanels(html);
+            await check?.panels(url, decoded);
+            panels = decoded;
+          } catch (err) {
+            fail(RULES_PANELS_FAILURE, err);
+          }
+        }
+        const content = parseFaction(html, f.slug, f.name, knownFactions, { legendsShown: true });
+        await check?.faction(url, content, knownFactions);
         const firstSeen = resolveFirstSeen(
           content,
           [args.out, ...args.datesFrom],
@@ -239,31 +178,33 @@ export async function scrape(args: ScrapeOptions): Promise<number> {
           `  ✓ ${f.slug.padEnd(22)} ${faction.units.length} units, ${faction.detachments.length} detachments${tags}`,
         );
       } catch (err) {
-        const error = err instanceof Error ? err.message : String(err);
-        failures.push({ slug: f.slug, error });
-        console.error(`  ✗ ${f.slug.padEnd(22)} ${error}`);
+        fail(f.slug, err);
       }
     });
-
-    // Only rewrite meta on a full run, so a single-faction smoke test stays honest.
-    if (!args.faction && scraped.length > 0 && !panelsFailed) {
-      const lastUpdated = scraped
-        .map((s) => s.firstSeen)
-        .sort()
-        .at(-1) as string;
-      writeFileSync(
-        join(args.out, 'meta.yaml'),
-        metaToYaml({
-          version: index.version,
-          lastUpdated,
-          ...panels,
-          factions: scraped.map((s) => s.slug),
-        }),
-      );
-    }
   } finally {
-    await ctx?.close();
-    await browser?.close();
+    await check?.close();
+  }
+
+  // The page the panels come from never arrived: that is a panels failure too.
+  if (fullRun && !panelsTried && targets[0]) {
+    fail(RULES_PANELS_FAILURE, `the page they are read from ("${targets[0].slug}") didn't load`);
+  }
+
+  // Only rewrite meta on a full run, so a single-faction smoke test stays honest.
+  if (fullRun && scraped.length > 0 && panels) {
+    const lastUpdated = scraped
+      .map((s) => s.firstSeen)
+      .sort()
+      .at(-1) as string;
+    writeFileSync(
+      join(args.out, 'meta.yaml'),
+      metaToYaml({
+        version: index.version,
+        lastUpdated,
+        ...panels,
+        factions: scraped.map((s) => s.slug),
+      }),
+    );
   }
 
   console.log(`\nDone: ${scraped.length} scraped, ${failures.length} failed.`);
