@@ -73,6 +73,10 @@ stderr) when the snapshots are identical.
   --record               with --send and --pr-number: read the message to edit from
                          the PR's marker comment, and leave a marker there after posting
                          a new one (needs GITHUB_REPOSITORY and GH_TOKEN)
+  --marker-author <login>
+                         with --record: whose marker comments count, the account
+                         behind GH_TOKEN (default: github-actions[bot], which is
+                         GITHUB_TOKEN's); markers anyone else wrote are ignored
   --pr-number <n>        the open update PR, which the message links to
   --pr-url <url>         that PR's address
   --changelog-url <url>  the link when there is no PR
@@ -82,6 +86,7 @@ stderr) when the snapshots are identical.
     send: { type: 'boolean' },
     'message-id': { type: 'string' },
     record: { type: 'boolean' },
+    'marker-author': { type: 'string' },
     'pr-number': { type: 'string' },
     'pr-url': { type: 'string' },
     'changelog-url': { type: 'string' },
@@ -120,7 +125,11 @@ stderr) when the snapshots are identical.
       const hook = webhookUrl(raw);
       const messageId = text(values, 'message-id') || undefined;
       if (record && pr !== undefined) {
-        const posted = await announceOnPr(githubFromEnv(), pr, hook, message, messageId);
+        const author = text(values, 'marker-author');
+        const posted = await announceOnPr(githubFromEnv(), pr, hook, message, {
+          messageId,
+          author,
+        });
         io.err(
           posted ? `Posted message ${posted.id}, recorded on #${pr}.\n` : 'Edited the message.\n',
         );

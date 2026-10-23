@@ -36,28 +36,42 @@ export function markerComment(posted: Posted): string {
   return `Announced on Discord: ${link} <!-- discord-message-id: ${posted.id} -->`;
 }
 
-/** The message id recorded on update PR `pr`, if any. */
-export async function readMessageId(gh: GitHub, pr: number): Promise<string | undefined> {
-  const comments = await paginate<{ body?: string | null }>(
+/**
+ * Who writes the markers: the account behind the workflow's token, `github-actions[bot]`
+ * for `GITHUB_TOKEN`. Anyone can comment on a PR, so a marker from anyone else is ignored:
+ * otherwise a comment could point the next edit at another message.
+ */
+export const MARKER_AUTHOR = 'github-actions[bot]';
+
+/** The message id `author` recorded on update PR `pr`, if any. */
+export async function readMessageId(
+  gh: GitHub,
+  pr: number,
+  author = MARKER_AUTHOR,
+): Promise<string | undefined> {
+  const comments = await paginate<{ body?: string | null; user?: { login?: string } | null }>(
     gh,
     `/issues/${pr}/comments?per_page=100`,
   );
-  return recordedMessageId(comments.map((c) => c.body ?? ''));
+  return recordedMessageId(
+    comments.filter((c) => c.user?.login === author).map((c) => c.body ?? ''),
+  );
 }
 
 /**
  * Announce an update on Discord through webhook `hook`: edit the message update PR `pr`
- * records (or `messageId`, when given), or post a new one and record that. Returns the
- * newly posted message, or `undefined` when one was edited.
+ * records (or `opts.messageId`, when given), or post a new one and record that. Only
+ * markers by `opts.author` (default `MARKER_AUTHOR`) count. Returns the newly posted
+ * message, or `undefined` when one was edited.
  */
 export async function announceOnPr(
   gh: GitHub,
   pr: number,
   hook: string,
   message: DiscordMessage,
-  messageId?: string,
+  opts: { messageId?: string | undefined; author?: string | undefined } = {},
 ): Promise<Posted | undefined> {
-  const id = messageId || (await readMessageId(gh, pr));
+  const id = opts.messageId || (await readMessageId(gh, pr, opts.author ?? MARKER_AUTHOR));
   const posted = await send(hook, message, id);
   if (posted) {
     await request(gh, 'POST', `/issues/${pr}/comments`, { body: markerComment(posted) });

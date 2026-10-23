@@ -38,3 +38,6 @@ marker, so the next run posts rather than assuming yesterday succeeded.
   announcement. Building it needs the guild, which only the webhook object has, so the
   sender fetches it once per post; a failure there costs the link, not the announcement.
 - Deleting the comment forces a repost: the manual escape hatch.
+- Only the bot's own comments count. Anyone can comment on a PR, and a forged marker would
+  otherwise redirect the edit; the marker's author is the account behind the token that
+  writes it (`--marker-author` when that isn't `GITHUB_TOKEN`).

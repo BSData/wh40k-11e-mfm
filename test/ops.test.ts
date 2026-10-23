@@ -480,10 +480,13 @@ const message: DiscordMessage = {
   allowed_mentions: { parse: [] },
 };
 
+/** A PR comment as the REST API lists it, by the workflow's bot unless said otherwise. */
+const comment = (body: string, login = 'github-actions[bot]') => ({ body, user: { login } });
+
 describe('announceOnPr', () => {
   it('edits the message the PR records, and records nothing new', async () => {
     const api = await stub(() => ({
-      body: [{ body: 'Announced on Discord: x <!-- discord-message-id: 555 -->' }],
+      body: [comment('Announced on Discord: x <!-- discord-message-id: 555 -->')],
     }));
     const discord = await stub(() => ({ body: { id: '555' } }));
     const hook = `${discord.url}/api/webhooks/1/token`;
@@ -518,6 +521,45 @@ describe('announceOnPr', () => {
         },
       },
     ]);
+  });
+
+  it("ignores a marker anyone but the workflow's bot wrote, and posts anew", async () => {
+    const api = await stub((call) =>
+      call.method === 'GET'
+        ? {
+            body: [
+              comment('Announced on Discord: x <!-- discord-message-id: 555 -->'),
+              comment('<!-- discord-message-id: 666 -->', 'someone'),
+            ],
+          }
+        : {},
+    );
+    const discord = await stub(() => ({ body: { id: '555' } }));
+    const hook = `${discord.url}/api/webhooks/1/token`;
+
+    // The bot's own marker wins, even with a later forged one after it.
+    await announceOnPr(github(api.url), 78, hook, message);
+    expect(discord.calls.map((c) => c.path)).toEqual(['/api/webhooks/1/token/messages/555']);
+
+    // With only a forged marker there is nothing to edit: it posts and records its own.
+    const forged = await stub((call) =>
+      call.method === 'GET' ? { body: [comment('<!-- discord-message-id: 666 -->', 'x')] } : {},
+    );
+    const fresh = await stub((call) =>
+      call.method === 'GET' ? { status: 403 } : { body: { id: '999' } },
+    );
+    await announceOnPr(github(forged.url), 78, `${fresh.url}/api/webhooks/1/token`, message);
+    expect(fresh.calls.map((c) => c.method)).toEqual(['POST', 'GET']);
+  });
+
+  it('counts the markers of the author it is told to', async () => {
+    const api = await stub(() => ({
+      body: [comment('<!-- discord-message-id: 777 -->', 'mfm-updates[bot]')],
+    }));
+    const discord = await stub(() => ({ body: { id: '777' } }));
+    const hook = `${discord.url}/api/webhooks/1/token`;
+    await announceOnPr(github(api.url), 78, hook, message, { author: 'mfm-updates[bot]' });
+    expect(discord.calls.map((c) => c.path)).toEqual(['/api/webhooks/1/token/messages/777']);
   });
 
   it('records nothing when Discord answers with something that is not an id', async () => {

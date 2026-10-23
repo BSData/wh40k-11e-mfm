@@ -297,7 +297,9 @@ that marker is the entire state:
 | absent | this update has never been announced | **post**, and record the id |
 | present | the update already has a message | **edit** it in place |
 
-The last marker among the PR's comments wins. The marker is written only for a message id
+The last marker among the comments by the account that writes them wins: the workflow's own
+`github-actions[bot]`, or the one `--marker-author` names. A marker anyone else wrote is
+ignored, so a comment can't point the next edit at another message. The marker is written only for a message id
 that is all digits (a Discord snowflake). The comment also carries the message's
 permalink (`https://discord.com/channels/<guild>/<channel>/<message>`), or `link
 unavailable` when the webhook won't say where it posts; resolving it is best-effort and
