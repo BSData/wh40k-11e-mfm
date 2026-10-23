@@ -61,7 +61,7 @@ export function assertFactionCovered(
   // name, sub-group/parent-army titles and version) remain. Catches a brand-new
   // top-level section that sits outside any card.
   $(CARD_SELECTOR).remove();
-  $('header, nav, footer, [id^="onetrust"], .onetrust-pc-dark-filter').remove();
+  $('header, nav, [id^="onetrust"], .onetrust-pc-dark-filter').remove();
   $('script, style, noscript, svg, head, link').remove();
   // The rules panels (open only) are captured into meta.yaml, not faction data.
   for (const label of Object.values(RULES_PANELS)) findPanel($, label)?.remove();
