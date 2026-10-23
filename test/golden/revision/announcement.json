@@ -1,0 +1,27 @@
+{
+  "embeds": [
+    {
+      "title": "MFM v1.7 update — 2026-10-28",
+      "url": "https://github.com/BSData/wh40k-11e-mfm/pull/78",
+      "description": "**31 factions changed** · site v1.6 → v1.7 · 🆕 1 new\nUnits: 1 changed, 4 added · Rules: Muster Armies changed\n**1 point change** — ▲1 raised · ▼0 cut\n\n[Full changelog · PR #78](https://github.com/BSData/wh40k-11e-mfm/pull/78) · [MFM](https://mfm.warhammer-community.com/en)",
+      "color": 11570519,
+      "fields": [
+        {
+          "name": "Units / detachments changed",
+          "value": "```\nQuestor Traitoris  4  -\nOrks               1  -\n```"
+        },
+        {
+          "name": "No unit or detachment changes",
+          "value": "Adepta Sororitas, Adeptus Custodes, Adeptus Mechanicus, Aeldari, Astra Militarum, Black Templars, Blood Angels, Chaos Daemons, Chaos Knights, Chaos Space Marines, Chaos Titan Legions, Dark Angels, Death Guard, Deathwatch, Drukhari, Emperor’s Children, Genestealer Cults, Grey Knights, Imperial Agents, Imperial Knights, Leagues of Votann, Necrons, Space Marines, Space Wolves, T’au Empire, Thousand Sons, Titan Legions, Tyranids, World Eaters"
+        }
+      ],
+      "footer": {
+        "text": "Unofficial · Warhammer 40,000 and the Munitorum Field Manual are © Games Workshop"
+      },
+      "timestamp": "2026-10-28T00:00:00.000Z"
+    }
+  ],
+  "allowed_mentions": {
+    "parse": []
+  }
+}

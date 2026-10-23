@@ -43,22 +43,31 @@ the AI angle is purely this maintenance harness.
 
 ## Project map
 - `src/model.ts` — zod schemas; the **data-model contract** (and TS types).
-- `src/parse.ts` — cheerio HTML → model. Pure. The drift-prone surface.
+- `src/parse.ts` — cheerio HTML → model. Pure. The drift-prone surface. Modules under
+  `src/parse/`: `page.ts` (hydrate, de-annotate, the cards), `cards.ts`, `values.ts`
+  (points, DP, ranges, cost rows), `coverage.ts`, `panels.ts`, `faction.ts` (a faction page,
+  the index, the Legends), `names.ts` (`titleCase()`) and `text.ts`.
 - `src/fetch.ts` — polite HTTP (retry/backoff).
 - `src/browser.ts` — Playwright: Legends units + the rules panels ("Welcome…" notes,
   "Muster Armies") (not in HTTP).
 - `src/emit.ts` — deterministic YAML in/out.
-- `src/diff.ts` — changelog from two snapshots (pure `changelog()` + CLI): the PR body,
-  kept under GitHub's 65,536-character limit, and the entry for the version's file.
+- `src/diff.ts` — changelog from two snapshots (pure; modules under `src/diff/`): the PR
+  body, kept under GitHub's 65,536-character limit, and the entry for the version's file.
 - `src/changelog.ts` — places an entry in `changelog/v<version>.md` and regenerates the
-  `DATA-CHANGELOG.md` index (pure; `scripts/update-data-changelog.ts` does the I/O).
+  `DATA-CHANGELOG.md` index (pure; `mfm changelog` does the I/O).
 - `src/discord.ts` — the same diff as a Discord webhook payload, plus the one call that
   sends it (`announcement()` pure, `send()` tested against a stub server). One message
   per update, edited as the update grows.
 - `src/stack.ts` — plans the update PR: one per MFM version (`mfm/v<version>`), a new
   version stacked on the open one rather than folded into it (`planUpdate()` pure).
-- `src/cli.ts` — the pipeline entrypoint (`pnpm scrape`).
+- `src/scrape.ts` — the scrape pipeline (`pnpm scrape`, which is `mfm scrape`).
+- `src/bin/mfm.ts` — `pnpm mfm <command>`, the one command line: the scrape, the reports
+  (`diff`, `announce`, `plan`, `changelog`), `check-data`, `refresh-fixtures`, and the
+  workflow's GitHub chores, which live in `src/ops/` (tested against stub servers).
+  `pnpm mfm --help` lists them.
 - `specs/` — **source-of-truth prose**. Change the spec first, then the code.
+- `docs/decisions/` — why the specs say what they do: one record per decision, linked
+  from the spec section it explains.
 - `test/` — Vitest + saved HTML `fixtures/`. Tests run offline.
 - `data/` — committed output: the dataset and its history. Do not hand-edit.
 - `changelog/` + `DATA-CHANGELOG.md` — committed output: one readable changelog file per
@@ -82,7 +91,7 @@ pnpm scrape --faction necrons  # live run for one faction (with Legends) → dat
 pnpm scrape --no-legends       # fast HTTP-only run, no browser/Legends
 pnpm scrape                    # full run, all factions → data/ + meta.yaml
 pnpm refresh-fixtures          # re-download test fixtures after a site change
-pnpm exec tsx src/discord.ts <before> <after>   # preview the Discord payload (--send posts it)
+pnpm mfm announce <before> <after>   # preview the Discord payload (pnpm mfm --help: every command, exit codes)
 pnpm check                     # Biome lint+format
 pnpm typecheck                 # tsc --noEmit
 ```

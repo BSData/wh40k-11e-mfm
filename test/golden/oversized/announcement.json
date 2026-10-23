@@ -1,0 +1,23 @@
+{
+  "embeds": [
+    {
+      "title": "MFM v1.6 update — 2026-10-30",
+      "url": "https://github.com/BSData/wh40k-11e-mfm/pull/78",
+      "description": "**24 factions changed**\nUnits: 1104 changed\n**1807 point changes** — ▲1807 raised · ▼0 cut\n\n[Full changelog · PR #78](https://github.com/BSData/wh40k-11e-mfm/pull/78) · [MFM](https://mfm.warhammer-community.com/en)",
+      "color": 11570519,
+      "fields": [
+        {
+          "name": "Units / detachments changed",
+          "value": "```\nAstra Militarum      134  -\nAeldari               99  -\nChaos Space Marines   85  -\nImperial Agents       75  -\nOrks                  67  -\nNecrons               64  -\nChaos Daemons         63  -\nT’au Empire           62  -\nTyranids              57  -\nDeath Guard           41  -\nAdepta Sororitas      38  -\nAdeptus Mechanicus    38  -\nAdeptus Custodes      36  -\nThousand Sons         34  -\nGrey Knights          31  -\nDrukhari              30  -\nWorld Eaters          30  -\nGenestealer Cults     25  -\nEmperor’s Children    23  -\nImperial Knights      22  -\nLeagues of Votann     22  -\nChaos Knights         20  -\nChaos Titan Legions    4  -\nTitan Legions          4  -\n```"
+        }
+      ],
+      "footer": {
+        "text": "Unofficial · Warhammer 40,000 and the Munitorum Field Manual are © Games Workshop"
+      },
+      "timestamp": "2026-10-30T00:00:00.000Z"
+    }
+  ],
+  "allowed_mentions": {
+    "parse": []
+  }
+}

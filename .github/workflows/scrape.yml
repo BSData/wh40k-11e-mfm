@@ -4,37 +4,23 @@ on:
   schedule:
     - cron: '0 16 * * *' # daily 16:00 UTC
   workflow_dispatch: # manual trigger
-    inputs:
-      dry-run:
-        description: Scrape, plan and render the changelog, but publish nothing (no PR, comment, issue or Discord message)
-        type: boolean
-        default: false
 
 permissions: {}
 
-# A dry run writes nothing, so it needn't wait for a real run. In the same group, a queued
-# dry run would also cancel a queued scheduled one.
 concurrency:
-  group: ${{ inputs.dry-run && 'scrape-dry-run' || 'scrape' }}
+  group: scrape
   cancel-in-progress: false
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    # GITHUB_TOKEN only reads, plus the failure issue: the PR, its comments and the stack
-    # use the App's tokens (see the two "Mint the App's token" steps).
     permissions:
-      contents: read # check out the code
-      pull-requests: read # list the open update PRs
+      contents: write # push the update branch
+      pull-requests: write # open the update PR, and comment its Discord marker
       issues: write # open, comment on and close the scrape-failure issue
     steps:
-      # Audit only: records outbound connections and processes, blocks nothing.
-      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
-        with:
-          egress-policy: audit
-
       # The fetches below need no credentials (the repository is public), and
-      # create-pull-request pushes with the App's token.
+      # create-pull-request configures its own token to push.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -45,32 +31,23 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      # Update PRs are sticky: each one's branch is force-pushed on every run while its
-      # version is live. Their data/ already carries the `firstSeen` stamps of the changes
-      # they captured, so the scrape matches against every open one as well as against
-      # main — a run that finds nothing new re-stamps nothing and so reproduces the branch
-      # byte for byte (no force-push, and the PR keeps its start date), while a later
-      # change widens the reported date range instead of resetting it to today.
-      # Branch names reach the shell through env and word splitting only, never ${{ }}.
+      # Every step below with logic in it runs one `mfm` command (src/bin/mfm.ts; see
+      # `--help` on each). `pnpm scrape` is `mfm scrape`; the rest are called as
+      # node_modules/.bin/tsx rather than `pnpm exec tsx`, because pnpm can print its own
+      # status lines ("Already up to date", "Done in …") to stdout, which is how #78's
+      # Discord marker came to record "Already" instead of the message id. Results a later
+      # step reads go to files (--output "$GITHUB_OUTPUT", --body-file), never through a
+      # captured stdout.
+
+      # Update PRs are sticky: the scrape matches `firstSeen` dates against each open
+      # one's data/ as well as main's, so a run that finds nothing new reproduces its
+      # branch byte for byte (src/ops/open-prs.ts). Branch names reach the shell through
+      # step outputs and word splitting only, never ${{ }}.
       - name: Fetch the open update PRs' dates
         id: open
         env:
           GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          gh pr list --label mfm-update --state open \
-            --json number,headRefName,baseRefName,isCrossRepository \
-            --jq '[.[] | select(.isCrossRepository | not) | select(.headRefName | startswith("mfm/"))]' \
-            > /tmp/update-prs.json
-          dates=""
-          for branch in $(jq -r '.[].headRefName' /tmp/update-prs.json); do
-            git fetch --depth=1 origin "+refs/heads/$branch:refs/remotes/origin/$branch"
-            mkdir -p "/tmp/pr-data/$branch"
-            git archive "origin/$branch" data | tar -x -C "/tmp/pr-data/$branch" --strip-components=1
-            dates="$dates --dates-from /tmp/pr-data/$branch"
-            echo "Matching dates against the open $branch PR."
-          done
-          echo "dates=$dates" >> "$GITHUB_OUTPUT"
+        run: node_modules/.bin/tsx src/bin/mfm.ts open-prs --out /tmp/pr-data --json /tmp/update-prs.json --output "$GITHUB_OUTPUT"
 
       - name: Scrape
         env:
@@ -81,38 +58,25 @@ jobs:
       # The announcement is rendered after the PR step (it links to the PR), by which
       # point create-pull-request has had the working tree. Keep it a copy.
       - name: Snapshot scraped data
-        run: |
-          mkdir -p /tmp/new-data
-          cp -r data/. /tmp/new-data/
+        run: cp -r data /tmp/new-data
 
       # One PR per MFM version, stacked: the live version's open PR is updated on its own
       # base, and a new version gets a new PR on top of the open one instead of
       # rebuilding it. See "One PR per version, stacked" in specs/change-tracking.md.
-      #
-      # tsx runs as node_modules/.bin/tsx, not `pnpm exec tsx`, wherever its stdout is
-      # captured: pnpm can print its own status lines ("Already up to date", "Done in …")
-      # to stdout first. Once `pub/` holds the base's package.json it does, and that is
-      # how #78's Discord marker came to record "Already" instead of the message id.
       - name: Plan the update PR
         id: plan
-        run: node_modules/.bin/tsx src/stack.ts /tmp/update-prs.json data >> "$GITHUB_OUTPUT"
+        run: node_modules/.bin/tsx src/bin/mfm.ts plan /tmp/update-prs.json data --output "$GITHUB_OUTPUT"
 
       # The PR is diffed against its base, not main: body, changelog entry and
       # announcement all compare the base's data/ with the scrape.
       - name: Snapshot the base's data
         env:
           BASE: ${{ steps.plan.outputs.base }}
-        run: |
-          git fetch --depth=1 origin "+refs/heads/$BASE:refs/remotes/origin/$BASE"
-          mkdir -p /tmp/old-data
-          git archive "origin/$BASE" data | tar -x -C /tmp/old-data --strip-components=1
+        run: node_modules/.bin/tsx src/bin/mfm.ts branch-data "$BASE" /tmp/old-data
 
       - name: Generate changelog
         id: changelog
-        run: |
-          node_modules/.bin/tsx src/diff.ts /tmp/old-data data --title-file /tmp/title.txt > /tmp/changelog.md
-          echo "title=$(cat /tmp/title.txt)" >> "$GITHUB_OUTPUT"
-          cat /tmp/changelog.md
+        run: node_modules/.bin/tsx src/bin/mfm.ts diff /tmp/old-data data --body-file /tmp/changelog.md --output "$GITHUB_OUTPUT"
 
       # The commit is built on a checkout of the base, so it carries the base's changelog
       # files plus this update's entry: changelog/v<version>.md and the regenerated
@@ -129,69 +93,12 @@ jobs:
         run: |
           rm -rf data
           cp -r ../data data
-          ../node_modules/.bin/tsx ../scripts/update-data-changelog.ts /tmp/old-data data
-
-      # Every step from here on but the token minting publishes something, so a dry run
-      # shows what they would have published instead.
-      - name: Show the dry run
-        if: inputs.dry-run
-        env:
-          BRANCH: ${{ steps.plan.outputs.branch }}
-          BASE: ${{ steps.plan.outputs.base }}
-          BELOW: ${{ steps.plan.outputs.below }}
-          TITLE: ${{ steps.changelog.outputs.title }}
-        run: |
-          set -euo pipefail
-          {
-            echo "## Dry run: nothing was published"
-            echo
-            echo "- Branch: \`$BRANCH\`, based on \`$BASE\`"
-            echo "- PRs below: ${BELOW:-none}"
-            echo "- Title: $TITLE"
-            echo
-            echo "Files the update commit would change, against the base:"
-            echo
-            echo '```'
-            git -C pub status --short | grep . || echo "(none: the scrape matches the base)"
-            echo '```'
-            echo
-            echo "The PR body:"
-            echo
-            cat /tmp/changelog.md
-          } >> "$GITHUB_STEP_SUMMARY"
-          echo "The Discord payload (not sent):"
-          node_modules/.bin/tsx src/discord.ts /tmp/old-data /tmp/new-data
-
-      # The PR is opened with the App's token rather than GITHUB_TOKEN, whose events start
-      # no workflows: that way the update PR gets CI. Each token is scoped to this
-      # repository (the default with no `owner` or `repositories`) and to what its steps
-      # need, and the Discord step, which runs our code with its token in the environment,
-      # gets one that can't push. Minted after the scrape, since they expire within the
-      # hour, and in a dry run too, unused, which checks the App's credentials. See "The
-      # App token" in specs/change-tracking.md.
-      - name: Mint the App's token for the update PR
-        id: pr-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: ${{ vars.BSDATA_AUTOMATON_APP_CLIENT_ID }}
-          private-key: ${{ secrets.BSDATA_AUTOMATON_APP_PRIVATE_KEY }}
-          permission-contents: write # push the update branch
-          permission-pull-requests: write # open or update the PR, and label it
-
-      - name: Mint the App's token for the PR's comments
-        id: comment-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: ${{ vars.BSDATA_AUTOMATON_APP_CLIENT_ID }}
-          private-key: ${{ secrets.BSDATA_AUTOMATON_APP_PRIVATE_KEY }}
-          permission-pull-requests: write # link the stack, read and write the Discord marker
+          ../node_modules/.bin/tsx ../src/bin/mfm.ts changelog /tmp/old-data data
 
       - name: Open pull request on change
         id: pr
-        if: ${{ !inputs.dry-run }}
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ steps.pr-token.outputs.token }}
           path: pub
           branch: ${{ steps.plan.outputs.branch }}
           base: ${{ steps.plan.outputs.base }}
@@ -201,14 +108,15 @@ jobs:
           labels: mfm-update
           delete-branch: true
 
-      # Link the chain as a GitHub stacked PR, so it merges bottom-up. Best-effort: the
+      # Link the chain as a GitHub stacked PR, so it merges bottom-up. Best-effort:
+      # GitHub doesn't document whether GITHUB_TOKEN may create stacks, and the
       # base-branch chain stands without it (GitHub retargets the PR above when the
       # branch below is deleted on merge).
       - name: Link the update stack
-        if: ${{ !inputs.dry-run && steps.pr.outputs.pull-request-number != '' && steps.plan.outputs.below != '' }}
+        if: steps.pr.outputs.pull-request-number != '' && steps.plan.outputs.below != ''
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ steps.comment-token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           GH_STACK_NO_UPDATE_NOTIFIER: '1'
           BELOW: ${{ steps.plan.outputs.below }}
@@ -218,116 +126,57 @@ jobs:
           # $BELOW is unquoted on purpose: the PRs below, bottom first, as separate args.
           gh stack link $BELOW "$PR"
 
-      # One Discord message per MFM update, not per scrape run. The sticky PR is the
-      # update's identity, and the hidden marker on one of its comments is the whole of
-      # the state: no marker means post, a marker means edit that message, so a multi-day
-      # update reads as one announcement whose numbers widen — the way the PR title and
-      # the changelog entry already do. The PR lives exactly as long as the update does,
-      # so once it is merged and its branch deleted the next update starts clean. Delete
-      # the comment to force a repost. See specs/change-tracking.md.
-      #
-      # The marker, rather than create-pull-request's `created`/`updated` output, is what
-      # decides — which makes a failed post self-healing: it leaves no marker, so the next
-      # run posts instead of assuming yesterday succeeded.
+      # One Discord message per MFM update, not per scrape run: `--record` keeps its id
+      # in a hidden marker on an update PR comment, and edits that message on later runs
+      # (src/ops/announce.ts). It writes no marker for an id that isn't numeric. Delete
+      # the comment to force a repost.
       #
       # continue-on-error, deliberately: a Discord outage must not fail this job, because
       # the failure handler below would then open a "the source markup may have drifted"
       # issue, which would be a lie.
       - name: Announce on Discord
-        if: ${{ !inputs.dry-run && steps.pr.outputs.pull-request-number != '' }}
+        if: steps.pr.outputs.pull-request-number != ''
         continue-on-error: true
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GH_TOKEN: ${{ steps.comment-token.outputs.token }}
-          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
           PR: ${{ steps.pr.outputs.pull-request-number }}
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
-        run: |
-          set -euo pipefail
-          # Only the GitHub half lives here: read the marker, then record a new one. The
-          # post/edit decision is in src/discord.ts, where tests can drive it.
-          id=$(gh pr view "$PR" --json comments --jq '
-            [ .comments[].body
-              | select(test("<!-- discord-message-id: [0-9]+ -->"))
-              | capture("<!-- discord-message-id: (?<id>[0-9]+) -->").id
-            ] | last // ""')
-          # No --changelog-url: at announce time main has yesterday's changelog, not this
-          # update's. The PR body is the changelog, so that is what the embed links to.
-          # Called directly, not through `pnpm exec`: see "Plan the update PR".
-          posted=$(node_modules/.bin/tsx src/discord.ts /tmp/old-data /tmp/new-data --send \
-            --message-id "$id" \
-            --pr-number "$PR" \
-            --pr-url "$REPO_URL/pull/$PR")
-          if [ -n "$posted" ]; then
-            # "<id> [permalink]": the id drives the next run's edit, the permalink is the
-            # clickable link (absent if the webhook wouldn't say which guild and channel it
-            # posts to). It is the last line: discord.ts prints nothing else to stdout, and
-            # whatever a wrapper printed ahead of it is ignored rather than recorded.
-            read -r msg_id permalink _ <<< "$(printf '%s\n' "$posted" | tail -n 1)"
-            # A marker the next run can't read makes it post a second announcement, so
-            # refuse to write one: fail the step (it's continue-on-error) and say why.
-            if [[ ! "${msg_id:-}" =~ ^[0-9]+$ ]]; then
-              echo "::error::Expected '<id> [permalink]' from src/discord.ts, got: $posted"
-              exit 1
-            fi
-            gh pr comment "$PR" \
-              --body "Announced on Discord: ${permalink:-link unavailable} <!-- discord-message-id: $msg_id -->"
-          fi
+        # No --changelog-url: at announce time main has yesterday's changelog, not this
+        # update's. The PR body is the changelog, so that is what the embed links to.
+        run: node_modules/.bin/tsx src/bin/mfm.ts announce /tmp/old-data /tmp/new-data --send --record --pr-number "$PR" --pr-url "$REPO_URL/pull/$PR"
 
       # One issue per outage, not per day: a failure while a `scrape-failure` issue is
-      # open is reported as a comment on it, and the next successful run (below) closes it.
-      # A dry run touches neither: its own red run is the report.
+      # open is reported as a comment on it, and the next successful run (below) closes it
+      # (src/ops/failure-issue.ts).
       - name: Report the failure
-        if: ${{ failure() && !inputs.dry-run }}
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const fs = require('fs');
-            const { owner, repo } = context.repo;
-            const run = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
-            let details = '';
-            try { details = fs.readFileSync('/tmp/failures.md', 'utf8').trim(); } catch {}
-            const report = [
-              `**Run log:** ${run}`,
-              '',
-              details || '_No per-faction detail was captured — the run likely failed outside parsing (network, browser launch, the index page itself, or a later step such as planning the update PR). Check the run log._',
-              '',
-              '---',
-              'To fix, follow `.agents/skills/diagnose-parse/SKILL.md`. Each block above is the located parser error (including any unconsumed-content report from the completeness check).',
-            ].join('\n');
-            const { data: [open] } = await github.rest.issues.listForRepo({
-              owner, repo, labels: 'scrape-failure', state: 'open', sort: 'created', direction: 'asc', per_page: 1,
-            });
-            if (open) {
-              await github.rest.issues.createComment({
-                owner, repo, issue_number: open.number,
-                body: `The scheduled MFM scrape failed again.\n\n${report}`,
-              });
-            } else {
-              await github.rest.issues.create({
-                owner, repo,
-                title: `Scrape failed (${new Date().toISOString().slice(0, 10)})`,
-                labels: ['scrape-failure'],
-                body: `The scheduled MFM scrape failed — the source site markup may have drifted, or a faction stopped parsing.\n\n${report}`,
-              });
-            }
+        id: report
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node_modules/.bin/tsx src/bin/mfm.ts report-failure --details /tmp/failures.md
+
+      # The report above needs the checkout and node_modules. When the run failed before
+      # it had them (checkout, pnpm/setup, the install), or the report itself failed, this
+      # files the failure with gh alone, the same way: a comment on the open issue, or a
+      # new one. The one place the workflow keeps logic, because it must run without mfm.
+      - name: Report the failure without mfm
+        if: failure() && steps.report.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          body="The scheduled MFM scrape failed before mfm could report it (in checkout or setup, or in the report step itself), so there is no per-faction detail: $RUN"
+          open=$(gh issue list --label scrape-failure --state open --json number --jq 'map(.number) | min // empty')
+          if [ -n "$open" ]; then
+            gh issue comment "$open" --body "$body"
+          else
+            gh issue create --label scrape-failure --title "Scrape failed ($(date -u +%F))" --body "$body"
+          fi
 
       - name: Close the failure issue
-        if: ${{ success() && !inputs.dry-run }}
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const run = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
-            const { data: open } = await github.rest.issues.listForRepo({
-              owner, repo, labels: 'scrape-failure', state: 'open',
-            });
-            for (const issue of open) {
-              await github.rest.issues.createComment({
-                owner, repo, issue_number: issue.number,
-                body: `The scheduled scrape succeeded again: ${run}`,
-              });
-              await github.rest.issues.update({
-                owner, repo, issue_number: issue.number, state: 'closed', state_reason: 'completed',
-              });
-            }
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node_modules/.bin/tsx src/bin/mfm.ts resolve-failure

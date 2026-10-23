@@ -1,7 +1,7 @@
 /**
  * The strings the parser may leave unconsumed: site chrome and annotation it deliberately
  * does not turn into data. These are the *only* exceptions to the coverage check in
- * `src/parse.ts`; anything else left over on a page is treated as new content and fails
+ * `src/parse/coverage.ts`; anything else left over on a page is treated as new content and fails
  * the parse. They live on their own so code owners can guard them: each entry is a
  * decision that some text on the site is not data, made in a reviewed commit. Keep each
  * list tight — a too-broad entry here is how a real addition gets silently swallowed.
@@ -17,7 +17,7 @@ export const DETACHMENT_BOILERPLATE: readonly string[] = ['ENHANCEMENTS'];
 // Page chrome is mostly removed by container (header/nav/footer/cookie dialog/rules panels)
 // in the page-level pass; these are the few content-area headings that remain.
 export const PAGE_BOILERPLATE: readonly string[] = [
-  // The rules panels' button labels (`RULES_PANELS` in src/parse.ts) — always shown,
+  // The rules panels' button labels (`RULES_PANELS` in src/parse/panels.ts) — always shown,
   // open or not.
   'Welcome to the Munitorum Field Manual, containing the most up-to-date points values for every Warhammer 40,000 faction.',
   'Muster Armies',

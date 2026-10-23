@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { checkData, type GeneratedFiles } from '../scripts/check-data.js';
 import { changelogIndex, withEntry } from '../src/changelog.js';
+import { checkData, type GeneratedFiles } from '../src/check-data.js';
 import { factionToYaml, metaFromYaml, metaToYaml } from '../src/emit.js';
 import type { Faction } from '../src/model.js';
 

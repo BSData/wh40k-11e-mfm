@@ -1,8 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { argv } from 'node:process';
-import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-import { loadVersion } from './diff.js';
+import { movedTo } from './moved.js';
 
 /**
  * Where a scrape's changes go: which update PR branch to write, and what it's based on.
@@ -11,11 +8,11 @@ import { loadVersion } from './diff.js';
  * PR being rebuilt into a `main` → new-version diff — the way v1.5's late update was
  * folded into v1.6 (`specs/change-tracking.md`, "One PR per version, stacked").
  *
- * `planUpdate()` is pure; the workflow feeds it `gh pr list` output and the scraped
- * `meta.yaml`'s version.
+ * `planUpdate()` is pure; `mfm plan` feeds it the open PRs (`mfm open-prs`) and the
+ * scraped `meta.yaml`'s version.
  */
 
-/** An open update PR, as `gh pr list --json number,headRefName,baseRefName` gives it. */
+/** An open update PR: its number, its branch and the branch it is based on. */
 export const UpdatePr = z.object({
   number: z.number().int(),
   headRefName: z.string().min(1),
@@ -91,21 +88,5 @@ export function planUpdate(prs: readonly UpdatePr[], version: string, trunk = 'm
     : { branch, base: trunk, below: [] };
 }
 
-// CLI: tsx src/stack.ts <openPrs.json> <scrapedDataDir>
-// Prints the plan as GitHub step outputs (`branch=…`, `base=…`, `below=…`, the last as
-// space-separated PR numbers), which the workflow appends to $GITHUB_OUTPUT.
-const isMain = argv[1] !== undefined && fileURLToPath(import.meta.url) === argv[1];
-if (isMain) {
-  const [prsFile, dataDir] = argv.slice(2);
-  if (!prsFile || !dataDir) {
-    console.error('usage: tsx src/stack.ts <openPrs.json> <scrapedDataDir>');
-    process.exit(2);
-  }
-  const version = loadVersion(dataDir);
-  if (!version) {
-    throw new Error(`No site version in ${dataDir}/meta.yaml, so no update branch to name.`);
-  }
-  const prs = z.array(UpdatePr).parse(JSON.parse(readFileSync(prsFile, 'utf8')));
-  const plan = planUpdate(prs, version);
-  process.stdout.write(`branch=${plan.branch}\nbase=${plan.base}\nbelow=${plan.below.join(' ')}\n`);
-}
+// This module used to be the `mfm plan` command: run directly, say where that went.
+movedTo(import.meta.url, 'mfm plan');

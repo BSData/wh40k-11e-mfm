@@ -1,0 +1,23 @@
+{
+  "embeds": [
+    {
+      "title": "MFM v1.6 update — 2026-10-20",
+      "url": "https://github.com/BSData/wh40k-11e-mfm/pull/78",
+      "description": "**8 factions changed**\nUnits: 9 changed\n8 units re-tiered\n\n[Full changelog · PR #78](https://github.com/BSData/wh40k-11e-mfm/pull/78) · [MFM](https://mfm.warhammer-community.com/en)",
+      "color": 11570519,
+      "fields": [
+        {
+          "name": "Units / detachments changed",
+          "value": "```\nNecrons         2  -\nBlack Templars  1  -\nBlood Angels    1  -\nDark Angels     1  -\nDeathwatch      1  -\nOrks            1  -\nSpace Marines   1  -\nSpace Wolves    1  -\n```"
+        }
+      ],
+      "footer": {
+        "text": "Unofficial · Warhammer 40,000 and the Munitorum Field Manual are © Games Workshop"
+      },
+      "timestamp": "2026-10-20T00:00:00.000Z"
+    }
+  ],
+  "allowed_mentions": {
+    "parse": []
+  }
+}
