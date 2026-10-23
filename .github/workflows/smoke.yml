@@ -10,7 +10,7 @@ on:
     paths:
       - src/**
       - package.json
-      - pnpm-lock.yaml # cheerio, Playwright and the rest of what parses the page
+      - pnpm-lock.yaml # cheerio, node-html-markdown and the rest of what parses the page
       - pnpm-workspace.yaml
       - .node-version
       - .github/workflows/smoke.yml # a change to this check runs it
@@ -24,7 +24,7 @@ concurrency:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 30 # a full scrape takes about five minutes
+    timeout-minutes: 30 # a full scrape takes under a minute over HTTP
     permissions:
       contents: read # check out the PR
     steps:

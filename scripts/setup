@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
-# The one environment setup for this repo: the dependencies from the lockfile, then the
-# Chromium that src/browser.ts drives for Legends units and the rules panels. Run it after
+# The one environment setup for this repo: the dependencies from the lockfile. Run it after
 # cloning; .devcontainer/devcontainer.json, .github/workflows/copilot-setup-steps.yml and
-# .agents/setup (Amp) call it too. Expects Node 22 and pnpm on the PATH.
+# .agents/setup (Amp) call it too. Expects Node 22 and pnpm on the PATH. No browser: the
+# scrape is HTTP only, and the optional browser path (src/browser.ts) uses the Google
+# Chrome already installed, if any.
 set -eu
 cd "$(dirname "$0")/.."
 pnpm install --frozen-lockfile
-pnpm exec playwright install --with-deps chromium

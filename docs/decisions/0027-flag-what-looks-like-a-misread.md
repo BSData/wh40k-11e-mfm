@@ -1,4 +1,4 @@
-# 0026. Flag what looks like a misread, not just what changed
+# 0027. Flag what looks like a misread, not just what changed
 
 - **Status:** accepted, [#76](https://github.com/BSData/wh40k-11e-mfm/issues/76)
 - **Spec:** [change tracking — Needs attention](../../specs/change-tracking.md#needs-attention)

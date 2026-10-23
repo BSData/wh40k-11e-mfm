@@ -6,8 +6,8 @@ import { main } from '../src/bin/mfm.js';
 // In this file every third-party library and the scraper itself fail to load. The commands
 // that hold GH_TOKEN, and so report a failed scrape, must still run: `mfm` imports a
 // command's module only when it runs, and theirs import none of these.
-vi.mock('playwright', () => {
-  throw new Error('broken: playwright');
+vi.mock('playwright-core', () => {
+  throw new Error('broken: playwright-core');
 });
 vi.mock('cheerio', () => {
   throw new Error('broken: cheerio');

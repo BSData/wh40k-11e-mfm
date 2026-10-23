@@ -231,7 +231,7 @@ The Discord message says how many lines there are. When there are any, the workf
 labels the update PR `needs-attention`, creating the label if the repository has none,
 and a later run that finds none takes the label off. A flag never fails the run or
 blocks the merge: the reviewer checks the line against the site. See
-[0026](../docs/decisions/0026-flag-what-looks-like-a-misread.md).
+[0027](../docs/decisions/0027-flag-what-looks-like-a-misread.md).
 
 ## Naming an update
 `updateTitle()` names an update `MFM v<version> update — <window>`. The version is the

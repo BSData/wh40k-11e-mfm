@@ -45,12 +45,14 @@ the AI angle is purely this maintenance harness.
 - `src/model.ts` — zod schemas; the **data-model contract** (and TS types).
 - `src/parse.ts` — cheerio HTML → model. Pure. The drift-prone surface. Modules under
   `src/parse/`: `page.ts` (hydrate, de-annotate, the cards), `cards.ts`, `values.ts`
-  (points, DP, ranges, cost rows), `coverage.ts`, `panels.ts`, `faction.ts` (a faction page,
-  the index, the Legends), `names.ts` (`nameCase()` for names, `titleCase()` for tier
-  labels) and `text.ts`.
-- `src/fetch.ts` — polite HTTP (retry/backoff).
-- `src/browser.ts` — Playwright: Legends units + the rules panels ("Welcome…" notes,
-  "Muster Armies") (not in HTTP).
+  (points, DP, ranges, cost rows), `coverage.ts`, `panels.ts` (the rules panels) with
+  `rsc.ts` (the page's React Server Components payload, which holds them), `faction.ts` (a
+  faction page, the index, the Legends), `names.ts` (`nameCase()` for names, `titleCase()`
+  for tier labels) and `text.ts`.
+- `src/fetch.ts` — polite HTTP (retry/backoff), and the Legends cookie.
+- `src/browser.ts` + `src/cross-check.ts` — Google Chrome (`playwright-core`, the installed
+  Chrome) for tests and troubleshooting only: `mfm scrape --browser` compares the HTTP
+  result with Chrome's render, `mfm render` prints a page as Chrome renders it.
 - `src/emit.ts` — deterministic YAML in/out.
 - `src/diff.ts` — changelog from two snapshots (pure; modules under `src/diff/`): the PR
   body, kept under GitHub's 65,536-character limit, and the entry for the version's file.
@@ -75,30 +77,30 @@ the AI angle is purely this maintenance harness.
   MFM version, and their generated index. Do not hand-edit, except for a schema-change
   note (the `change-data-model` skill).
 - `scripts/setup` — the one environment setup for containers and cloud agents
-  (dependencies + Chromium).
+  (the dependencies; no browser).
 - `.agents/skills/` — the skills above.
 - Open work lives in GitHub issues (label `enhancement`), not in a file.
 
 ## Commands
 ```bash
 pnpm install
-pnpm exec playwright install chromium   # once, for Legends/notes capture
-scripts/setup                  # containers + cloud agents: both of the above, frozen lockfile,
-                               # and Chromium's system packages (Debian/Ubuntu, sudo)
+scripts/setup                  # containers + cloud agents: the same, from the frozen lockfile
 pnpm verify                    # the definition of done: check + typecheck + test + check-data
 pnpm check-data                # data/ valid and canonical, DATA-CHANGELOG.md up to date
 pnpm test                      # offline parser/emit/diff tests (start here)
 pnpm scrape --faction necrons  # live run for one faction (with Legends) → data/
-pnpm scrape --no-legends       # fast HTTP-only run, no browser/Legends
-pnpm scrape                    # full run, all factions → data/ + meta.yaml
+pnpm scrape                    # full run, all factions → data/ + meta.yaml (HTTP only)
+pnpm scrape --browser          # the same, cross-checked against Google Chrome's render
+pnpm mfm render necrons --legends   # a page as Chrome renders it, for troubleshooting
 pnpm refresh-fixtures          # re-download test fixtures after a site change
 pnpm mfm announce <before> <after>   # preview the Discord payload (pnpm mfm --help: every command, exit codes)
 pnpm check                     # Biome lint+format
 pnpm typecheck                 # tsc --noEmit
 ```
-Legends units and the rules panels ("Welcome…" notes, "Muster Armies") aren't in the
-server HTML; `src/browser.ts` (Playwright) captures them. Use `--no-legends` for quick
-iteration without a browser.
+The scrape is HTTP only: each faction page is fetched with the Legends cookie, and the
+rules panels ("Welcome…" notes, "Muster Armies") are decoded from the page's RSC payload.
+Nothing installs a browser; `--browser`, `mfm render` and the two browser-render fixtures
+use the Google Chrome already on the machine (GitHub's Ubuntu runners have one).
 
 ## Conventions
 - TypeScript ESM (`.js` import specifiers), Node ≥ 22, pnpm. Biome for lint/format.

@@ -85,7 +85,7 @@ jobs:
             # The paths smoke.yml runs on (keep the two lists in step). Auto-merge waits
             # only for required checks, and smoke can't be one, since it doesn't run on
             # every PR: so wait here for this commit's live scrape, in this repository,
-            # and hold unless it passed. A cheerio or Playwright update that misreads
+            # and hold unless it passed. A cheerio or node-html-markdown update that misreads
             # today's site would otherwise merge, and the next scheduled scrape would fail.
             # The wait outlasts smoke's own 30-minute timeout.
             deadline=$((SECONDS + 2700))

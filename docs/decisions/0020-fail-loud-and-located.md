@@ -20,7 +20,7 @@ flaky browser run removed `notes` and `muster` from `meta.yaml`.
   ([0013](0013-one-failure-issue-per-outage.md)).
 - An error names the faction and the card as the page shows it (upper case), so it can be
   searched for in the fixture or the live page.
-- On a full browser run the rules panels are required. If they fail, that is a failure
+- On a full run the rules panels are required. If they fail, that is a failure
   like a faction's, and `meta.yaml` is not written at all.
 
 ## Consequences
