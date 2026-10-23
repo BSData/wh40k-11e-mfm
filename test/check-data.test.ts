@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { changelogIndex, withEntry } from '../src/changelog.js';
 import { checkData, type GeneratedFiles } from '../src/check-data.js';
-import { factionToYaml, metaFromYaml, metaToYaml } from '../src/emit.js';
+import { pointsCsv } from '../src/csv.js';
+import { factionToYaml, metaFromYaml, metaToYaml, type SiteMeta } from '../src/emit.js';
 import type { Faction } from '../src/model.js';
+import { jsonSchemas } from '../src/schema.js';
 
 const necrons: Faction = {
   name: 'Necrons',
@@ -29,7 +31,12 @@ const necrons: Faction = {
   ],
 };
 
-const meta = { version: '1.6', lastUpdated: '2026-10-14', factions: ['necrons'] };
+const meta: SiteMeta = {
+  schemaVersion: 2,
+  version: '1.6',
+  lastUpdated: '2026-10-14',
+  factions: ['necrons'],
+};
 
 const v16 = {
   name: 'v1.6.md',
@@ -42,6 +49,8 @@ const files = (): GeneratedFiles => ({
     { name: 'meta.yaml', text: metaToYaml(meta) },
     { name: 'necrons.yaml', text: factionToYaml(necrons) },
   ],
+  points: pointsCsv([necrons]),
+  schemas: jsonSchemas(),
   changelog: [v16],
   index: changelogIndex([v16]),
 });
@@ -84,7 +93,7 @@ describe('checkData', () => {
     it('meta.yaml with its factions unsorted', () => {
       const text = metaToYaml(meta).replace('  - necrons\n', '  - orks\n  - necrons\n');
       expect(checkData(withData('meta.yaml', text))).toEqual([
-        'data/meta.yaml is not canonical: line 4 is "  - orks" where metaToYaml() writes "  - necrons"',
+        'data/meta.yaml is not canonical: line 5 is "  - orks" where metaToYaml() writes "  - necrons"',
       ]);
     });
   });
@@ -127,6 +136,68 @@ describe('checkData', () => {
       f.data.push({ name: 'orks.yaml', text: factionToYaml(necrons) });
       expect(checkData(f)).toEqual([
         'data/orks.yaml holds the slug "necrons", so it belongs in data/necrons.yaml',
+      ]);
+    });
+
+    it.each([
+      ['another schemaVersion', 'schemaVersion: 3'],
+      ['no schemaVersion', ''],
+    ])('meta.yaml with %s', (_, line) => {
+      const text = metaToYaml(meta).replace('schemaVersion: 2', line);
+      const [problem, ...rest] = checkData(withData('meta.yaml', text));
+      expect(rest).toEqual([]);
+      expect(problem).toMatch(/^data\/meta\.yaml is invalid:\n/);
+      expect(problem).toContain('schemaVersion');
+    });
+  });
+
+  describe('fails on a points.csv the faction files do not make', () => {
+    it('a points value changed in the YAML alone', () => {
+      const text = factionToYaml(necrons).replace('points: 85', 'points: 90');
+      expect(checkData(withData('necrons.yaml', text))).toEqual([
+        'data/points.csv is not canonical: line 3 is "necrons,Overlord,,,\\"[1,)\\",Your Unit Costs,1,85,," where pointsCsv() writes "necrons,Overlord,,,\\"[1,)\\",Your Unit Costs,1,90,," (the faction files are the source; rescrape)',
+      ]);
+    });
+
+    it('a missing points.csv', () => {
+      expect(checkData({ ...files(), points: undefined })).toEqual(['data/points.csv is missing']);
+    });
+
+    it('not while a faction file is broken, which is reported instead', () => {
+      const text = `${factionToYaml(necrons).replace('points: 85', 'points: 90')}x: 1\n`;
+      expect(checkData(withData('necrons.yaml', text))).toEqual([
+        expect.stringMatching(/^data\/necrons\.yaml is not canonical/),
+      ]);
+    });
+  });
+
+  describe('fails on JSON Schemas the model does not generate', () => {
+    const named = (f: GeneratedFiles, name: string) => f.schemas.filter((s) => s.name === name);
+
+    it('a stale schema', () => {
+      const f = files();
+      for (const s of named(f, 'meta.schema.json')) s.text = s.text.replace('"lastUpdated"', '"x"');
+      const [problem, ...rest] = checkData(f);
+      expect(rest).toEqual([]);
+      expect(problem).toMatch(/^schema\/meta\.schema\.json is not canonical: line \d+ /);
+      expect(problem).toContain(
+        'out of date with src/model.ts: regenerate it with `pnpm mfm schema`',
+      );
+    });
+
+    it('a missing schema', () => {
+      const f = files();
+      f.schemas = f.schemas.filter((s) => s.name !== 'faction.schema.json');
+      expect(checkData(f)).toEqual([
+        'schema/faction.schema.json is missing: regenerate it with `pnpm mfm schema`',
+      ]);
+    });
+
+    it('a file no schema generates', () => {
+      const f = files();
+      f.schemas.push({ name: 'unit.schema.json', text: '{}\n' });
+      expect(checkData(f)).toEqual([
+        "schema/unit.schema.json isn't generated from the model: delete it",
       ]);
     });
   });

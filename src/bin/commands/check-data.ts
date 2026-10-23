@@ -11,8 +11,10 @@ export const command: Command = {
 Checks that the committed generated files are exactly what the tools would write (see
 "Integrity of the committed files" in specs/data-model.md): every data/<slug>.yaml
 passes the Faction schema, is named after its slug and is canonical; data/meta.yaml
-passes SiteMeta and is canonical; and ${INDEX} is the index generated from
-changelog/. Lists every problem and exits 1 when any file isn't.
+passes SiteMeta, at the current schemaVersion, and is canonical; data/points.csv is the
+table made from the faction files; schema/ holds the JSON Schemas generated from
+src/model.ts, and nothing else; and ${INDEX} is the index generated from changelog/.
+Lists every problem and exits 1 when any file isn't.
 
   --root <dir>  the repository to check (default: the one this command is in)
 `,
@@ -23,7 +25,10 @@ changelog/. Lists every problem and exits 1 when any file isn't.
     const problems = checkData(files);
     if (problems.length === 0) {
       const factions = files.data.filter((f) => f.name !== 'meta.yaml').length;
-      io.out(`check-data: ${factions} faction files, meta.yaml and ${INDEX} are canonical.\n`);
+      io.out(
+        `check-data: ${factions} faction files, meta.yaml, points.csv, ${files.schemas.length} ` +
+          `JSON Schemas and ${INDEX} are canonical.\n`,
+      );
       return 0;
     }
     for (const p of problems) io.err(`✗ ${p}\n\n`);

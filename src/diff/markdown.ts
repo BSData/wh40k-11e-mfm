@@ -59,6 +59,8 @@ function summary(changes: FactionChanges[], rules: RulesChanges | null): string 
       ? `**${changes.length} faction${changes.length === 1 ? '' : 's'} changed**`
       : '**No faction changes**',
   ];
+  // A schema bump breaks readers of the files, so it comes first (specs/data-model.md).
+  if (rules?.schema) clauses.push(`\`schemaVersion\` ${rules.schema}`);
   if (shared) clauses.push(`all ${shared}`);
   // The site version, unless the factions' shared note has already said it.
   if (rules?.version && !shared.split(', ').includes(rules.version))

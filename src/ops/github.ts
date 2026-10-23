@@ -1,7 +1,7 @@
 import { sleep } from '../fetch.js';
 
 /**
- * The few GitHub REST calls the scrape workflow makes, as plain `fetch` against
+ * The few GitHub REST calls the workflows make, as plain `fetch` against
  * `GITHUB_API_URL`. They used to be `gh` and `github-script` inside the workflow, where
  * they only ever ran in production; here a test points them at a stub server, so the
  * code the tests drive is the code that ships.
@@ -62,9 +62,16 @@ const MAX_WAIT_MS = 60_000;
  * or the issue. A 502–504 or a dropped connection doesn't prove GitHub didn't act either,
  * so a retried write can, rarely, comment or open an issue twice: better than a failure
  * report lost, and the next run tidies up (it closes every open failure issue). Waits
- * `Retry-After` when GitHub sends one, at most a minute, else 1 s, then 2 s.
+ * `Retry-After` when GitHub sends one, at most a minute, else 1 s, then 2 s. With
+ * `missing`, a 404 is an answer (nothing there), not an error.
  */
-async function call(gh: GitHub, method: string, url: string, body?: unknown): Promise<Response> {
+async function call(
+  gh: GitHub,
+  method: string,
+  url: string,
+  body?: unknown,
+  missing = false,
+): Promise<Response> {
   for (let attempt = 1; ; attempt++) {
     let res: Response | undefined;
     try {
@@ -82,7 +89,7 @@ async function call(gh: GitHub, method: string, url: string, body?: unknown): Pr
     } catch (err) {
       if (attempt >= ATTEMPTS) throw err;
     }
-    if (res?.ok) return res;
+    if (res?.ok || (missing && res?.status === 404)) return res;
     if (res) {
       const transient = NOT_SERVED.has(res.status) || (method === 'GET' && res.status >= 500);
       if (!transient || attempt >= ATTEMPTS) {
@@ -104,6 +111,12 @@ export async function request<T>(
 ): Promise<T> {
   const res = await call(gh, method, repoUrl(gh, path), body);
   return (await res.json()) as T;
+}
+
+/** A GET on the repository, or `undefined` when there is nothing there (a 404). */
+export async function find<T>(gh: GitHub, path: string): Promise<T | undefined> {
+  const res = await call(gh, 'GET', repoUrl(gh, path), undefined, true);
+  return res.status === 404 ? undefined : ((await res.json()) as T);
 }
 
 /**

@@ -196,6 +196,8 @@ function describe(
         ? `**${t.factions} factions changed**`
         : '**No faction changes**',
   ];
+  // A schema bump breaks readers of the files, so it comes first (specs/data-model.md).
+  if (rules?.schema) lead.push(`\`schemaVersion\` ${rules.schema}`);
   if (note) lead.push(only ? note : `all ${note}`);
   // The site version, unless the factions' note has already said it.
   if (rules?.version && !note.split(', ').includes(rules.version))

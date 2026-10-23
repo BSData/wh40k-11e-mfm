@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Munitorum Field Manual dataset metadata",
+  "description": "data/meta.yaml, at schemaVersion 2. See https://github.com/BSData/wh40k-11e-mfm/blob/main/specs/data-model.md",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 2
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lastUpdated": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1
+    },
+    "muster": {
+      "type": "string",
+      "minLength": 1
+    },
+    "factions": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "version",
+    "lastUpdated",
+    "factions"
+  ]
+}

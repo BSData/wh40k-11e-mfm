@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { POINTS_CSV, pointsCsv } from './csv.js';
 import type { CrossCheck } from './cross-check.js';
-import { failuresReport } from './diff.js';
+import { failuresReport, loadFactionDir } from './diff.js';
 import {
   contentKey,
   factionFromYaml,
@@ -11,7 +12,7 @@ import {
   type OrderMode,
 } from './emit.js';
 import { BASE_URL, factionUrl, fetchText, LEGENDS_COOKIE } from './fetch.js';
-import { Faction, type FactionContent } from './model.js';
+import { Faction, type FactionContent, SCHEMA_VERSION } from './model.js';
 import { parseFaction, parseIndex, type RulesPanels, rulesPanels } from './parse.js';
 
 /**
@@ -199,6 +200,7 @@ export async function scrape(args: ScrapeOptions): Promise<number> {
     writeFileSync(
       join(args.out, 'meta.yaml'),
       metaToYaml({
+        schemaVersion: SCHEMA_VERSION,
         version: index.version,
         lastUpdated,
         ...panels,
@@ -206,6 +208,9 @@ export async function scrape(args: ScrapeOptions): Promise<number> {
       }),
     );
   }
+  // The points table is made from the faction files in --out, so it matches them on every
+  // run, a single faction's included.
+  writeFileSync(join(args.out, POINTS_CSV), pointsCsv(loadFactionDir(args.out)));
 
   console.log(`\nDone: ${scraped.length} scraped, ${failures.length} failed.`);
   if (failures.length > 0) {

@@ -1,16 +1,21 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { factionFromYaml, metaFromYaml, type SiteMeta } from '../emit.js';
-import type { Faction } from '../model.js';
+import { parse } from 'yaml';
+import { factionFromYaml } from '../emit.js';
+import { type Faction, SnapshotMeta } from '../model.js';
 
 /** Reading a snapshot (a `data/` directory) from disk. */
 
-/** A snapshot's `meta.yaml` (the site version and the rules panels), when it has one. */
-export function loadMeta(dir: string): SiteMeta | undefined {
+/**
+ * A snapshot's `meta.yaml` (the schema version, the site version and the rules panels),
+ * when it has one. Read as `SnapshotMeta`, so a snapshot from another schema version, or
+ * from before `schemaVersion`, still compares.
+ */
+export function loadMeta(dir: string): SnapshotMeta | undefined {
   const path = join(dir, 'meta.yaml');
   if (!existsSync(path)) return undefined;
   try {
-    const meta: SiteMeta | null = metaFromYaml(readFileSync(path, 'utf8'));
+    const meta: SnapshotMeta | null = SnapshotMeta.parse(parse(readFileSync(path, 'utf8')));
     return meta?.version ? meta : undefined;
   } catch {
     return undefined; // A snapshot without usable meta just goes unnamed.
