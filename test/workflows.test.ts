@@ -68,3 +68,96 @@ describe('no workflow restores a dependency cache', () => {
     expect(steps.filter(({ step }) => step.uses?.startsWith('actions/cache/'))).toEqual([]);
   });
 });
+
+/**
+ * "Check what scrape handed over" in `publish` (specs/change-tracking.md, "Workflow
+ * integration"): the job that holds the App's key admits the staged update only if it is
+ * regular files where an update writes. `scrape` stages `data/` whole, so a file the
+ * scraper adds to `data/` (points.csv was one, from #96) has to be admitted here too, or
+ * the first real update after it fails with "Not part of an update".
+ *
+ * The workflow matches `find -printf '%y %p'` lines with bash's `[[ =~ ]]` (POSIX ERE).
+ * The pattern is run here as a JavaScript RegExp, which reads the same for the constructs
+ * a path allowlist needs; the guard below rejects the ones where the two differ.
+ */
+describe('publish admits what an update writes', () => {
+  interface PublishStep extends Step {
+    name?: string;
+    run?: string;
+  }
+  const { jobs } = parse(readFileSync(root('.github/workflows/scrape.yml'), 'utf8')) as {
+    jobs: { publish: { steps: PublishStep[] } };
+  };
+  const script = jobs.publish.steps.find(
+    ({ name }) => name === 'Check what scrape handed over',
+  )?.run;
+  const pattern = script?.match(/^\s*allowed='(.*)'\s*$/m)?.[1];
+  const allowed = (entry: string) => new RegExp(pattern ?? '(?!)').test(entry);
+
+  it('finds the check and its pattern', () => {
+    expect(pattern).toBeTruthy();
+  });
+
+  it('uses only syntax that POSIX ERE and JavaScript read alike', () => {
+    // No \d \w \s \b, no backreference or (?...) group, and no {n} count.
+    expect(pattern).not.toMatch(/\\[a-zA-Z0-9]|\(\?|\{/);
+  });
+
+  // What `find -printf '%y %p'` prints for a directory of the repository: a type letter
+  // (d directory, f regular file, l link), then the path from the repository's root.
+  const found = (dir: string): string[] => [
+    `d ./${dir}`,
+    ...readdirSync(root(dir), { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory() ? found(`${dir}/${e.name}`) : [`f ./${dir}/${e.name}`],
+    ),
+  ];
+
+  it('admits every file the repository holds where an update writes', () => {
+    const files = [...found('data'), ...found('changelog')];
+    expect(files).toContain('f ./data/points.csv');
+    expect(files).toContain('f ./data/meta.yaml');
+    expect(files.filter((entry) => !allowed(entry))).toEqual([]);
+    expect(allowed('f ./DATA-CHANGELOG.md')).toBe(true);
+  });
+
+  it.each([
+    'd ./data',
+    'd ./changelog',
+    'f ./DATA-CHANGELOG.md',
+    'f ./data/necrons.yaml',
+    'f ./data/tau-empire.yaml',
+    'f ./data/meta.yaml',
+    'f ./data/points.csv',
+    'f ./changelog/v1.6.md',
+  ])('admits %s', (entry) => {
+    expect(allowed(entry)).toBe(true);
+  });
+
+  it.each([
+    'f ./data/notes.txt',
+    'f ./data/points.csv.bak',
+    'f ./data/xpoints.csv',
+    'f ./data/Points.csv',
+    'f ./data/.hidden.yaml',
+    'f ./data/.points.csv',
+    'f ./data/sub/points.csv',
+    'f ./data/necrons.yaml.orig',
+    'l ./data/necrons.yaml',
+    'l ./data/points.csv',
+    'p ./data/points.csv',
+    'd ./data/sub',
+    'd ./changelog/sub',
+    'd ./.git',
+    'f ./.git/config',
+    'f ./.hidden',
+    'f ./README.md',
+    'f ./changelog/notes.md',
+    'f ./changelog/.v1.6.md',
+    'f ./changelog/v1.6.md.bak',
+    'f ./data',
+    'd ./DATA-CHANGELOG.md',
+    'f ./other/data/points.csv',
+  ])('rejects %s', (entry) => {
+    expect(allowed(entry)).toBe(false);
+  });
+});

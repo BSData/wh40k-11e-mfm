@@ -554,7 +554,10 @@ captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after an
    It first checks what `scrape` handed over, since that job ran every dependency: the
    branch is an update branch (`mfm/v…`), the base is `main` or another one, the base
    commit is on the base branch, and the staged files are regular files named
-   `data/*.yaml`, `changelog/v*.md` and `DATA-CHANGELOG.md`, and nothing else. Then it
+   `data/*.yaml`, `data/points.csv`, `changelog/v*.md` and `DATA-CHANGELOG.md`, and
+   nothing else (`scrape` stages `data/` whole, so a file the scraper adds there must be
+   named here too; `test/workflows.test.ts` holds the check to the files in the
+   repository's `data/` and `changelog/`). Then it
    checks out the base's commit afresh, replaces its `data/`, `changelog/` and
    `DATA-CHANGELOG.md` with the staged ones, and, if anything changed, opens (or
    updates) the PR on the planned branch and base. Its title and body are the two

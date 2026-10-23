@@ -135,7 +135,9 @@ describe.skipIf(!hasJq)('LATER_RELEASE_CHANGES, the latest decision', () => {
   });
 });
 
-describe.skipIf(!hasBash)('the publish script', () => {
+// Each test spawns bash and stubbed git and gh several times, which can take more than
+// vitest's default 5 s on Windows.
+describe.skipIf(!hasBash)('the publish script', { timeout: 20_000 }, () => {
   const scratch = mkdtempSync(join(tmpdir(), 'mfm-publish-'));
   afterAll(() => rmSync(scratch, { recursive: true, force: true }));
   /** A path as bash takes it, on Windows (Git Bash) too. */

@@ -265,7 +265,7 @@ jobs:
         run: |
           set -euo pipefail
           cd /tmp/update/staged
-          allowed='^(d \./(data|changelog)|f \./DATA-CHANGELOG\.md|f \./data/[a-z0-9-]+\.yaml|f \./changelog/v[0-9.]+\.md)$'
+          allowed='^(d \./(data|changelog)|f \./DATA-CHANGELOG\.md|f \./data/[a-z0-9-]+\.yaml|f \./data/points\.csv|f \./changelog/v[0-9.]+\.md)$'
           while IFS= read -r -d '' entry; do
             [[ "$entry" =~ $allowed ]] || { echo "::error::Not part of an update: ${entry#? }"; exit 1; }
           done < <(find . -mindepth 1 -printf '%y %p\0')
