@@ -39,11 +39,13 @@ export async function main(argv: readonly string[], io: Io = stdio): Promise<num
     io.out(overview());
     return 0;
   }
-  const command = name === undefined ? undefined : COMMANDS[name];
-  if (!command) {
+  const entry = name === undefined ? undefined : COMMANDS[name];
+  if (!entry) {
     io.err(`${name === undefined ? '' : `Unknown command: ${name}\n\n`}${overview()}`);
     return 2;
   }
+  // Only now is the command's module imported, and with it only what it uses.
+  const command = await entry.load();
   try {
     const { values, positionals } = parseArgs({
       args: [...args],

@@ -4,9 +4,8 @@ import type { ParseArgsOptionsConfig } from 'node:util';
  * What a subcommand of `mfm` (`src/bin/mfm.ts`) is: its options, its `--help`, and a
  * thin `run` over the modules that do the work. What a command prints on stdout is its
  * result; progress and notes go to stderr. (`scrape` and `refresh-fixtures` log their
- * progress to stdout, as they always have: nothing reads their output.) The commands themselves are in
- * `report-commands.ts`, `workflow-commands.ts` and `data-commands.ts`, listed in
- * `commands.ts`.
+ * progress to stdout, as they always have: nothing reads their output.) Each command is
+ * a module of its own, `commands/<name>.ts`, which `commands.ts` lists and loads lazily.
  */
 
 export interface Io {
@@ -17,8 +16,6 @@ export interface Io {
 export type Values = Record<string, string | boolean | (string | boolean)[] | undefined>;
 
 export interface Command {
-  /** One line, for `mfm --help`. */
-  summary: string;
   /** The whole `--help` text. */
   help: string;
   options: ParseArgsOptionsConfig;

@@ -26,3 +26,12 @@ export function loadFactionDir(dir: string): Faction[] {
     .filter((f) => f.endsWith('.yaml') && f !== 'meta.yaml')
     .map((f) => factionFromYaml(readFileSync(join(dir, f), 'utf8')));
 }
+
+/** Two snapshots and their `meta.yaml`, as every report compares them. */
+export function loadSnapshots(beforeDir: string, afterDir: string) {
+  return {
+    before: loadFactionDir(beforeDir),
+    after: loadFactionDir(afterDir),
+    meta: { before: loadMeta(beforeDir), after: loadMeta(afterDir) },
+  };
+}

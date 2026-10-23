@@ -29,7 +29,7 @@
 
 export { collectChanges, type FactionChanges, type Snapshot } from './diff/collect.js';
 export { failuresReport } from './diff/failures.js';
-export { loadFactionDir, loadMeta, loadVersion } from './diff/load.js';
+export { loadFactionDir, loadMeta, loadSnapshots, loadVersion } from './diff/load.js';
 export { BODY_LIMIT, changelog, changelogEntry } from './diff/markdown.js';
 export {
   changelogFile,

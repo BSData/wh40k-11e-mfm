@@ -41,7 +41,8 @@ describe('mfm --help', () => {
     expect(code).toBe(0);
     expect(stdout.startsWith(`usage: mfm ${name}`)).toBe(true);
     // Every option the command takes is in its help.
-    for (const option of Object.keys(COMMANDS[name]?.options ?? {}))
+    const command = await COMMANDS[name]?.load();
+    for (const option of Object.keys(command?.options ?? {}))
       expect(stdout).toContain(`--${option}`);
   });
 });
