@@ -1,0 +1,116 @@
+name: Release
+
+# A release of the dataset for every change to data/ on main: tagged
+# mfm-v<version>+<date>, with the newest entry of changelog/v<version>.md as its notes,
+# and all.json, points.csv, the JSON Schemas and data.zip attached. See "Releases" in
+# specs/data-model.md.
+
+on:
+  push:
+    branches: [main]
+    paths: ['data/**']
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Build the release and print it, but publish nothing
+        type: boolean
+        default: false
+
+permissions: {}
+
+# One release at a time, in push order. A dry run has a group of its own, so it never
+# holds up, or is held up by, a real one.
+concurrency:
+  group: ${{ inputs.dry-run && 'release-dry-run' || 'release' }}
+  cancel-in-progress: false
+
+jobs:
+  # Everything that runs the project's code, with a read-only token: the checks, the
+  # assets, the notes, and whether the tag is released already (src/bin/commands/release.ts).
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # check out the code, and look the tag up among the releases
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      title: ${{ steps.release.outputs.title }}
+      publish: ${{ steps.release.outputs.publish }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # No dependency cache: what this job installs goes into a release.
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          runtime: node
+          node-version-file: .node-version
+          require-lockfile: true
+
+      - name: Build the release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT: ${{ github.sha }}
+        run: node_modules/.bin/tsx src/bin/mfm.ts release --assets "$RUNNER_TEMP/release/assets" --notes-file "$RUNNER_TEMP/release/notes.md" --commit "$COMMIT" --output "$GITHUB_OUTPUT"
+
+      - name: Summary
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+          TITLE: ${{ steps.release.outputs.title }}
+          PUBLISH: ${{ steps.release.outputs.publish }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          if [ "$PUBLISH" != true ]; then
+            what="Nothing to publish: $TAG is released already, at this commit."
+          elif [ "$DRY_RUN" = true ] || [ "$GITHUB_REF" != refs/heads/main ]; then
+            what="A real run on main would publish $TAG. This one publishes nothing."
+          else
+            what="Publishing $TAG."
+          fi
+          {
+            echo "## $TITLE"
+            echo
+            echo "$what"
+            echo
+            echo "Assets:"
+            echo
+            for asset in "$RUNNER_TEMP"/release/assets/*; do
+              echo "- \`$(basename "$asset")\`, $(stat -c %s "$asset") bytes"
+            done
+            echo
+            echo "### Notes"
+            echo
+            cat "$RUNNER_TEMP/release/notes.md"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: ${{ runner.temp }}/release
+          if-no-files-found: error
+          retention-days: 7
+
+  # The only job that can write, and it runs no code from the repository or its
+  # dependencies: the artifact, and one gh command. gh uploads the assets to a draft and
+  # publishes it once they are all there, which immutable releases need.
+  publish:
+    needs: build
+    # A real run on main only: a dry run, or a run on another branch, publishes nothing.
+    if: ${{ needs.build.outputs.publish == 'true' && github.ref == 'refs/heads/main' && !inputs.dry-run }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the tag and the release
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: ${{ runner.temp }}/release
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.build.outputs.tag }}
+          TITLE: ${{ needs.build.outputs.title }}
+          COMMIT: ${{ github.sha }}
+        run: gh release create "$TAG" --target "$COMMIT" --title "$TITLE" --notes-file "$RUNNER_TEMP/release/notes.md" --latest "$RUNNER_TEMP"/release/assets/*

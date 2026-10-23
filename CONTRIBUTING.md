@@ -79,7 +79,8 @@ Handling for markup that no fixture shows gets reverted:
 wrong value is either a parser bug (fix the parser, with a fixture) or what the MFM says.
 The one hand-written exception is a dated note in the version's `changelog/v<version>.md`
 when a change alters the shape of the files, like the 2026-09-02 note in
-[`changelog/v1.4.md`](changelog/v1.4.md).
+[`changelog/v1.4.md`](changelog/v1.4.md). Any PR that regenerates `data/` adds such a
+note, since the release it triggers is named after the newest entry.
 
 If your change alters the output, agree in the issue on how the data gets regenerated
 before you open the PR. A re-scrape stamps today's date as the `firstSeen` of every
@@ -101,6 +102,9 @@ PR that regenerates the data with the scraper or adds a schema-change note.
    stacked on the open one (based on its branch). They merge bottom-up.
 5. A maintainer checks the changes against the site and merges, which deletes the branch.
    Until then, `main` is behind the site.
+6. The merge changes `data/` on `main`, so the `Release` workflow publishes a release
+   named after the newest changelog entry (`mfm-v<version>+<date>`), with the files for
+   consumers attached.
 
 The details, and the reasons for them, are in
 [`specs/change-tracking.md`](specs/change-tracking.md).

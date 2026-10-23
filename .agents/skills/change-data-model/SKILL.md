@@ -15,8 +15,10 @@ into `objectives`. Its commit and the `Schema change` entry in
 
 ## 0. Decide whether it is breaking
 Removing, renaming or retyping a field breaks consumers; adding an optional field doesn't.
-If `specs/data-model.md` has a breaking-change policy (a `schemaVersion`), follow it. Prefer
-one shape for consumers to handle: #41 made `objectives` a list even when there is one.
+Follow the policy in "Schema version" in `specs/data-model.md`: a breaking change bumps
+`SCHEMA_VERSION` in `src/model.ts` by one, in the same PR, and the PR body says "Breaking"
+and what a reader has to change. Prefer one shape for consumers to handle: #41 made
+`objectives` a list even when there is one.
 
 ## 1. Spec: `specs/data-model.md`
 Change the prose first: the field in the example YAML, its meaning, when it is present or
@@ -52,9 +54,10 @@ compares `version`, `notes` and `muster` and skips `lastUpdated` and `factions` 
 they are derived from the faction files; a new field is either compared there or derived
 the same way, and the spec says which.
 
-## 6. JSON Schema
-If the repo has generated JSON Schemas (`schema/*.schema.json`), regenerate them from the
-zod model; `pnpm verify` fails when they are stale.
+## 6. JSON Schema and the CSV
+Regenerate `schema/*.schema.json` from the zod model with `pnpm mfm schema`, and read the
+diff; `pnpm verify` fails while they are stale. A unit cost field may belong in
+`data/points.csv` too (`POINTS_COLUMNS` in `src/csv.ts`, and its spec section).
 
 ## 7. Tests
 - `test/parse.test.ts`: the field parsed from a fixture, with the snapshot diff reviewed
@@ -83,7 +86,11 @@ so regenerate it rather than editing it (`pnpm check-data` fails while it is sta
 ```bash
 pnpm exec tsx -e "import {readdirSync as r,readFileSync as f,writeFileSync as w} from 'node:fs';import {changelogIndex} from './src/changelog.ts';w('DATA-CHANGELOG.md',changelogIndex(r('changelog').map(n=>({name:n,text:f('changelog/'+n,'utf8')}))))"
 ```
-Say "Breaking" in the PR description when it is.
+The entry is not optional when `data/` changes: once the PR merges, the release workflow
+names the release after the newest entry and uses it as the notes, and it fails rather
+than reuse a tag (see "Releases" in `specs/data-model.md`). So date it a day no release of
+this version is tagged with yet, usually the day it merges. Say "Breaking" in the PR
+description when it is, and give the `schemaVersion` change in the entry.
 
 ## Done
 `pnpm verify` is green, the spec says what the code does, and you have read the snapshot

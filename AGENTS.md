@@ -54,6 +54,9 @@ the AI angle is purely this maintenance harness.
   Chrome) for tests and troubleshooting only: `mfm scrape --browser` compares the HTTP
   result with Chrome's render, `mfm render` prints a page as Chrome renders it.
 - `src/emit.ts` — deterministic YAML in/out.
+- `src/csv.ts`, `src/schema.ts`, `src/release.ts` — the outputs for consumers (pure):
+  `data/points.csv`, the JSON Schemas in `schema/` (`mfm schema`), and the release of
+  `data/` (`mfm release`, run by `.github/workflows/release.yml`).
 - `src/diff.ts` — changelog from two snapshots (pure; modules under `src/diff/`): the PR
   body, kept under GitHub's 65,536-character limit, and the entry for the version's file.
 - `src/changelog.ts` — places an entry in `changelog/v<version>.md` and regenerates the
@@ -73,6 +76,7 @@ the AI angle is purely this maintenance harness.
   from the spec section it explains.
 - `test/` — Vitest + saved HTML `fixtures/`. Tests run offline.
 - `data/` — committed output: the dataset and its history. Do not hand-edit.
+- `schema/` — committed output: JSON Schemas generated from `src/model.ts`.
 - `changelog/` + `DATA-CHANGELOG.md` — committed output: one readable changelog file per
   MFM version, and their generated index. Do not hand-edit, except for a schema-change
   note (the `change-data-model` skill).
@@ -86,7 +90,8 @@ the AI angle is purely this maintenance harness.
 pnpm install
 scripts/setup                  # containers + cloud agents: the same, from the frozen lockfile
 pnpm verify                    # the definition of done: check + typecheck + test + check-data
-pnpm check-data                # data/ valid and canonical, DATA-CHANGELOG.md up to date
+pnpm check-data                # data/ valid and canonical; points.csv, schema/, DATA-CHANGELOG.md up to date
+pnpm mfm schema                # regenerate schema/ after changing src/model.ts
 pnpm test                      # offline parser/emit/diff tests (start here)
 pnpm scrape --faction necrons  # live run for one faction (with Legends) → data/
 pnpm scrape                    # full run, all factions → data/ + meta.yaml (HTTP only)
