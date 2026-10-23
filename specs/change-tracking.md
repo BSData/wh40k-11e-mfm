@@ -453,7 +453,16 @@ part holds only what it needs. See
    its draft says so. The run's full record stays in the job. Since `pnpm verify` runs
    tests the model wrote, the rest of this job is within its reach; see *No dependency
    cache*.
-4. **The PR** (job `pr`) holds the App's key and no model credential. Like `publish`, it
+4. **The caches** (job `caches`, `actions: write`) runs after the agent, however it ended,
+   and deletes every Actions cache entry created since the gate finished (see *No
+   dependency cache*). `src/ops/cache-sweep.ts`, which imports only Node's own modules and
+   runs under plain Node, lists the entries newest first by creation, page by page until
+   one older than that, deletes them, and goes round again until a pass finds none, so a
+   flood of later entries can't push one off the list. An entry it can't delete fails the
+   job.
+5. **The PR** (job `pr`) runs only once `caches` has succeeded: the draft PR starts a
+   CodeQL run, which restores from main's cache. It holds the App's key and no model
+   credential. Like `publish`, it
    runs pinned actions and `gh`, plus one repository file: `src/ops/agent-patch.ts`, under
    plain Node, which imports only Node's own modules (a test checks), so no dependency
    code meets the key. The script rejects the whole patch unless:
@@ -473,9 +482,6 @@ part holds only what it needs. See
    files, the agent's note in a code block (where nothing in it renders), the run's turns
    and cost, and what is left to do, and stays under GitHub's 65,536-character limit
    (the note is cut to fit). An empty patch opens nothing.
-5. **The caches** (job `caches`, `actions: write`, `gh` only) runs after the agent, however
-   it ended, and deletes every Actions cache entry written since the gate finished (see
-   *No dependency cache*).
 6. **A maintainer** reviews it, commits the refreshed page that shows the drift as the
    fixture, and merges. The next successful scrape closes the failure issue, as always.
 
@@ -553,11 +559,21 @@ GitHub's Actions service and its storage. So:
   touched. Each job installs from the registry, which costs it a few seconds.
 - `setup-node` runs with `package-manager-cache: false`, and no workflow uses
   `actions/cache`.
-- The drift fixer's `caches` job deletes every cache entry written while its agent ran,
-  since the agent's code can still write one, and CodeQL's default setup restores its
-  own on `main` (`codeql-overlay-base-database-*`).
+- The drift fixer's `caches` job deletes every cache entry created since its gate, since
+  the agent's code can still write one, before its draft PR opens.
 
-`test/workflows.test.ts` holds every workflow to the first two. See
+`test/workflows.test.ts` holds every workflow to the first two; it can't see a cache a
+third-party action keeps inside itself, so a pinned action's own caching is checked when
+it is pinned (claude-code-action v1.0.251 runs `setup-bun` with `no-cache: true`).
+
+What is left is CodeQL's default setup, which the workflows don't configure: its PR runs
+restore `codeql-overlay-base-database-*` from main's cache and unpack it with `tar -P`,
+at the absolute paths it names. A poisoned entry would run code in a CodeQL job, which
+holds `security-events: write` and reads the repository: a low-privilege execution risk,
+not a way to the keys. It is open from the agent's first `pnpm verify` to the end of the
+sweep, up to about half an hour, and longer if the agent's code sent the runtime token
+out, since that token can stay valid for about six hours. Turning off CodeQL's overlay
+analysis closes it. See
 [0028](../docs/decisions/0028-a-failed-scrape-drafts-its-fix.md).
 
 A human reviews and merges the PR — giving reviewable, auditable history of every

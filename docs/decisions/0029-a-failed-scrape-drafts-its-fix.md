@@ -74,12 +74,17 @@ model's key in the job's memory. Four things follow:
   exists, and `pnpm/setup` touches no cache at all. A test holds every workflow to it.
   Each job pays for its install, a few seconds.
 - **And the agent's cache entries are deleted.** CodeQL's default setup, which the
-  workflows don't configure, restores its own entries on `main`
-  (`codeql-overlay-base-database-*`), the same kind of archive. The `caches` job deletes
-  every entry written while the agent ran, as soon as its job ends. That leaves a window
-  of seconds, between the agent's job writing one and `caches` deleting it, in which a
-  CodeQL analysis on `main` could restore it. Turning off CodeQL's overlay analysis, or
-  moving it to advanced setup without its cache, would close it; that is a setting.
+  workflows don't configure, is the one reader left: its PR runs restore
+  `codeql-overlay-base-database-*` from main's cache and unpack it with `tar -P`, at the
+  absolute paths it names. A poisoned entry would run code in a CodeQL job, which holds
+  `security-events: write` and reads the repository: a low-privilege execution risk, not
+  a way to either key. The `caches` job deletes every entry created since the gate,
+  listing by creation time until none is left, and fails if it can't; the draft PR, whose
+  own CodeQL run would restore one, opens only after it succeeds. The risk is open from
+  the agent's first `pnpm verify` until the sweep ends, up to about half an hour (the
+  agent's job alone can last 28 minutes), and for as long as the runtime token stays
+  valid, about six hours, if the agent's code sent it out. Turning off CodeQL's overlay
+  analysis closes it; that is a setting, and the maintainer's call.
 - **The key can leak.** Code the agent runs can send the key to an account of its own on
   GitHub or in GitHub's storage, into the run's public artifacts, or through
   `api.anthropic.com` itself, with a key of its own. The patch check rejects a patch or a

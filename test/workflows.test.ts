@@ -8,6 +8,12 @@ import { parse } from 'yaml';
  * model wrote in a job on main, which can write cache entries main's runs would restore,
  * so no workflow restores any. pnpm/setup restores its lockfile-verification log even
  * with `cache: false`, unless the lockfile it hashes for the key matches no file.
+ *
+ * This reads the workflows' own steps only: it can't see a cache a third-party action
+ * keeps inside itself. Those were checked at the version pinned, and are checked again on
+ * a bump: pnpm/setup v3.1.1 (src/cache-restore/run.ts: no lockfile hash, no cache), and
+ * anthropics/claude-code-action v1.0.251, whose only cache is setup-bun's, which it runs
+ * with `no-cache: true`.
  */
 
 const root = (path: string) => fileURLToPath(new URL(`../${path}`, import.meta.url));

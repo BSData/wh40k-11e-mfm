@@ -72,8 +72,9 @@ the AI angle is purely this maintenance harness.
   (`diff`, `announce`, `plan`, `changelog`), `check-data`, `refresh-fixtures`, and the
   workflow's GitHub chores, which live in `src/ops/` (tested against stub servers).
   `pnpm mfm --help` lists them.
-- `src/ops/agent-patch.ts` — the drift fixer's patch check (`drift-fix.yml`). It runs in
-  the job that holds the App's key, so it imports only Node's own modules.
+- `src/ops/agent-patch.ts` and `src/ops/cache-sweep.ts` — the drift fixer's patch check
+  and cache sweep (`drift-fix.yml`). They run in jobs that hold the App's key or
+  `actions: write`, so they import only Node's own modules.
 - `specs/` — **source-of-truth prose**. Change the spec first, then the code.
 - `docs/decisions/` — why the specs say what they do: one record per decision, linked
   from the spec section it explains.
