@@ -10,8 +10,8 @@ import { parse } from 'yaml';
  * How `.github/workflows/drift-fix.yml` ends (docs/decisions/0031): the agent's step may
  * fail, so a run cut short at its limits still hands on its patch, and the job's last step
  * fails the run for any other end. That step's script runs here as it is, with bash and
- * jq, which GitHub's runners have; without them, it skips. And how Claude Code gets there
- * (0032): the action installs it, through the hosts the egress block lets through.
+ * jq, which GitHub's runners have; without them, it skips. And what the job installs
+ * through its egress block: Claude Code, by the action (0032), and Node, by pnpm.
  */
 
 const hasBash = spawnSync('bash', ['-c', 'command -v jq'], { encoding: 'utf8' }).status === 0;
@@ -79,7 +79,8 @@ describe('the drift fixer workflow', () => {
     expect(allowed).toEqual(expect.arrayContaining(['claude.ai:443', 'downloads.claude.ai:443']));
   });
 
-  // Refused, pnpm's install of Node retries for over a minute before going on without it.
+  // Refused the mirror, pnpm 11.20 retries for over a minute before going on without it,
+  // and later releases fail the install (pnpm/pnpm#14854).
   it("lets pnpm's install of Node read its checksums", () => {
     expect(allowed).toEqual(
       expect.arrayContaining(['nodejs.org:443', 'unofficial-builds.nodejs.org:443']),
