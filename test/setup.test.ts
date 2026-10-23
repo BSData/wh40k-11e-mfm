@@ -26,6 +26,11 @@ describe('the test environment (test/setup.ts)', () => {
     expect(env('GITHUB_TOKEN')).toBeUndefined();
   });
 
+  it('sets no Anthropic key, so no test can make a billed request', () => {
+    expect(env('ANTHROPIC_API_KEY')).toBeUndefined();
+    expect(env('ANTHROPIC_AUTH_TOKEN')).toBeUndefined();
+  });
+
   it('drops the variables that would point git at another repository', () => {
     for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE'])
       expect(env(name)).toBeUndefined();
