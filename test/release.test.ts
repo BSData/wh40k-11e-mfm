@@ -265,7 +265,9 @@ describe('historicalVerdict', () => {
   });
 });
 
-describe('mfm release', () => {
+// Each test builds whole releases, some from a throwaway repository's history, and twice:
+// more than vitest's default 5 s on a busy runner.
+describe('mfm release', { timeout: 60_000 }, () => {
   /** Run `mfm` in-process, collecting what it prints. */
   async function mfm(...argv: string[]) {
     let stdout = '';
