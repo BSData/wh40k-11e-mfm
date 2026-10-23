@@ -6,7 +6,8 @@ export const command: Command = {
 
 Re-downloads the HTML fixtures the parser tests run against into test/fixtures/
 (\`pnpm refresh-fixtures\` runs this); then review the diff and update the snapshots
-with \`pnpm test -u\`. Needs the network, and a browser for the two rendered fixtures.
+with \`pnpm test -u\`. Needs the network, and the installed Google Chrome for the two
+browser renders (necrons-legends.html, necrons-panels.html); nothing downloads one.
 
   --only <name>  just this fixture (repeatable), leaving the rest as they are. An
                  unknown name stops the run before anything is downloaded.

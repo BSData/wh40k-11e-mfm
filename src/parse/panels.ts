@@ -1,18 +1,28 @@
 import { type CheerioAPI, load } from 'cheerio';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
+import { collapsibleContent, readFlight, renderHtml } from './rsc.js';
 import { clean } from './text.js';
 
-/** The rules panels ("Welcome…" notes and "Muster Armies"), as Markdown for meta.yaml. */
+/**
+ * The rules panels ("Welcome…" notes and "Muster Armies"), as Markdown for meta.yaml:
+ * decoded from a plain page's RSC payload (`rulesPanels`, what the scrape uses), or read
+ * from a page a browser has rendered with the panels open (`extractNotesMarkdown` /
+ * `extractMusterMarkdown`, what the cross-check and the fixtures use). Both convert the
+ * panel the same way.
+ */
 
 /**
  * The page's collapsible rules panels, keyed by where they land in `meta.yaml`, each
- * named by (a prefix of) its button label. Their bodies are client-only — rendered
- * by the browser once the button is clicked, never in the HTTP HTML.
+ * named by (a prefix of) its button label. Their bodies aren't in the page's HTML until
+ * the button is clicked; a plain page carries them only in its RSC payload.
  */
 export const RULES_PANELS = {
   notes: 'Welcome to the Munitorum Field Manual',
   muster: 'Muster Armies',
 } as const;
+
+/** The rules panels' Markdown, keyed as in `meta.yaml`. */
+export type RulesPanels = Record<keyof typeof RULES_PANELS, string>;
 
 /**
  * The open panel of the rules collapsible whose button label starts with `label`:
@@ -43,18 +53,12 @@ const panelMarkdown = new NodeHtmlMarkdown(
 );
 
 /**
- * Convert one rendered rules panel to Markdown, keeping its structure: `<b>` →
- * `**bold**`, all-caps standalone labels → `## headings`, lists → bullets, tables →
- * GFM tables. `pageHtml` is a fully-rendered page's HTML (from the browser, with
- * the panel open); returns `''` if the panel isn't open. The one project-specific
- * step is spotting the headings: the site marks them up as plain `<b>` on a line
- * of their own, so they are promoted to `<h2>` before conversion.
+ * Convert one rules panel to Markdown, keeping its structure: `<b>` → `**bold**`,
+ * all-caps standalone labels → `## headings`, lists → bullets, tables → GFM tables. The
+ * one project-specific step is spotting the headings: the site marks them up as plain
+ * `<b>` on a line of their own, so they are promoted to `<h2>` before conversion.
  */
-function extractPanelMarkdown(pageHtml: string, label: string): string {
-  const $ = load(pageHtml);
-  const panel = findPanel($, label);
-  if (!panel) return '';
-
+function panelToMarkdown($: CheerioAPI, panel: ReturnType<CheerioAPI>): string {
   panel.find('b, strong').each((_i, el) => {
     const b = $(el);
     if (!PANEL_HEADING_RE.test(clean(b.text()))) return;
@@ -76,6 +80,16 @@ function extractPanelMarkdown(pageHtml: string, label: string): string {
     .trim();
 }
 
+/**
+ * The open panel on a rendered page (from the browser, with the panel open) as Markdown;
+ * `''` if the panel isn't open.
+ */
+function extractPanelMarkdown(pageHtml: string, label: string): string {
+  const $ = load(pageHtml);
+  const panel = findPanel($, label);
+  return panel ? panelToMarkdown($, panel) : '';
+}
+
 /** The "Welcome…" help text as Markdown (→ `meta.notes`). See `extractPanelMarkdown`. */
 export const extractNotesMarkdown = (pageHtml: string): string =>
   extractPanelMarkdown(pageHtml, RULES_PANELS.notes);
@@ -83,3 +97,21 @@ export const extractNotesMarkdown = (pageHtml: string): string =>
 /** The "Muster Armies" army-building rules as Markdown (→ `meta.muster`). */
 export const extractMusterMarkdown = (pageHtml: string): string =>
   extractPanelMarkdown(pageHtml, RULES_PANELS.muster);
+
+/**
+ * Both rules panels as Markdown, decoded from a plain page's RSC payload: each panel's
+ * collapsible is found by its trigger label (`collapsibleContent`), its content rendered
+ * to HTML (`renderHtml`) and converted as an open panel is. Throws, naming the panel, if
+ * either isn't found exactly once, holds something the decoder can't render, or has no text.
+ */
+export function rulesPanels(pageHtml: string): RulesPanels {
+  const flight = readFlight(pageHtml);
+  const markdown = (label: string): string => {
+    const html = renderHtml(flight, collapsibleContent(flight, label), `rules panel "${label}"`);
+    const $ = load(`<div id="rsc-panel">${html}</div>`);
+    const md = panelToMarkdown($, $('#rsc-panel'));
+    if (!md) throw new Error(`rules panel "${label}" has no text`);
+    return md;
+  };
+  return { notes: markdown(RULES_PANELS.notes), muster: markdown(RULES_PANELS.muster) };
+}

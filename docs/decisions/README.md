@@ -24,7 +24,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0014](0014-unit-identity.md) | A unit is its group, name and position | change tracking |
 | [0015](0015-diff-the-rules-panels.md) | Diff the rules panels | change tracking |
 | [0016](0016-one-english-collation.md) | One English collation | change tracking |
-| [0017](0017-http-first-a-browser-only-where-needed.md) | Plain HTTP first, a browser only where the page needs one | scraping |
+| [0017](0017-http-first-a-browser-only-where-needed.md) | Plain HTTP first, a browser only where the page needs one (superseded by 0026) | scraping |
 | [0018](0018-the-change-layer-is-not-data.md) | The "changed since the last MFM" layer is not data | scraping |
 | [0019](0019-account-for-every-visible-string.md) | Account for every visible string on the page | scraping, data model |
 | [0020](0020-fail-loud-and-located.md) | Fail loud and located, one faction at a time | scraping |
@@ -33,6 +33,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0023](0023-a-dry-run-publishes-nothing.md) | A dry run publishes nothing | change tracking |
 | [0024](0024-a-live-smoke-test-reports-and-gates-only-auto-merge.md) | A live smoke test reports, and gates only Dependabot's merges | change tracking |
 | [0025](0025-dependabot-minor-and-patch-updates-merge-themselves.md) | Dependabot's minor and patch updates merge themselves | change tracking |
+| [0026](0026-http-only-a-browser-for-tests-and-troubleshooting.md) | Scrape over HTTP only; a browser for tests and troubleshooting | scraping |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and

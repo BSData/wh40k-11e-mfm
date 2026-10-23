@@ -4,93 +4,170 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { main } from '../src/bin/mfm.js';
-import {
-  createScrapeContext,
-  launchBrowser,
-  renderRulesPanels,
-  renderWithLegends,
-} from '../src/browser.js';
+import { openCrossCheck } from '../src/cross-check.js';
 import { factionFromYaml, factionToYaml, mapNames } from '../src/emit.js';
-import { BASE_URL, fetchText } from '../src/fetch.js';
+import { BASE_URL, factionUrl, fetchText, LEGENDS_COOKIE } from '../src/fetch.js';
 
-// The pipeline end to end, offline, as `mfm scrape` runs it: the network and the browser
-// are stubbed with saved fixtures, so what runs is the real parse → validate → write path.
+// The pipeline end to end, offline, as `mfm scrape` runs it: the network is stubbed with
+// saved fixtures, so what runs is the real parse → validate → write path. The browser
+// cross-check is stubbed too; test/cross-check.test.ts runs it on fixtures.
 vi.mock('../src/fetch.js', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../src/fetch.js')>()),
   fetchText: vi.fn(),
 }));
-vi.mock('../src/browser.js', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../src/browser.js')>()),
-  launchBrowser: vi.fn(async () => ({ close: async () => {} })),
-  createScrapeContext: vi.fn(async () => ({ close: async () => {} })),
-  renderWithLegends: vi.fn(),
-  renderRulesPanels: vi.fn(),
-}));
+vi.mock('../src/cross-check.js', () => ({ openCrossCheck: vi.fn() }));
 
 const fixture = (name: string) =>
   readFileSync(fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url)), 'utf8');
 
 /** A one-faction index, so a full run (no `--faction`) scrapes just Necrons. */
-const INDEX = '<html><body><p>v1.1</p><a href="/en/necrons">Necrons</a></body></html>';
+const INDEX = '<html><body><p>v1.6</p><a href="/en/necrons">Necrons</a></body></html>';
 const OLD_META = 'version: "1.0"\nlastUpdated: 2026-01-01\nnotes: kept\nfactions:\n  - necrons\n';
 
-describe('mfm scrape — the rules panels on a full run', () => {
-  let out: string;
-  const meta = () => readFileSync(join(out, 'meta.yaml'), 'utf8');
+/** The Legends-cookie page with its "Muster Armies" collapsible relabelled in the payload. */
+const withoutMuster = () => {
+  const label = (text: string) => `\\"children\\":\\"${text}\\"`;
+  return fixture('necrons-legends-cookie.html').replaceAll(
+    label('Muster Armies'),
+    label('Army Rules'),
+  );
+};
 
-  beforeEach(() => {
-    out = mkdtempSync(join(tmpdir(), 'mfm-cli-'));
-    writeFileSync(join(out, 'meta.yaml'), OLD_META);
-    vi.mocked(fetchText).mockImplementation(async (url) =>
-      url === BASE_URL ? INDEX : fixture('necrons.html'),
-    );
-    vi.mocked(renderWithLegends).mockResolvedValue(fixture('necrons-legends.html'));
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-  });
-  afterEach(() => {
-    rmSync(out, { recursive: true, force: true });
-    vi.restoreAllMocks();
+let out: string;
+const meta = () => readFileSync(join(out, 'meta.yaml'), 'utf8');
+const report = () => readFileSync(join(out, 'failures.md'), 'utf8');
+const scrape = (...args: string[]) =>
+  main(['scrape', '--out', out, '--report', join(out, 'failures.md'), ...args]);
+
+/** Serve the index, and `page` for every faction page. */
+const serve = (page: () => string | Promise<string>) =>
+  vi.mocked(fetchText).mockImplementation(async (url) => (url === BASE_URL ? INDEX : page()));
+
+beforeEach(() => {
+  out = mkdtempSync(join(tmpdir(), 'mfm-cli-'));
+  writeFileSync(join(out, 'meta.yaml'), OLD_META);
+  vi.mocked(fetchText).mockReset();
+  vi.mocked(openCrossCheck).mockReset();
+  vi.spyOn(console, 'log').mockImplementation(() => {});
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterEach(() => {
+  rmSync(out, { recursive: true, force: true });
+  vi.restoreAllMocks();
+});
+
+describe('mfm scrape — HTTP only', () => {
+  it('fetches each faction page once, with the Legends cookie', async () => {
+    serve(() => fixture('necrons-legends-cookie.html'));
+    expect(await scrape()).toBe(0);
+    expect(vi.mocked(fetchText).mock.calls).toEqual([
+      [BASE_URL],
+      [factionUrl('necrons'), { cookie: LEGENDS_COOKIE }],
+    ]);
+    expect(openCrossCheck).not.toHaveBeenCalled();
   });
 
-  it('writes notes and muster to meta.yaml when the panels render', async () => {
-    vi.mocked(renderRulesPanels).mockResolvedValue(fixture('necrons-panels.html'));
-    expect(await main(['scrape', '--out', out])).toBe(0);
+  it('writes the Legends, marked, and the rules panels from the same page', async () => {
+    serve(() => fixture('necrons-legends-cookie.html'));
+    expect(await scrape()).toBe(0);
+    const necrons = readFileSync(join(out, 'necrons.yaml'), 'utf8');
+    expect(necrons.match(/legends: true/g)).toHaveLength(12);
     expect(meta()).toContain('## SELECT BATTLE SIZE');
     expect(meta()).toContain('## UNITS');
   });
 
-  it('fails the run and leaves meta.yaml untouched when the panels fail to render', async () => {
-    vi.mocked(renderRulesPanels).mockRejectedValue(new Error('Timeout 15000ms exceeded'));
-    const report = join(out, 'failures.md');
-    expect(await main(['scrape', '--out', out, '--report', report])).toBe(1);
+  it('fails a faction whose page comes back without its Legends', async () => {
+    serve(() => fixture('necrons-panels-rsc.html')); // the plain page: the cookie ignored
+    expect(await scrape()).toBe(1);
+    expect(report()).toMatch(
+      /necrons[\s\S]*the page has the Legends toggle but no LEGENDS section/,
+    );
+    expect(existsSync(join(out, 'necrons.yaml'))).toBe(false);
+  });
+});
+
+describe('mfm scrape — the rules panels on a full run', () => {
+  it('fails the run and leaves meta.yaml untouched when a panel is not in the payload', async () => {
+    serve(withoutMuster);
+    expect(await scrape()).toBe(1);
     expect(meta()).toBe(OLD_META);
-    expect(readFileSync(report, 'utf8')).toMatch(/rules panels[\s\S]*Timeout 15000ms exceeded/);
+    expect(report()).toMatch(/rules panels[\s\S]*rules panel "Muster Armies": no collapsible/);
     // The factions themselves still parse and are written.
     expect(existsSync(join(out, 'necrons.yaml'))).toBe(true);
   });
 
-  it('fails the run and leaves meta.yaml untouched when a panel renders empty', async () => {
-    // The HTTP page has both panels closed, so neither panel's text can be extracted.
-    vi.mocked(renderRulesPanels).mockResolvedValue(fixture('necrons.html'));
-    const report = join(out, 'failures.md');
-    expect(await main(['scrape', '--out', out, '--report', report])).toBe(1);
+  it('fails the panels too when the page they are read from does not load', async () => {
+    serve(() => Promise.reject(new Error('HTTP 503 for necrons')));
+    expect(await scrape()).toBe(1);
     expect(meta()).toBe(OLD_META);
-    expect(readFileSync(report, 'utf8')).toMatch(/rules panels[\s\S]*Welcome to the Munitorum/);
+    expect(report()).toMatch(/rules panels[\s\S]*the page they are read from \("necrons"\)/);
+  });
+
+  it('reads no panels and writes no meta.yaml on a --faction run', async () => {
+    serve(withoutMuster);
+    expect(await scrape('--faction', 'necrons')).toBe(0);
+    expect(meta()).toBe(OLD_META);
+  });
+});
+
+describe('mfm scrape --browser — the cross-check', () => {
+  const stub = () => {
+    const check = {
+      faction: vi.fn(async () => {}),
+      panels: vi.fn(async () => {}),
+      close: vi.fn(async () => {}),
+    };
+    vi.mocked(openCrossCheck).mockResolvedValue(check);
+    return check;
+  };
+
+  it('checks every faction and the panels against the browser, then closes it', async () => {
+    const check = stub();
+    serve(() => fixture('necrons-legends-cookie.html'));
+    expect(await scrape('--browser')).toBe(0);
+    expect(check.faction).toHaveBeenCalledWith(
+      factionUrl('necrons'),
+      expect.objectContaining({ slug: 'necrons' }),
+      new Set(['necrons']),
+    );
+    expect(check.panels).toHaveBeenCalledWith(
+      factionUrl('necrons'),
+      expect.objectContaining({ muster: expect.stringContaining('## SELECT BATTLE SIZE') }),
+    );
+    expect(check.close).toHaveBeenCalledOnce();
+  });
+
+  it('fails, and writes nothing for, what the browser shows differently', async () => {
+    const check = stub();
+    check.faction.mockRejectedValue(new Error('"necrons": the browser render differs'));
+    check.panels.mockRejectedValue(new Error('rules panel "Muster Armies" in the browser differs'));
+    serve(() => fixture('necrons-legends-cookie.html'));
+    expect(await scrape('--browser')).toBe(1);
+    expect(existsSync(join(out, 'necrons.yaml'))).toBe(false);
+    expect(meta()).toBe(OLD_META);
+    expect(report()).toMatch(/the browser render differs/);
+    expect(report()).toMatch(/rules panels[\s\S]*in the browser differs/);
+    expect(check.close).toHaveBeenCalledOnce();
+  });
+
+  it('stops before any faction page when Chrome does not start', async () => {
+    vi.mocked(openCrossCheck).mockRejectedValue(new Error('Google Chrome did not start.'));
+    serve(() => fixture('necrons-legends-cookie.html'));
+    await expect(scrape('--browser')).rejects.toThrow('Google Chrome did not start.');
+    expect(vi.mocked(fetchText).mock.calls).toEqual([[BASE_URL]]);
+    expect(existsSync(join(out, 'necrons.yaml'))).toBe(false);
+    expect(meta()).toBe(OLD_META);
   });
 });
 
 describe('mfm scrape — its options', () => {
-  beforeEach(() => {
-    vi.mocked(fetchText).mockClear();
-  });
-
   it.each([
     [['--order', 'alphabetical'], /--order must be "name" or "page", got: alphabetical/],
     [['--concurrency', '0'], /--concurrency must be a whole number above 0, got: 0/],
     [['--concurrency', 'four'], /--concurrency must be a whole number above 0, got: four/],
     [['--faction'], /--faction/],
     [['--legends'], /Unknown option '--legends'/],
+    [['--no-legends'], /Unknown option '--no-legends'/],
     [['--ignore-names-case'], /Unknown option '--ignore-names-case'/],
   ])('refuses %j before fetching anything', async (args, message) => {
     let stderr = '';
@@ -106,45 +183,12 @@ describe('mfm scrape — its options', () => {
   });
 });
 
-describe('mfm scrape — a browser that fails to open a page context', () => {
-  it('is closed, so the run ends instead of hanging on it', async () => {
-    const close = vi.fn(async () => {});
-    vi.mocked(launchBrowser).mockResolvedValueOnce({ close } as never);
-    vi.mocked(createScrapeContext).mockRejectedValueOnce(new Error('context failed'));
-    vi.mocked(fetchText).mockImplementation(async (url) =>
-      url === BASE_URL ? INDEX : fixture('necrons.html'),
-    );
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    const out = mkdtempSync(join(tmpdir(), 'mfm-cli-'));
-    try {
-      await expect(main(['scrape', '--out', out])).rejects.toThrow('context failed');
-      expect(close).toHaveBeenCalledOnce();
-    } finally {
-      rmSync(out, { recursive: true, force: true });
-      vi.restoreAllMocks();
-    }
-  });
-});
-
 describe('mfm scrape --ignore-name-case, for a regeneration after a change to the Names rule', () => {
   const OLD_DATE = '2026-01-01';
-  let out: string;
-  const meta = () => readFileSync(join(out, 'meta.yaml'), 'utf8');
   const necrons = () => readFileSync(join(out, 'necrons.yaml'), 'utf8');
 
   beforeEach(() => {
-    out = mkdtempSync(join(tmpdir(), 'mfm-cli-'));
-    vi.mocked(fetchText).mockImplementation(async (url) =>
-      url === BASE_URL ? INDEX : fixture('necrons.html'),
-    );
-    vi.mocked(renderWithLegends).mockResolvedValue(fixture('necrons-legends.html'));
-    vi.mocked(renderRulesPanels).mockResolvedValue(fixture('necrons-panels.html'));
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-  });
-  afterEach(() => {
-    rmSync(out, { recursive: true, force: true });
-    vi.restoreAllMocks();
+    serve(() => fixture('necrons-legends-cookie.html'));
   });
 
   /** Leave necrons.yaml as an older scrape wrote it: dated OLD_DATE, then `edit`ed. */

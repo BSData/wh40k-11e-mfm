@@ -25,7 +25,7 @@ export const PAGE_BOILERPLATE: readonly string[] = [
   'Hide Legends', // its toggled state, on browser (Legends) renders
   'UNITS',
   'DETACHMENTS',
-  'LEGENDS', // section heading shown on browser renders with Legends toggled on
+  'LEGENDS', // section heading over the Legends, when shown (the Legends cookie, or the toggle)
 ];
 
 /**

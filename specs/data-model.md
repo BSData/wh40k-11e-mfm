@@ -173,14 +173,14 @@ Cost`).
 ```yaml
 version: "1.0"            # site version at last full scrape
 lastUpdated: 2026-06-17   # most recent firstSeen across factions (stable on no-op)
-notes: |-                 # the expandable "Welcome…" help text (browser-captured), as Markdown
+notes: |-                 # the expandable "Welcome…" help text, as Markdown
   To muster a Warhammer 40,000 army, you will need the points values for your chosen
   units and **enhancements**, and the Detachment Points (DP) for your chosen **detachments**...
 
   ## UNITS
 
   - **Starting Strength**: The number of models a unit contains can affect its points cost...
-muster: |-                # the expandable "Muster Armies" army-building rules (browser-captured), as Markdown
+muster: |-                # the expandable "Muster Armies" army-building rules, as Markdown
   The following rules tell you how to create an army list out of models and units...
 
   ## SELECT BATTLE SIZE
@@ -193,13 +193,13 @@ factions:                 # slugs successfully scraped, sorted
   - ...
 ```
 `lastUpdated` deliberately avoids a per-run timestamp so an unchanged scrape leaves
-`meta.yaml` byte-identical (no spurious PR). `notes` and `muster` are present only on
-browser runs (omitted with `--no-legends`). Both are **Markdown**: `extractNotesMarkdown` /
-`extractMusterMarkdown` in `src/parse/panels.ts` convert the rendered panel — `<b>` → `**bold**`,
-all-caps section labels → `##` headings, `<ul>/<li>` → bullet lists, `<table>` → GFM
-tables — so the rules keep their structure, and a change to them (e.g. a battle size's DP)
-is a readable line diff. `src/browser.ts` only drives the page (open + wait) and hands the
-rendered HTML to those pure functions.
+`meta.yaml` byte-identical (no spurious PR). `notes` and `muster` are written on every full
+run: a run that can't read them writes no `meta.yaml` at all. Both are **Markdown**:
+`rulesPanels()` in `src/parse/panels.ts` decodes each panel from a faction page's RSC
+payload and converts it — `<b>` → `**bold**`, all-caps section labels → `##` headings,
+`<ul>/<li>` → bullet lists, `<table>` → GFM tables — so the rules keep their structure, and
+a change to them (e.g. a battle size's DP) is a readable line diff. See "The rules panels"
+in [`scraping.md`](scraping.md).
 
 The runtime contract is the `SiteMeta` schema in `src/model.ts`: `metaFromYaml()` validates
 against it, as `factionFromYaml()` validates a faction file against `Faction`.

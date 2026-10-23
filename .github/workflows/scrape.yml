@@ -9,6 +9,10 @@ on:
         description: Scrape, plan and render the changelog, but publish nothing (no PR, comment, issue or Discord message)
         type: boolean
         default: false
+      cross-check:
+        description: Also compare every page with the runner's Google Chrome render (mfm scrape --browser)
+        type: boolean
+        default: false
 
 permissions: {}
 
@@ -20,15 +24,15 @@ concurrency:
 
 # The App's private key never shares a job with dependency code: any step can read every
 # secret its job uses from the runner's memory, and the App can write to more than this
-# repository. So `scrape` runs pnpm, Playwright and every repository script with no
-# secrets and hands the staged update on as an artifact, and `publish` mints the App's
-# token and opens the PR with pinned actions and a copy, nothing else. `announce` and
-# `report` run our code again, with the default token. A dry run runs `scrape` only (and
-# `app-check`). See "The App token" in specs/change-tracking.md.
+# repository. So `scrape` runs pnpm, every repository script and, for a cross-check,
+# Google Chrome, with no secrets, and hands the staged update on as an artifact; `publish`
+# mints the App's token and opens the PR with pinned actions and a copy, nothing else.
+# `announce` and `report` run our code again, with the default token. A dry run runs
+# `scrape` only (and `app-check`). See "The App token" in specs/change-tracking.md.
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 30 # a full scrape takes about five minutes
+    timeout-minutes: 30 # the scrape takes under a minute over HTTP, a few with the cross-check
     permissions:
       contents: read # check out the code
       pull-requests: read # list the open update PRs
@@ -52,8 +56,6 @@ jobs:
         with:
           runtime: node@22
           cache: true
-      - name: Install Playwright Chromium
-        run: pnpm exec playwright install --with-deps chromium
 
       # Every step below with logic in it runs one `mfm` command (src/bin/mfm.ts; see
       # `--help` on each). `pnpm scrape` is `mfm scrape`; the rest are called as
@@ -73,11 +75,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: node_modules/.bin/tsx src/bin/mfm.ts open-prs --out /tmp/pr-data --json /tmp/update-prs.json --output "$GITHUB_OUTPUT"
 
+      # HTTP only. The cross-check input also renders every page in the Google Chrome the
+      # runner image ships and compares (src/cross-check.ts); nothing installs a browser.
       - name: Scrape
         env:
           DATES: ${{ steps.open.outputs.dates }}
-        # $DATES is unquoted on purpose: one `--dates-from <dir>` pair per open PR.
-        run: pnpm scrape --report /tmp/failures.md $DATES
+          BROWSER: ${{ inputs.cross-check && '--browser' || '' }}
+        # $DATES and $BROWSER are unquoted on purpose: one `--dates-from <dir>` pair per open
+        # PR, and no argument at all when there's no cross-check.
+        run: pnpm scrape --report /tmp/failures.md $DATES $BROWSER
 
       # One PR per MFM version, stacked: the live version's open PR is updated on its own
       # base, and a new version gets a new PR on top of the open one instead of

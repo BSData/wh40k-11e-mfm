@@ -24,6 +24,10 @@ export const COMMANDS: Record<string, Entry> = {
     'scrape the MFM into data/: index, faction pages, validated YAML',
     () => import('./commands/scrape.js'),
   ),
+  render: lazy(
+    'print a faction page as Google Chrome renders it, for troubleshooting',
+    () => import('./commands/render.js'),
+  ),
   diff: lazy(
     "the update's PR body: the changelog between two snapshots",
     () => import('./commands/diff.js'),

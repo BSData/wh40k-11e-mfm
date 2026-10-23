@@ -20,7 +20,7 @@ body:
     attributes:
       label: How to reproduce
       description: The command you ran, or a link to the workflow run, pull request or issue.
-      placeholder: pnpm scrape --faction necrons --no-legends
+      placeholder: pnpm scrape --faction necrons --out /tmp/check
     validations:
       required: true
   - type: textarea

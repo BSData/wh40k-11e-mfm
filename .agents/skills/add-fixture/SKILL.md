@@ -23,15 +23,17 @@ coverage of a faction whose layout differs from Necrons (the default fixture).
    // orks: a detachment granting two Force Dispositions ("War Horde").
    { name: 'orks.html', url: factionUrl('orks') },
    ```
-2. Download it, then put the existing fixtures back, so only the new file is added:
+   The scrape fetches every faction page with the Legends cookie; for a page as it sees
+   it, Legends included, add `cookie: LEGENDS_COOKIE` (as `necrons-legends-cookie.html`
+   does).
+2. Download just that one, so no existing fixture changes:
    ```bash
-   pnpm refresh-fixtures
-   git restore test/fixtures       # keeps the new (untracked) file
+   pnpm refresh-fixtures --only orks.html
    git status test/fixtures        # exactly one new file
    ```
-   The script overwrites every fixture. Some pin cases the live site no longer shows
-   (`adepta-sororitas.html` holds the "changed since the last MFM" layer), so never
-   commit a refresh of the existing ones as a side effect.
+   Without `--only` the script overwrites every fixture. Some pin cases the live site no
+   longer shows (`adepta-sororitas.html` holds the "changed since the last MFM" layer), so
+   never commit a refresh of the existing ones as a side effect.
 3. Add focused assertions in `test/parse.test.ts` for the structure you care about
    (mirror the Necrons `describe` block). Add a `toMatchSnapshot()` if useful.
 4. `pnpm test -u` to baseline, then review the snapshot diff before committing. The

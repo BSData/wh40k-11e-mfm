@@ -25,9 +25,12 @@ You need Node 22 or later and pnpm, at the version in the `packageManager` field
 `package.json` (see [pnpm's installation guide](https://pnpm.io/installation)).
 
 ```bash
-pnpm install                            # also installs the git hooks (lefthook)
-pnpm exec playwright install chromium   # for live scrapes with Legends and pnpm refresh-fixtures
+pnpm install   # also installs the git hooks (lefthook)
 ```
+
+There is no browser to install. The scrape is HTTP only; `pnpm scrape --browser`,
+`pnpm mfm render` and the two browser-render fixtures use the Google Chrome you already
+have, if any.
 
 The hooks run Biome on commit, and the typecheck and the tests on push.
 
@@ -43,7 +46,7 @@ pnpm verify       # before you push: lint, types, tests and data checks
 A live scrape checks your change against the real site:
 
 ```bash
-pnpm scrape --faction necrons --no-legends
+pnpm scrape --faction necrons
 ```
 
 It writes into `data/`. Run `git restore data/` before you commit, unless the PR is meant
@@ -61,9 +64,9 @@ Change the spec first, in the same PR, then the code.
 ## Parser changes need fixture evidence
 The MFM site changes its markup without notice; that is the failure this project expects.
 Handle only markup that a saved page shows:
-1. `pnpm refresh-fixtures` re-downloads every fixture from the live site (it needs
-   Chromium). To save a page the set doesn't cover yet, add it to `FIXTURES` in
-   `src/fixtures.ts` first.
+1. `pnpm refresh-fixtures` re-downloads every fixture from the live site (the two browser
+   renders need Google Chrome). To save a page the set doesn't cover yet, add it to
+   `FIXTURES` in `src/fixtures.ts` first, and fetch just that one with `--only <name>`.
 2. Update the snapshots with `pnpm test -u`, and review what changed in them.
 3. Add a test that fails without your change.
 

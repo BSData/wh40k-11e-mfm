@@ -54,9 +54,11 @@ console.log("templates:", $("template[id]").length, "completions:", $("div[hidde
 ```
 The card count should equal the parsed units plus detachments: 52 + 12 = 64 on the saved
 (v1.1) Necrons page. On a refreshed page, compare it with `data/<slug>.yaml`: its
-detachments plus its units without `legends: true` for an HTTP page (`<slug>.html`), or
-plus all its units for a browser render, which includes the Legends cards
-(`necrons-panels.html` at v1.6: 64 + 12 = 76). Don't count unit headers (`div.bg-slate-500.text-xl`): "changed"-style headers don't carry
+detachments plus its units without `legends: true` for a plain page (`<slug>.html`), or
+plus all its units for a page with the Legends shown: fetched with the Legends cookie, as
+the scrape fetches every page, or a browser render after the toggle
+(`necrons-legends-cookie.html` and `necrons-panels.html` at v1.6: 64 + 12 = 76). Don't count
+unit headers (`div.bg-slate-500.text-xl`): "changed"-style headers don't carry
 that class. Templates and completions pair up one to one; a mismatch means the streaming
 swap changed.
 
@@ -87,13 +89,30 @@ error lists exactly what and where (`unit "…"`, `detachment "…"`, or `page-l
   `grep -rn _BOILERPLATE src` finds them). Keep it tight and specific — a broad entry
   silently swallows future data.
 
-## Browser path (Legends / rules panels)
-If the failure is in `src/browser.ts` (Legends or the "Welcome…"/"Muster Armies" panels),
-the site's *interactive* bits drifted, not the markup. Re-check these landmarks against the
-live page: the cookie reject button (`#onetrust-reject-all-handler`), the toggle
-(`#show-legends-label`, **absent on factions with no Legends — that's expected**), and the
-rules panels' button labels (`RULES_PANELS` in `src/parse/panels.ts`) plus the `aria-controls`
-link from each button to its panel. Debug with `chromium.launch({ headless: false })`.
+## Legends and the rules panels
+Both come over plain HTTP from details the site doesn't document (see "Legends" and "The
+rules panels" in `specs/scraping.md`), so these failures mean one of them moved:
+- **"the page has the Legends toggle but no LEGENDS section"**: the cookie
+  `isLegendsDisplayed=true` (`LEGENDS_COOKIE` in `src/fetch.ts`) no longer shows the
+  Legends. `pnpm mfm render <slug> --legends` prints what a visitor gets after clicking the
+  toggle; in Chrome's devtools, the cookies the click sets show what the cookie is now. The
+  toggle is **absent on factions with no Legends — that's expected**.
+- **"rules panel "…": no collapsible with that trigger label"**: the panel's button label
+  (`RULES_PANELS` in `src/parse/panels.ts`) changed, or the payload's shape did. Refresh
+  `necrons-panels-rsc.html` and look in its `self.__next_f.push` strings for the `I` rows
+  naming `Collapsible`, `CollapsibleTrigger` and `CollapsibleContent`, and the element that
+  uses them.
+- **"…: a component, "X", which plain HTTP can't render"** (or an unknown reference): a
+  panel now holds something the payload doesn't spell out. See what it is in the browser
+  (`pnpm mfm render necrons --panels`), then teach `src/parse/rsc.ts` to render it, with a
+  fixture that shows it.
+
+`pnpm scrape --browser` (or the scrape workflow's `cross-check` input) compares every page
+with Google Chrome's render; when it fails, the first differing line says which side moved.
+It drives the installed Chrome: debug a render with `chromium.launch({ channel: 'chrome',
+headless: false })` in `src/browser.ts`. Its landmarks: the cookie reject button
+(`#onetrust-reject-all-handler`), the toggle (`#show-legends-label`), and the
+`aria-controls` link from each panel's button to its panel.
 
 ## 5. Open a PR
 Reference the failing scrape run / issue. Summarise what the site changed and the

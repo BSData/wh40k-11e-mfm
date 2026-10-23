@@ -146,9 +146,9 @@ export type FactionSummary = z.infer<typeof FactionSummary>;
 export const SiteMeta = z.object({
   version: z.string().min(1),
   lastUpdated: z.string().regex(ISO_DATE),
-  /** The expandable "Welcome…" help text, when captured via the browser. */
+  /** The expandable "Welcome…" help text, from a faction page's RSC payload. */
   notes: z.string().min(1).optional(),
-  /** The expandable "Muster Armies" army-building rules, when captured via the browser. */
+  /** The expandable "Muster Armies" army-building rules, from the same payload. */
   muster: z.string().min(1).optional(),
   factions: z.array(z.string().min(1)).min(1),
 });

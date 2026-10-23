@@ -4,15 +4,17 @@ import { type Command, flag, list, text, UsageError } from '../command.js';
 export const command: Command = {
   help: `usage: mfm scrape [options]
 
-Scrapes the Munitorum Field Manual into --out: each faction's YAML, validated, and on
-a full run meta.yaml. Legends units and the rules panels need a browser (Playwright);
---no-legends skips it. A faction that fails doesn't stop the others, but the run exits
-1 at the end. \`pnpm scrape\` runs this.
+Scrapes the Munitorum Field Manual into --out over plain HTTP, one request per page:
+each faction's YAML, Legends included, validated, and on a full run meta.yaml with the
+rules panels. A faction that fails doesn't stop the others, but the run exits 1 at the
+end. \`pnpm scrape\` runs this.
 
   --faction <slug>     one faction only; meta.yaml is left as it is
   --out <dir>          where the YAML goes (default: data)
   --concurrency <n>    faction pages in flight at once (default: 4)
-  --no-legends         HTTP only: no browser, so no Legends and no rules panels
+  --browser            also cross-check every page against Google Chrome's render
+                       (the installed Chrome; nothing downloads one), failing the
+                       faction or the rules panels that differ
   --order <name|page>  entity order: name (default, alphabetical) or page
   --report <file>      write the per-faction failure report there, for
                        \`mfm report-failure\`
@@ -24,7 +26,7 @@ a full run meta.yaml. Legends units and the rules panels need a browser (Playwri
     faction: { type: 'string' },
     out: { type: 'string' },
     concurrency: { type: 'string' },
-    'no-legends': { type: 'boolean' },
+    browser: { type: 'boolean' },
     order: { type: 'string' },
     report: { type: 'string' },
     'dates-from': { type: 'string', multiple: true },
@@ -43,7 +45,7 @@ a full run meta.yaml. Legends units and the rules panels need a browser (Playwri
     const opts: ScrapeOptions = {
       out: text(values, 'out') ?? 'data',
       concurrency: Number(concurrency),
-      legends: !flag(values, 'no-legends'),
+      browser: flag(values, 'browser'),
       order,
       datesFrom: list(values, 'dates-from'),
       ignoreNameCase: flag(values, 'ignore-name-case'),

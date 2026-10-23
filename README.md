@@ -89,10 +89,12 @@ no coding needed. For everything else, including code, see
 [BSData/wh40k-11e](https://github.com/BSData/wh40k-11e/issues).
 
 ## How it works
-Most data is server-rendered, so the core scrape is a plain HTTP GET + HTML parse.
-**Legends** units and the expandable **"Welcome…" notes** and **"Muster Armies" rules** are
-client-only, so those are captured with a headless browser (Playwright); pass `--no-legends`
-to skip it.
+The MFM site is server-rendered, so the scrape is a plain HTTP GET per page and an HTML
+parse, with no browser. Each faction page is requested with the cookie the site's "Show
+Legends" toggle sets, so the **Legends** units come back with it, and the expandable
+**"Welcome…" notes** and **"Muster Armies" rules** are read from the page's React Server
+Components payload. `pnpm scrape --browser` cross-checks all of it against Google Chrome's
+render, using the Chrome already installed.
 
 - The scraped shape is validated against zod schemas (`src/model.ts`) before writing —
   drift fails loudly instead of producing bad data.
@@ -108,11 +110,10 @@ TypeScript (Node 22, ESM) · cheerio · zod · `yaml` · Vitest · Biome · pnpm
 ## For maintainers / agents
 ```bash
 pnpm install
-pnpm exec playwright install chromium   # once, for Legends/notes
 pnpm test                      # offline tests against saved HTML fixtures
 pnpm scrape --faction necrons  # live run for one faction → data/necrons.yaml
-pnpm scrape --no-legends       # fast HTTP-only run (no browser)
 pnpm scrape                    # full run, all factions (with Legends + notes)
+pnpm scrape --browser          # the same, cross-checked against Google Chrome
 ```
 
 See [`AGENTS.md`](AGENTS.md) for the project map and the commands,
