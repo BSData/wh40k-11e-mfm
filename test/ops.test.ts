@@ -16,7 +16,7 @@ import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import type { DiscordMessage } from '../src/discord.js';
 import { announceOnPr, markerComment, recordedMessageId } from '../src/ops/announce.js';
 import { failureReport, reportFailure, resolveFailure } from '../src/ops/failure-issue.js';
-import { type GitHub, githubFromEnv, paginate, runUrl } from '../src/ops/github.js';
+import { type GitHub, githubFromEnv, paginate, request, runUrl } from '../src/ops/github.js';
 import { exportBranchData, exportOpenPrs, gitEnv, listUpdatePrs } from '../src/ops/open-prs.js';
 import { stepOutputs } from '../src/ops/outputs.js';
 
@@ -76,6 +76,7 @@ const github = (api: string): GitHub => ({
   server: 'https://github.com',
   repo: REPO,
   token: 't0ken',
+  retryDelayMs: 0,
 });
 const RUN = 'https://github.com/BSData/wh40k-11e-mfm/actions/runs/42';
 
@@ -160,6 +161,44 @@ const pull = (number: number, ref: string, base: string, labels = ['mfm-update']
   head: { ref, repo: repo ? { full_name: repo } : null },
   base: { ref: base },
   labels: labels.map((name) => ({ name })),
+});
+
+describe('retries', () => {
+  /** A stub that answers each request with the next status, then 200 for good. */
+  const answering = (...statuses: number[]) =>
+    stub(() => ({ status: statuses.shift() ?? 200, body: [{ n: 1 }] }));
+
+  it.each([429, 500, 502, 503, 504])('retries a GET answered %i', async (status) => {
+    const api = await answering(status, status);
+    await expect(paginate(github(api.url), '/issues')).resolves.toEqual([{ n: 1 }]);
+    expect(api.calls).toHaveLength(3);
+  });
+
+  it('gives up after three tries, with the last answer', async () => {
+    const api = await answering(503, 503, 503);
+    await expect(paginate(github(api.url), '/issues')).rejects.toThrow(/HTTP 503/);
+    expect(api.calls).toHaveLength(3);
+  });
+
+  it.each([429, 502, 503, 504])('retries a write GitHub never served (%i)', async (status) => {
+    const api = await answering(status);
+    await request(github(api.url), 'POST', '/issues/1/comments', { body: 'x' });
+    expect(api.calls.map((c) => c.method)).toEqual(['POST', 'POST']);
+  });
+
+  it('does not repeat a write answered 500, which may have been made already', async () => {
+    const api = await answering(500);
+    await expect(
+      request(github(api.url), 'POST', '/issues/1/comments', { body: 'x' }),
+    ).rejects.toThrow(/HTTP 500/);
+    expect(api.calls).toHaveLength(1);
+  });
+
+  it('does not retry a client error', async () => {
+    const api = await answering(404);
+    await expect(paginate(github(api.url), '/issues')).rejects.toThrow(/HTTP 404/);
+    expect(api.calls).toHaveLength(1);
+  });
 });
 
 describe('listUpdatePrs', () => {

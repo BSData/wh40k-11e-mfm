@@ -1,3 +1,5 @@
+import { sleep } from '../fetch.js';
+
 /**
  * The few GitHub REST calls the scrape workflow makes, as plain `fetch` against
  * `GITHUB_API_URL`. They used to be `gh` and `github-script` inside the workflow, where
@@ -13,6 +15,8 @@ export interface GitHub {
   /** `owner/name`. */
   repo: string;
   token: string;
+  /** The first retry's wait, doubling after (default 1 s); tests set 0. */
+  retryDelayMs?: number;
 }
 
 /** An environment variable; an empty one counts as unset. */
@@ -45,22 +49,47 @@ export function runUrl(gh: GitHub, env: NodeJS.ProcessEnv = process.env): string
 
 const repoUrl = (gh: GitHub, path: string) => `${gh.api}/repos/${gh.repo}${path}`;
 
+/** Tries per call: these calls are how a failed scrape gets reported, so a blip mustn't lose one. */
+const ATTEMPTS = 3;
+/** Statuses GitHub answers without having acted on the request, so any method can retry. */
+const NOT_SERVED = new Set([429, 502, 503, 504]);
+/** The longest `Retry-After` honoured; past it, the call fails rather than stall the job. */
+const MAX_WAIT_MS = 60_000;
+
+/**
+ * One HTTP call, retried on a network error, a 429 or a 502–504, and for a GET (which is
+ * safe to repeat) on any 5xx; never on a 500 to a write, which may already have made the
+ * comment or the issue. Waits `Retry-After` when GitHub sends one, else 1 s, then 2 s.
+ */
 async function call(gh: GitHub, method: string, url: string, body?: unknown): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: {
-      accept: 'application/vnd.github+json',
-      authorization: `Bearer ${gh.token}`,
-      'user-agent': 'wh40k-mfm-scraper',
-      'x-github-api-version': '2022-11-28',
-      ...(body === undefined ? {} : { 'content-type': 'application/json' }),
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
-  if (!res.ok) {
-    throw new Error(`GitHub ${method} ${url}: HTTP ${res.status} ${await res.text()}`);
+  for (let attempt = 1; ; attempt++) {
+    let res: Response | undefined;
+    try {
+      res = await fetch(url, {
+        method,
+        headers: {
+          accept: 'application/vnd.github+json',
+          authorization: `Bearer ${gh.token}`,
+          'user-agent': 'wh40k-mfm-scraper',
+          'x-github-api-version': '2022-11-28',
+          ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+        },
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      });
+    } catch (err) {
+      if (attempt >= ATTEMPTS) throw err;
+    }
+    if (res?.ok) return res;
+    if (res) {
+      const transient = NOT_SERVED.has(res.status) || (method === 'GET' && res.status >= 500);
+      if (!transient || attempt >= ATTEMPTS) {
+        throw new Error(`GitHub ${method} ${url}: HTTP ${res.status} ${await res.text()}`);
+      }
+    }
+    const after = Number(res?.headers.get('retry-after')) * 1000;
+    const backoff = (gh.retryDelayMs ?? 1000) * 2 ** (attempt - 1);
+    await sleep(Number.isFinite(after) && after > 0 ? Math.min(after, MAX_WAIT_MS) : backoff);
   }
-  return res;
 }
 
 /** One call on the repository: `path` is relative to `/repos/<owner>/<name>`. */
