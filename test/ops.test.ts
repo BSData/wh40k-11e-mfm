@@ -1,5 +1,13 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
@@ -196,10 +204,11 @@ const git = (cwd: string, ...args: string[]) =>
   ).toString();
 
 /**
- * A GitHub-like `origin` with an update branch, and a shallow checkout of `main` that
- * doesn't have the branch yet, as the workflow's checkout doesn't.
+ * A GitHub-like `origin` with an update branch, and a checkout of `main` that doesn't have
+ * the branch yet: shallow, as the workflow's is, unless `shallow` is false (a developer's
+ * full clone).
  */
-function originWithBranch(branch: string, files: Record<string, string>): string {
+function originWithBranch(branch: string, files: Record<string, string>, shallow = true): string {
   const root = mkdtempSync(join(scratch, 'repo-'));
   const origin = join(root, 'origin.git');
   const work = join(root, 'work');
@@ -223,15 +232,8 @@ function originWithBranch(branch: string, files: Record<string, string>): string
   git(work, 'push', 'origin', branch);
 
   const checkout = join(root, 'checkout');
-  git(
-    root,
-    'clone',
-    '--depth=1',
-    '--branch',
-    'main',
-    `file://${origin.replaceAll('\\', '/')}`,
-    checkout,
-  );
+  const url = `file://${origin.replaceAll('\\', '/')}`;
+  git(root, 'clone', ...(shallow ? ['--depth=1'] : []), '--branch', 'main', url, checkout);
   return checkout;
 }
 
@@ -249,6 +251,18 @@ describe('exportBranchData', () => {
     expect(readFileSync(join(dir, 'necrons.yaml'), 'utf8')).toBe(files['necrons.yaml']);
     expect(git(checkout, 'rev-parse', '--abbrev-ref', 'HEAD').trim()).toBe('main');
     expect(git(checkout, 'status', '--porcelain')).toBe('');
+    // One commit deep, as the workflow's checkout is.
+    expect(git(checkout, 'rev-list', '--count', 'refs/remotes/origin/mfm/v1.6').trim()).toBe('1');
+  });
+
+  it('leaves a full clone full', async () => {
+    const checkout = originWithBranch('mfm/v1.6', { 'a.yaml': 'a: 1\n' }, false);
+    await exportBranchData('mfm/v1.6', join(scratch, 'out-full'), checkout);
+    expect(readFileSync(join(scratch, 'out-full', 'a.yaml'), 'utf8')).toBe('a: 1\n');
+    expect(git(checkout, 'rev-parse', '--is-shallow-repository').trim()).toBe('false');
+    expect(existsSync(join(checkout, '.git', 'shallow'))).toBe(false);
+    // The branch arrives with its history, main's commit included.
+    expect(git(checkout, 'rev-list', '--count', 'refs/remotes/origin/mfm/v1.6').trim()).toBe('2');
   });
 
   it('copies files byte for byte, nested ones and multi-byte text included', async () => {

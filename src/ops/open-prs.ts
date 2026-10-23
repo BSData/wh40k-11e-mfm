@@ -90,12 +90,16 @@ function git(cwd: string, args: string[], input?: string): Promise<Buffer> {
 }
 
 /**
- * Fetch `branch` from `origin` (one commit deep) and write the files under its `data/`
- * into `dir`, without the `data/` prefix. The checkout in `cwd` is left as it was.
+ * Fetch `branch` from `origin` and write the files under its `data/` into `dir`, without
+ * the `data/` prefix. The checkout in `cwd` is left as it was: a shallow one (the
+ * workflow's) fetches one commit deep, and a full clone stays full, since `--depth` would
+ * make it shallow.
  */
 export async function exportBranchData(branch: string, dir: string, cwd = '.'): Promise<void> {
   const ref = `refs/remotes/origin/${branch}`;
-  await git(cwd, ['fetch', '--depth=1', 'origin', `+refs/heads/${branch}:${ref}`]);
+  const shallow = (await git(cwd, ['rev-parse', '--is-shallow-repository'])).toString().trim();
+  const depth = shallow === 'true' ? ['--depth=1'] : [];
+  await git(cwd, ['fetch', ...depth, 'origin', `+refs/heads/${branch}:${ref}`]);
   const blobs = (await git(cwd, ['ls-tree', '-r', '-z', '--full-tree', ref, '--', 'data/']))
     .toString('utf8')
     .split('\0')
