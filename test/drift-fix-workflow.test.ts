@@ -10,8 +10,8 @@ import { parse } from 'yaml';
  * How `.github/workflows/drift-fix.yml` ends (docs/decisions/0031): the agent's step may
  * fail, so a run cut short at its limits still hands on its patch, and the job's last step
  * fails the run for any other end. That step's script runs here as it is, with bash and
- * jq, which GitHub's runners have; without them, it skips. And how Claude Code gets there
- * (0032): the action installs it, through the hosts the egress block lets through.
+ * jq, which GitHub's runners have; without them, it skips. And what the job installs
+ * through its egress block: Claude Code, by the action (0032), and Node, by pnpm.
  */
 
 const hasBash = spawnSync('bash', ['-c', 'command -v jq'], { encoding: 'utf8' }).status === 0;
@@ -40,6 +40,12 @@ const workflow = parse(
 const agent = workflow.jobs.agent?.steps ?? [];
 const draft = agent.find((s) => s.id === 'agent');
 const check = agent.at(-1);
+/** The hosts the agent job's egress block lets through. */
+const allowed = (
+  agent.find((s) => s.uses?.startsWith('step-security/harden-runner@'))?.with?.[
+    'allowed-endpoints'
+  ] ?? ''
+).split(/\s+/);
 
 describe('the drift fixer workflow', () => {
   it('has a gate, an agent and a PR job, and nothing else', () => {
@@ -70,9 +76,15 @@ describe('the drift fixer workflow', () => {
   // Nothing in the repository uses these hosts, so nothing else would notice them gone
   // before an outage's run failed at the install.
   it("lets the agent's job reach Claude Code's installer", () => {
-    const block = agent.find((s) => s.uses?.startsWith('step-security/harden-runner@'));
-    const allowed = (block?.with?.['allowed-endpoints'] ?? '').split(/\s+/);
     expect(allowed).toEqual(expect.arrayContaining(['claude.ai:443', 'downloads.claude.ai:443']));
+  });
+
+  // Refused the mirror, pnpm 11.20 retries for over a minute before going on without it,
+  // and later releases fail the install (pnpm/pnpm#14854).
+  it("lets pnpm's install of Node read its checksums", () => {
+    expect(allowed).toEqual(
+      expect.arrayContaining(['nodejs.org:443', 'unofficial-builds.nodejs.org:443']),
+    );
   });
 
   it('opens the PR only after the agent job succeeded', () => {

@@ -439,7 +439,8 @@ part holds only what it needs. See
    `ANTHROPIC_API_KEY`, and no other secret. Its token has `contents: read` and
    `actions: read`, the checkout keeps no credentials, and harden-runner blocks egress
    except to the model's API, GitHub (`github.com`, `api.github.com` and its release
-   downloads), the npm registry, `nodejs.org`, and Claude Code's installer (`claude.ai`,
+   downloads), the npm registry, `nodejs.org` and `unofficial-builds.nodejs.org` (where
+   pnpm's install of Node reads checksums), and Claude Code's installer (`claude.ai`,
    which redirects to `downloads.claude.ai`), with sudo and containers off; harden-runner
    itself always allows GitHub's Actions service and its storage. The dependencies are
    installed from the lockfile before the agent starts, and the action installs Claude
