@@ -207,7 +207,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 10, points: 90 }
-  - name: Ironkin Steeljacks With Heavy Volkanite Disintegrators
+  - name: Ironkin Steeljacks with Heavy Volkanite Disintegrators
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -219,7 +219,7 @@ units:
         costs:
           - { models: 3, points: 90 }
           - { models: 6, points: 180 }
-  - name: Ironkin Steeljacks With Melee Weapons
+  - name: Ironkin Steeljacks with Melee Weapons
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -269,8 +269,8 @@ units:
         costs:
           - { models: 1, points: 45 }
     leaderTo:
-      - Ironkin Steeljacks With Heavy Volkanite Disintegrators
-      - Ironkin Steeljacks With Melee Weapons
+      - Ironkin Steeljacks with Heavy Volkanite Disintegrators
+      - Ironkin Steeljacks with Melee Weapons
   - name: Sagitaur
     pricing:
       - range: "[1,3]"
@@ -281,7 +281,7 @@ units:
         label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 95 }
-  - name: ûthar The Destined
+  - name: Ûthar the Destined
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

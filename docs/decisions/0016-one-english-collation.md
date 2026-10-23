@@ -5,7 +5,7 @@
 
 ## Context
 Names were sorted with `localeCompare` and no locale, which uses the process's. Under a
-POSIX locale that put Orks' `Big’Ed Bossbunka` before `Big Mek`, so the same data came out
+POSIX locale that put Orks' `Big’ed Bossbunka` before `Big Mek`, so the same data came out
 in a different order on a differently configured machine, and the dataset's order is part
 of its byte-reproducibility ([0001](0001-git-is-the-change-history.md)).
 

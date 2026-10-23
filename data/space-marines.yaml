@@ -11,7 +11,7 @@ detachments:
     enhancements:
       - { name: Furious Assault (Upgrade), points: 10 }
       - { name: Imperium’s Sword, points: 20 }
-  - name: Blade Of Ultramar
+  - name: Blade of Ultramar
     dp: 3
     objectives:
       - TAKE AND HOLD
@@ -44,7 +44,7 @@ detachments:
     enhancements:
       - { name: Honour of Vigilance, points: 20 }
       - { name: Master-forged Firearms, points: 15 }
-  - name: Forgefather’S Seekers
+  - name: Forgefather’s Seekers
     dp: 2
     objectives:
       - PRIORITY ASSETS
@@ -101,7 +101,7 @@ detachments:
     enhancements:
       - { name: Gunnery Honours (Upgrade), points: 15 }
       - { name: Redoubtable Machine Spirit (Upgrade), points: 25 }
-  - name: Medusa'S Wrath
+  - name: Medusa's Wrath
     dp: 2
     objectives:
       - PURGE THE FOE
@@ -235,7 +235,7 @@ units:
       - Sternguard Veteran Squad
       - Sword Brethren Squad
       - Vanguard Veteran Squad
-  - name: Ancient In Terminator Armour
+  - name: Ancient in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -277,8 +277,8 @@ units:
           - { models: 1, points: 60 }
     supportTo:
       - Aggressor Squad
-      - Eradicator Squad With Heavy Bolters
-      - Eradicator Squad With Melta Rifles
+      - Eradicator Squad with Heavy Bolters
+      - Eradicator Squad with Melta Rifles
       - Heavy Intercessor Squad
       - Indomitor Kill Team
   - name: Assault Intercessor Squad
@@ -288,7 +288,7 @@ units:
         costs:
           - { models: 5, points: 85 }
           - { models: 10, points: 170 }
-  - name: Assault Intercessors With Jump Packs
+  - name: Assault Intercessors with Jump Packs
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -383,7 +383,7 @@ units:
       - Sword Brethren Squad
       - Vanguard Veteran Squad
       - Victrix Honour Guard
-  - name: Captain In Gravis Armour
+  - name: Captain in Gravis Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -391,11 +391,11 @@ units:
           - { models: 1, points: 90 }
     leaderTo:
       - Aggressor Squad
-      - Eradicator Squad With Heavy Bolters
-      - Eradicator Squad With Melta Rifles
+      - Eradicator Squad with Heavy Bolters
+      - Eradicator Squad with Melta Rifles
       - Heavy Intercessor Squad
       - Indomitor Kill Team
-  - name: Captain In Phobos Armour
+  - name: Captain in Phobos Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -409,7 +409,7 @@ units:
       - Scout Squad
       - Spectrus Kill Team
       - Wolf Scouts
-  - name: Captain In Terminator Armour
+  - name: Captain in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -422,7 +422,7 @@ units:
       - Terminator Assault Squad
       - Terminator Squad
       - Wolf Guard Terminators
-  - name: Captain On Bike
+  - name: Captain on Bike
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -430,7 +430,7 @@ units:
           - { models: 1, points: 110 }
     leaderTo:
       - Bike Squad
-      - Company Veterans On Bikes
+      - Company Veterans on Bikes
       - Outrider Squad
       - Ravenwing Black Knights
   - name: Captain Titus
@@ -448,17 +448,17 @@ units:
       - Intercessor Squad
       - Sternguard Veteran Squad
       - Vanguard Veteran Squad
-  - name: Captain With Jump Pack
+  - name: Captain with Jump Pack
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 90 }
     leaderTo:
-      - Assault Intercessors With Jump Packs
+      - Assault Intercessors with Jump Packs
       - Sanguinary Guard
       - Talonstrike Kill Team
-      - Vanguard Veteran Squad With Jump Packs
+      - Vanguard Veteran Squad with Jump Packs
   - name: Cato Sicarius
     groupTitle: Ultramarines
     pricing:
@@ -514,7 +514,7 @@ units:
       - Sternguard Veteran Squad
       - Sword Brethren Squad
       - Vanguard Veteran Squad
-  - name: Chaplain In Terminator Armour
+  - name: Chaplain in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -527,7 +527,7 @@ units:
       - Terminator Assault Squad
       - Terminator Squad
       - Wolf Guard Terminators
-  - name: Chaplain On Bike
+  - name: Chaplain on Bike
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -536,17 +536,17 @@ units:
     leaderTo:
       - Outrider Squad
       - Ravenwing Black Knights
-  - name: Chaplain With Jump Pack
+  - name: Chaplain with Jump Pack
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
     leaderTo:
-      - Assault Intercessors With Jump Packs
-      - Death Company Marines With Jump Packs
+      - Assault Intercessors with Jump Packs
+      - Death Company Marines with Jump Packs
       - Talonstrike Kill Team
-      - Vanguard Veteran Squad With Jump Packs
+      - Vanguard Veteran Squad with Jump Packs
   - name: Chief Librarian Tigurius
     groupTitle: Ultramarines
     pricing:
@@ -617,7 +617,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 3, points: 85 }
-  - name: Eradicator Squad With Heavy Bolters
+  - name: Eradicator Squad with Heavy Bolters
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -629,7 +629,7 @@ units:
         costs:
           - { models: 3, points: 130 }
           - { models: 6, points: 245 }
-  - name: Eradicator Squad With Melta Rifles
+  - name: Eradicator Squad with Melta Rifles
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -773,7 +773,7 @@ units:
         costs:
           - { models: 5, points: 85 }
           - { models: 10, points: 170 }
-  - name: Invader Atvs
+  - name: Invader ATVs
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -806,8 +806,8 @@ units:
           - { models: 1, points: 85 }
     leaderTo:
       - Aggressor Squad
-      - Eradicator Squad With Heavy Bolters
-      - Eradicator Squad With Melta Rifles
+      - Eradicator Squad with Heavy Bolters
+      - Eradicator Squad with Melta Rifles
       - Heavy Intercessor Squad
   - name: Judiciar
     pricing:
@@ -848,9 +848,9 @@ units:
         costs:
           - { models: 1, points: 95 }
     leaderTo:
-      - Assault Intercessors With Jump Packs
-      - Vanguard Veteran Squad With Jump Packs
-  - name: Kor’Sarro Khan
+      - Assault Intercessors with Jump Packs
+      - Vanguard Veteran Squad with Jump Packs
+  - name: Kor’sarro Khan
     groupTitle: White Scars
     pricing:
       - range: "[1,)"
@@ -932,7 +932,7 @@ units:
       - Intercessor Squad
       - Sternguard Veteran Squad
       - Vanguard Veteran Squad
-  - name: Librarian In Phobos Armour
+  - name: Librarian in Phobos Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -946,7 +946,7 @@ units:
       - Scout Squad
       - Spectrus Kill Team
       - Wolf Scouts
-  - name: Librarian In Terminator Armour
+  - name: Librarian in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -981,7 +981,7 @@ units:
       - Sternguard Veteran Squad
       - Sword Brethren Squad
       - Vanguard Veteran Squad
-  - name: Lieutenant In Phobos Armour
+  - name: Lieutenant in Phobos Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -994,7 +994,7 @@ units:
       - Reiver Squad
       - Spectrus Kill Team
       - Wolf Scouts
-  - name: Lieutenant With Combi-Weapon
+  - name: Lieutenant with Combi-Weapon
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1012,8 +1012,8 @@ units:
       - Assault Intercessor Squad
       - Bladeguard Veteran Squad
       - Company Heroes
-      - Eradicator Squad With Heavy Bolters
-      - Eradicator Squad With Melta Rifles
+      - Eradicator Squad with Heavy Bolters
+      - Eradicator Squad with Melta Rifles
       - Heavy Intercessor Squad
       - Infernus Squad
       - Intercessor Squad
@@ -1326,8 +1326,8 @@ units:
           - { models: 1, points: 90 }
     leaderTo:
       - Aggressor Squad
-      - Eradicator Squad With Heavy Bolters
-      - Eradicator Squad With Melta Rifles
+      - Eradicator Squad with Heavy Bolters
+      - Eradicator Squad with Melta Rifles
       - Heavy Intercessor Squad
   - name: Typhon
     pricing:
@@ -1344,7 +1344,7 @@ units:
           - { models: 5, points: 120 }
           - { models: 10, points: 240 }
     legends: true
-  - name: Vanguard Veteran Squad With Jump Packs
+  - name: Vanguard Veteran Squad with Jump Packs
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -1389,7 +1389,7 @@ units:
         costs:
           - { models: 1, points: 200 }
     legends: true
-  - name: Vulkan He’Stan
+  - name: Vulkan He’stan
     groupTitle: Salamanders
     pricing:
       - range: "[1,)"
@@ -1400,10 +1400,10 @@ units:
       - Assault Intercessor Squad
       - Bladeguard Veteran Squad
       - Company Heroes
-      - Eradicator Squad With Melta Rifles
+      - Eradicator Squad with Melta Rifles
       - Infernus Squad
       - Vanguard Veteran Squad
-  - name: Wardens Of Ultramar
+  - name: Wardens of Ultramar
     groupTitle: Ultramarines
     pricing:
       - range: "[1,)"

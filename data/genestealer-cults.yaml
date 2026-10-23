@@ -30,14 +30,14 @@ detachments:
       - { name: Inhuman Integration, points: 20 }
       - { name: Synaptic Auger, points: 15 }
       - { name: Vanguard Tyrant, points: 25 }
-  - name: Heroes Of The Uprising
+  - name: Heroes of the Uprising
     dp: 1
     objectives:
       - DISRUPTION
     enhancements:
       - { name: Contraband Munitions, points: 20 }
       - { name: Gene-tailored Toxins, points: 35 }
-  - name: Host Of Ascension
+  - name: Host of Ascension
     dp: 3
     objectives:
       - TAKE AND HOLD
@@ -120,14 +120,14 @@ units:
           - { models: 2, points: 170 }
     wargear:
       - { item: Heavy mining laser, points: 10 }
-  - name: Acolyte Hybrids With Autopistols
+  - name: Acolyte Hybrids with Autopistols
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 5, points: 65 }
           - { models: 10, points: 120 }
-  - name: Acolyte Hybrids With Hand Flamers
+  - name: Acolyte Hybrids with Hand Flamers
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -141,8 +141,8 @@ units:
         costs:
           - { models: 1, points: 50 }
     leaderTo:
-      - Acolyte Hybrids With Autopistols
-      - Acolyte Hybrids With Hand Flamers
+      - Acolyte Hybrids with Autopistols
+      - Acolyte Hybrids with Hand Flamers
       - Hybrid Metamorphs
       - Neophyte Hybrids
   - name: Atalan Jackals
@@ -166,8 +166,8 @@ units:
         costs:
           - { models: 1, points: 75 }
     leaderTo:
-      - Acolyte Hybrids With Autopistols
-      - Acolyte Hybrids With Hand Flamers
+      - Acolyte Hybrids with Autopistols
+      - Acolyte Hybrids with Hand Flamers
       - Hybrid Metamorphs
       - Neophyte Hybrids
   - name: Biophagus
@@ -178,8 +178,8 @@ units:
           - { models: 1, points: 50 }
     supportTo:
       - Aberrants
-      - Acolyte Hybrids With Autopistols
-      - Acolyte Hybrids With Hand Flamers
+      - Acolyte Hybrids with Autopistols
+      - Acolyte Hybrids with Hand Flamers
       - Hybrid Metamorphs
       - Neophyte Hybrids
   - name: Clamavus
@@ -189,8 +189,8 @@ units:
         costs:
           - { models: 1, points: 50 }
     supportTo:
-      - Acolyte Hybrids With Autopistols
-      - Acolyte Hybrids With Hand Flamers
+      - Acolyte Hybrids with Autopistols
+      - Acolyte Hybrids with Hand Flamers
       - Hybrid Metamorphs
       - Neophyte Hybrids
   - name: Goliath Rockgrinder
@@ -246,8 +246,8 @@ units:
         costs:
           - { models: 1, points: 35 }
     supportTo:
-      - Acolyte Hybrids With Autopistols
-      - Acolyte Hybrids With Hand Flamers
+      - Acolyte Hybrids with Autopistols
+      - Acolyte Hybrids with Hand Flamers
       - Hybrid Metamorphs
       - Neophyte Hybrids
   - name: Magus
@@ -257,8 +257,8 @@ units:
         costs:
           - { models: 1, points: 50 }
     leaderTo:
-      - Acolyte Hybrids With Autopistols
-      - Acolyte Hybrids With Hand Flamers
+      - Acolyte Hybrids with Autopistols
+      - Acolyte Hybrids with Hand Flamers
       - Hybrid Metamorphs
       - Neophyte Hybrids
   - name: Neophyte Hybrids
@@ -275,8 +275,8 @@ units:
         costs:
           - { models: 1, points: 50 }
     supportTo:
-      - Acolyte Hybrids With Autopistols
-      - Acolyte Hybrids With Hand Flamers
+      - Acolyte Hybrids with Autopistols
+      - Acolyte Hybrids with Hand Flamers
       - Hybrid Metamorphs
       - Neophyte Hybrids
   - name: Patriarch
@@ -294,8 +294,8 @@ units:
         costs:
           - { models: 1, points: 60 }
     leaderTo:
-      - Acolyte Hybrids With Autopistols
-      - Acolyte Hybrids With Hand Flamers
+      - Acolyte Hybrids with Autopistols
+      - Acolyte Hybrids with Hand Flamers
       - Hybrid Metamorphs
       - Neophyte Hybrids
   - name: Purestrain Genestealers

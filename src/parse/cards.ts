@@ -1,6 +1,6 @@
 import type { CheerioAPI } from 'cheerio';
 import type { Detachment, PricingTier, Unit, Wargear } from '../model.js';
-import { titleCase } from './names.js';
+import { nameCase, titleCase } from './names.js';
 import { cardName, cardWhere, DELTA_MARKER_RE, TIER_LABEL_SELECTOR } from './page.js';
 import { clean } from './text.js';
 import { DP_RE, parseCostRow, parsePoints, parseRange, UNIQUE_RE } from './values.js';
@@ -31,7 +31,7 @@ function parseRole(
     const list = clean(img.parent().nextAll('span').first().text());
     const attachTo = list
       .split(',')
-      .map((s) => titleCase(s))
+      .map((s) => nameCase(s))
       .filter(Boolean);
     if (attachTo.length > 0) {
       out[key] = attachTo;
@@ -79,7 +79,7 @@ export function parseUnit(
   consumed: string[],
 ): Unit {
   const where = cardWhere(slug, 'unit', card);
-  const name = titleCase(cardName(card));
+  const name = nameCase(cardName(card));
   consumed.push(cardName(card));
   const pricing: PricingTier[] = [];
 
@@ -134,7 +134,7 @@ function enhancementGrant(
   );
   const units = list
     .split(',')
-    .map((s) => titleCase(s))
+    .map((s) => nameCase(s))
     .filter(Boolean);
   if (units.length > 0) consumed.push(keyword, list);
   return units;
@@ -148,7 +148,7 @@ export function parseDetachment(
 ): Detachment {
   const where = cardWhere(slug, 'detachment', card);
   const header = card.children().first();
-  const name = titleCase(cardName(card));
+  const name = nameCase(cardName(card));
   consumed.push(cardName(card));
   // A badge that isn't a whole "NDP" is left unconsumed, so the coverage check reports it.
   const dpText = clean(header.find('span.self-end').last().text());
@@ -173,7 +173,7 @@ export function parseDetachment(
       .first()
       .text(),
   );
-  const unique = titleCase(banner.replace(UNIQUE_RE, ''));
+  const unique = nameCase(banner.replace(UNIQUE_RE, ''));
   if (unique) consumed.push(banner);
   const enhancements = card
     .find('ul.leaders li')

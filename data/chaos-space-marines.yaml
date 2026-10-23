@@ -3,7 +3,7 @@ slug: chaos-space-marines
 version: "1.6"
 firstSeen: 2026-10-14
 detachments:
-  - name: Cabal Of Chaos
+  - name: Cabal of Chaos
     dp: 1
     objectives:
       - DISRUPTION
@@ -19,7 +19,7 @@ detachments:
       - { name: Cultist’s Brand, points: 30 }
       - { name: Incendiary Goad, points: 25 }
       - { name: Warped Foresight, points: 10 }
-  - name: Creations Of Bile
+  - name: Creations of Bile
     dp: 3
     objectives:
       - TAKE AND HOLD
@@ -29,7 +29,7 @@ detachments:
       - { name: Living Carapace, points: 15 }
       - { name: Prime Test Subject, points: 35 }
       - { name: Surgical Precision, points: 10 }
-  - name: Cult Of The Arkifane
+  - name: Cult of the Arkifane
     dp: 2
     objectives:
       - PRIORITY ASSETS
@@ -47,7 +47,7 @@ detachments:
       - { name: Falsehood, points: 10 }
       - { name: Shroud of Obfuscation, points: 15 }
       - { name: Soul Link, points: 5 }
-  - name: Devotees Of Destruction
+  - name: Devotees of Destruction
     dp: 1
     objectives:
       - PRIORITY ASSETS
@@ -72,7 +72,7 @@ detachments:
       - { name: Iron Artifice, points: 10 }
       - { name: Ironbound Enmity, points: 15 }
       - { name: Warp Tracer, points: 20 }
-  - name: Huron’S Marauders
+  - name: Huron’s Marauders
     dp: 3
     objectives:
       - DISRUPTION
@@ -138,7 +138,7 @@ detachments:
       - { name: Invigorated Mechatendrils, points: 15 }
       - { name: Soul Harvester, points: 15 }
       - { name: Tempting Addendum, points: 40 }
-  - name: Veterans Of The Long War
+  - name: Veterans of the Long War
     dp: 2
     objectives:
       - TAKE AND HOLD
@@ -157,7 +157,7 @@ detachments:
       - { name: Infernal Fulgurite, points: 20 }
       - { name: Tzagulla, points: 25 }
 units:
-  - name: Abaddon The Despoiler
+  - name: Abaddon the Despoiler
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -220,7 +220,7 @@ units:
       - Legionaries
       - Nemesis Claw
       - Red Corsairs Raiders
-  - name: Chaos Lord In Terminator Armour
+  - name: Chaos Lord in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -228,7 +228,7 @@ units:
           - { models: 1, points: 90 }
     leaderTo:
       - Chaos Terminator Squad
-  - name: Chaos Lord On Bike
+  - name: Chaos Lord on Bike
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -237,7 +237,7 @@ units:
     leaderTo:
       - Chaos Bikers
     legends: true
-  - name: Chaos Lord On Disc Of Tzeentch
+  - name: Chaos Lord on Disc of Tzeentch
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -247,7 +247,7 @@ units:
       - Chosen
       - Legionaries
     legends: true
-  - name: Chaos Lord On Juggernaut
+  - name: Chaos Lord on Juggernaut
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -256,7 +256,7 @@ units:
     leaderTo:
       - Chaos Bikers
     legends: true
-  - name: Chaos Lord On Palanquin Of Nurgle
+  - name: Chaos Lord on Palanquin of Nurgle
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -266,7 +266,7 @@ units:
       - Chosen
       - Legionaries
     legends: true
-  - name: Chaos Lord On Steed Of Slaanesh
+  - name: Chaos Lord on Steed of Slaanesh
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -275,7 +275,7 @@ units:
     leaderTo:
       - Chaos Bikers
     legends: true
-  - name: Chaos Lord With Jump Pack
+  - name: Chaos Lord with Jump Pack
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -373,7 +373,7 @@ units:
     leaderTo:
       - Accursed Cultists
       - Cultist Mob
-      - Cultist Mob With Firearms
+      - Cultist Mob with Firearms
       - Negavolt Cultists
   - name: Cultist Mob
     pricing:
@@ -382,7 +382,7 @@ units:
         costs:
           - { models: 10, points: 50 }
           - { models: 20, points: 90 }
-  - name: Cultist Mob With Firearms
+  - name: Cultist Mob with Firearms
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -406,7 +406,7 @@ units:
       - Accursed Cultists
       - Chosen
       - Cultist Mob
-      - Cultist Mob With Firearms
+      - Cultist Mob with Firearms
       - Legionaries
       - Negavolt Cultists
       - Nemesis Claw
@@ -424,7 +424,7 @@ units:
     leaderTo:
       - Accursed Cultists
       - Cultist Mob
-      - Cultist Mob With Firearms
+      - Cultist Mob with Firearms
       - Negavolt Cultists
   - name: Decimator
     pricing:
@@ -473,7 +473,7 @@ units:
       - Accursed Cultists
       - Chosen
       - Cultist Mob
-      - Cultist Mob With Firearms
+      - Cultist Mob with Firearms
       - Legionaries
       - Negavolt Cultists
       - Red Corsairs Raiders
@@ -566,7 +566,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 155 }
-  - name: Heretic Astartes Daemon Prince With Wings
+  - name: Heretic Astartes Daemon Prince with Wings
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -590,7 +590,7 @@ units:
         costs:
           - { models: 1, points: 300 }
     legends: true
-  - name: Khorne Lord Of Skulls
+  - name: Khorne Lord of Skulls
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -624,13 +624,13 @@ units:
         costs:
           - { models: 5, points: 95 }
           - { models: 10, points: 180 }
-  - name: Lord Discordant On Helstalker
+  - name: Lord Discordant on Helstalker
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 155 }
-  - name: Master Of Executions
+  - name: Master of Executions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -641,7 +641,7 @@ units:
       - Legionaries
       - Nemesis Claw
       - Red Corsairs Raiders
-  - name: Master Of Possession
+  - name: Master of Possession
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -653,7 +653,7 @@ units:
       - Nemesis Claw
       - Possessed
       - Red Corsairs Raiders
-  - name: Masters Of The Maelstrom
+  - name: Masters of the Maelstrom
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -811,7 +811,7 @@ units:
     leaderTo:
       - Accursed Cultists
       - Cultist Mob
-      - Cultist Mob With Firearms
+      - Cultist Mob with Firearms
       - Negavolt Cultists
     legends: true
   - name: Sorcerer
@@ -825,7 +825,7 @@ units:
       - Legionaries
       - Nemesis Claw
       - Red Corsairs Raiders
-  - name: Sorcerer In Terminator Armour
+  - name: Sorcerer in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -833,7 +833,7 @@ units:
           - { models: 1, points: 85 }
     leaderTo:
       - Chaos Terminator Squad
-  - name: Sorcerer On Bike
+  - name: Sorcerer on Bike
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -842,7 +842,7 @@ units:
     leaderTo:
       - Chaos Bikers
     legends: true
-  - name: Sorcerer On Disc Of Tzeentch
+  - name: Sorcerer on Disc of Tzeentch
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -852,7 +852,7 @@ units:
       - Chosen
       - Legionaries
     legends: true
-  - name: Sorcerer On Palanquin Of Nurgle
+  - name: Sorcerer on Palanquin of Nurgle
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -862,7 +862,7 @@ units:
       - Chosen
       - Legionaries
     legends: true
-  - name: Sorcerer On Steed Of Slaanesh
+  - name: Sorcerer on Steed of Slaanesh
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -885,7 +885,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 10, points: 65 }
-  - name: Vashtorr The Arkifane
+  - name: Vashtorr the Arkifane
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

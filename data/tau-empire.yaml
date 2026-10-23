@@ -46,7 +46,7 @@ detachments:
       - { name: Kroothawk Flock, points: 10 }
       - { name: Nomadic Hunter, points: 20 }
       - { name: Root-carved Weapons, points: 10 }
-  - name: Mont’Ka
+  - name: Mont’ka
     dp: 3
     objectives:
       - TAKE AND HOLD
@@ -68,7 +68,7 @@ detachments:
       - { name: Puretide Engram Neurochip, points: 15 }
       - { name: Starflare Ignition System, points: 20 }
 units:
-  - name: Aun’Shi
+  - name: Aun’shi
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -80,14 +80,14 @@ units:
       - Kroot Farstalkers
       - Strike Team
     legends: true
-  - name: Aun’Va
+  - name: Aun’va
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 3, points: 65 }
     legends: true
-  - name: Ax-1-0 Tiger Shark
+  - name: AX-1-0 Tiger Shark
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -146,7 +146,7 @@ units:
       - Crisis Fireknife Battlesuits
       - Crisis Starscythe Battlesuits
       - Crisis Sunforge Battlesuits
-  - name: Commander In Coldstar Battlesuit
+  - name: Commander in Coldstar Battlesuit
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -157,7 +157,7 @@ units:
       - Crisis Fireknife Battlesuits
       - Crisis Starscythe Battlesuits
       - Crisis Sunforge Battlesuits
-  - name: Commander In Crisis Battlesuit
+  - name: Commander in Crisis Battlesuit
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -169,7 +169,7 @@ units:
       - Crisis Starscythe Battlesuits
       - Crisis Sunforge Battlesuits
     legends: true
-  - name: Commander In Enforcer Battlesuit
+  - name: Commander in Enforcer Battlesuit
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -434,7 +434,7 @@ units:
           - { models: 1, points: 75 }
           - { models: 2, points: 120 }
           - { models: 3, points: 175 }
-  - name: R’Varna Battlesuit
+  - name: R’varna Battlesuit
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -473,14 +473,14 @@ units:
           - { models: 1, points: 220 }
     wargear:
       - { item: Ion Accelerator, points: 25 }
-  - name: Shas’O R’Alai
+  - name: Shas’o R’alai
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 80 }
     leaderTo:
-      - Xv9 Hazard Battlesuits
+      - XV9 Hazard Battlesuits
     legends: true
   - name: Sky Ray Gunship
     pricing:
@@ -520,7 +520,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 150 }
-  - name: Ta’Unar Supremacy Armour
+  - name: Ta’unar Supremacy Armour
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -573,7 +573,7 @@ units:
         label: Your 2nd + Unit Costs
         costs:
           - { models: 1, points: 445 }
-  - name: Tx42 Piranha
+  - name: TX42 Piranha
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -587,7 +587,7 @@ units:
         costs:
           - { models: 5, points: 70 }
           - { models: 10, points: 115 }
-  - name: Xv9 Hazard Battlesuits
+  - name: XV9 Hazard Battlesuits
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -595,7 +595,7 @@ units:
           - { models: 1, points: 55 }
           - { models: 2, points: 110 }
     legends: true
-  - name: Y’Vahra Battlesuit
+  - name: Y’vahra Battlesuit
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

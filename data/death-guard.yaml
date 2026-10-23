@@ -3,7 +3,7 @@ slug: death-guard
 version: "1.6"
 firstSeen: 2026-10-14
 detachments:
-  - name: Champions Of Contagion
+  - name: Champions of Contagion
     dp: 2
     objectives:
       - TAKE AND HOLD
@@ -19,7 +19,7 @@ detachments:
     enhancements:
       - { name: Lancet of the Worldsore (Upgrade), points: 15 }
       - { name: Parasitic Woe‑reaper (Upgrade), points: 15 }
-  - name: Death Lord’S Chosen
+  - name: Death Lord’s Chosen
     dp: 2
     objectives:
       - PRIORITY ASSETS
@@ -35,7 +35,7 @@ detachments:
     enhancements:
       - { name: Insectile Murmuration (Upgrade), points: 15 }
       - { name: Plagueveil (Upgrade), points: 15 }
-  - name: Mortarion’S Hammer
+  - name: Mortarion’s Hammer
     dp: 2
     objectives:
       - PURGE THE FOE
@@ -44,7 +44,7 @@ detachments:
       - { name: Eye of Affliction, points: 20 }
       - { name: Shriekworm Familiar, points: 15 }
       - { name: Tendrilous Emissions, points: 30 }
-  - name: Paragons Of Putrescence
+  - name: Paragons of Putrescence
     dp: 1
     objectives:
       - PRIORITY ASSETS
@@ -80,7 +80,7 @@ detachments:
       - { name: Furnace of Plagues, points: 25 }
       - { name: Revolting Regeneration, points: 30 }
 units:
-  - name: Beasts Of Nurgle
+  - name: Beasts of Nurgle
     groupTitle: Plague Legions
     pricing:
       - range: "[1,)"
@@ -156,13 +156,13 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 2, points: 80 }
-  - name: Daemon Prince Of Nurgle
+  - name: Daemon Prince of Nurgle
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 185 }
-  - name: Daemon Prince Of Nurgle With Wings
+  - name: Daemon Prince of Nurgle with Wings
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -177,7 +177,7 @@ units:
     leaderTo:
       - Plague Marines
     legends: true
-  - name: Death Guard Chaos Lord In Terminator Armour
+  - name: Death Guard Chaos Lord in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -203,7 +203,7 @@ units:
           - { models: 5, points: 155 }
           - { models: 10, points: 310 }
     legends: true
-  - name: Death Guard Sorcerer In Terminator Armour
+  - name: Death Guard Sorcerer in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -248,7 +248,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 110 }
-  - name: Foetid Bloat-Drone With Heavy Blight Launcher
+  - name: Foetid Bloat-Drone with Heavy Blight Launcher
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -291,7 +291,7 @@ units:
           - { models: 1, points: 45 }
     leaderTo:
       - Plague Marines
-  - name: Lord Of Contagion
+  - name: Lord of Contagion
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -300,7 +300,7 @@ units:
     leaderTo:
       - Blightlord Terminators
       - Deathshroud Terminators
-  - name: Lord Of Poxes
+  - name: Lord of Poxes
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -308,7 +308,7 @@ units:
           - { models: 1, points: 65 }
     leaderTo:
       - Plague Marines
-  - name: Lord Of Virulence
+  - name: Lord of Virulence
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

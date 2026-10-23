@@ -66,7 +66,7 @@ function repeated(snapshots: Unit[][], pick: (u: Unit) => string): Set<string> {
  * unit removed and another added.
  *
  * A label is the bare name unless another unit in either snapshot carries it; then it
- * adds the group, `Inquisitor (Every Model Has The Imperium Keyword)`, and, if that
+ * adds the group, `Inquisitor (Every Model Has the Imperium Keyword)`, and, if that
  * still doesn't tell them apart, the position: `Venerable Dreadnought (#2)`.
  */
 export function matchUnits(before: Unit[], after: Unit[]) {

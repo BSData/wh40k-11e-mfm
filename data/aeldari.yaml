@@ -29,7 +29,7 @@ detachments:
       - { name: Infamy, points: 25 }
       - { name: Voidstone, points: 15 }
       - { name: Webway Pathstone, points: 25 }
-  - name: Devoted Of Ynnead
+  - name: Devoted of Ynnead
     dp: 2
     objectives:
       - PRIORITY ASSETS
@@ -54,7 +54,7 @@ detachments:
     enhancements:
       - { name: A Foot in the Future, points: 15 }
       - { name: Mistweave, points: 20 }
-  - name: Ghosts Of The Webway
+  - name: Ghosts of the Webway
     dp: 2
     objectives:
       - DISRUPTION
@@ -72,7 +72,7 @@ detachments:
       - { name: Craftworld’s Champion, points: 25 }
       - { name: Ethereal Pathway, points: 30 }
       - { name: Protector of the Paths, points: 20 }
-  - name: Path Of The Outcast
+  - name: Path of the Outcast
     dp: 1
     objectives:
       - RECONNAISSANCE
@@ -88,7 +88,7 @@ detachments:
       - { name: Runes of Warding, points: 25 }
       - { name: Stone of Eldritch Fury, points: 15 }
       - { name: Torc of Morai-Heg, points: 20 }
-  - name: Serpent’S Brood
+  - name: Serpent’s Brood
     dp: 2
     objectives:
       - PURGE THE FOE
@@ -180,7 +180,7 @@ units:
     leaderTo:
       - Swooping Hawks
       - Warp Spiders
-  - name: Avatar Of Khaine
+  - name: Avatar of Khaine
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -837,7 +837,7 @@ units:
           - { models: 1, points: 405 }
     wargear:
       - { item: Heavy Wraithcannon, points: 10 }
-  - name: Wraithknight With Ghostglaive
+  - name: Wraithknight with Ghostglaive
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs

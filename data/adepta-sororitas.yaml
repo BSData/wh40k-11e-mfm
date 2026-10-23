@@ -3,7 +3,7 @@ slug: adepta-sororitas
 version: "1.6"
 firstSeen: 2026-10-14
 detachments:
-  - name: Army Of Faith
+  - name: Army of Faith
     dp: 2
     objectives:
       - TAKE AND HOLD
@@ -12,7 +12,7 @@ detachments:
       - { name: Divine Aspect, points: 5 }
       - { name: Litanies of Faith, points: 10 }
       - { name: Triptych of the Macharian Crusade, points: 20 }
-  - name: Bringers Of Flame
+  - name: Bringers of Flame
     dp: 2
     objectives:
       - PRIORITY ASSETS
@@ -21,7 +21,7 @@ detachments:
       - { name: Iron Surplice of Saint Istalela, points: 10 }
       - { name: Manual of Saint Griselda, points: 20 }
       - { name: Righteous Rage, points: 15 }
-  - name: Champions Of Faith
+  - name: Champions of Faith
     dp: 2
     objectives:
       - DISRUPTION
@@ -31,7 +31,7 @@ detachments:
       - { name: Mark of Devotion, points: 30 }
       - { name: Sanctified Amulet, points: 25 }
       - { name: Triptych of Judgement, points: 15 }
-  - name: Chorus Of Condemnation
+  - name: Chorus of Condemnation
     dp: 1
     objectives:
       - RECONNAISSANCE
@@ -72,7 +72,7 @@ detachments:
     enhancements:
       - { name: Hagiomnifex (Upgrade), points: 25 }
 units:
-  - name: Aestred Thurga And Agathae Dolan
+  - name: Aestred Thurga and Agathae Dolan
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -120,7 +120,7 @@ units:
       - Dominion Squad
       - Retributor Squad
       - Sisters Novitiate Squad
-  - name: Canoness With Jump Pack
+  - name: Canoness with Jump Pack
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -429,7 +429,7 @@ units:
         label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 75 }
-  - name: Triumph Of Saint Katherine
+  - name: Triumph of Saint Katherine
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

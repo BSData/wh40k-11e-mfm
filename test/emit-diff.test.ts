@@ -957,7 +957,7 @@ describe('unit identity (names are not unique within a faction)', () => {
     const inquisitors = after.units.filter((u) => u.name === 'Inquisitor');
     expect(inquisitors.map((u) => u.groupTitle)).toEqual([
       undefined,
-      'Every Model Has The Imperium Keyword',
+      'Every Model Has the Imperium Keyword',
     ]);
     const cost = inquisitors[0]?.pricing[0]?.costs[0];
     if (!cost) throw new Error('data changed');
@@ -975,7 +975,7 @@ describe('unit identity (names are not unique within a faction)', () => {
     if (!cost) throw new Error('data changed');
     cost.points += 5;
     expect(changelog([before], [after])).toContain(
-      '- Inquisitor (Every Model Has The Imperium Keyword) — 1 model: 65 → 70 (+5)\n',
+      '- Inquisitor (Every Model Has the Imperium Keyword) — 1 model: 65 → 70 (+5)\n',
     );
   });
 
@@ -1244,7 +1244,7 @@ describe('the rules panels (meta.yaml)', () => {
 
 describe('sort order (independent of the process locale)', () => {
   /**
-   * Run `fn` as if the process locale were POSIX, where "Big’Ed Bossbunka" sorts before
+   * Run `fn` as if the process locale were POSIX, where "Big’ed Bossbunka" sorts before
    * "Big Mek" — the opposite of the committed (English) order.
    */
   const underPosix = <T>(fn: () => T): T => {
@@ -1276,7 +1276,7 @@ describe('sort order (independent of the process locale)', () => {
   });
 
   it('orders the report the same way', () => {
-    const names = ['Big’Ed Bossbunka', 'Big Mek'];
+    const names = ['Big’ed Bossbunka', 'Big Mek'];
     const before = names.map((name) => ({ ...asOrks(necronsContent()), slug: name, name }));
     const after = before.map((f) => {
       const g = structuredClone(f);
@@ -1284,7 +1284,7 @@ describe('sort order (independent of the process locale)', () => {
       return g;
     });
     const log = underPosix(() => changelog(before, after));
-    expect(log.indexOf('| Big Mek |')).toBeLessThan(log.indexOf('| Big’Ed Bossbunka |'));
+    expect(log.indexOf('| Big Mek |')).toBeLessThan(log.indexOf('| Big’ed Bossbunka |'));
   });
 });
 

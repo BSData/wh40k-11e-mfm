@@ -57,7 +57,7 @@ detachments:
       - { name: Inloaded Lethality, points: 15 }
       - { name: Sanctified Ordnance, points: 10 }
       - { name: Transoracular Dyad Wafers, points: 15 }
-  - name: Lords Of The Forge
+  - name: Lords of the Forge
     dp: 2
     objectives:
       - PRIORITY ASSETS
@@ -336,7 +336,7 @@ units:
         label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 85 }
-  - name: Sydonian Dragoons With Radium Jezzails
+  - name: Sydonian Dragoons with Radium Jezzails
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -344,7 +344,7 @@ units:
           - { models: 1, points: 55 }
           - { models: 2, points: 95 }
           - { models: 3, points: 140 }
-  - name: Sydonian Dragoons With Taser Lances
+  - name: Sydonian Dragoons with Taser Lances
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
