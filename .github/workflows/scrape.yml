@@ -301,7 +301,7 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
 
-  # Neither step needs to start a workflow, so both use the default token. The Discord
+  # None of these steps needs to start a workflow, so all use the default token. The Discord
   # marker must be github-actions[bot]'s anyway: src/ops/announce.ts honours no other.
   announce:
     needs: [scrape, publish]
@@ -310,7 +310,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read # check out the code
-      pull-requests: write # link the stack, and read and write the Discord marker
+      pull-requests: write # link the stack, label the PR, and read and write the Discord marker
     steps:
       - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
@@ -356,6 +356,17 @@ jobs:
           (cd "$dir" && gh extension install .)
           read -ra below <<< "$BELOW" # the PRs below, bottom first
           gh stack link "${below[@]}" "$PR"
+
+      # The needs-attention label, on while the update has a change the scraper may have
+      # misread and off once a later run finds none (see "Needs attention" in
+      # specs/change-tracking.md); the PR body lists them. continue-on-error, like the
+      # announcement below: a label that didn't stick is not a scrape failure.
+      - name: Label the PR when something needs attention
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ needs.publish.outputs.pr }}
+        run: node_modules/.bin/tsx src/bin/mfm.ts attention /tmp/update/old-data /tmp/update/new-data --label --pr-number "$PR"
 
       # One Discord message per MFM update, not per scrape run: `--record` keeps its id
       # in a hidden marker on an update PR comment, and edits that message on later runs

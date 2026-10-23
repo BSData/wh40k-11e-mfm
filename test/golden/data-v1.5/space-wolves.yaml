@@ -1,0 +1,1574 @@
+name: Space Wolves
+slug: space-wolves
+version: "1.5"
+firstSeen: 2026-10-02
+parent: Space Marines
+detachments:
+  - name: Assault Brethren
+    dp: 1
+    objectives:
+      - TAKE AND HOLD
+    unique: Doctrines
+    enhancements:
+      - { name: Furious Assault (Upgrade), points: 10 }
+      - { name: Imperium’s Sword, points: 20 }
+  - name: Champions Of Fenris
+    dp: 1
+    objectives:
+      - PRIORITY ASSETS
+    unique: Terminator
+    enhancements:
+      - { name: A Giant Amongst Giants, points: 15 }
+      - { name: Preyslayer, points: 15 }
+  - name: Deathwatch Support
+    dp: 1
+    objectives:
+      - DISRUPTION
+    enhancements:
+      - { name: Beacon Angelis, points: 25 }
+  - name: Devastator Brethren
+    dp: 1
+    objectives:
+      - PURGE THE FOE
+    unique: Doctrines
+    enhancements:
+      - { name: Honour of Vigilance, points: 20 }
+      - { name: Master-forged Firearms, points: 15 }
+  - name: Gauntlet Task Force
+    dp: 1
+    objectives:
+      - RECONNAISSANCE
+    enhancements:
+      - { name: Damocles-class Uplink, points: 15 }
+      - { name: Linebreaker Onslaught, points: 20 }
+  - name: Gladius Task Force
+    dp: 3
+    objectives:
+      - TAKE AND HOLD
+      - PRIORITY ASSETS
+    enhancements:
+      - { name: Adept of the Codex, points: 20 }
+      - { name: Artificer Armour, points: 15 }
+      - { name: Laurels of Triumph, points: 20 }
+      - { name: Standard of the Emperor Ascendant, points: 25 }
+  - name: Gravis Linebreaker Force
+    dp: 1
+    objectives:
+      - TAKE AND HOLD
+    unique: Gravis
+    enhancements:
+      - { name: Indefatigable Fortitude, points: 20 }
+      - { name: Relentless Advance, points: 20 }
+  - name: Gravis Siege Force
+    dp: 1
+    objectives:
+      - TAKE AND HOLD
+    unique: Gravis
+    enhancements:
+      - { name: Immovable Conquerors (Upgrade), points: 15 }
+      - { name: Narthecis Gauntlet, points: 20 }
+  - name: Ironclad Champions
+    dp: 1
+    objectives:
+      - PRIORITY ASSETS
+    enhancements:
+      - { name: Artificer Sarcophagus (Upgrade), points: 40 }
+      - { name: Venerable Champion (Aura) (Upgrade), points: 30 }
+  - name: Ironstorm Spearhead
+    dp: 1
+    objectives:
+      - PURGE THE FOE
+    unique: Ironstorm
+    enhancements:
+      - { name: Gunnery Honours (Upgrade), points: 15 }
+      - { name: Redoubtable Machine Spirit (Upgrade), points: 25 }
+  - name: Phobos Shadow Force
+    dp: 1
+    objectives:
+      - DISRUPTION
+    unique: Phobos
+    enhancements:
+      - { name: Execute and Redeploy, points: 25 }
+      - { name: Venator Omni-auspex, points: 15 }
+  - name: Phobos Shock Force
+    dp: 1
+    objectives:
+      - DISRUPTION
+    unique: Phobos
+    enhancements:
+      - { name: Seal of Shrouding, points: 15 }
+      - { name: Venator Omni-auspex, points: 15 }
+  - name: Saga Of The Beastslayer
+    dp: 1
+    objectives:
+      - PURGE THE FOE
+    enhancements:
+      - { name: Hunter’s Guile, points: 20 }
+      - { name: Wolf-Touched, points: 15, leaderTo: [ Wulfen, Wulfen With Storm Shields ] }
+  - name: Saga Of The Great Wolf
+    dp: 2
+    objectives:
+      - TAKE AND HOLD
+    enhancements:
+      - { name: Chariots of the Storm, points: 25 }
+      - { name: Grimnar’s Mark, points: 15 }
+      - { name: Howlmaw, points: 15 }
+      - { name: Skjald’s Foretelling, points: 20 }
+  - name: Stormlance Task Force
+    dp: 1
+    objectives:
+      - RECONNAISSANCE
+    enhancements:
+      - { name: Auspex Triangulation Shrines (Upgrade), points: 10 }
+      - { name: Supercharged Engines (Upgrade), points: 10 }
+  - name: Tactical Brethren
+    dp: 1
+    objectives:
+      - PRIORITY ASSETS
+    unique: Doctrines
+    enhancements:
+      - { name: Laurels of Vigilance, points: 10 }
+      - { name: Tactical Insight, points: 15 }
+  - name: Tacticus Attack Force
+    dp: 1
+    objectives:
+      - TAKE AND HOLD
+    unique: Tacticus
+    enhancements:
+      - { name: Martial Paragon, points: 10 }
+      - { name: Spearpoint War Leader, points: 15 }
+  - name: Tacticus Firestorm Force
+    dp: 1
+    objectives:
+      - PRIORITY ASSETS
+    unique: Tacticus
+    enhancements:
+      - { name: Cyber-familiar, points: 15 }
+      - { name: Tempered in Battle (Aura), points: 10 }
+  - name: Terminator Storm Force
+    dp: 1
+    objectives:
+      - PRIORITY ASSETS
+    unique: Terminator
+    enhancements:
+      - { name: Champion of the First Company, points: 20 }
+      - { name: Corporeum Reliquary, points: 25 }
+units:
+  - name: Aggressor Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 180 }
+  - name: Ancient
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    supportTo:
+      - Assault Intercessor Squad
+      - Crusader Squad
+      - Deathwatch Veterans
+      - Decimus Kill Team
+      - Desolation Squad
+      - Fortis Kill Team
+      - Hellblaster Squad
+      - Infernus Squad
+      - Inner Circle Companions
+      - Intercessor Squad
+      - Sternguard Veteran Squad
+      - Sword Brethren Squad
+      - Vanguard Veteran Squad
+  - name: Ancient In Terminator Armour
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    supportTo:
+      - Deathwatch Terminator Squad
+      - Deathwing Knights
+      - Deathwing Terminator Squad
+      - Terminator Assault Squad
+      - Terminator Squad
+      - Wolf Guard Terminators
+  - name: Arjac Rockfist
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+    leaderTo:
+      - Terminator Assault Squad
+      - Terminator Squad
+      - Wolf Guard Terminators
+  - name: Assault Intercessor Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 170 }
+  - name: Assault Intercessors With Jump Packs
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 95 }
+          - { models: 10, points: 190 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 105 }
+          - { models: 10, points: 200 }
+  - name: Astraeus
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 550 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 650 }
+  - name: Ballistus Dreadnought
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 150 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 170 }
+  - name: Bjorn The Fell-Handed
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 160 }
+  - name: Bladeguard Ancient
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    supportTo:
+      - Bladeguard Veteran Squad
+  - name: Bladeguard Veteran Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 90 }
+          - { models: 6, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 110 }
+          - { models: 6, points: 200 }
+  - name: Blood Claws
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 150 }
+          - { models: 20, points: 290 }
+  - name: Brutalis Dreadnought
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+  - name: Canis Wolfborn
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    legends: true
+  - name: Captain
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    leaderTo:
+      - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
+      - Company Heroes
+      - Crusader Squad
+      - Deathwatch Veterans
+      - Decimus Kill Team
+      - Desolation Squad
+      - Fortis Kill Team
+      - Hellblaster Squad
+      - Infernus Squad
+      - Inner Circle Companions
+      - Intercessor Squad
+      - Sternguard Veteran Squad
+      - Sword Brethren Squad
+      - Vanguard Veteran Squad
+      - Victrix Honour Guard
+  - name: Captain In Gravis Armour
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    leaderTo:
+      - Aggressor Squad
+      - Eradicator Squad With Heavy Bolters
+      - Eradicator Squad With Melta Rifles
+      - Heavy Intercessor Squad
+      - Indomitor Kill Team
+  - name: Captain In Phobos Armour
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    leaderTo:
+      - Eliminator Squad
+      - Incursor Squad
+      - Infiltrator Squad
+      - Reiver Squad
+      - Scout Squad
+      - Spectrus Kill Team
+      - Wolf Scouts
+  - name: Captain In Terminator Armour
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    leaderTo:
+      - Deathwatch Terminator Squad
+      - Deathwing Knights
+      - Deathwing Terminator Squad
+      - Terminator Assault Squad
+      - Terminator Squad
+      - Wolf Guard Terminators
+  - name: Captain On Bike
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 110 }
+    leaderTo:
+      - Outrider Squad
+      - Ravenwing Black Knights
+  - name: Captain With Jump Pack
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    leaderTo:
+      - Assault Intercessors With Jump Packs
+      - Sanguinary Guard
+      - Talonstrike Kill Team
+      - Vanguard Veteran Squad With Jump Packs
+  - name: Centurion Assault Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 150 }
+          - { models: 6, points: 300 }
+    legends: true
+  - name: Centurion Devastator Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 175 }
+          - { models: 6, points: 350 }
+    legends: true
+  - name: Cerberus
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 270 }
+    legends: true
+  - name: Chaplain
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    leaderTo:
+      - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
+      - Crusader Squad
+      - Death Company Marines
+      - Deathwatch Veterans
+      - Decimus Kill Team
+      - Fortis Kill Team
+      - Hellblaster Squad
+      - Infernus Squad
+      - Inner Circle Companions
+      - Intercessor Squad
+      - Sternguard Veteran Squad
+      - Sword Brethren Squad
+      - Vanguard Veteran Squad
+  - name: Chaplain In Terminator Armour
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    leaderTo:
+      - Deathwatch Terminator Squad
+      - Deathwing Knights
+      - Deathwing Terminator Squad
+      - Terminator Assault Squad
+      - Terminator Squad
+      - Wolf Guard Terminators
+  - name: Chaplain On Bike
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    leaderTo:
+      - Outrider Squad
+      - Ravenwing Black Knights
+  - name: Chaplain With Jump Pack
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    leaderTo:
+      - Assault Intercessors With Jump Packs
+      - Death Company Marines With Jump Packs
+      - Talonstrike Kill Team
+      - Vanguard Veteran Squad With Jump Packs
+  - name: Company Heroes
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 4, points: 125 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 4, points: 145 }
+  - name: Cyberwolf
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 20 }
+    legends: true
+  - name: Desolation Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 150 }
+    wargear:
+      - { item: Vengor Launcher, points: 5 }
+  - name: Dreadnought
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 135 }
+    legends: true
+  - name: Drop Pod
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 60 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+  - name: Eliminator Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 85 }
+  - name: Eradicator Squad With Heavy Bolters
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 100 }
+          - { models: 6, points: 215 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 130 }
+          - { models: 6, points: 245 }
+  - name: Eradicator Squad With Melta Rifles
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 100 }
+          - { models: 6, points: 200 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 120 }
+          - { models: 6, points: 220 }
+  - name: Falchion
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 420 }
+    legends: true
+  - name: Fenrisian Wolves
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 45 }
+          - { models: 10, points: 75 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 50 }
+          - { models: 10, points: 80 }
+  - name: Firestrike Servo-Turrets
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+          - { models: 2, points: 160 }
+  - name: Gladiator Lancer
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 160 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+  - name: Gladiator Reaper
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 165 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 185 }
+  - name: Gladiator Valiant
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 165 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 185 }
+  - name: Grey Hunters
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 10, points: 180 }
+  - name: Hammerfall Bunker
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 175 }
+    legends: true
+  - name: Harald Deathwolf
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+    legends: true
+  - name: Heavy Intercessor Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 115 }
+          - { models: 10, points: 230 }
+  - name: Hellblaster Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 115 }
+          - { models: 10, points: 230 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 130 }
+          - { models: 10, points: 245 }
+  - name: Hounds Of Morkai
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 95 }
+          - { models: 10, points: 190 }
+    legends: true
+  - name: Impulsor
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 70 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    wargear:
+      - { item: Orbital Comms Array, points: 10 }
+  - name: Inceptor Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 130 }
+          - { models: 6, points: 260 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 150 }
+          - { models: 6, points: 280 }
+  - name: Incursor Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 170 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 100 }
+          - { models: 10, points: 180 }
+  - name: Infernus Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 95 }
+          - { models: 10, points: 190 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 105 }
+          - { models: 10, points: 200 }
+  - name: Infiltrator Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 150 }
+  - name: Intercessor Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 170 }
+  - name: Invader Atvs
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 65 }
+          - { models: 2, points: 130 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+          - { models: 2, points: 140 }
+    wargear:
+      - { item: Multi-melta, points: 5 }
+  - name: Invictor Tactical Warsuit
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 135 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Iron Priest
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 60 }
+    leaderTo:
+      - Assault Intercessor Squad
+      - Blood Claws
+      - Grey Hunters
+      - Intercessor Squad
+      - Wolf Guard Headtakers
+  - name: Judiciar
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    supportTo:
+      - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
+      - Crusader Squad
+      - Deathwatch Veterans
+      - Decimus Kill Team
+      - Fortis Kill Team
+      - Infernus Squad
+      - Inner Circle Companions
+      - Intercessor Squad
+      - Sternguard Veteran Squad
+      - Sword Brethren Squad
+      - Vanguard Veteran Squad
+  - name: Kratos
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 240 }
+    legends: true
+  - name: Krom Dragongaze
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 65 }
+    leaderTo:
+      - Wolf Guard
+    legends: true
+  - name: Land Raider
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 245 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 265 }
+  - name: Land Raider Crusader
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 230 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 250 }
+  - name: Land Raider Excelsior
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 250 }
+    legends: true
+  - name: Land Raider Redeemer
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 245 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 265 }
+  - name: Land Speeder
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+  - name: Librarian
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    leaderTo:
+      - Assault Intercessor Squad
+      - Deathwatch Veterans
+      - Decimus Kill Team
+      - Desolation Squad
+      - Fortis Kill Team
+      - Hellblaster Squad
+      - Infernus Squad
+      - Inner Circle Companions
+      - Intercessor Squad
+      - Sternguard Veteran Squad
+      - Vanguard Veteran Squad
+  - name: Librarian In Phobos Armour
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    leaderTo:
+      - Eliminator Squad
+      - Incursor Squad
+      - Infiltrator Squad
+      - Reiver Squad
+      - Scout Squad
+      - Spectrus Kill Team
+      - Wolf Scouts
+  - name: Librarian In Terminator Armour
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    leaderTo:
+      - Deathwatch Terminator Squad
+      - Deathwing Knights
+      - Deathwing Terminator Squad
+      - Terminator Assault Squad
+      - Terminator Squad
+      - Wolf Guard Terminators
+  - name: Lieutenant
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    supportTo:
+      - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
+      - Company Heroes
+      - Crusader Squad
+      - Deathwatch Veterans
+      - Decimus Kill Team
+      - Desolation Squad
+      - Fortis Kill Team
+      - Hellblaster Squad
+      - Infernus Squad
+      - Inner Circle Companions
+      - Intercessor Squad
+      - Sternguard Veteran Squad
+      - Sword Brethren Squad
+      - Vanguard Veteran Squad
+  - name: Lieutenant In Phobos Armour
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    supportTo:
+      - Eliminator Squad
+      - Incursor Squad
+      - Infiltrator Squad
+      - Reiver Squad
+      - Spectrus Kill Team
+      - Wolf Scouts
+  - name: Lieutenant With Combi-Weapon
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 85 }
+  - name: Logan Grimnar
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+    leaderTo:
+      - Terminator Assault Squad
+      - Terminator Squad
+      - Wolf Guard Terminators
+  - name: Logan Grimnar On Stormrider
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+    legends: true
+  - name: Long Fangs
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 120 }
+          - { models: 6, points: 145 }
+    legends: true
+  - name: Lukas The Trickster
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 50 }
+    legends: true
+  - name: Mastodon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 540 }
+    legends: true
+  - name: Murderfang
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Njal Stormcaller
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    leaderTo:
+      - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
+      - Blood Claws
+      - Grey Hunters
+      - Intercessor Squad
+      - Wolf Guard Headtakers
+  - name: Outrider Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 80 }
+          - { models: 6, points: 160 }
+  - name: Predator Annihilator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 135 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 145 }
+    legends: true
+  - name: Predator Destructor
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+    legends: true
+  - name: Ragnar Blackmane
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    leaderTo:
+      - Blood Claws
+      - Wolf Guard Headtakers
+  - name: Rapier Carrier
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    legends: true
+  - name: Razorback
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    legends: true
+  - name: Redemptor Dreadnought
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 170 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 190 }
+    wargear:
+      - { item: Macro plasma incinerator, points: 10 }
+  - name: Reiver Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 165 }
+  - name: Relic Razorback
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 105 }
+    legends: true
+  - name: Repulsor
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 190 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 210 }
+  - name: Repulsor Executioner
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 260 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 280 }
+    wargear:
+      - { item: Heavy Laser Destroyer, points: 10 }
+  - name: Rhino
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,3]"
+        label: Your 1st To 3rd Units Cost
+        costs:
+          - { models: 1, points: 70 }
+      - range: "[4,)"
+        label: Your 4th + Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+  - name: Rhino Primaris
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 95 }
+    legends: true
+  - name: Scout Bike Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 3, points: 75 }
+          - { models: 6, points: 150 }
+    legends: true
+  - name: Scout Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 65 }
+          - { models: 10, points: 120 }
+  - name: Sicaran
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 180 }
+    legends: true
+  - name: Skyclaws
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 165 }
+          - { models: 15, points: 240 }
+    legends: true
+  - name: Sternguard Veteran Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 105 }
+          - { models: 10, points: 210 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 120 }
+          - { models: 10, points: 225 }
+  - name: Storm Speeder Hailstrike
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 110 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 120 }
+  - name: Storm Speeder Hammerstrike
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Storm Speeder Thunderstrike
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Stormfang Gunship
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 300 }
+    legends: true
+  - name: Stormhawk Interceptor
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 155 }
+    legends: true
+  - name: Stormraven Gunship
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 280 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 300 }
+    legends: true
+  - name: Stormtalon Gunship
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 165 }
+    legends: true
+  - name: Stormwolf
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 250 }
+    legends: true
+  - name: Tarantula Air Defence Battery
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 70 }
+    legends: true
+  - name: Tarantula Sentry Battery
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 30 }
+          - { models: 2, points: 60 }
+          - { models: 3, points: 90 }
+    legends: true
+  - name: Techmarine
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 55 }
+    leaderTo:
+      - Assault Intercessor Squad
+      - Crusader Squad
+      - Decimus Kill Team
+      - Desolation Squad
+      - Fortis Kill Team
+      - Intercessor Squad
+      - Sword Brethren Squad
+  - name: Terminator Assault Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 170 }
+          - { models: 10, points: 340 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 210 }
+          - { models: 10, points: 380 }
+    wargear:
+      - { item: Storm Shield, points: 5 }
+  - name: Terminator Squad
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 190 }
+          - { models: 10, points: 380 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 230 }
+          - { models: 10, points: 420 }
+    wargear:
+      - { item: Cyclone Missile Launcher, points: 10 }
+  - name: Terrax-Pattern Termite
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 200 }
+    legends: true
+  - name: Thunderhawk Gunship
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 850 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 950 }
+  - name: Thunderwolf Cavalry
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 115 }
+          - { models: 6, points: 230 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 145 }
+          - { models: 6, points: 260 }
+    wargear:
+      - { item: Storm Shield, points: 5 }
+  - name: Typhon
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 320 }
+    legends: true
+  - name: Ulrik The Slayer
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 90 }
+    leaderTo:
+      - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
+      - Blood Claws
+      - Grey Hunters
+      - Intercessor Squad
+      - Wolf Guard Headtakers
+  - name: Vanguard Veteran Squad
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 120 }
+          - { models: 10, points: 240 }
+    legends: true
+  - name: Vanguard Veteran Squad With Jump Packs
+    groupTitle: Space Marines
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 110 }
+          - { models: 10, points: 220 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 130 }
+          - { models: 10, points: 240 }
+  - name: Venerable Dreadnought
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 130 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 140 }
+  - name: Venerable Dreadnought
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 165 }
+  - name: Vindicator
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 185 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 200 }
+    legends: true
+  - name: Whirlwind
+    pricing:
+      - range: "[1,1]"
+        label: Your 1st Unit Costs
+        costs:
+          - { models: 1, points: 175 }
+      - range: "[2,)"
+        label: Your 2nd + Unit Costs
+        costs:
+          - { models: 1, points: 195 }
+    legends: true
+  - name: Wolf Guard
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 5, points: 85 }
+          - { models: 10, points: 170 }
+    legends: true
+  - name: Wolf Guard Battle Leader
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    leaderTo:
+      - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
+      - Blood Claws
+      - Grey Hunters
+      - Intercessor Squad
+      - Wolf Guard Headtakers
+  - name: Wolf Guard Battle Leader In Terminator Armour
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    legends: true
+  - name: Wolf Guard Battle Leader On Thunderwolf
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 80 }
+    legends: true
+  - name: Wolf Guard Headtakers
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 3, points: 85, desc: 3 Wolf Guard Headtakers }
+          - { models: 6, points: 115, desc: "3 Wolf Guard Headtakers, 3 Hunting Wolves" }
+          - { models: 6, points: 170, desc: 6 Wolf Guard Headtakers }
+          - { models: 12, points: 230, desc: "6 Wolf Guard Headtakers, 6 Hunting Wolves" }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 3, points: 95, desc: 3 Wolf Guard Headtakers }
+          - { models: 6, points: 125, desc: "3 Wolf Guard Headtakers, 3 Hunting Wolves" }
+          - { models: 6, points: 180, desc: 6 Wolf Guard Headtakers }
+          - { models: 12, points: 240, desc: "6 Wolf Guard Headtakers, 6 Hunting Wolves" }
+  - name: Wolf Guard Pack Leader
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 30 }
+    supportTo:
+      - Long Fangs
+    legends: true
+  - name: Wolf Guard Pack Leader In Terminator Armour
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 40 }
+    supportTo:
+      - Long Fangs
+    legends: true
+  - name: Wolf Guard Pack Leader With Jump Pack
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 35 }
+    supportTo:
+      - Skyclaws
+    legends: true
+  - name: Wolf Guard Terminators
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 180 }
+          - { models: 10, points: 365 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 220 }
+          - { models: 10, points: 405 }
+    wargear:
+      - { item: Storm Shield, points: 5 }
+  - name: Wolf Lord On Thunderwolf
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 100 }
+    legends: true
+  - name: Wolf Priest
+    pricing:
+      - range: "[1,)"
+        label: Your Unit Costs
+        costs:
+          - { models: 1, points: 75 }
+    leaderTo:
+      - Assault Intercessor Squad
+      - Bladeguard Veteran Squad
+      - Blood Claws
+      - Grey Hunters
+      - Intercessor Squad
+      - Wolf Guard Headtakers
+  - name: Wolf Scouts
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 6, points: 95 }
+          - { models: 12, points: 190 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 6, points: 105 }
+          - { models: 12, points: 200 }
+  - name: Wulfen
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 90 }
+          - { models: 10, points: 180 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 105 }
+          - { models: 10, points: 195 }
+  - name: Wulfen Dreadnought
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 1, points: 140 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 1, points: 150 }
+  - name: Wulfen With Storm Shields
+    pricing:
+      - range: "[1,2]"
+        label: Your 1st To 2nd Units Cost
+        costs:
+          - { models: 5, points: 125 }
+          - { models: 10, points: 250 }
+      - range: "[3,)"
+        label: Your 3rd + Unit Costs
+        costs:
+          - { models: 5, points: 155 }
+          - { models: 10, points: 280 }

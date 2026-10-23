@@ -18,6 +18,7 @@ import { announceOnPr, markerComment, recordedMessageId } from '../src/ops/annou
 import { failureReport, reportFailure, resolveFailure } from '../src/ops/failure-issue.js';
 import { gitEnv } from '../src/ops/git-env.js';
 import { type GitHub, githubFromEnv, paginate, request, runUrl } from '../src/ops/github.js';
+import { ATTENTION_LABEL, setLabel } from '../src/ops/labels.js';
 import { exportBranchData, exportOpenPrs, listUpdatePrs } from '../src/ops/open-prs.js';
 import { stepOutputs } from '../src/ops/outputs.js';
 
@@ -606,5 +607,53 @@ describe('stepOutputs', () => {
 
   it('refuses a value that would add outputs of its own', () => {
     expect(() => stepOutputs({ title: 'MFM\nbase=evil' })).toThrow(/spans lines/);
+  });
+});
+
+describe('setLabel', () => {
+  /** A repository with `repo` labels, and PR #96 carrying `pr` of them. */
+  const labelled = (repo: string[], pr: string[]) =>
+    stub((call) => {
+      if (call.method !== 'GET') return { body: [] };
+      if (call.path.startsWith('/repos/BSData/wh40k-11e-mfm/issues/96/labels'))
+        return { body: pr.map((name) => ({ name })) };
+      return { body: repo.map((name) => ({ name })) };
+    });
+
+  it('creates the label when the repository has none, then puts it on the PR', async () => {
+    const api = await labelled(['mfm-update'], ['mfm-update']);
+    await expect(setLabel(github(api.url), 96, ATTENTION_LABEL, true)).resolves.toBe('added');
+    expect(writes(api.calls)).toEqual([
+      { call: 'POST /repos/BSData/wh40k-11e-mfm/labels', body: ATTENTION_LABEL },
+      {
+        call: 'POST /repos/BSData/wh40k-11e-mfm/issues/96/labels',
+        body: { labels: ['needs-attention'] },
+      },
+    ]);
+  });
+
+  it('only labels the PR when the repository has the label, in any case', async () => {
+    const api = await labelled(['mfm-update', 'Needs-Attention'], ['mfm-update']);
+    await expect(setLabel(github(api.url), 96, ATTENTION_LABEL, true)).resolves.toBe('added');
+    expect(writes(api.calls).map((w) => w.call)).toEqual([
+      'POST /repos/BSData/wh40k-11e-mfm/issues/96/labels',
+    ]);
+  });
+
+  it('takes the label off when nothing needs attention any more', async () => {
+    const api = await labelled(['needs-attention'], ['mfm-update', 'needs-attention']);
+    await expect(setLabel(github(api.url), 96, ATTENTION_LABEL, false)).resolves.toBe('removed');
+    expect(writes(api.calls).map((w) => w.call)).toEqual([
+      'DELETE /repos/BSData/wh40k-11e-mfm/issues/96/labels/needs-attention',
+    ]);
+  });
+
+  it.each([
+    [true, ['needs-attention']],
+    [false, []],
+  ])('writes nothing when the PR is already as it should be (on: %s)', async (on, pr) => {
+    const api = await labelled(['needs-attention'], pr);
+    await expect(setLabel(github(api.url), 96, ATTENTION_LABEL, on)).resolves.toBe('unchanged');
+    expect(writes(api.calls)).toEqual([]);
   });
 });

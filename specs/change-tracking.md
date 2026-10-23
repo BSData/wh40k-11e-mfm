@@ -203,6 +203,49 @@ for; a note under the table names every shortened section. The complete entry is
 shortened: it is the version's changelog file (below), which the same PR commits and the
 body names. See [0009](../docs/decisions/0009-fit-the-pr-body-limit.md).
 
+### Needs attention
+Some changes are more likely the scraper misreading the site than GW changing it.
+`collectAttention()` in [`src/diff/attention.ts`](../src/diff/attention.ts) flags them:
+
+| flag | when |
+| --- | --- |
+| a faction is gone | a faction in the old snapshot isn't in the new one, or the site's index (`meta.yaml`'s `factions`) no longer lists it |
+| a faction lost more than half its units | more than half of the units it had (by identity, see *Which unit is which*) aren't in the new snapshot, whether or not new ones were added: a misread name looks like that too |
+| only the version changed | the site or the factions moved to a new version, and nothing else changed: no faction content and no rules panel |
+| a value dropped to 0 | a cost option, wargear item or enhancement went from more than 0 to 0 |
+| a value changed threefold | it went to at least three times what it was, or to a third of it or less, or up from 0 |
+
+The scraper writes a file for each faction the index lists and deletes none, so a
+faction the index stops listing keeps its old file, unchanged, and the diff never sees it
+go: the index is where it shows. Its flag says the file was kept.
+
+A re-tiered unit's prices aren't in the cost diff, so they are checked option by option,
+against the range of the option's old prices: a new price above the old highest is
+measured from that highest, and one below the old lowest from that lowest, by the value
+rules above. So it is flagged at three times the old highest or more (any price at all
+above an old highest of 0), and at a third of the old lowest or less, 0 included.
+
+The PR body lists the flags in a **Needs attention** warning (a GitHub `> [!WARNING]`
+alert), straight after the title and before everything else, one line each: the faction
+in bold, then what moved, as `**Orks**: Nobz — 5 models: 100 → 350 (×3.5)`. A value's
+flag that several factions share word for word (a sub-faction carrying its parent's
+roster) is one line naming them all. At most 50 lines are listed, then how many more
+there are, which `mfm attention <before> <after>` lists in full. The warning is part of
+the body's head, so fitting GitHub's limit never cuts it. A flag alone makes a body,
+and a Discord message: a faction gone from the index changes no data file, so without it
+the body would say `No changes detected.` and nothing would be announced. Such an update
+has no changelog entry either (`mfm changelog` writes none), so its body's blurb says
+the PR commits none, and that `meta.yaml` is the whole change. The warning isn't in the
+changelog file: it is for the reviewer, and every other change it names is in the entry
+anyway.
+
+The Discord message says how many lines there are. When there are any, the workflow
+labels the update PR `needs-attention`, creating the label if the repository has none,
+and a later run that finds none takes the label off. Taking it off by hand doesn't stick
+while the flags are there: the next run puts it back. A flag never fails the run or
+blocks the merge: the reviewer checks the line against the site. See
+[0027](../docs/decisions/0027-flag-what-looks-like-a-misread.md).
+
 ## Naming an update
 `updateTitle()` names an update `MFM v<version> update — <window>`. The version is the
 site-wide one from `meta.yaml` (`loadVersion()`); failing that, the version most factions
@@ -315,8 +358,9 @@ Any other failed edit (a 429, a 5xx) throws instead, and writes no marker. See
 `announcement()` renders the same `collectChanges()` diff the other renderers use, as a
 single Discord embed: the update title, the summary totals, then **every faction that
 moved with the number of units and detachments that moved in it**, busiest first, and the
-factions a global revision swept up without touching named separately. It is `null`, and
-nothing is posted, when nothing changed.
+factions a global revision swept up without touching named separately. When some changes
+need attention (see *Needs attention*), the summary opens with how many. It is `null`, and
+nothing is posted, when nothing changed and nothing needs attention.
 
 The changelog link points at the **PR**, not at the version's changelog file on `main`.
 Discord's embed limits (title 256, description 4096, field value 1024, 6000 total) are
@@ -383,9 +427,11 @@ captured stdout. The scrape workflow (`scrape.yml`) runs four jobs, one after an
    updates) the PR on the planned branch and base. Its title and body are the two
    outputs of `mfm diff`, and the title is also the commit subject (`data: <title>`).
 3. **`announce`**, when there is a PR: when the base isn't `main`, links the chain with
-   `gh stack link` (best-effort), and `mfm announce <before> <new> --send --record`
-   posts or edits the Discord message and records a new one's marker on the PR (see
-   *Announcing an update* above).
+   `gh stack link` (best-effort); `mfm attention <before> <new> --label --pr-number <n>`
+   puts the `needs-attention` label on the PR or takes it off (see *Needs attention*);
+   and `mfm announce <before> <new> --send --record` posts or edits the Discord message
+   and records a new one's marker on the PR (see *Announcing an update* above). The
+   label and the announcement are `continue-on-error`: neither is a scrape failure.
 4. **`report`**: if any job failed or timed out, `mfm report-failure` reports it on the
    `scrape-failure` issue (with the failure report, when there is one), and if that step
    didn't succeed, a fallback step reports it with `gh` alone. After a successful run,

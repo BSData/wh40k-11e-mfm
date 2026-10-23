@@ -59,6 +59,7 @@ describe('usage errors exit 2 and say why', () => {
     [['open-prs', '--json', 'x.json'], /--out is required/],
     [['announce', DATA, DATA, '--record'], /--record needs --send and --pr-number/],
     [['announce', DATA, DATA, '--pr-number', '78abc'], /Not a PR number: 78abc/],
+    [['attention', DATA, DATA, '--label'], /--label needs --pr-number/],
     [['render'], /expected 1 argument, got 0/],
     [['render', '../necrons'], /Not a faction slug: \.\.\/necrons/],
     [['render', 'necrons', '--legends', '--panels'], /--legends and --panels render different/],
