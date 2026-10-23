@@ -1,6 +1,11 @@
+import { cpSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { createServer, type Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
+import { main } from '../src/bin/mfm.js';
 import { FACTOR, MAX_LISTED, valueNote } from '../src/diff/attention.js';
 import {
   attentionSection,
@@ -12,14 +17,17 @@ import {
   needsAttention,
 } from '../src/diff.js';
 import { announcement } from '../src/discord.js';
-import type { SiteMeta } from '../src/emit.js';
+import { metaToYaml, type SiteMeta } from '../src/emit.js';
 import type { Faction, Unit } from '../src/model.js';
 
 /**
  * The "Needs attention" flags (src/diff/attention.ts): each rule at its threshold, how
  * they are listed, and that no real update so far trips any of them. The real updates are
- * the datasets frozen under test/golden/ (data-v1.3 to data-v1.6), each the `data/` the
- * repository had when that MFM version's update PRs had merged.
+ * replayed from `data/` as it was in git history, frozen byte for byte under test/golden/:
+ *  - data-v1.3: main just before the v1.4 update (#42);
+ *  - data-v1.4: after #42;
+ *  - data-v1.5-pr53 and data-v1.5: after the two v1.5 updates, #53 and #63;
+ *  - data-v1.6 and data-v1.6-pr78: after the two v1.6 updates, #64 and #78.
  */
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -96,6 +104,28 @@ describe('the rules', () => {
         what: `is gone from the site (it had ${necrons.units.length} units and ${necrons.detachments.length} detachments)`,
       },
     ]);
+  });
+
+  it('a faction the index stopped listing, whose file the scraper keeps', () => {
+    const flags = flagsFor((fs, meta) => {
+      meta.factions = meta.factions.filter((s) => s !== 'chaos-titan-legions');
+      return fs;
+    });
+    expect(flags).toEqual([
+      {
+        kind: 'gone',
+        factions: ['Chaos Titan Legions'],
+        what: "is gone from the site's index (it had 4 units; its `data/` file is kept as it was)",
+      },
+    ]);
+  });
+
+  it('a faction whose file is gone and the index too, once', () => {
+    const flags = flagsFor((fs, meta) => {
+      meta.factions = meta.factions.filter((s) => s !== 'necrons');
+      return fs.filter((f) => f.slug !== 'necrons');
+    });
+    expect(flags.map((f) => [f.kind, f.factions])).toEqual([['gone', ['Necrons']]]);
   });
 
   it('a faction that lost more than half its units, not half', () => {
@@ -188,6 +218,15 @@ describe('the rules', () => {
       'Necron Warriors — 10 models: 85 → 85 / 255 (re-tiered, ×3)',
       'Necron Warriors — 20 models: 190 → 190 / 570 (re-tiered, ×3)',
     ]);
+    // Either side of the threshold, both ways: 254 and 569 are under ×3; 30 and 65 are
+    // above a third (28.3 and 63.3); 28 and 63 are at a third or less.
+    expect(retier((p) => p * 3 - 1)).toEqual([]);
+    expect(retier((p) => Math.ceil(p / 3) + 1)).toEqual([]);
+    expect(retier((p) => Math.floor(p / 3)).map((f) => f.what)).toEqual([
+      'Necron Warriors — 10 models: 85 → 85 / 28 (re-tiered, ÷3)',
+      'Necron Warriors — 20 models: 190 → 190 / 63 (re-tiered, ÷3)',
+    ]);
+    expect(retier(() => 0).map((f) => f.kind)).toEqual(['to-zero', 'to-zero']);
   });
 
   it('a new version with nothing else in it, but not one that changed anything', () => {
@@ -206,6 +245,27 @@ describe('the rules', () => {
       },
     ]);
     expect(bump((fs) => setCost(unit(faction(fs, 'orks'), 'Nobz'), 120))).toEqual([]);
+  });
+
+  it('a new site version and nothing else, with no faction changed at all', () => {
+    const flags = flagsFor((fs, meta) => {
+      meta.version = '1.7';
+      return fs;
+    });
+    expect(flags.map((f) => [f.kind, f.what.split(':')[0]])).toEqual([
+      ['version-only', 'Only the version changed (v1.6 → v1.7)'],
+    ]);
+  });
+
+  it('a version-only update without meta.yaml: every faction, or just one', () => {
+    const bumped = (which: (f: Faction) => boolean) => {
+      const after = structuredClone(base);
+      for (const f of after.filter(which)) f.version = '1.7';
+      return needsAttention(base, after).map((f) => [f.kind, f.what.split(':')[0]]);
+    };
+    const want = [['version-only', 'Only the version changed (v1.6 → v1.7)']];
+    expect(bumped(() => true)).toEqual(want);
+    expect(bumped((f) => f.slug === 'orks')).toEqual(want);
   });
 
   it('a rules panel change is not version-only either', () => {
@@ -268,7 +328,7 @@ describe('the warning', () => {
     }));
     const out = lines(many);
     expect(out.filter((l) => l.startsWith('> - **Orks**'))).toHaveLength(MAX_LISTED);
-    expect(out.at(-1)).toBe('> - …and 3 more');
+    expect(out.at(-1)).toBe('> - …and 3 more, which `mfm attention` lists');
   });
 
   it('opens the PR body, straight after the title, and stays out of the changelog file', () => {
@@ -283,6 +343,18 @@ describe('the warning', () => {
     expect(body[2]).toBe('> [!WARNING]');
     expect(changelogEntry(base, after, { meta, today: '2026-10-23' })).not.toContain(
       'Needs attention',
+    );
+  });
+
+  it('makes a PR body on its own, when no data file changed', () => {
+    const meta = {
+      before: baseMeta,
+      after: { ...baseMeta, factions: baseMeta.factions.filter((s) => s !== 'necrons') },
+    };
+    const body = changelog(base, base, { meta, today: '2026-10-23' });
+    expect(body).toContain("> - **Necrons** is gone from the site's index");
+    expect(changelog(base, base, { meta: { before: baseMeta, after: baseMeta } })).toBe(
+      'No changes detected.\n',
     );
   });
 
@@ -306,17 +378,90 @@ describe('no false alarms', () => {
     ).toEqual([]);
   });
 
-  // Every real update so far. The largest moves in them are a faction losing 39% of its
-  // units, a value changing ×2.5 and a re-tiered price ×1.82 (docs/decisions/0026).
+  // Every real update so far, one by one. The largest moves in them are a faction losing
+  // 39% of its units, a value changing ×2.5 and a re-tiered price ×1.82
+  // (docs/decisions/0027).
   it.each([
-    ['1.3', '1.4'],
-    ['1.4', '1.5'],
-    ['1.5', '1.6'],
-  ])('on the real v%s → v%s update', (from, to) => {
+    ['1.3', '1.4', '#42'],
+    ['1.4', '1.5-pr53', '#53'],
+    ['1.5-pr53', '1.5', '#63'],
+    ['1.5', '1.6', '#64'],
+    ['1.6', '1.6-pr78', '#78'],
+  ])('on the real update from v%s to v%s (%s)', (from, to) => {
     const [b, a] = [golden(from), golden(to)];
     const flags = needsAttention(loadFactionDir(b), loadFactionDir(a), {
       meta: { before: loadMeta(b), after: loadMeta(a) },
     });
     expect(flags).toEqual([]);
+  });
+});
+
+describe('mfm attention', () => {
+  const scratch = mkdtempSync(join(tmpdir(), 'mfm-attention-'));
+  afterAll(() => rmSync(scratch, { recursive: true, force: true }));
+  let server: Server | undefined;
+  afterEach(async () => {
+    vi.unstubAllEnvs();
+    if (server) await new Promise((done) => server?.close(done));
+    server = undefined;
+  });
+
+  /** The v1.6 snapshot with Chaos Titan Legions gone from the index, its file kept. */
+  const withdrawn = () => {
+    const dir = join(scratch, 'withdrawn');
+    cpSync(V16, dir, { recursive: true });
+    const factions = baseMeta.factions.filter((s) => s !== 'chaos-titan-legions');
+    writeFileSync(join(dir, 'meta.yaml'), metaToYaml({ ...baseMeta, factions }));
+    return dir;
+  };
+
+  async function mfm(...argv: string[]) {
+    let stdout = '';
+    let stderr = '';
+    const code = await main(argv, {
+      out: (text) => {
+        stdout += text;
+      },
+      err: (text) => {
+        stderr += text;
+      },
+    });
+    return { code, stdout, stderr };
+  }
+
+  it('prints one line per flag, and nothing when there are none', async () => {
+    expect((await mfm('attention', V16, withdrawn())).stdout).toBe(
+      "- **Chaos Titan Legions** is gone from the site's index (it had 4 units; its `data/` file is kept as it was)\n",
+    );
+    expect(await mfm('attention', V16, V16)).toEqual({ code: 0, stdout: '', stderr: '' });
+  });
+
+  it('--label labels the PR through the API', async () => {
+    const calls: string[] = [];
+    server = createServer((req, res) => {
+      req.resume();
+      req.on('end', () => {
+        calls.push(`${req.method} ${req.url}`);
+        res.writeHead(200, { 'content-type': 'application/json' }).end('[]');
+      });
+    });
+    await new Promise<void>((done) => server?.listen(0, '127.0.0.1', done));
+    vi.stubEnv('GITHUB_API_URL', `http://127.0.0.1:${(server.address() as AddressInfo).port}`);
+    vi.stubEnv('GITHUB_REPOSITORY', 'BSData/wh40k-11e-mfm');
+    vi.stubEnv('GH_TOKEN', 't0ken');
+    const { code, stderr } = await mfm(
+      'attention',
+      V16,
+      withdrawn(),
+      '--label',
+      '--pr-number',
+      '96',
+    );
+    expect(code).toBe(0);
+    expect(stderr).toBe('needs-attention on #96: added.\n');
+    expect(calls.filter((c) => !c.startsWith('GET'))).toEqual([
+      'POST /repos/BSData/wh40k-11e-mfm/labels',
+      'POST /repos/BSData/wh40k-11e-mfm/issues/96/labels',
+    ]);
   });
 });

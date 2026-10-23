@@ -178,10 +178,12 @@ function fitted(
 export function changelog(before: Snapshot[], after: Snapshot[], opts: RenderOpts = {}): string {
   const changes = collectChanges(before, after);
   const rules = collectRules(opts.meta?.before, opts.meta?.after);
-  if (changes.length === 0 && !rules) return 'No changes detected.\n';
+  const flags = collectAttention(changes, rules, before, after, opts.meta);
+  // A flag alone still makes a body: a faction gone from the index changes no data file.
+  if (changes.length === 0 && !rules && flags.length === 0) return 'No changes detected.\n';
   const file = changelogFile(updateVersion(after, opts));
   // The warning is part of the head, which fitting the body to GitHub's limit never cuts.
-  const warning = attentionSection(collectAttention(changes, rules, before, after));
+  const warning = attentionSection(flags);
   const head = `# ${updateTitle(before, after, opts)}\n\n${warning ? `${warning}\n\n` : ''}${blurb(file)}`;
   const all = [...rulesSection(rules), ...sections(changes)];
   return fitted(head, summary(changes, rules), all, changes.length, file);

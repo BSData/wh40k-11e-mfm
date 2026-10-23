@@ -308,7 +308,7 @@ export function announcement(
         changes,
         rules,
         totals(changes, rules),
-        collectAttention(changes, rules, before, after).length,
+        collectAttention(changes, rules, before, after, opts.meta).length,
         opts,
       ),
       LIMIT.description,

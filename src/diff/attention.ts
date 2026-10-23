@@ -10,14 +10,14 @@ import { matchUnits, pricesByOption, tierRanges } from './units.js';
  * The changes more likely the scraper misreading the site than GW changing it: what the
  * PR body lists under "Needs attention", what the Discord summary counts, and what the
  * update PR is labelled `needs-attention` for. See "Needs attention" in
- * specs/change-tracking.md, and docs/decisions/0026 for where the thresholds come from.
+ * specs/change-tracking.md, and docs/decisions/0027 for where the thresholds come from.
  */
 
 /** A value this many times bigger, or smaller, than before is flagged. */
 export const FACTOR = 3;
 
-/** The most flags the PR body lists; the rest are counted. */
-export const MAX_LISTED = 25;
+/** The most flags the PR body lists; the rest are counted, and `mfm attention` lists all. */
+export const MAX_LISTED = 50;
 
 export type FlagKind = 'gone' | 'units-lost' | 'version-only' | 'to-zero' | 'threefold';
 
@@ -87,17 +87,26 @@ const versionOnly = (c: FactionChanges): boolean =>
     (d) => d.deltas.length === 0 && d.added.length === 0 && d.removed.length === 0,
   );
 
+/** What a gone faction had: "64 units and 12 detachments". */
+const contents = (units: number, dets: number): string =>
+  listing(
+    [units > 0 ? plural(units, 'unit') : '', dets > 0 ? plural(dets, 'detachment') : ''].filter(
+      Boolean,
+    ),
+  ) || 'nothing in it';
+
 /**
- * Every flag in an update, merged where several factions share one word for word (a
- * sub-faction carries its parent's roster), and in listing order. `changes` and `rules`
- * are the update's diff; the snapshots are read again only for the re-tiered units,
- * whose prices the diff keeps out of its cost rows.
+ * Every flag in an update, in listing order, a value's flag merged where several factions
+ * share it word for word (a sub-faction carries its parent's roster). `changes` and
+ * `rules` are the update's diff. The snapshots are read again for the re-tiered units,
+ * whose prices the diff keeps out of its cost rows; `meta` for the site's index.
  */
 export function collectAttention(
   changes: FactionChanges[],
   rules: RulesChanges | null,
   before: Snapshot[],
   after: Snapshot[],
+  meta: RenderOpts['meta'] = {},
 ): Flag[] {
   const flags: Flag[] = [];
   /** A value's flag, merged into the same line from another faction when there is one. */
@@ -111,11 +120,7 @@ export function collectAttention(
   const afterBySlug = new Map(after.map((f) => [f.slug, f]));
   for (const c of changes) {
     if (c.status === 'removed') {
-      const had = [
-        c.unitCount > 0 ? plural(c.unitCount, 'unit') : '',
-        c.detCount > 0 ? plural(c.detCount, 'detachment') : '',
-      ].filter(Boolean);
-      const what = `is gone from the site (it had ${listing(had) || 'nothing in it'})`;
+      const what = `is gone from the site (it had ${contents(c.unitCount, c.detCount)})`;
       flags.push({ kind: 'gone', factions: [c.name], what });
       continue;
     }
@@ -157,6 +162,21 @@ export function collectAttention(
     }
   }
 
+  // A faction the site's index stopped listing. The scraper writes only what the index
+  // lists and deletes nothing, so its old file stays in `data/` unchanged and the diff
+  // never sees it go: `meta.yaml`'s list of factions is where it shows.
+  const reported = new Set(changes.filter((c) => c.status === 'removed').map((c) => c.slug));
+  const listed = new Set(meta?.after?.factions ?? []);
+  if (meta?.after) {
+    for (const slug of meta.before?.factions ?? []) {
+      if (listed.has(slug) || reported.has(slug)) continue;
+      const f = beforeBySlug.get(slug);
+      const had = f ? contents(f.units.length, f.detachments.length) : 'a faction file';
+      const what = `is gone from the site's index (it had ${had}; its \`data/\` file is kept as it was)`;
+      flags.push({ kind: 'gone', factions: [f?.name ?? slug], what });
+    }
+  }
+
   // A new version and nothing else: what changed in it is likely what the scraper missed.
   const bumped = rules?.version ?? (sharedHead(changes) || changes[0]?.head[0]);
   if (
@@ -189,7 +209,7 @@ export function needsAttention(
 ): Flag[] {
   const changes = collectChanges(before, after);
   const rules = collectRules(opts.meta?.before, opts.meta?.after);
-  return collectAttention(changes, rules, before, after);
+  return collectAttention(changes, rules, before, after, opts.meta);
 }
 
 /** One flag as a Markdown list item, the factions first. */
@@ -209,7 +229,7 @@ export function attentionSection(flags: Flag[]): string {
   if (flags.length === 0) return '';
   const lines = flags.slice(0, MAX_LISTED).map(flagLine);
   const more = flags.length - MAX_LISTED;
-  if (more > 0) lines.push(`- …and ${more} more`);
+  if (more > 0) lines.push(`- …and ${more} more, which \`mfm attention\` lists`);
   const lead = `**Needs attention:** ${plural(flags.length, 'change')} that look${flags.length === 1 ? 's' : ''} more like the scraper misreading the site than GW changing it. Check ${flags.length === 1 ? 'it' : 'them'} against the site before merging.`;
   return ['> [!WARNING]', `> ${lead}`, '>', ...lines.map((l) => `> ${l}`)].join('\n');
 }
