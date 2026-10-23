@@ -16,8 +16,9 @@ import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import type { DiscordMessage } from '../src/discord.js';
 import { announceOnPr, markerComment, recordedMessageId } from '../src/ops/announce.js';
 import { failureReport, reportFailure, resolveFailure } from '../src/ops/failure-issue.js';
+import { gitEnv } from '../src/ops/git-env.js';
 import { type GitHub, githubFromEnv, paginate, request, runUrl } from '../src/ops/github.js';
-import { exportBranchData, exportOpenPrs, gitEnv, listUpdatePrs } from '../src/ops/open-prs.js';
+import { exportBranchData, exportOpenPrs, listUpdatePrs } from '../src/ops/open-prs.js';
 import { stepOutputs } from '../src/ops/outputs.js';
 
 interface Call {
@@ -192,6 +193,28 @@ describe('retries', () => {
       request(github(api.url), 'POST', '/issues/1/comments', { body: 'x' }),
     ).rejects.toThrow(/HTTP 500/);
     expect(api.calls).toHaveLength(1);
+  });
+
+  it('waits as long as Retry-After asks', async () => {
+    const replies: Reply[] = [{ status: 429, headers: { 'retry-after': '1' } }];
+    const api = await stub(() => replies.shift() ?? { body: [] });
+    const started = Date.now();
+    await expect(paginate(github(api.url), '/issues')).resolves.toEqual([]);
+    expect(Date.now() - started).toBeGreaterThanOrEqual(900);
+    expect(api.calls).toHaveLength(2);
+  });
+
+  it('retries a call whose connection dropped', async () => {
+    let drops = 1;
+    const server = createServer((req, res) => {
+      if (drops-- > 0) req.socket.destroy();
+      else res.writeHead(200, { 'content-type': 'application/json' }).end('[{"n":1}]');
+    });
+    await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
+    servers.push(server);
+    const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    await expect(paginate(github(url), '/issues')).resolves.toEqual([{ n: 1 }]);
+    expect(drops).toBe(-1);
   });
 
   it('does not retry a client error', async () => {

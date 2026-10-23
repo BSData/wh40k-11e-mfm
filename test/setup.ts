@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll } from 'vitest';
-import { gitEnv } from '../src/ops/open-prs.js';
+import { gitEnv } from '../src/ops/git-env.js';
 
 /**
  * Runs before every test file, to keep the tests off the developer's repository and off
@@ -19,7 +19,7 @@ import { gitEnv } from '../src/ops/open-prs.js';
  * GitHub: tests stub the API and `gh`, and a stub that isn't the one used must fail, not
  * reach the real thing. Once, a stub `gh` missing from `PATH` let the real one open two
  * issues on the repository. So `gh` gets a host that can't resolve and an empty config
- * (no stored login), no GitHub token is set, and the REST API root can't resolve either:
+ * (no stored login), no GitHub token is set, and the REST API root is a closed port:
  * a test that wants GitHub stubs it, with `vi.stubEnv` or a `GitHub` of its own.
  */
 
@@ -38,7 +38,9 @@ Object.assign(process.env, {
   GH_HOST: 'github.invalid',
   GH_CONFIG_DIR: join(dir, 'gh'),
   GH_PROMPT_DISABLED: '1',
-  GITHUB_API_URL: 'https://api.github.invalid',
+  // The REST API at a port nothing listens on: a call is refused at once, not retried
+  // against GitHub.
+  GITHUB_API_URL: 'http://127.0.0.1:9',
   GITHUB_SERVER_URL: 'https://github.invalid',
 });
 afterAll(() => rmSync(dir, { recursive: true, force: true }));

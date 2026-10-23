@@ -51,15 +51,18 @@ const repoUrl = (gh: GitHub, path: string) => `${gh.api}/repos/${gh.repo}${path}
 
 /** Tries per call: these calls are how a failed scrape gets reported, so a blip mustn't lose one. */
 const ATTEMPTS = 3;
-/** Statuses GitHub answers without having acted on the request, so any method can retry. */
+/** Statuses that usually mean GitHub didn't act on the request, so any method retries. */
 const NOT_SERVED = new Set([429, 502, 503, 504]);
-/** The longest `Retry-After` honoured; past it, the call fails rather than stall the job. */
+/** The longest wait between tries: a longer `Retry-After` is cut to this, not obeyed. */
 const MAX_WAIT_MS = 60_000;
 
 /**
  * One HTTP call, retried on a network error, a 429 or a 502–504, and for a GET (which is
- * safe to repeat) on any 5xx; never on a 500 to a write, which may already have made the
- * comment or the issue. Waits `Retry-After` when GitHub sends one, else 1 s, then 2 s.
+ * safe to repeat) on any 5xx; never on a 500 to a write, which likely made the comment
+ * or the issue. A 502–504 or a dropped connection doesn't prove GitHub didn't act either,
+ * so a retried write can, rarely, comment or open an issue twice: better than a failure
+ * report lost, and the next run tidies up (it closes every open failure issue). Waits
+ * `Retry-After` when GitHub sends one, at most a minute, else 1 s, then 2 s.
  */
 async function call(gh: GitHub, method: string, url: string, body?: unknown): Promise<Response> {
   for (let attempt = 1; ; attempt++) {

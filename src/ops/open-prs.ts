@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 import type { UpdatePr } from '../stack.js';
+import { gitEnv } from './git-env.js';
 import { type GitHub, paginate } from './github.js';
 
 /**
@@ -38,34 +39,6 @@ export async function listUpdatePrs(gh: GitHub): Promise<UpdatePr[]> {
         p.head.ref.startsWith('mfm/'),
     )
     .map((p) => ({ number: p.number, headRefName: p.head.ref, baseRefName: p.base.ref }));
-}
-
-/** The variables that tell git which repository to use (`git rev-parse --local-env-vars`). */
-const REPO_ENV = [
-  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
-  'GIT_CONFIG',
-  'GIT_CONFIG_PARAMETERS',
-  'GIT_CONFIG_COUNT',
-  'GIT_OBJECT_DIRECTORY',
-  'GIT_DIR',
-  'GIT_WORK_TREE',
-  'GIT_IMPLICIT_WORK_TREE',
-  'GIT_GRAFT_FILE',
-  'GIT_INDEX_FILE',
-  'GIT_NO_REPLACE_OBJECTS',
-  'GIT_REPLACE_REF_BASE',
-  'GIT_PREFIX',
-  'GIT_SHALLOW_FILE',
-  'GIT_COMMON_DIR',
-];
-
-/**
- * The environment without `REPO_ENV`, so the directory git runs in decides the
- * repository. A git hook exports `GIT_DIR`, and a command run from one would otherwise
- * act on the hook's repository instead.
- */
-export function gitEnv(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
-  return Object.fromEntries(Object.entries(env).filter(([name]) => !REPO_ENV.includes(name)));
 }
 
 /** Run git in `cwd`, feeding it `input`; its stdout, or a throw with its stderr. */

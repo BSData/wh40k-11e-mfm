@@ -297,15 +297,15 @@ that marker is the entire state:
 | absent | this update has never been announced | **post**, and record the id |
 | present | the update already has a message | **edit** it in place |
 
-The last marker among the comments by the account that writes them wins: the workflow's own
-`github-actions[bot]`, or the one `--marker-author` names. A marker anyone else wrote is
-ignored, so a comment can't point the next edit at another message. The marker is written only for a message id
-that is all digits (a Discord snowflake). The comment also carries the message's
-permalink (`https://discord.com/channels/<guild>/<channel>/<message>`), or `link
-unavailable` when the webhook won't say where it posts; resolving it is best-effort and
-never stops the marker. Deleting the comment forces a repost. Each run edits the message
-while the PR is open, even when nothing changed, and a new version's PR, which starts
-with no marker, gets a message of its own.
+The last marker among the comments by the account that writes them wins: the workflow's
+own `github-actions[bot]`, or the one `--marker-author` names. A marker anyone else wrote
+is ignored, so a comment can't point the next edit at another message. The marker is
+written only for a message id that is all digits (a Discord snowflake). The comment also
+carries the message's permalink (`https://discord.com/channels/<guild>/<channel>/<message>`),
+or `link unavailable` when the webhook won't say where it posts; resolving it is
+best-effort and never stops the marker. Deleting the comment forces a repost. Each run
+edits the message while the PR is open, even when nothing changed, and a new version's PR,
+which starts with no marker, gets a message of its own.
 
 An edit that fails because the message is gone (a 404) falls back to posting a new one.
 Any other failed edit (a 429, a 5xx) throws instead, and writes no marker. See
@@ -345,8 +345,8 @@ every open one with a link to that run, and closes it. See
 
 A run that fails before `mfm` can report it (in checkout or setup, or in the report step
 itself) still files the failure, the same way, from a fallback step that needs only `gh`:
-the issue then links the run and says there is no per-faction detail. A failure is never
-silent.
+the issue then links the run and says there is no per-faction detail. So a run that
+fails before `mfm` could start is still reported, unless GitHub itself can't be reached.
 
 ## Workflow integration
 Each step that has logic is one `mfm` command, run as `node_modules/.bin/tsx

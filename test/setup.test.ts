@@ -18,9 +18,9 @@ const hasGh = (() => {
 const env = (name: string) => process.env[name];
 
 describe('the test environment (test/setup.ts)', () => {
-  it('points gh and the GitHub API at hosts that cannot resolve, with no token', () => {
+  it('points gh and the GitHub API where nothing answers, with no token', () => {
     expect(env('GH_HOST')).toMatch(/\.invalid$/);
-    expect(new URL(env('GITHUB_API_URL') ?? '').hostname).toMatch(/\.invalid$/);
+    expect(env('GITHUB_API_URL')).toBe('http://127.0.0.1:9');
     expect(env('GH_CONFIG_DIR')).toBeTruthy();
     expect(env('GH_TOKEN')).toBeUndefined();
     expect(env('GITHUB_TOKEN')).toBeUndefined();

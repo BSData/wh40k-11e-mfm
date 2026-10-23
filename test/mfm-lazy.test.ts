@@ -1,6 +1,6 @@
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { main } from '../src/bin/mfm.js';
 
 // In this file every third-party library and the scraper itself fail to load. The commands
@@ -41,6 +41,12 @@ async function mfm(...argv: string[]) {
 }
 
 describe('a command loads only what it uses', () => {
+  // Whatever an earlier import (a setup file) already loaded is loaded again, under the
+  // mocks above, when a command's module imports it.
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
   let server: Server | undefined;
   afterEach(async () => {
     vi.unstubAllEnvs();
