@@ -55,7 +55,7 @@ detachments:
       - { name: Aquilan Eye, points: 20 }
       - { name: Laud Hailer, points: 10 }
       - { name: Spec Ops Veteran, points: 15 }
-  - name: Hammer Of The Emperor
+  - name: Hammer of the Emperor
     dp: 2
     objectives:
       - PURGE THE FOE
@@ -102,7 +102,7 @@ detachments:
       - { name: Engine Speaker, points: 15 }
       - { name: Titan Killer, points: 20 }
 units:
-  - name: ‘iron Hand’ Straken
+  - name: ‘Iron Hand’ Straken
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -306,7 +306,7 @@ units:
         costs:
           - { models: 1, points: 40 }
     legends: true
-  - name: Centaur Rsv
+  - name: Centaur RSV
     pricing:
       - range: "[1,3]"
         label: Your 1st To 3rd Units Cost
@@ -343,7 +343,7 @@ units:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
-      - Death Korps Of Krieg
+      - Death Korps of Krieg
       - Kasrkin
       - Krieg Combat Engineers
       - Tempestus Scions
@@ -353,7 +353,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 125 }
-  - name: Commissar Graves On Foot
+  - name: Commissar Graves on Foot
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -363,7 +363,7 @@ units:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
-      - Death Korps Of Krieg
+      - Death Korps of Krieg
       - Kasrkin
       - Krieg Combat Engineers
       - Tempestus Scions
@@ -377,7 +377,7 @@ units:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
-      - Death Korps Of Krieg
+      - Death Korps of Krieg
       - Kasrkin
       - Krieg Combat Engineers
       - Tempestus Scions
@@ -405,7 +405,7 @@ units:
         costs:
           - { models: 10, points: 110 }
     legends: true
-  - name: Death Korps Of Krieg
+  - name: Death Korps of Krieg
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -491,7 +491,7 @@ units:
           - { models: 2, points: 90 }
     wargear:
       - { item: Bombast field gun, points: 10 }
-  - name: Gaunt’S Ghosts
+  - name: Gaunt’s Ghosts
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -532,7 +532,7 @@ units:
         costs:
           - { models: 1, points: 50 }
     legends: true
-  - name: Hell'S Last
+  - name: Hell's Last
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -561,7 +561,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 125 }
-  - name: Hippogriff Afv
+  - name: Hippogriff AFV
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -611,7 +611,7 @@ units:
           - { models: 6, points: 60 }
     leaderTo:
       - Death Korps Grenadier Squad
-      - Death Korps Of Krieg
+      - Death Korps of Krieg
       - Krieg Combat Engineers
   - name: Krieg Heavy Weapons Squad
     pricing:
@@ -753,7 +753,7 @@ units:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
-      - Death Korps Of Krieg
+      - Death Korps of Krieg
       - Death Riders
       - Kasrkin
       - Krieg Combat Engineers
@@ -873,7 +873,7 @@ units:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
-      - Death Korps Of Krieg
+      - Death Korps of Krieg
       - Kasrkin
       - Krieg Combat Engineers
       - Tempestus Scions
@@ -934,7 +934,7 @@ units:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
       - Death Korps Grenadier Squad
-      - Death Korps Of Krieg
+      - Death Korps of Krieg
       - Kasrkin
       - Krieg Combat Engineers
       - Tempestus Scions
@@ -955,7 +955,7 @@ units:
           - { models: 5, points: 45 }
     leaderTo:
       - Death Korps Grenadier Squad
-      - Death Korps Of Krieg
+      - Death Korps of Krieg
       - Krieg Combat Engineers
     legends: true
   - name: Rapier Laser Destroyer Battery
@@ -981,7 +981,7 @@ units:
         costs:
           - { models: 3, points: 40 }
     legends: true
-  - name: Rein And Raus
+  - name: Rein and Raus
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1162,7 +1162,7 @@ units:
     leaderTo:
       - Cadian Shock Troops
       - Catachan Jungle Fighters
-      - Death Korps Of Krieg
+      - Death Korps of Krieg
       - Kasrkin
       - Krieg Combat Engineers
   - name: Tempestus Aquilons

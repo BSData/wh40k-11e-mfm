@@ -3,7 +3,7 @@ slug: emperors-children
 version: "1.6"
 firstSeen: 2026-10-14
 detachments:
-  - name: Carnival Of Excess
+  - name: Carnival of Excess
     dp: 3
     objectives:
       - DISRUPTION
@@ -13,7 +13,7 @@ detachments:
       - { name: Empyric Suffusion, points: 15 }
       - { name: Possessed Blade, points: 35 }
       - { name: Warp Walker, points: 35 }
-  - name: Coterie Of The Conceited
+  - name: Coterie of the Conceited
     dp: 3
     objectives:
       - PRIORITY ASSETS
@@ -23,7 +23,7 @@ detachments:
       - { name: Pledge of Eternal Servitude, points: 25 }
       - { name: Pledge of Mortal Pain, points: 15 }
       - { name: Pledge of Unholy Fortune, points: 30 }
-  - name: Court Of The Phoenician
+  - name: Court of the Phoenician
     dp: 2
     objectives:
       - PURGE THE FOE
@@ -73,7 +73,7 @@ detachments:
       - { name: Heretek Adept, points: 35 }
       - { name: Spearhead Striker, points: 20 }
       - { name: Sublime Prescience, points: 25 }
-  - name: Slaanesh’S Chosen
+  - name: Slaanesh’s Chosen
     dp: 1
     objectives:
       - PURGE THE FOE
@@ -82,7 +82,7 @@ detachments:
       - { name: Proud and Vainglorious, points: 20 }
       - { name: Repulsed by Weakness, points: 25 }
       - { name: Slayer of Champions, points: 15 }
-  - name: Spectacle Of Slaughter
+  - name: Spectacle of Slaughter
     dp: 1
     objectives:
       - DISRUPTION
@@ -122,7 +122,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 5, points: 155 }
-  - name: Daemon Prince Of Slaanesh
+  - name: Daemon Prince of Slaanesh
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -132,7 +132,7 @@ units:
         label: Your 2nd + Unit Costs
         costs:
           - { models: 1, points: 180 }
-  - name: Daemon Prince Of Slaanesh With Wings
+  - name: Daemon Prince of Slaanesh with Wings
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -143,7 +143,7 @@ units:
         costs:
           - { models: 1, points: 225 }
   - name: Daemonettes
-    groupTitle: Legions Of Excess
+    groupTitle: Legions of Excess
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -163,7 +163,7 @@ units:
       - { item: Heavy Reaper Autocannon, points: 15 }
       - { item: Hades Lascannon, points: 15 }
   - name: Fiends
-    groupTitle: Legions Of Excess
+    groupTitle: Legions of Excess
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -196,8 +196,8 @@ units:
         costs:
           - { models: 5, points: 95 }
           - { models: 10, points: 175 }
-  - name: Keeper Of Secrets
-    groupTitle: Legions Of Excess
+  - name: Keeper of Secrets
+    groupTitle: Legions of Excess
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -229,7 +229,7 @@ units:
     leaderTo:
       - Chaos Terminators
       - Noise Marines
-  - name: Lucius The Eternal
+  - name: Lucius the Eternal
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -258,7 +258,7 @@ units:
         costs:
           - { models: 6, points: 175 }
   - name: Seekers
-    groupTitle: Legions Of Excess
+    groupTitle: Legions of Excess
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -266,7 +266,7 @@ units:
           - { models: 5, points: 85 }
           - { models: 10, points: 155 }
   - name: Shalaxi Helbane
-    groupTitle: Legions Of Excess
+    groupTitle: Legions of Excess
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

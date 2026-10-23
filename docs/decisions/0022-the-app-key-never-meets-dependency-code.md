@@ -1,4 +1,4 @@
-# 0021. Update PRs are opened with the App's token, in a job that runs no dependency code
+# 0022. Update PRs are opened with the App's token, in a job that runs no dependency code
 
 - **Status:** accepted, [#91](https://github.com/BSData/wh40k-11e-mfm/pull/91)
 - **Spec:** [change tracking — The App token](../../specs/change-tracking.md#the-app-token)

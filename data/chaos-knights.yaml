@@ -3,7 +3,7 @@ slug: chaos-knights
 version: "1.6"
 firstSeen: 2026-10-14
 detachments:
-  - name: Bastions Of Tyranny
+  - name: Bastions of Tyranny
     dp: 1
     objectives:
       - PRIORITY ASSETS
@@ -52,7 +52,7 @@ detachments:
       - { name: Blasphemous Engine, points: 35 }
       - { name: Fleshmetal Fusion, points: 35 }
       - { name: Knight Diabolus, points: 25 }
-  - name: Lords Of Dread
+  - name: Lords of Dread
     dp: 2
     objectives:
       - TAKE AND HOLD

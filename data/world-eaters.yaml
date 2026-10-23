@@ -19,14 +19,14 @@ detachments:
     enhancements:
       - { name: Murder-forged Entity (Upgrade), points: 15 }
       - { name: Talons of Butchery (Upgrade), points: 20 }
-  - name: Butchers Of Khorne
+  - name: Butchers of Khorne
     dp: 1
     objectives:
       - TAKE AND HOLD
     enhancements:
       - { name: Gore-stained Veterans (Upgrade), points: 20 }
       - { name: Sanctified in Slaughter (Upgrade), points: 15 }
-  - name: Cult Of Blood
+  - name: Cult of Blood
     dp: 2
     objectives:
       - PRIORITY ASSETS
@@ -62,7 +62,7 @@ detachments:
       - { name: Killing Clarity, points: 15 }
       - { name: Malicious Vigour, points: 30 }
       - { name: Violent Demise, points: 10 }
-  - name: Vessels Of Wrath
+  - name: Vessels of Wrath
     dp: 1
     objectives:
       - PRIORITY ASSETS
@@ -165,13 +165,13 @@ units:
         costs:
           - { models: 5, points: 185 }
           - { models: 10, points: 360 }
-  - name: Daemon Prince Of Khorne
+  - name: Daemon Prince of Khorne
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 200 }
-  - name: Daemon Prince Of Khorne With Wings
+  - name: Daemon Prince of Khorne with Wings
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -259,7 +259,7 @@ units:
         costs:
           - { models: 10, points: 65 }
           - { models: 20, points: 120 }
-  - name: Khârn The Betrayer
+  - name: Khârn the Betrayer
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -274,7 +274,7 @@ units:
         costs:
           - { models: 10, points: 170 }
           - { models: 20, points: 330 }
-  - name: Khorne Lord Of Skulls
+  - name: Khorne Lord of Skulls
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -294,7 +294,7 @@ units:
       - Eightbound
       - Exalted Eightbound
       - Khorne Berzerkers
-  - name: Lord On Juggernaut
+  - name: Lord on Juggernaut
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -304,7 +304,7 @@ units:
       - Eightbound
       - Exalted Eightbound
       - Khorne Berzerkers
-  - name: Master Of Executions
+  - name: Master of Executions
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

@@ -108,7 +108,7 @@ unmatched are then paired by name, in page order, and such a pair is a **changed
 (`group: A → B`), not a removal plus an addition.
 
 A unit is named as it always was unless another unit in either snapshot has the same
-name. Then the report adds its group, `Inquisitor (Every Model Has The Imperium
+name. Then the report adds its group, `Inquisitor (Every Model Has the Imperium
 Keyword)`, and, if the group doesn't tell them apart either, its position: `Venerable
 Dreadnought (#2)`. Leader/Support lists hold bare names, so a target counts as lost
 only when no unit of that name is left. See [0014](../docs/decisions/0014-unit-identity.md).
@@ -410,7 +410,7 @@ Discord marker, which needn't start anything.
 The key never shares a job with dependency code: `publish` runs pinned actions, a file
 copy and the checks above, nothing else. It takes no `.git` from the artifact, because git
 config can run commands and `create-pull-request` runs git there. See
-[0021](../docs/decisions/0021-the-app-key-never-meets-dependency-code.md).
+[0022](../docs/decisions/0022-the-app-key-never-meets-dependency-code.md).
 
 ### Dry run
 `gh workflow run scrape.yml --ref <branch> -f dry-run=true` runs `scrape` as a real run
@@ -422,7 +422,7 @@ commit would change, and the PR body. The Discord payload goes to the log, from 
 announce` without `--send`, which makes no request. A separate `app-check` job mints the
 App's token, unused, so a dry run also checks the App's credentials and permissions.
 A dry run has its own concurrency group. See
-[0022](../docs/decisions/0022-a-dry-run-publishes-nothing.md).
+[0023](../docs/decisions/0023-a-dry-run-publishes-nothing.md).
 
 ## Around the pipeline
 ### Live smoke test
@@ -433,7 +433,7 @@ the `mfm diff` changelog from the committed `data/` to that scrape in the job su
 with a notice when they differ. A difference never fails the job; a scrape that fails
 does, with its failure report in the summary. It is not a required check. The job has
 `contents: read` and no secrets, so a PR from a fork runs it the same way. See
-[0023](../docs/decisions/0023-a-live-smoke-test-reports-and-never-gates.md).
+[0024](../docs/decisions/0024-a-live-smoke-test-reports-and-never-gates.md).
 
 ### Dependabot auto-merge
 `dependabot-automerge.yml` runs on each PR whose author (not `github.actor`) is
@@ -448,4 +448,4 @@ check passes, only when all of these hold:
 Otherwise it waits for a maintainer. The PR gets one comment saying why, and auto-merge
 that an earlier run of this job turned on is turned off; a run that fails turns it off
 too. Auto-merge a maintainer turned on is left alone. See
-[0024](../docs/decisions/0024-dependabot-minor-and-patch-updates-merge-themselves.md).
+[0025](../docs/decisions/0025-dependabot-minor-and-patch-updates-merge-themselves.md).

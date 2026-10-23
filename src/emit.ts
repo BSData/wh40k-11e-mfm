@@ -28,7 +28,7 @@ const STRINGIFY_OPTS = { lineWidth: 0, sortMapEntries: false } as const;
 /**
  * The one name order, for the dataset and the reports alike: English collation, never
  * the process locale. Under POSIX, `localeCompare` without a locale sorts Orks'
- * "Big’Ed Bossbunka" before "Big Mek", the reverse of the committed files.
+ * "Big’ed Bossbunka" before "Big Mek", the reverse of the committed files.
  */
 export const compareNames = new Intl.Collator('en').compare;
 
@@ -105,6 +105,36 @@ function orderContent(c: FactionContent, order: OrderMode = 'name'): FactionCont
  */
 export function contentKey(c: FactionContent, order: OrderMode = 'name'): string {
   return JSON.stringify(orderContent(c, order));
+}
+
+/**
+ * `c` with `f` applied to every name the Names rule cases (specs/data-model.md): unit
+ * `name`, `groupTitle`, `leaderTo` and `supportTo`, detachment `name` and `unique`, the
+ * enhancements' `leaderTo` and `supportTo`, and `parent`. Enhancement names are verbatim
+ * site text, so they are left alone.
+ */
+export function mapNames<T extends FactionContent>(c: T, f: (name: string) => string): T {
+  type Lists = { leaderTo?: string[] | undefined; supportTo?: string[] | undefined };
+  const lists = <L extends Lists>(x: L): L => ({
+    ...x,
+    ...(x.leaderTo !== undefined ? { leaderTo: x.leaderTo.map(f) } : {}),
+    ...(x.supportTo !== undefined ? { supportTo: x.supportTo.map(f) } : {}),
+  });
+  return {
+    ...c,
+    ...(c.parent !== undefined ? { parent: f(c.parent) } : {}),
+    detachments: c.detachments.map((d) => ({
+      ...d,
+      name: f(d.name),
+      ...(d.unique !== undefined ? { unique: f(d.unique) } : {}),
+      enhancements: d.enhancements.map(lists),
+    })),
+    units: c.units.map((u) => ({
+      ...lists(u),
+      name: f(u.name),
+      ...(u.groupTitle !== undefined ? { groupTitle: f(u.groupTitle) } : {}),
+    })),
+  };
 }
 
 /** Serialize a faction to canonical YAML. `firstSeen` sits just under `version`. */

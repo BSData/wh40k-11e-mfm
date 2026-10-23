@@ -46,7 +46,8 @@ the AI angle is purely this maintenance harness.
 - `src/parse.ts` — cheerio HTML → model. Pure. The drift-prone surface. Modules under
   `src/parse/`: `page.ts` (hydrate, de-annotate, the cards), `cards.ts`, `values.ts`
   (points, DP, ranges, cost rows), `coverage.ts`, `panels.ts`, `faction.ts` (a faction page,
-  the index, the Legends), `names.ts` (`titleCase()`) and `text.ts`.
+  the index, the Legends), `names.ts` (`nameCase()` for names, `titleCase()` for tier
+  labels) and `text.ts`.
 - `src/fetch.ts` — polite HTTP (retry/backoff).
 - `src/browser.ts` — Playwright: Legends units + the rules panels ("Welcome…" notes,
   "Muster Armies") (not in HTTP).

@@ -147,7 +147,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "points": 15,
         },
       ],
-      "name": "Hand Of The Dynasty",
+      "name": "Hand of the Dynasty",
       "objectives": [
         "TAKE AND HOLD",
       ],
@@ -224,7 +224,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "points": 45,
         },
       ],
-      "name": "Pantheon Of Woe",
+      "name": "Pantheon of Woe",
       "objectives": [
         "DISRUPTION",
       ],
@@ -283,7 +283,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
           "points": 25,
         },
       ],
-      "name": "The Phaeron'S Armoury",
+      "name": "The Phaeron's Armoury",
       "objectives": [
         "PRIORITY ASSETS",
       ],
@@ -484,7 +484,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "name": "Convergence Of Dominion",
+      "name": "Convergence of Dominion",
       "pricing": [
         {
           "costs": [
@@ -522,7 +522,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "name": "C’Tan Shard Of The Deceiver",
+      "name": "C’tan Shard of the Deceiver",
       "pricing": [
         {
           "costs": [
@@ -537,7 +537,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "name": "C’Tan Shard Of The Nightbringer",
+      "name": "C’tan Shard of the Nightbringer",
       "pricing": [
         {
           "costs": [
@@ -552,7 +552,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "name": "C’Tan Shard Of The Void Dragon",
+      "name": "C’tan Shard of the Void Dragon",
       "pricing": [
         {
           "costs": [
@@ -748,7 +748,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         "Lychguard",
         "Necron Warriors",
       ],
-      "name": "Imotekh The Stormlord",
+      "name": "Imotekh the Stormlord",
       "pricing": [
         {
           "costs": [
@@ -1023,7 +1023,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "name": "Orikan The Diviner",
+      "name": "Orikan the Diviner",
       "pricing": [
         {
           "costs": [
@@ -1067,7 +1067,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         "Lychguard",
         "Necron Warriors",
       ],
-      "name": "Overlord With Translocation Shroud",
+      "name": "Overlord with Translocation Shroud",
       "pricing": [
         {
           "costs": [
@@ -1328,7 +1328,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
       ],
     },
     {
-      "name": "Transcendent C’Tan",
+      "name": "Transcendent C’tan",
       "pricing": [
         {
           "costs": [
@@ -1358,7 +1358,7 @@ exports[`parseFaction (necrons) > matches the full snapshot 1`] = `
         "Lychguard",
         "Necron Warriors",
       ],
-      "name": "Trazyn The Infinite",
+      "name": "Trazyn the Infinite",
       "pricing": [
         {
           "costs": [

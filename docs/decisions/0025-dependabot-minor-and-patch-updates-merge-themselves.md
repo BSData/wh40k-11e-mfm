@@ -1,4 +1,4 @@
-# 0024. Dependabot's minor and patch updates merge themselves
+# 0025. Dependabot's minor and patch updates merge themselves
 
 - **Status:** accepted, [#91](https://github.com/BSData/wh40k-11e-mfm/pull/91)
 - **Spec:** [change tracking — Dependabot auto-merge](../../specs/change-tracking.md#dependabot-auto-merge)

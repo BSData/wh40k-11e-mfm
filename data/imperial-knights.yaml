@@ -46,7 +46,7 @@ detachments:
       - { name: Herald of Triumph, points: 15 }
       - { name: Pennant of Silvered Fury, points: 15 }
       - { name: Wyrmslayer Divination, points: 10 }
-  - name: Spearhead-At-Arms
+  - name: Spearhead-at-Arms
     dp: 2
     objectives:
       - RECONNAISSANCE

@@ -1,4 +1,4 @@
-# 0023. A live smoke test reports, and never gates
+# 0024. A live smoke test reports, and never gates
 
 - **Status:** accepted, [#91](https://github.com/BSData/wh40k-11e-mfm/pull/91)
 - **Spec:** [change tracking — Live smoke test](../../specs/change-tracking.md#live-smoke-test)

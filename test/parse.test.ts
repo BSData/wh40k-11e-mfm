@@ -1,11 +1,15 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { factionFromYaml, mapNames } from '../src/emit.js';
 import { FactionContent, SiteIndex } from '../src/model.js';
 import {
   extractMusterMarkdown,
   extractNotesMarkdown,
   markLegends,
+  nameCase,
+  OFFICIAL_SPELLINGS,
   parseFaction,
   parseIndex,
 } from '../src/parse.js';
@@ -239,6 +243,95 @@ describe('parseFaction (adeptus-custodes, v1.6) — the "WARGEAR COSTS REMOVED" 
   });
 });
 
+describe('names — the "Names" rule in specs/data-model.md', () => {
+  const templars = parseFaction(
+    fixture('black-templars.html'),
+    'black-templars',
+    'Black Templars',
+    new Set(['space marines']),
+  );
+  const necrons = parseFaction(fixture('necrons-legends.html'), 'necrons', 'Necrons');
+  const unitNames = (f: FactionContent) => f.units.map((u) => u.name);
+  const detachmentNames = (f: FactionContent) => f.detachments.map((d) => d.name);
+
+  it('keeps a letter after an apostrophe lower-case, whichever apostrophe the site uses', () => {
+    expect(fixture('black-templars.html')).toContain('EMPEROR’S CHAMPION');
+    expect(unitNames(templars)).toContain('Emperor’s Champion');
+    expect(detachmentNames(templars)).toContain("Marshal's Household");
+    expect(unitNames(necrons)).toContain('C’tan Shard of the Deceiver');
+  });
+
+  it('keeps the minor words lower-case unless a name starts with one', () => {
+    expect(unitNames(necrons)).toContain('Anrakyr the Traveller');
+    expect(unitNames(necrons)).toContain('Overlord with Translocation Shroud');
+    expect(detachmentNames(necrons)).toContain("The Phaeron's Armoury");
+  });
+
+  it('capitalises the word after an opening quote or bracket, not the minor words', () => {
+    // As the live Astra Militarum page writes it; no fixture has the unit.
+    expect(nameCase('‘IRON HAND’ STRAKEN')).toBe('‘Iron Hand’ Straken');
+    expect(nameCase("'IRON HAND' STRAKEN")).toBe("'Iron Hand' Straken");
+    expect(nameCase('KNIGHT (WITH SHIELD)')).toBe('Knight (with Shield)');
+  });
+
+  it('capitalises a first letter outside a–z', () => {
+    expect(nameCase('ÛTHAR THE DESTINED')).toBe('Ûthar the Destined');
+  });
+
+  it('capitalises each part of a hyphenated word, minor words aside', () => {
+    expect(nameCase('SHIELD-CAPTAIN')).toBe('Shield-Captain');
+    expect(nameCase('VOIDSMEN-AT-ARMS')).toBe('Voidsmen-at-Arms');
+    expect(nameCase('CALADIUS ANNIHILATOR GRAV‑TANK')).toBe('Caladius Annihilator Grav‑Tank');
+  });
+
+  it('takes the official spellings as listed, keeping the site’s apostrophes and hyphens', () => {
+    expect(nameCase('LION EL’JONSON')).toBe('Lion El’Jonson');
+    expect(nameCase("LION EL'JONSON")).toBe("Lion El'Jonson");
+    expect(nameCase('CENTAUR RSV')).toBe('Centaur RSV');
+    expect(nameCase('INVADER ATVS')).toBe('Invader ATVs');
+    expect(nameCase('AX-1-0 TIGER SHARK')).toBe('AX-1-0 Tiger Shark');
+    expect(nameCase('AX‑1‑0 TIGER SHARK')).toBe('AX‑1‑0 Tiger Shark');
+  });
+
+  it('sees an official spelling or a minor word through the punctuation around it', () => {
+    expect(nameCase('CENTAUR (RSV)')).toBe('Centaur (RSV)');
+    expect(nameCase('“XV9” HAZARD')).toBe('“XV9” Hazard');
+    expect(nameCase('BANNER OF, AND FOR, THE CHAPTER')).toBe('Banner of, and for, the Chapter');
+    expect(nameCase('ORDO HERETICUS, PURGATION FORCE')).toBe('Ordo Hereticus, Purgation Force');
+  });
+
+  describe('every committed name', () => {
+    const dir = fileURLToPath(new URL('../data/', import.meta.url));
+    // Every name the rule covers, with its file.
+    const names = readdirSync(dir)
+      .filter((file) => file.endsWith('.yaml') && file !== 'meta.yaml')
+      .flatMap((file) => {
+        const found: { file: string; name: string }[] = [];
+        mapNames(factionFromYaml(readFileSync(join(dir, file), 'utf8')), (name) => {
+          found.push({ file, name });
+          return name;
+        });
+        return found;
+      });
+    const where = ({ file, name }: { file: string; name: string }) => `${file}: ${name}`;
+    const curly = (s: string) => s.replace(/'/g, '’');
+    const official = new Set(OFFICIAL_SPELLINGS.map(curly));
+
+    it('has no capital after an apostrophe inside a word, but in the official spellings', () => {
+      expect(names.length).toBeGreaterThan(1000);
+      const capitalAfterApostrophe = names.filter(({ name }) =>
+        name.split(' ').some((word) => /\p{L}['’]\p{Lu}/u.test(word) && !official.has(curly(word))),
+      );
+      expect(capitalAfterApostrophe.map(where)).toEqual([]);
+    });
+
+    it('is cased by the current rule, so data/ was regenerated after a change to it', () => {
+      const stale = names.filter(({ name }) => nameCase(name.toUpperCase()) !== name);
+      expect(stale.map(where)).toEqual([]);
+    });
+  });
+});
+
 describe('markLegends (necrons base vs legends-on render)', () => {
   const base = parseFaction(fixture('necrons.html'), 'necrons', 'Necrons');
   const full = parseFaction(fixture('necrons-legends.html'), 'necrons', 'Necrons');
@@ -249,9 +342,9 @@ describe('markLegends (necrons base vs legends-on render)', () => {
     const current = marked.units.filter((u) => !u.legends);
     expect(current).toHaveLength(base.units.length); // 52 current
     expect(legends.length).toBe(full.units.length - base.units.length); // +12 legends
-    expect(legends.map((u) => u.name)).toContain('Anrakyr The Traveller');
+    expect(legends.map((u) => u.name)).toContain('Anrakyr the Traveller');
     // a flagged legends unit still parses fully (pricing, role)
-    const anrakyr = legends.find((u) => u.name === 'Anrakyr The Traveller');
+    const anrakyr = legends.find((u) => u.name === 'Anrakyr the Traveller');
     expect(anrakyr?.leaderTo?.length).toBeGreaterThan(0);
     expect(anrakyr?.pricing[0]?.costs[0]).toEqual({ models: 1, points: 95 });
   });
@@ -454,7 +547,7 @@ describe('change annotations — the "changed since the last MFM" layer', () => 
     // "Bringers of Flame" changed: emerald header, a "2DP ▼" badge, and an
     // UPDATED / "FORCE DISPOSITION(S) CHANGED" note whose divs are direct children of
     // the card (the same shape a UNIQUE banner uses).
-    const bof = sisters.detachments.find((d) => d.name === 'Bringers Of Flame');
+    const bof = sisters.detachments.find((d) => d.name === 'Bringers of Flame');
     expect(bof?.dp).toBe(2);
     expect(bof?.objectives).toEqual(['PRIORITY ASSETS']);
     expect(bof?.unique).toBeUndefined();

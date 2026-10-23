@@ -12,7 +12,7 @@ detachments:
       - { name: Fury’s Cage, points: 20 }
       - { name: Gateway Unto Damnation, points: 10 }
       - { name: Slaughterthirst, points: 25 }
-  - name: Cavalcade Of Chaos
+  - name: Cavalcade of Chaos
     dp: 1
     objectives:
       - DISRUPTION
@@ -29,7 +29,7 @@ detachments:
       - { name: Soulstealer, points: 15 }
       - { name: The Endless Gift, points: 30 }
       - { name: The Everstave, points: 25 }
-  - name: Legion Of Excess
+  - name: Legion of Excess
     dp: 2
     objectives:
       - PRIORITY ASSETS
@@ -38,7 +38,7 @@ detachments:
       - { name: Dreaming Crown, points: 30 }
       - { name: False Majesty, points: 30 }
       - { name: Soul Glutton, points: 10 }
-  - name: Lords Of The Warp
+  - name: Lords of the Warp
     dp: 1
     objectives:
       - TAKE AND HOLD
@@ -79,27 +79,27 @@ detachments:
       - { name: Bane-forged Weapons (Upgrade), points: 15 }
       - { name: Soul-hungry Slaughterers (Upgrade), points: 10 }
 units:
-  - name: Aetaos’Rau’Keres
+  - name: Aetaos’rau’keres
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 315 }
     legends: true
-  - name: An’Ggrath The Unbound
+  - name: An’ggrath the Unbound
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 415 }
     legends: true
-  - name: Be’Lakor
+  - name: Be’lakor
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 390 }
-  - name: Beasts Of Nurgle
+  - name: Beasts of Nurgle
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -175,13 +175,13 @@ units:
           - { models: 1, points: 125 }
     leaderTo:
       - Daemonettes
-  - name: Daemon Prince Of Chaos
+  - name: Daemon Prince of Chaos
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 165 }
-  - name: Daemon Prince Of Chaos With Wings
+  - name: Daemon Prince of Chaos with Wings
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -290,7 +290,7 @@ units:
         costs:
           - { models: 1, points: 80 }
           - { models: 2, points: 160 }
-  - name: Herald Of Slaanesh On Steed Of Slaanesh
+  - name: Herald of Slaanesh on Steed of Slaanesh
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -306,7 +306,7 @@ units:
         costs:
           - { models: 1, points: 120 }
     leaderTo:
-      - Beasts Of Nurgle
+      - Beasts of Nurgle
       - Plague Toads
       - Pox Riders
   - name: Infernal Enrapturess
@@ -331,7 +331,7 @@ units:
           - { models: 1, points: 70 }
     leaderTo:
       - Flesh Hounds
-  - name: Keeper Of Secrets
+  - name: Keeper of Secrets
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -341,7 +341,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 280 }
-  - name: Lord Of Change
+  - name: Lord of Change
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -403,7 +403,7 @@ units:
           - { models: 1, points: 70 }
     leaderTo:
       - Plaguebearers
-  - name: Rendmaster On Blood Throne
+  - name: Rendmaster on Blood Throne
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -419,7 +419,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 280 }
-  - name: Scabeiathrax The Bloated
+  - name: Scabeiathrax the Bloated
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -513,7 +513,7 @@ units:
           - { models: 1, points: 60 }
     leaderTo:
       - Plaguebearers
-  - name: Syll’Esske
+  - name: Syll’esske
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -533,7 +533,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 105 }
-  - name: The Masque Of Slaanesh
+  - name: The Masque of Slaanesh
     pricing:
       - range: "[1,)"
         label: Your Unit Costs

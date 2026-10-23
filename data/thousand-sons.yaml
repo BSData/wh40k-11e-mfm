@@ -3,7 +3,7 @@ slug: thousand-sons
 version: "1.6"
 firstSeen: 2026-10-14
 detachments:
-  - name: Changehost Of Deceit
+  - name: Changehost of Deceit
     dp: 2
     objectives:
       - RECONNAISSANCE
@@ -32,7 +32,7 @@ detachments:
       - { name: Empowered Manifestation, points: 20 }
       - { name: Empyric Onslaught, points: 25 }
       - { name: Noctilith Mantle, points: 15 }
-  - name: Ritual Of Regeneration
+  - name: Ritual of Regeneration
     dp: 1
     objectives:
       - TAKE AND HOLD
@@ -56,7 +56,7 @@ detachments:
     enhancements:
       - { name: Occulus Infernum, points: 20 }
       - { name: Walking Rampart, points: 30 }
-  - name: Servants Of Change
+  - name: Servants of Change
     dp: 1
     objectives:
       - RECONNAISSANCE
@@ -93,7 +93,7 @@ units:
     leaderTo:
       - Rubric Marines
       - Tzaangor Enlightened
-      - Tzaangor Enlightened With Fatecaster Greatbows
+      - Tzaangor Enlightened with Fatecaster Greatbows
   - name: Blue Horrors
     groupTitle: Scintillating Legions
     pricing:
@@ -157,13 +157,13 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 195 }
-  - name: Daemon Prince Of Tzeentch
+  - name: Daemon Prince of Tzeentch
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 170 }
-  - name: Daemon Prince Of Tzeentch With Wings
+  - name: Daemon Prince of Tzeentch with Wings
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -194,7 +194,7 @@ units:
           - { models: 1, points: 100 }
     leaderTo:
       - Rubric Marines
-  - name: Exalted Sorcerer On Disc Of Tzeentch
+  - name: Exalted Sorcerer on Disc of Tzeentch
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -203,7 +203,7 @@ units:
     leaderTo:
       - Rubric Marines
       - Tzaangor Enlightened
-      - Tzaangor Enlightened With Fatecaster Greatbows
+      - Tzaangor Enlightened with Fatecaster Greatbows
   - name: Flamers
     groupTitle: Scintillating Legions
     pricing:
@@ -251,7 +251,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 1, points: 305 }
-  - name: Lord Of Change
+  - name: Lord of Change
     groupTitle: Scintillating Legions
     pricing:
       - range: "[1,2]"
@@ -262,7 +262,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 340 }
-  - name: Magnus The Red
+  - name: Magnus the Red
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -351,7 +351,7 @@ units:
           - { models: 1, points: 110 }
     leaderTo:
       - Rubric Marines
-  - name: Sorcerer In Terminator Armour
+  - name: Sorcerer in Terminator Armour
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -370,7 +370,7 @@ units:
         costs:
           - { models: 3, points: 50 }
           - { models: 6, points: 90 }
-  - name: Tzaangor Enlightened With Fatecaster Greatbows
+  - name: Tzaangor Enlightened with Fatecaster Greatbows
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -385,7 +385,7 @@ units:
           - { models: 1, points: 65 }
     leaderTo:
       - Tzaangor Enlightened
-      - Tzaangor Enlightened With Fatecaster Greatbows
+      - Tzaangor Enlightened with Fatecaster Greatbows
       - Tzaangors
   - name: Tzaangors
     pricing:

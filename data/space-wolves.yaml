@@ -12,7 +12,7 @@ detachments:
     enhancements:
       - { name: Furious Assault (Upgrade), points: 10 }
       - { name: Imperium’s Sword, points: 20 }
-  - name: Champions Of Fenris
+  - name: Champions of Fenris
     dp: 1
     objectives:
       - PRIORITY ASSETS
@@ -98,14 +98,14 @@ detachments:
     enhancements:
       - { name: Seal of Shrouding, points: 15 }
       - { name: Venator Omni-auspex, points: 15 }
-  - name: Saga Of The Beastslayer
+  - name: Saga of the Beastslayer
     dp: 1
     objectives:
       - PURGE THE FOE
     enhancements:
       - { name: Hunter’s Guile, points: 20 }
-      - { name: Wolf-Touched, points: 15, leaderTo: [ Wulfen, Wulfen With Storm Shields ] }
-  - name: Saga Of The Great Wolf
+      - { name: Wolf-Touched, points: 15, leaderTo: [ Wulfen, Wulfen with Storm Shields ] }
+  - name: Saga of the Great Wolf
     dp: 2
     objectives:
       - TAKE AND HOLD
@@ -183,7 +183,7 @@ units:
       - Sternguard Veteran Squad
       - Sword Brethren Squad
       - Vanguard Veteran Squad
-  - name: Ancient In Terminator Armour
+  - name: Ancient in Terminator Armour
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -215,7 +215,7 @@ units:
         costs:
           - { models: 5, points: 85 }
           - { models: 10, points: 170 }
-  - name: Assault Intercessors With Jump Packs
+  - name: Assault Intercessors with Jump Packs
     groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
@@ -250,7 +250,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 170 }
-  - name: Bjorn The Fell-Handed
+  - name: Bjorn the Fell-Handed
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -327,7 +327,7 @@ units:
       - Sword Brethren Squad
       - Vanguard Veteran Squad
       - Victrix Honour Guard
-  - name: Captain In Gravis Armour
+  - name: Captain in Gravis Armour
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -336,11 +336,11 @@ units:
           - { models: 1, points: 90 }
     leaderTo:
       - Aggressor Squad
-      - Eradicator Squad With Heavy Bolters
-      - Eradicator Squad With Melta Rifles
+      - Eradicator Squad with Heavy Bolters
+      - Eradicator Squad with Melta Rifles
       - Heavy Intercessor Squad
       - Indomitor Kill Team
-  - name: Captain In Phobos Armour
+  - name: Captain in Phobos Armour
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -355,7 +355,7 @@ units:
       - Scout Squad
       - Spectrus Kill Team
       - Wolf Scouts
-  - name: Captain In Terminator Armour
+  - name: Captain in Terminator Armour
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -369,7 +369,7 @@ units:
       - Terminator Assault Squad
       - Terminator Squad
       - Wolf Guard Terminators
-  - name: Captain On Bike
+  - name: Captain on Bike
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -379,7 +379,7 @@ units:
     leaderTo:
       - Outrider Squad
       - Ravenwing Black Knights
-  - name: Captain With Jump Pack
+  - name: Captain with Jump Pack
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -387,10 +387,10 @@ units:
         costs:
           - { models: 1, points: 90 }
     leaderTo:
-      - Assault Intercessors With Jump Packs
+      - Assault Intercessors with Jump Packs
       - Sanguinary Guard
       - Talonstrike Kill Team
-      - Vanguard Veteran Squad With Jump Packs
+      - Vanguard Veteran Squad with Jump Packs
   - name: Centurion Assault Squad
     pricing:
       - range: "[1,)"
@@ -436,7 +436,7 @@ units:
       - Sternguard Veteran Squad
       - Sword Brethren Squad
       - Vanguard Veteran Squad
-  - name: Chaplain In Terminator Armour
+  - name: Chaplain in Terminator Armour
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -450,7 +450,7 @@ units:
       - Terminator Assault Squad
       - Terminator Squad
       - Wolf Guard Terminators
-  - name: Chaplain On Bike
+  - name: Chaplain on Bike
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -460,7 +460,7 @@ units:
     leaderTo:
       - Outrider Squad
       - Ravenwing Black Knights
-  - name: Chaplain With Jump Pack
+  - name: Chaplain with Jump Pack
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -468,10 +468,10 @@ units:
         costs:
           - { models: 1, points: 75 }
     leaderTo:
-      - Assault Intercessors With Jump Packs
-      - Death Company Marines With Jump Packs
+      - Assault Intercessors with Jump Packs
+      - Death Company Marines with Jump Packs
       - Talonstrike Kill Team
-      - Vanguard Veteran Squad With Jump Packs
+      - Vanguard Veteran Squad with Jump Packs
   - name: Company Heroes
     groupTitle: Space Marines
     pricing:
@@ -528,7 +528,7 @@ units:
         label: Your Unit Costs
         costs:
           - { models: 3, points: 85 }
-  - name: Eradicator Squad With Heavy Bolters
+  - name: Eradicator Squad with Heavy Bolters
     groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
@@ -541,7 +541,7 @@ units:
         costs:
           - { models: 3, points: 130 }
           - { models: 6, points: 245 }
-  - name: Eradicator Squad With Melta Rifles
+  - name: Eradicator Squad with Melta Rifles
     groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
@@ -655,7 +655,7 @@ units:
         costs:
           - { models: 5, points: 130 }
           - { models: 10, points: 245 }
-  - name: Hounds Of Morkai
+  - name: Hounds of Morkai
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -731,7 +731,7 @@ units:
         costs:
           - { models: 5, points: 85 }
           - { models: 10, points: 170 }
-  - name: Invader Atvs
+  - name: Invader ATVs
     groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
@@ -871,7 +871,7 @@ units:
       - Intercessor Squad
       - Sternguard Veteran Squad
       - Vanguard Veteran Squad
-  - name: Librarian In Phobos Armour
+  - name: Librarian in Phobos Armour
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -886,7 +886,7 @@ units:
       - Scout Squad
       - Spectrus Kill Team
       - Wolf Scouts
-  - name: Librarian In Terminator Armour
+  - name: Librarian in Terminator Armour
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -923,7 +923,7 @@ units:
       - Sternguard Veteran Squad
       - Sword Brethren Squad
       - Vanguard Veteran Squad
-  - name: Lieutenant In Phobos Armour
+  - name: Lieutenant in Phobos Armour
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -937,7 +937,7 @@ units:
       - Reiver Squad
       - Spectrus Kill Team
       - Wolf Scouts
-  - name: Lieutenant With Combi-Weapon
+  - name: Lieutenant with Combi-Weapon
     groupTitle: Space Marines
     pricing:
       - range: "[1,)"
@@ -954,7 +954,7 @@ units:
       - Terminator Assault Squad
       - Terminator Squad
       - Wolf Guard Terminators
-  - name: Logan Grimnar On Stormrider
+  - name: Logan Grimnar on Stormrider
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -969,7 +969,7 @@ units:
           - { models: 5, points: 120 }
           - { models: 6, points: 145 }
     legends: true
-  - name: Lukas The Trickster
+  - name: Lukas the Trickster
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1342,7 +1342,7 @@ units:
         costs:
           - { models: 1, points: 320 }
     legends: true
-  - name: Ulrik The Slayer
+  - name: Ulrik the Slayer
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1363,7 +1363,7 @@ units:
           - { models: 5, points: 120 }
           - { models: 10, points: 240 }
     legends: true
-  - name: Vanguard Veteran Squad With Jump Packs
+  - name: Vanguard Veteran Squad with Jump Packs
     groupTitle: Space Marines
     pricing:
       - range: "[1,2]"
@@ -1436,14 +1436,14 @@ units:
       - Grey Hunters
       - Intercessor Squad
       - Wolf Guard Headtakers
-  - name: Wolf Guard Battle Leader In Terminator Armour
+  - name: Wolf Guard Battle Leader in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 1, points: 75 }
     legends: true
-  - name: Wolf Guard Battle Leader On Thunderwolf
+  - name: Wolf Guard Battle Leader on Thunderwolf
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1475,7 +1475,7 @@ units:
     supportTo:
       - Long Fangs
     legends: true
-  - name: Wolf Guard Pack Leader In Terminator Armour
+  - name: Wolf Guard Pack Leader in Terminator Armour
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1484,7 +1484,7 @@ units:
     supportTo:
       - Long Fangs
     legends: true
-  - name: Wolf Guard Pack Leader With Jump Pack
+  - name: Wolf Guard Pack Leader with Jump Pack
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1507,7 +1507,7 @@ units:
           - { models: 10, points: 405 }
     wargear:
       - { item: Storm Shield, points: 5 }
-  - name: Wolf Lord On Thunderwolf
+  - name: Wolf Lord on Thunderwolf
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -1561,7 +1561,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 1, points: 150 }
-  - name: Wulfen With Storm Shields
+  - name: Wulfen with Storm Shields
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost

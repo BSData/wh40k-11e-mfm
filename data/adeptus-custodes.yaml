@@ -35,7 +35,7 @@ detachments:
     enhancements:
       - { name: Auriferous Orb, points: 20 }
       - { name: Edge of the Blade, points: 15 }
-  - name: Emperor’S Chosen
+  - name: Emperor’s Chosen
     dp: 1
     objectives:
       - PRIORITY ASSETS
@@ -43,14 +43,14 @@ detachments:
     enhancements:
       - { name: From the Hall of Armouries, points: 15 }
       - { name: Radiant Mantle, points: 40 }
-  - name: Grav‑assault Force
+  - name: Grav‑Assault Force
     dp: 1
     objectives:
       - RECONNAISSANCE
     enhancements:
       - { name: Anti-gravitic Mobility (Upgrade), points: 15 }
       - { name: Combat Deployment (Upgrade), points: 20 }
-  - name: Guardians Of The Throne
+  - name: Guardians of the Throne
     dp: 3
     objectives:
       - PRIORITY ASSETS
@@ -67,14 +67,14 @@ detachments:
     enhancements:
       - { name: Arae-Shrike, points: 20 }
       - { name: Celeritous Sentries (Upgrade), points: 15 }
-  - name: Lions Of The Emperor
+  - name: Lions of the Emperor
     dp: 1
     objectives:
       - DISRUPTION
     enhancements:
       - { name: Leonine Ferocity, points: 20 }
       - { name: Lightning Descent, points: 20 }
-  - name: Might Of The Moritoi
+  - name: Might of the Moritoi
     dp: 1
     objectives:
       - TAKE AND HOLD
@@ -139,7 +139,7 @@ units:
         label: Your 4th + Unit Costs
         costs:
           - { models: 1, points: 80 }
-  - name: Aquilon Terminators With Solarite Power Gauntlets
+  - name: Aquilon Terminators with Solarite Power Gauntlets
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -149,7 +149,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 3, points: 315 }
-  - name: Aquilon Terminators With Solarite Power Talons
+  - name: Aquilon Terminators with Solarite Power Talons
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -183,7 +183,7 @@ units:
       - Custodian Guard Sodality
       - Custodian Wardens
       - Sentinel Guard Sodality
-  - name: Caladius Annihilator Grav‑tank
+  - name: Caladius Annihilator Grav‑Tank
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -243,14 +243,14 @@ units:
         label: Your 4th + Unit Costs
         costs:
           - { models: 3, points: 270 }
-  - name: Custodian Guard Sodality With Adrasite Spears
+  - name: Custodian Guard Sodality with Adrasite Spears
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
         costs:
           - { models: 3, points: 200 }
     legends: true
-  - name: Custodian Guard Sodality With Pyrithite Spears
+  - name: Custodian Guard Sodality with Pyrithite Spears
     pricing:
       - range: "[1,)"
         label: Your Unit Costs
@@ -345,14 +345,14 @@ units:
           - { models: 1, points: 200 }
     leaderTo:
       - Custodian Guard Sodality
-      - Custodian Guard Sodality With Adrasite Spears
-      - Custodian Guard Sodality With Pyrithite Spears
+      - Custodian Guard Sodality with Adrasite Spears
+      - Custodian Guard Sodality with Pyrithite Spears
       - Custodian Wardens
       - Sagittarum Custodians Sodality
       - Sentinel Guard Sodality
     wargear:
       - { item: Praesidium Shield, points: 25 }
-  - name: Shield-Captain In Allarus Terminator Armour
+  - name: Shield-Captain in Allarus Terminator Armour
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -364,9 +364,9 @@ units:
           - { models: 1, points: 205 }
     leaderTo:
       - Allarus Custodians
-      - Aquilon Terminators With Solarite Power Gauntlets
-      - Aquilon Terminators With Solarite Power Talons
-  - name: Shield-Captain On Dawneagle Jetbike
+      - Aquilon Terminators with Solarite Power Gauntlets
+      - Aquilon Terminators with Solarite Power Talons
+  - name: Shield-Captain on Dawneagle Jetbike
     pricing:
       - range: "[1,1]"
         label: Your 1st Unit Costs
@@ -397,11 +397,11 @@ units:
           - { models: 1, points: 265 }
     leaderTo:
       - Allarus Custodians
-      - Aquilon Terminators With Solarite Power Gauntlets
-      - Aquilon Terminators With Solarite Power Talons
+      - Aquilon Terminators with Solarite Power Gauntlets
+      - Aquilon Terminators with Solarite Power Talons
       - Custodian Guard Sodality
-      - Custodian Guard Sodality With Adrasite Spears
-      - Custodian Guard Sodality With Pyrithite Spears
+      - Custodian Guard Sodality with Adrasite Spears
+      - Custodian Guard Sodality with Pyrithite Spears
       - Custodian Wardens
       - Sagittarum Custodians Sodality
       - Sentinel Guard Sodality
@@ -413,13 +413,13 @@ units:
           - { models: 1, points: 130 }
     leaderTo:
       - Custodian Guard Sodality
-      - Custodian Guard Sodality With Adrasite Spears
-      - Custodian Guard Sodality With Pyrithite Spears
+      - Custodian Guard Sodality with Adrasite Spears
+      - Custodian Guard Sodality with Pyrithite Spears
       - Custodian Wardens
       - Sagittarum Custodians Sodality
       - Sentinel Guard Sodality
     legends: true
-  - name: Venatari With Kinetic Destroyers
+  - name: Venatari with Kinetic Destroyers
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost
@@ -429,7 +429,7 @@ units:
         label: Your 3rd + Unit Costs
         costs:
           - { models: 3, points: 280 }
-  - name: Venatari With Verutum Lances
+  - name: Venatari with Verutum Lances
     pricing:
       - range: "[1,2]"
         label: Your 1st To 2nd Units Cost

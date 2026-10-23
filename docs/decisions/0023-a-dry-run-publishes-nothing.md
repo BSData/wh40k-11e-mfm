@@ -1,4 +1,4 @@
-# 0022. A dry run publishes nothing
+# 0023. A dry run publishes nothing
 
 - **Status:** accepted, [#91](https://github.com/BSData/wh40k-11e-mfm/pull/91)
 - **Spec:** [change tracking — Dry run](../../specs/change-tracking.md#dry-run)
@@ -14,7 +14,7 @@ would, then skips every job that publishes: `publish`, `announce` and `report`. 
 would have published goes to the run's summary, and the Discord payload to the log. A
 separate `app-check` job mints the App's token and does nothing with it, so a dry run
 also checks the App's credentials without putting the key in a job with dependency code
-([0021](0021-the-app-key-never-meets-dependency-code.md)).
+([0022](0022-the-app-key-never-meets-dependency-code.md)).
 
 The failure issue is skipped both ways: a dry run neither opens nor closes one, so a
 failed dry run is reported by its red run alone.
