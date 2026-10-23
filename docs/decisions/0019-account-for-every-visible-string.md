@@ -1,6 +1,6 @@
 # 0019. Account for every visible string on the page
 
-- **Status:** accepted, [#8](https://github.com/BSData/wh40k-11e-mfm/pull/8); coverage as consumed strings in [#85](https://github.com/BSData/wh40k-11e-mfm/pull/85)
+- **Status:** accepted, [#8](https://github.com/BSData/wh40k-11e-mfm/pull/8); coverage as consumed strings in [#85](https://github.com/BSData/wh40k-11e-mfm/pull/85); revised by [0036](0036-a-label-counts-once-with-its-block.md): a block label counts once, with its block
 - **Spec:** [scraping — Completeness coverage](../../specs/scraping.md#completeness-coverage-dont-silently-drop-new-content)
 
 ## Context

@@ -26,7 +26,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0016](0016-one-english-collation.md) | One English collation | change tracking |
 | [0017](0017-http-first-a-browser-only-where-needed.md) | Plain HTTP first, a browser only where the page needs one (superseded by 0026) | scraping |
 | [0018](0018-the-change-layer-is-not-data.md) | The "changed since the last MFM" layer is not data | scraping |
-| [0019](0019-account-for-every-visible-string.md) | Account for every visible string on the page | scraping, data model |
+| [0019](0019-account-for-every-visible-string.md) | Account for every visible string on the page (revised by 0036) | scraping, data model |
 | [0020](0020-fail-loud-and-located.md) | Fail loud and located, one faction at a time | scraping |
 | [0021](0021-names-match-the-official-ones.md) | Names match the official ones | data model |
 | [0022](0022-the-app-key-never-meets-dependency-code.md) | Update PRs are opened with the App's token, in a job that runs no dependency code | change tracking |
@@ -41,6 +41,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0031](0031-the-drift-fixer-fails-loud-with-fewer-layers.md) | The drift fixer fails loud, with fewer layers (revises 0029) | change tracking |
 | [0032](0032-one-claude-code-pin.md) | One Claude Code pin: the action installs it (revises 0029) | change tracking |
 | [0035](0035-pair-namesakes-by-content-first.md) | Pair same-named units by content before position (revises 0014) | change tracking |
+| [0036](0036-a-label-counts-once-with-its-block.md) | A block label counts once, with the block it heads (revises 0019) | scraping |
 | [0038](0038-a-rules-change-dates-the-update.md) | A rules change dates the update, beside the factions too (revises 0002, 0015) | change tracking |
 
 ## Writing one

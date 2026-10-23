@@ -48,11 +48,14 @@ export function hydrate($: CheerioAPI): void {
 export const CARD_SELECTOR = 'div.flex.flex-col.space-y-1.m-1';
 
 /**
- * A unit card's pricing-tier label ("YOUR … COST(S)"): a `TIER_LABEL_SELECTOR` element
- * whose text matches `TIER_LABEL_RE`. Detachment cards have none (see `isUnitCard`).
+ * A unit card's pricing-tier label: a `TIER_LABEL_SELECTOR` element whose whole text reads
+ * "YOUR … COST(S)" (`TIER_LABEL_RE`: "YOUR UNIT COSTS", "YOUR 1ST TO 2ND UNITS COST",
+ * "YOUR 4TH + UNIT COSTS"), followed by its `ul.leaders` (see `isUnitCard`). Anchored,
+ * because a change note is a `TIER_LABEL_SELECTOR` element too and may mention costs
+ * ("ENHANCEMENT COSTS CHANGED"). Detachment cards have no tier label.
  */
 export const TIER_LABEL_SELECTOR = 'div.bg-slate-200';
-export const TIER_LABEL_RE = /COST/i;
+export const TIER_LABEL_RE = /^\s*YOUR\b.*\bCOSTS?\s*$/i;
 
 /**
  * The "changed since the last MFM" annotation layer. After a points update GW
@@ -95,13 +98,19 @@ export function cardName(card: ReturnType<CheerioAPI>): string {
 }
 
 /**
- * A card prices a unit iff it carries a "YOUR … COST(S)" tier label; detachment
- * cards never do (their labels are `ENHANCEMENTS`, a `UNIQUE:` banner or an
- * objective). This holds in both header styles and with the annotation layer off.
+ * A card prices a unit iff it carries a "YOUR … COST(S)" tier label immediately followed
+ * by its `ul.leaders` of cost rows. Detachment cards never do: their labels are
+ * `ENHANCEMENTS`, a `UNIQUE:` banner, an objective or a change note, and a note has no
+ * list after it, whatever it reads. This holds in both header styles and with the
+ * annotation layer off.
  */
 export function isUnitCard($: CheerioAPI, card: ReturnType<CheerioAPI>): boolean {
   return (
-    card.find(TIER_LABEL_SELECTOR).filter((_, el) => TIER_LABEL_RE.test($(el).text())).length > 0
+    card
+      .find(TIER_LABEL_SELECTOR)
+      .filter(
+        (_, el) => TIER_LABEL_RE.test(clean($(el).text())) && $(el).next('ul.leaders').length > 0,
+      ).length > 0
   );
 }
 

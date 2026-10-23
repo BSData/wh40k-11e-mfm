@@ -71,9 +71,11 @@ const hasLegends = async (page: Page): Promise<boolean> =>
  * Click "Show Legends" and wait for the Legends, on a page that has them. The toggle's
  * label appears once React has hydrated. The Legends render in a single React commit, so
  * the unit-card count jumps straight to its full total: waiting for it to exceed the
- * default count is exact, not a timed guess. Unit cards are counted the way the parser
- * tells them apart (`isUnitCard` in src/parse/page.ts): a card holding a pricing-tier
- * label. Header styles vary with the annotation layer, so they are no signal.
+ * default count is exact, not a timed guess. Unit cards are counted by the parser's
+ * pricing-tier label (`TIER_LABEL_RE` in src/parse/page.ts): a card holding one.
+ * `isUnitCard` also wants the `ul.leaders` after the label, which every unit card has, but
+ * a count to wait on needn't. Header styles vary with the annotation layer, so they are no
+ * signal.
  */
 async function showLegends(page: Page): Promise<void> {
   const toggle = page.locator(LEGENDS_TOGGLE);

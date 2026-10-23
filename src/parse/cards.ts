@@ -1,4 +1,5 @@
 import type { CheerioAPI } from 'cheerio';
+import { ENHANCEMENTS_LABEL, UNIT_BLOCK_LABELS } from '../allowlists.js';
 import type { Detachment, PricingTier, Unit, Wargear } from '../model.js';
 import { nameCase, titleCase } from './names.js';
 import { cardName, cardWhere, DELTA_MARKER_RE, TIER_LABEL_SELECTOR } from './page.js';
@@ -15,7 +16,8 @@ import { DP_RE, parseCostRow, parsePoints, parseRange, UNIQUE_RE } from './value
  * ability. A unit may carry a Leader block, a Support block, or **both** with different
  * lists — v1.4's Judiciar leads twelve units and supports five — so this returns them
  * keyed by ability rather than picking a single role. Two blocks of the *same* ability
- * have never appeared and would be a genuine surprise, so that still throws.
+ * have never appeared and would be a genuine surprise, so that still throws. A block's
+ * label is consumed with its list, and only if it reads as `UNIT_BLOCK_LABELS` lists it.
  */
 function parseRole(
   card: ReturnType<CheerioAPI>,
@@ -36,12 +38,17 @@ function parseRole(
     if (attachTo.length > 0) {
       out[key] = attachTo;
       consumed.push(list);
+      const label = clean(img.parent().text());
+      if (label === UNIT_BLOCK_LABELS[key]) consumed.push(label);
     }
   });
   return out;
 }
 
-/** Parse the "Wargear Options" block (cog icon + per-item costs), if present. */
+/**
+ * Parse the "Wargear Options" block (cog icon + per-item costs), if present. Its label is
+ * consumed with its rows, and only if it reads as `UNIT_BLOCK_LABELS.wargear`.
+ */
 function parseWargear(
   $: CheerioAPI,
   card: ReturnType<CheerioAPI>,
@@ -50,7 +57,7 @@ function parseWargear(
 ): Wargear[] {
   const cog = card.find('img[src$="cog.svg"]').first();
   if (cog.length === 0) return [];
-  return cog
+  const wargear = cog
     .parent()
     .parent()
     .find('ul li')
@@ -70,6 +77,9 @@ function parseWargear(
       return { item, points };
     })
     .get();
+  const label = clean(cog.parent().text());
+  if (wargear.length > 0 && label === UNIT_BLOCK_LABELS.wargear) consumed.push(label);
+  return wargear;
 }
 
 export function parseUnit(
@@ -85,7 +95,7 @@ export function parseUnit(
 
   // Each tier = a `div.bg-slate-200` label followed by a `ul.leaders` of rows. The
   // role block's `div.bg-slate-200` label (LEADER/SUPPORT) has no `ul.leaders`, so
-  // it contributes no costs and is skipped.
+  // it contributes no costs and is skipped here; `parseRole` consumes it with its list.
   card.find(TIER_LABEL_SELECTOR).each((_, labelEl) => {
     const labelText = clean($(labelEl).text());
     const label = titleCase(labelText);
@@ -200,6 +210,9 @@ export function parseDetachment(
       };
     })
     .get();
+  // The `ENHANCEMENTS` heading right before the list, consumed with the list it heads.
+  const heading = clean(card.find('ul.leaders').first().prev().text());
+  if (enhancements.length > 0 && heading === ENHANCEMENTS_LABEL) consumed.push(heading);
 
   return { name, dp, objectives, ...(unique ? { unique } : {}), enhancements };
 }
