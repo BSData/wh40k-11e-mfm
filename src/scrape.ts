@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { CrossCheck } from './cross-check.js';
 import { POINTS_CSV, pointsCsv } from './csv.js';
-import { failuresReport, loadFactionDir } from './diff.js';
+import { failuresReport, loadFactionDir, RULES_PANELS_FAILURE } from './diff.js';
 import {
   contentKey,
   factionFromYaml,
@@ -30,9 +30,6 @@ import { parseFaction, parseIndex, type RulesPanels, rulesPanels } from './parse
  * required too: if they fail, that is reported the same way (as `RULES_PANELS_FAILURE`)
  * and meta.yaml is not written.
  */
-
-/** The name the rules panels' failure goes by in the failures report. */
-const RULES_PANELS_FAILURE = 'rules panels';
 
 /** What to scrape, and where to: `mfm scrape`'s options. */
 export interface ScrapeOptions {
@@ -186,9 +183,13 @@ export async function scrape(args: ScrapeOptions): Promise<number> {
     await check?.close();
   }
 
-  // The page the panels come from never arrived: that is a panels failure too.
+  // The page the panels come from never arrived: that is a panels failure too, and, like
+  // the page's own, a failed fetch (`isFetchFailure`), not drift.
   if (fullRun && !panelsTried && targets[0]) {
-    fail(RULES_PANELS_FAILURE, `the page they are read from ("${targets[0].slug}") didn't load`);
+    fail(
+      RULES_PANELS_FAILURE,
+      `Failed to fetch the page they are read from ("${targets[0].slug}")`,
+    );
   }
 
   // Only rewrite meta on a full run, so a single-faction smoke test stays honest.

@@ -36,6 +36,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0026](0026-http-only-a-browser-for-tests-and-troubleshooting.md) | Scrape over HTTP only; a browser for tests and troubleshooting | scraping |
 | [0027](0027-flag-what-looks-like-a-misread.md) | Flag what looks like a misread, not just what changed | change tracking |
 | [0028](0028-a-schema-version-and-releases-for-consumers.md) | A schema version, and a release for every data change | data model |
+| [0029](0029-a-failed-scrape-drafts-its-fix.md) | A failed scrape drafts its own fix, with the model's key and the App's key in separate jobs | change tracking |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and

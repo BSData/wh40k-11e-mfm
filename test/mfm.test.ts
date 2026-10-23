@@ -63,6 +63,8 @@ describe('usage errors exit 2 and say why', () => {
     [['render'], /expected 1 argument, got 0/],
     [['render', '../necrons'], /Not a faction slug: \.\.\/necrons/],
     [['render', 'necrons', '--legends', '--panels'], /--legends and --panels render different/],
+    [['refresh-fixtures', '--only', 'necrons.html', '--failed', 'f.md'], /--only and --failed/],
+    [['drift-fix-gate'], /--run-id is required/],
   ])('mfm %j', async (argv, message) => {
     const { code, stdout, stderr } = await mfm(...argv);
     expect(code).toBe(2);

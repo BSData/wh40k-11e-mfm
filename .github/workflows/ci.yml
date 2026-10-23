@@ -27,7 +27,8 @@ jobs:
         with:
           runtime: node
           node-version-file: .node-version
-          cache: true
+          cache: false # "No dependency cache" in specs/change-tracking.md
+          cache-dependency-path: .github/no-dependency-cache # matches no file: no cache at all
       - run: pnpm verify
 
       # The workflow lints run even when verify fails, so one push reports both.
