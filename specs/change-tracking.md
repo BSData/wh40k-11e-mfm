@@ -365,11 +365,12 @@ several days. See [0038](../docs/decisions/0038-a-rules-change-dates-the-update.
 A re-scrape must not re-stamp what the open PRs already captured. The workflow hands the
 scrape every open update branch's `data/` via `--dates-from`, and `firstSeen` resolves to
 the date of the **oldest** snapshot (committed or PR) whose content matches what was just
-scraped. So a run that finds nothing new keeps every stamp and the PR's start date, and a
-later change stamps only the factions that moved, widening the window. Such a run
-reproduces the branch byte for byte (no force-push), unless the update is dated partly by
-today: one with a rules panel change or a faction the site dropped is re-dated on its last
-day, in its title and its changelog entry, by each re-scrape until it merges. See
+scraped. So a run that finds nothing new keeps every stamp, and a later change stamps only
+the factions that moved, widening the window. Such a run reproduces the branch byte for
+byte (no force-push, and the PR keeps its dates), unless the update is dated partly by
+today: one with a rules panel change or a faction the site dropped is re-dated by each
+re-scrape until it merges, in its title and its changelog entry. Its last day moves to
+today, and so does its first when nothing else dates it. See
 [0002](../docs/decisions/0002-name-and-date-an-update-from-the-data.md) and
 [0038](../docs/decisions/0038-a-rules-change-dates-the-update.md).
 

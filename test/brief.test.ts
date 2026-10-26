@@ -593,7 +593,7 @@ describe("it runs where the model's key is: plain Node, no dependencies", () => 
     expectNodeOnly(source);
   });
 
-  it('sees every way a module can be loaded, a bare import too', () => {
+  it('sees an import over several lines, a re-export and a bare import', () => {
     expect(
       importSpecifiers(
         "import { a } from 'node:fs';\nimport {\n  b,\n} from \"dep\";\nexport * from './c.js';\nimport 'side-effect';\nexport const s = 'from x';\n",

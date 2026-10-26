@@ -1,6 +1,6 @@
 # 0039. A tier is read only from a tier label
 
-- **Status:** accepted, for [#110](https://github.com/BSData/wh40k-11e-mfm/issues/110); follows [0036](0036-a-label-counts-once-with-its-block.md)
+- **Status:** accepted, for [#110](https://github.com/BSData/wh40k-11e-mfm/issues/110)
 - **Spec:** [scraping — Selectors](../../specs/scraping.md#selectors-the-drift-prone-surface)
 
 ## Context
@@ -41,6 +41,10 @@ Anything else is left over for the coverage check:
   fixture of its own: it reads nothing new, and refuses what it used to misread.
 - If GW starts putting notes inside a tier's wrapper, every card with one fails until the
   note is added to `CHANGE_BADGE_TEXT`, which is how any new note is accepted.
+- It fails on more than notes. Beside a valid tier, a tier whose label GW rewords off
+  `TIER_LABEL_RE` (`EACH FURTHER UNIT COSTS`), or one with anything between its label and
+  its list, is left over, label and rows. The old reading took a reworded label for a tier,
+  with the range `[1,)` unless the new words hold an ordinal.
 
 Rejected:
 - **Waiting for a fixture that shows the shape.** The misread produces no error, so nothing

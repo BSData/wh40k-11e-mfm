@@ -1390,7 +1390,8 @@ describe('the rules panels (meta.yaml)', () => {
     const data = loadMeta(fileURLToPath(new URL('../data/', import.meta.url)));
     expect(data?.schemaVersion).toBe(2);
     expect(data?.version).toMatch(/^\d+\.\d+$/);
-    expect(data?.muster).toContain('## SELECT BATTLE SIZE');
+    // Whatever GW writes in it: an update that rewords the rules must not fail this.
+    expect(data?.muster?.length).toBeGreaterThan(0);
     expect(loadMeta(fileURLToPath(new URL('./fixtures/', import.meta.url)))).toBeUndefined();
   });
 

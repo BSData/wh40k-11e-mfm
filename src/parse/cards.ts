@@ -94,8 +94,9 @@ export function parseUnit(
   const pricing: PricingTier[] = [];
 
   // Each tier = a "YOUR … COST(S)" label right before its `ul.leaders` of rows
-  // (`tierLabels`). No other `div.bg-slate-200` is one: `parseRole` consumes the role
-  // block's label (LEADER/SUPPORT) with its list, and the coverage check reports a note.
+  // (`tierLabels`). No other `div.bg-slate-200` is one: `parseRole` and `parseWargear`
+  // consume their blocks' labels (LEADER, SUPPORT, WARGEAR OPTIONS) with their lists, and
+  // the coverage check reports a note.
   tierLabels($, card).each((_, labelEl) => {
     const labelText = clean($(labelEl).text());
     const label = titleCase(labelText);
