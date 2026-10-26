@@ -365,9 +365,13 @@ several days. See [0038](../docs/decisions/0038-a-rules-change-dates-the-update.
 A re-scrape must not re-stamp what the open PRs already captured. The workflow hands the
 scrape every open update branch's `data/` via `--dates-from`, and `firstSeen` resolves to
 the date of the **oldest** snapshot (committed or PR) whose content matches what was just
-scraped. So a run that finds nothing new reproduces the branch byte for byte (no
-force-push, and the PR keeps its start date), and a later change stamps only the factions
-that moved, widening the window. See [0002](../docs/decisions/0002-name-and-date-an-update-from-the-data.md).
+scraped. So a run that finds nothing new keeps every stamp and the PR's start date, and a
+later change stamps only the factions that moved, widening the window. Such a run
+reproduces the branch byte for byte (no force-push), unless the update is dated partly by
+today: one with a rules panel change or a faction the site dropped is re-dated on its last
+day, in its title and its changelog entry, by each re-scrape until it merges. See
+[0002](../docs/decisions/0002-name-and-date-an-update-from-the-data.md) and
+[0038](../docs/decisions/0038-a-rules-change-dates-the-update.md).
 
 This is pure code — no LLM.
 
@@ -423,7 +427,8 @@ with the brief, if there is one, above it (see *In brief, by a model*).
    `src/changelog.ts`, not the file.
 
 No changes → neither file is touched (no spurious diff), and a re-scrape that finds
-nothing new leaves both byte-identical too. Each run writes the entry into a checkout of
+nothing new leaves both byte-identical too, but for the entry's dates when the update is
+dated partly by today (see *Naming an update*). Each run writes the entry into a checkout of
 the PR's base, so re-running on a sticky PR rewrites its entry rather than stacking a
 second one. Entries written before this layout keep their original Keep a Changelog
 shape (**Added** / **Changed** / **Removed**).
