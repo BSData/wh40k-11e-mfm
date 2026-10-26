@@ -50,7 +50,7 @@ export const CARD_SELECTOR = 'div.flex.flex-col.space-y-1.m-1';
 /**
  * A unit card's pricing-tier label: a `TIER_LABEL_SELECTOR` element whose whole text reads
  * "YOUR … COST(S)" (`TIER_LABEL_RE`: "YOUR UNIT COSTS", "YOUR 1ST TO 2ND UNITS COST",
- * "YOUR 4TH + UNIT COSTS"), followed by its `ul.leaders` (see `isUnitCard`). Anchored,
+ * "YOUR 4TH + UNIT COSTS"), followed by its `ul.leaders` (see `tierLabels`). Anchored,
  * because a change note is a `TIER_LABEL_SELECTOR` element too and may mention costs
  * ("ENHANCEMENT COSTS CHANGED"). Detachment cards have no tier label.
  */
@@ -98,20 +98,27 @@ export function cardName(card: ReturnType<CheerioAPI>): string {
 }
 
 /**
- * A card prices a unit iff it carries a "YOUR … COST(S)" tier label immediately followed
- * by its `ul.leaders` of cost rows. Detachment cards never do: their labels are
- * `ENHANCEMENTS`, a `UNIQUE:` banner, an objective or a change note, and a note has no
- * list after it, whatever it reads. This holds in both header styles and with the
- * annotation layer off.
+ * A card's pricing-tier labels: each a "YOUR … COST(S)" label immediately followed by its
+ * `ul.leaders` of cost rows. The parser reads a tier from each of these and from nothing
+ * else, so a note beside a label, inside the tier's wrapper, is left over for the coverage
+ * check instead of being read as a tier of its own.
+ */
+export function tierLabels($: CheerioAPI, card: ReturnType<CheerioAPI>): ReturnType<CheerioAPI> {
+  return card
+    .find(TIER_LABEL_SELECTOR)
+    .filter(
+      (_, el) => TIER_LABEL_RE.test(clean($(el).text())) && $(el).next('ul.leaders').length > 0,
+    );
+}
+
+/**
+ * A card prices a unit iff it carries a tier label (`tierLabels`). Detachment cards never
+ * do: their labels are `ENHANCEMENTS`, a `UNIQUE:` banner, an objective or a change note,
+ * and a note has no list after it, whatever it reads. This holds in both header styles and
+ * with the annotation layer off.
  */
 export function isUnitCard($: CheerioAPI, card: ReturnType<CheerioAPI>): boolean {
-  return (
-    card
-      .find(TIER_LABEL_SELECTOR)
-      .filter(
-        (_, el) => TIER_LABEL_RE.test(clean($(el).text())) && $(el).next('ul.leaders').length > 0,
-      ).length > 0
-  );
+  return tierLabels($, card).length > 0;
 }
 
 /** A card's location for error messages: `"necrons", unit "TECHNOMANCER"`. */

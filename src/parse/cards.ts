@@ -2,7 +2,7 @@ import type { CheerioAPI } from 'cheerio';
 import { ENHANCEMENTS_LABEL, UNIT_BLOCK_LABELS } from '../allowlists.js';
 import type { Detachment, PricingTier, Unit, Wargear } from '../model.js';
 import { nameCase, titleCase } from './names.js';
-import { cardName, cardWhere, DELTA_MARKER_RE, TIER_LABEL_SELECTOR } from './page.js';
+import { cardName, cardWhere, DELTA_MARKER_RE, tierLabels } from './page.js';
 import { clean } from './text.js';
 import { DP_RE, parseCostRow, parsePoints, parseRange, UNIQUE_RE } from './values.js';
 
@@ -93,13 +93,13 @@ export function parseUnit(
   consumed.push(cardName(card));
   const pricing: PricingTier[] = [];
 
-  // Each tier = a `div.bg-slate-200` label followed by a `ul.leaders` of rows. The
-  // role block's `div.bg-slate-200` label (LEADER/SUPPORT) has no `ul.leaders`, so
-  // it contributes no costs and is skipped here; `parseRole` consumes it with its list.
-  card.find(TIER_LABEL_SELECTOR).each((_, labelEl) => {
+  // Each tier = a "YOUR … COST(S)" label right before its `ul.leaders` of rows
+  // (`tierLabels`). No other `div.bg-slate-200` is one: `parseRole` consumes the role
+  // block's label (LEADER/SUPPORT) with its list, and the coverage check reports a note.
+  tierLabels($, card).each((_, labelEl) => {
     const labelText = clean($(labelEl).text());
     const label = titleCase(labelText);
-    const ul = $(labelEl).nextAll('ul.leaders').first();
+    const ul = $(labelEl).next('ul.leaders');
     const costs = ul
       .find('li')
       .map((_i, li) => {

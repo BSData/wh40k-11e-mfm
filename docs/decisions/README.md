@@ -46,6 +46,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0036](0036-a-label-counts-once-with-its-block.md) | A block label counts once, with the block it heads (revises 0019) | scraping |
 | [0037](0037-a-new-cost-row-is-checked-per-model.md) | A new cost row is checked against its unit, per model | change tracking |
 | [0038](0038-a-rules-change-dates-the-update.md) | A rules change dates the update, beside the factions too (revises 0002, 0015) | change tracking |
+| [0039](0039-a-tier-is-read-only-from-a-tier-label.md) | A tier is read only from a tier label | scraping |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and

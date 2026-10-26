@@ -753,6 +753,31 @@ describe('loud failures — content the parser cannot read fails, located', () =
     },
   );
 
+  const tierNote =
+    '<div class="bg-slate-200 dark:bg-slate-600 px-1 py-0.5 font-bold text-black dark:text-white">POINTS REVISED</div>';
+  const tierLabel =
+    '<div class="bg-slate-200 dark:bg-slate-600 px-1 py-0.5 font-bold text-black dark:text-white">YOUR 2ND + UNIT COSTS</div>';
+
+  it.each([
+    ['before', tierNote + tierLabel, 'POINTS REVISED'],
+    // The label is no longer right before its list, so the whole tier is left over.
+    [
+      'after',
+      tierLabel + tierNote,
+      'YOUR 2ND + UNIT COSTSPOINTS REVISED3 models115 pts6 models240 pts',
+    ],
+  ])(
+    'fails on a note %s a tier label, inside its wrapper, rather than reading a tier',
+    (_, html, leftover) => {
+      // CANOPTEK WRAITHS is the first card with a "YOUR 2ND + UNIT COSTS" tier (necrons.html).
+      const page = fixture('necrons.html').replace(tierLabel, html);
+      expect(page).not.toBe(fixture('necrons.html'));
+      const parse = () => parseFaction(page, 'necrons', 'Necrons');
+      expect(parse).toThrow(/Unconsumed content/);
+      expect(parse).toThrow(`unit "CANOPTEK WRAITHS": "${leftover}"`);
+    },
+  );
+
   it('fails on a role block with no list', () => {
     const html = fixture('necrons.html').replace(
       'SKORPEKH DESTROYERS</span></div>',
