@@ -998,6 +998,20 @@ const committed = (slug: string): Faction =>
 const committedSlugs = readdirSync(fileURLToPath(new URL('../data/', import.meta.url)))
   .filter((f) => f.endsWith('.yaml') && f !== 'meta.yaml')
   .map((f) => f.replace(/\.yaml$/, ''));
+/**
+ * A faction file as `data/` held it after #78, frozen: the roster the tests below count on
+ * (29 namesakes in Imperial Agents, the 55 and 65 point Inquisitors, the identical Callidus
+ * pair, a Legends Venerable Dreadnought), whatever an update does to it. Its names predate
+ * #88's casing rule.
+ */
+const frozen = (slug: string): Faction =>
+  factionFromYaml(
+    readFileSync(
+      fileURLToPath(new URL(`./golden/data-v1.6-pr78/${slug}.yaml`, import.meta.url)),
+      'utf8',
+    ),
+  );
+const IMPERIUM = 'Every Model Has The Imperium Keyword';
 
 describe('unit identity (names are not unique within a faction)', () => {
   it.each(committedSlugs)('reports nothing for two identical %s snapshots', (slug) => {
@@ -1005,15 +1019,12 @@ describe('unit identity (names are not unique within a faction)', () => {
   });
 
   it('reprices the right one of two same-named units, once', () => {
-    const before = committed('imperial-agents');
-    const after = committed('imperial-agents');
+    const before = frozen('imperial-agents');
+    const after = frozen('imperial-agents');
     // Imperial Agents lists "Inquisitor" twice: on the base roster, and again under a
     // sub-group, at a different price.
     const inquisitors = after.units.filter((u) => u.name === 'Inquisitor');
-    expect(inquisitors.map((u) => u.groupTitle)).toEqual([
-      undefined,
-      'Every Model Has the Imperium Keyword',
-    ]);
+    expect(inquisitors.map((u) => u.groupTitle)).toEqual([undefined, IMPERIUM]);
     const cost = inquisitors[0]?.pricing[0]?.costs[0];
     if (!cost) throw new Error('data changed');
     cost.points += 25;
@@ -1024,19 +1035,19 @@ describe('unit identity (names are not unique within a faction)', () => {
   });
 
   it('names the sub-group when two units would otherwise read the same', () => {
-    const before = committed('imperial-agents');
-    const after = committed('imperial-agents');
+    const before = frozen('imperial-agents');
+    const after = frozen('imperial-agents');
     const cost = after.units.filter((u) => u.name === 'Inquisitor')[1]?.pricing[0]?.costs[0];
     if (!cost) throw new Error('data changed');
     cost.points += 5;
     expect(changelog([before], [after])).toContain(
-      '- Inquisitor (Every Model Has the Imperium Keyword) — 1 model: 65 → 70 (+5)\n',
+      `- Inquisitor (${IMPERIUM}) — 1 model: 65 → 70 (+5)\n`,
     );
   });
 
   it('numbers two same-named units in the same sub-group', () => {
-    const before = committed('space-wolves');
-    const after = committed('space-wolves');
+    const before = frozen('space-wolves');
+    const after = frozen('space-wolves');
     const cost = after.units.filter((u) => u.name === 'Venerable Dreadnought')[1]?.pricing[0]
       ?.costs[0];
     if (!cost) throw new Error('data changed');
@@ -1048,22 +1059,22 @@ describe('unit identity (names are not unique within a faction)', () => {
   });
 
   it('reads a unit moved beside its namesake as moved, not as two reprices', () => {
-    const before = committed('imperial-agents');
-    const after = committed('imperial-agents');
+    const before = frozen('imperial-agents');
+    const after = frozen('imperial-agents');
     const base = after.units.find((u) => u.name === 'Inquisitor' && !u.groupTitle);
     if (!base) throw new Error('data changed');
-    base.groupTitle = 'Every Model Has the Imperium Keyword';
+    base.groupTitle = IMPERIUM;
     const log = changelog([before], [after]);
     expect(log).toContain('**1 faction changed** · units ~1\n');
     expect(log).toContain(
-      '**Unit changes:**\n- Inquisitor (Every Model Has the Imperium Keyword, #1) — group: — → Every Model Has the Imperium Keyword\n',
+      `**Unit changes:**\n- Inquisitor (${IMPERIUM}, #1) — group: — → ${IMPERIUM}\n`,
     );
     expect(log).not.toContain('**Unit points:**');
   });
 
   it('removes the first of two same-named units, not the second', () => {
-    const before = committed('space-wolves');
-    const after = committed('space-wolves');
+    const before = frozen('space-wolves');
+    const after = frozen('space-wolves');
     after.units.splice(
       after.units.findIndex((u) => u.name === 'Venerable Dreadnought'),
       1,
@@ -1076,8 +1087,8 @@ describe('unit identity (names are not unique within a faction)', () => {
   });
 
   it('reprices the base copy of an identical pair, not its sub-group twin', () => {
-    const before = committed('imperial-agents');
-    const after = committed('imperial-agents');
+    const before = frozen('imperial-agents');
+    const after = frozen('imperial-agents');
     const cost = after.units.filter((u) => u.name === 'Callidus Assassin')[0]?.pricing[0]?.costs[0];
     if (!cost) throw new Error('data changed');
     cost.points += 5;
@@ -1089,8 +1100,8 @@ describe('unit identity (names are not unique within a faction)', () => {
   });
 
   it('pairs by group before it pairs by content, so a reprice that meets its twin is no move', () => {
-    const before = committed('imperial-agents');
-    const after = committed('imperial-agents');
+    const before = frozen('imperial-agents');
+    const after = frozen('imperial-agents');
     // Both Inquisitors (55 and 65 points) go up by 10: the base's new content is now the
     // sub-group's old content, which a content-first pairing would take for a move.
     for (const u of after.units.filter((u) => u.name === 'Inquisitor')) {
@@ -1100,15 +1111,13 @@ describe('unit identity (names are not unique within a faction)', () => {
     }
     const log = changelog([before], [after]);
     expect(log).toContain('- Inquisitor — 1 model: 55 → 65 (+10)\n');
-    expect(log).toContain(
-      '- Inquisitor (Every Model Has the Imperium Keyword) — 1 model: 65 → 75 (+10)\n',
-    );
+    expect(log).toContain(`- Inquisitor (${IMPERIUM}) — 1 model: 65 → 75 (+10)\n`);
     expect(log).not.toContain('group:');
   });
 
   it('a base roster dropped beside its sub-group copies is 29 removals', () => {
-    const before = committed('imperial-agents');
-    const after = committed('imperial-agents');
+    const before = frozen('imperial-agents');
+    const after = frozen('imperial-agents');
     const grouped = new Set(after.units.filter((u) => u.groupTitle).map((u) => u.name));
     after.units = after.units.filter((u) => u.groupTitle || !grouped.has(u.name));
     const log = changelog([before], [after]);
