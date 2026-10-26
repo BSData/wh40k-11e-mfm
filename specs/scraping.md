@@ -95,8 +95,8 @@ present.
 | Detachment DP badge | `span.self-end` in the header, the whole of it `NDP` (e.g. `2DP`) |
 | Detachment objectives | `div[style]` (styled banner) under the header — **all** of them, since v1.4 a detachment can grant two Force Dispositions |
 | Detachment `unique` | direct-child `div.bg-slate-200` whose text starts `UNIQUE:` (prefix stripped) |
-| Enhancement | `ul.leaders li`: last `div`'s two spans = name, points |
-| Enhancement `leaderTo` / `supportTo` | sibling of the enhancement's `<li>` in its wrapper: span `LEADER:`/`SUPPORT:` + next span (comma-separated unit list) |
+| Enhancement | `ul.leaders li` without `no-leaders`: last `div`'s two spans = name, points |
+| Enhancement `leaderTo` / `supportTo` | what follows the enhancement's `<li>`: its sibling `<div>` in a per-enhancement wrapper (older pages), or the `li.no-leaders` rows after it in the flat list (newer pages). Span `LEADER:`/`SUPPORT:` + next span (comma-separated unit list) |
 
 ## Validation (fail loud)
 Every faction is checked against the `Faction` zod schema before writing. The parser also

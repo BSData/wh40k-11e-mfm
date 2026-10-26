@@ -125,6 +125,12 @@ export function parseUnit(
   };
 }
 
+// What follows an enhancement's <li> and belongs to it: its sibling <div> in the old
+// per-enhancement wrapper, or the `li.no-leaders` rows after it in the flat list.
+function grantBlocks(li: ReturnType<CheerioAPI>) {
+  return li.nextUntil('li:not(.no-leaders)');
+}
+
 /** Units a detachment enhancement grants an ability to via a "LEADER:"/"SUPPORT:" block. */
 function enhancementGrant(
   $: CheerioAPI,
@@ -133,8 +139,7 @@ function enhancementGrant(
   consumed: string[],
 ): string[] {
   const list = clean(
-    li
-      .parent()
+    grantBlocks(li)
       .find('span')
       .filter((_j, s) => clean($(s).text()) === keyword)
       .first()
@@ -186,7 +191,7 @@ export function parseDetachment(
   const unique = nameCase(banner.replace(UNIQUE_RE, ''));
   if (unique) consumed.push(banner);
   const enhancements = card
-    .find('ul.leaders li')
+    .find('ul.leaders li:not(.no-leaders)')
     .map((_i, el) => {
       const li = $(el);
       const spans = li.find('div').last().find('span');

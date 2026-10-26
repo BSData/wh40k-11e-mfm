@@ -596,6 +596,24 @@ describe('parseFaction coverage guard — nothing on the page goes unconsumed', 
     expect(() => parseFaction(fixture('necrons-panels.html'), 'necrons', 'Necrons')).not.toThrow();
   });
 
+  it('reads a grant that is its own li.no-leaders row after the enhancement', () => {
+    // Markup from the refreshed orks-legends-cookie.html (TAKTIKAL BRIGADE): the grant is
+    // a flat `li.no-leaders` row, not a div in a per-enhancement wrapper.
+    const html = fixture('necrons.html');
+    const old =
+      '<div><li><div class="flex flex-row justify-between"><span>Murdermind</span><span>15 pts</span></div></li><div class="mx-3 font-bold"><span class="font-bold">SUPPORT:</span>';
+    const flat =
+      '<li><div class="flex flex-row justify-between"><span>Murdermind</span><span>15 pts</span></div></li><li class="mx-3 font-bold no-leaders"><span class="font-bold">SUPPORT:</span>';
+    expect(html).toContain(old);
+    const injected = html.replace(old, flat);
+    const cursed = parseFaction(injected, 'necrons', 'Necrons').detachments.find(
+      (d) => d.name === 'Cursed Legion',
+    );
+    const murdermind = cursed?.enhancements.find((e) => e.name === 'Murdermind');
+    expect(murdermind?.supportTo).toContain('Lokhust Destroyers');
+    expect(cursed?.enhancements.map((e) => e.name)).not.toContain('SUPPORT:');
+  });
+
   it('throws, located, when the page has content no selector captured', () => {
     const injected = fixture('necrons.html').replace(
       '</body>',
