@@ -305,8 +305,9 @@ stands out. It is for readers who never open the detail, and nothing depends on 
   one or two short paragraphs of plain prose, at most 120 words, using only the
   changelog's facts and names, naming no dates (the title carries them), and, when there
   is a *Needs attention* warning, for how many changes it flags rather than their values.
-- **What of the answer is used.** Plain text: the answer is normalised to NFC, a tab or
-  any other space character becomes a plain space, and every character but letters (with
+- **What of the answer is used.** Plain text: the answer is normalised to NFC, a tab, any
+  other space character, a vertical tab, a form feed, U+0085 and the line and paragraph
+  separators (U+2028, U+2029) become a plain space, and every character but letters (with
   their accents), digits, spaces, line breaks, dashes, quotation marks and
   `. , ; : ! ? ' " ( ) / % + × → ▲ ▼ ·` is dropped, as is every invisible one (variation
   selectors, joiners, fillers, tags, bidirectional controls), so it holds no HTML, mention

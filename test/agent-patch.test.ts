@@ -26,6 +26,7 @@ import {
   prBody,
   readMeta,
 } from '../src/ops/agent-patch.js';
+import { expectNodeOnly } from './node-only.js';
 
 /**
  * The drift fixer's patch check (src/ops/agent-patch.ts): the one thing between a model
@@ -526,13 +527,7 @@ describe('it runs where the App key is: plain Node, no dependencies', () => {
   const source = readFileSync(file, 'utf8');
 
   it("imports Node's own modules and nothing else", () => {
-    const imports = [...source.matchAll(/^\s*(?:import|export)\b[^;]*?\bfrom\s+'([^']+)'/gm)].map(
-      (m) => m[1],
-    );
-    expect(imports.length).toBeGreaterThan(0);
-    for (const specifier of imports) expect(specifier).toMatch(/^node:/);
-    expect(source).not.toMatch(/\bimport\s*\(/);
-    expect(source).not.toMatch(/\brequire\s*\(/);
+    expectNodeOnly(source);
   });
 
   it('runs under node --experimental-strip-types, outside the test runner', () => {
