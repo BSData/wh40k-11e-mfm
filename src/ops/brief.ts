@@ -55,8 +55,11 @@ export const HEADER = `**In brief** · written by a model (\`${MODEL}\`) from th
  */
 const NOT_PLAIN =
   /\p{Default_Ignorable_Code_Point}|[^\p{L}\p{M}\p{N}\p{Pd}\p{Pi}\p{Pf} \n.,;:!?'"()/%+×→▲▼·]/gu;
-/** A tab or any space character other than U+0020: a word break, not a glue. */
-const OTHER_SPACE = /[\t\p{Zs}]/gu;
+/**
+ * A tab, a vertical tab, a form feed, a next line, a line or paragraph separator, or any
+ * space character other than U+0020: a word break, not a glue.
+ */
+const OTHER_SPACE = /[\t\v\f\u0085\p{Zs}\p{Zl}\p{Zp}]/gu;
 /** What GitHub links on its own, or what reads as an issue reference. */
 const LINK = /\b(?:https?|ftp):\/\/|\bwww\.|\bgh-\d/iu;
 

@@ -21,6 +21,7 @@ import {
   SYSTEM_PROMPT,
   TIMEOUT_MS,
 } from '../src/ops/brief.js';
+import { expectNodeOnly, importSpecifiers } from './node-only.js';
 
 /**
  * The brief (src/ops/brief.ts): asking the model, what of its answer is used, and where it
@@ -102,6 +103,17 @@ describe('briefBlock — the answer as a quote a PR body can hold', () => {
     );
     // ... so a line with only one is still a blank line between paragraphs.
     expect(block('a\n\t\nb')).toBe(`${BRIEF_MARKER}\n> ${HEADER}\n>\n> a\n>\n> b\n\n${BRIEF_END}`);
+  });
+
+  it.each([
+    '000B', // vertical tab
+    '000C', // form feed
+    '0085', // next line
+    '2028', // line separator
+    '2029', // paragraph separator
+  ])('turns U+%s into a space, not a glue', (hex) => {
+    const brk = String.fromCodePoint(Number.parseInt(hex, 16));
+    expect(firstLine(`Orks${brk}up`)).toBe('> Orks up');
   });
 
   it('keeps names, numbers and arrows as the changelog writes them', () => {
@@ -578,13 +590,17 @@ describe("it runs where the model's key is: plain Node, no dependencies", () => 
   const source = readFileSync(file, 'utf8');
 
   it("imports Node's own modules and nothing else", () => {
-    const imports = [...source.matchAll(/^\s*(?:import|export)\b[^;]*?\bfrom\s+'([^']+)'/gm)].map(
-      (m) => m[1],
-    );
-    expect(imports.length).toBeGreaterThan(0);
-    for (const specifier of imports) expect(specifier).toMatch(/^node:/);
-    expect(source).not.toMatch(/\bimport\s*\(/);
-    expect(source).not.toMatch(/\brequire\s*\(/);
+    expectNodeOnly(source);
+  });
+
+  it('sees an import over several lines, a re-export and a bare import', () => {
+    expect(
+      importSpecifiers(
+        "import { a } from 'node:fs';\nimport {\n  b,\n} from \"dep\";\nexport * from './c.js';\nimport 'side-effect';\nexport const s = 'from x';\n",
+      ),
+    ).toEqual(['node:fs', 'dep', './c.js', 'side-effect']);
+    expect(() => expectNodeOnly("import { a } from 'node:fs';\nimport 'dep';\n")).toThrow();
+    expect(() => expectNodeOnly("import { a } from 'node:fs';\nawait import('dep');\n")).toThrow();
   });
 
   it('runs under node --experimental-strip-types, outside the test runner', () => {

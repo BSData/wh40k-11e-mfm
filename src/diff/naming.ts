@@ -74,8 +74,8 @@ export const windowLabel = (w: { from: string; to: string }): string =>
  * What to call this update: `MFM v1.3 update — 2026-08-26`. Used verbatim as the PR
  * title, the changelog's `# ` heading and the commit subject, so the version and the
  * days it covers are legible from the merged history alone. Stable across re-scrapes,
- * widening as days accrue, except for an update with a rules panel change (see
- * `updateWindow`).
+ * widening as days accrue, except for an update with a rules panel change or a faction
+ * the site dropped, which is dated today (see `updateWindow`).
  */
 export function updateTitle(before: Snapshot[], after: Snapshot[], opts: RenderOpts = {}): string {
   const version = updateVersion(after, opts);
