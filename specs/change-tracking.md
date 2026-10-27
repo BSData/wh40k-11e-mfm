@@ -513,14 +513,15 @@ report names a failure the parser could have caused: the `drift` artifact.
 
 ## The drift fixer
 When the site changes its markup, the fix takes judgment: find what moved, change the
-parser or an allowlist, update the spec. `drift-fix.yml` has a model draft it as a PR. A
-fix that passes the rules code checks merges itself once CI and the live smoke test pass;
-any other stays a draft for a maintainer to review. Everything around the model is plain
-Actions, and each part holds only what it needs. See
+parser or an allowlist, update the spec. `drift-fix.yml` has a model draft it as a PR,
+which merges itself once CI and the live smoke test pass, unless the agent hands it to a
+maintainer. A fix whose checks fail is closed, and the outage gets another run, up to
+three. Everything around the model is plain Actions, and each part holds only what it
+needs. See
 [0029](../docs/decisions/0029-a-failed-scrape-drafts-its-fix.md),
 [0031](../docs/decisions/0031-the-drift-fixer-fails-loud-with-fewer-layers.md),
 [0032](../docs/decisions/0032-one-claude-code-pin.md) and
-[0040](../docs/decisions/0040-a-low-risk-drift-fix-merges-itself.md).
+[0040](../docs/decisions/0040-a-drift-fix-merges-itself.md).
 
 1. **The failure artifact**, in `scrape` (no secrets, no model). When the scrape fails,
    `mfm refresh-fixtures --failed /tmp/failures.md --out /tmp/drift/fixtures` downloads,
@@ -540,13 +541,14 @@ Actions, and each part holds only what it needs. See
    - it has an unexpired `drift` artifact (a replay also takes `drift-dry-run`);
    - no open PR is labelled `agent-fix`;
    - for a failed scrape, not a replay: there is an open `scrape-failure` issue, and it
-     records no drift-fix run yet. A record counts only in a comment by
-     `github-actions[bot]` that starts with it.
+     records fewer than three drift-fix runs (`MAX_RUNS_PER_OUTAGE`). A record counts
+     only in a comment by `github-actions[bot]` that starts with it.
 
    The gate records the run it lets through on that issue
    (`<!-- drift-fix-run: <run id> -->`, with the command to replay it) before the agent
-   starts, so an outage gets one agent run however long it lasts, even when that run
-   fails.
+   starts, so an outage gets at most three agent runs however long it lasts, failed ones
+   included. A fix that merged but left the scrape failing, or one the merge closed (step
+   5), is how a second or third run comes about.
 3. **The agent** (job `agent`) holds the model's key, the repository secret
    `ANTHROPIC_API_KEY`, and no other secret. Its token has `contents: read` and
    `actions: read`, the checkout keeps no credentials, and harden-runner blocks egress
@@ -597,23 +599,16 @@ Actions, and each part holds only what it needs. See
    It applies the patch to a fresh checkout of the commit the agent worked on, and checks
    that the tree changed exactly there. It downloads the same `drift` artifact and adds,
    byte for byte, each of its pages whose name no fixture has and that a line the patch
-   adds under `test/` holds as a string (`fixture('orks-legends-cookie.html')`; a name in
-   a comment doesn't count). So every page the PR adds came from the scrape, none from the
-   model. Then it decides the risk. A fix is **low risk** when all of these hold, and
-   **high risk** otherwise:
+   adds holds as a string (`fixture('orks-legends-cookie.html')`, or its entry in
+   `FIXTURES`; a name in a comment doesn't count). So every page the PR adds came from the
+   scrape, none from the model. Then it decides the risk. A fix is **low risk** when both
+   of these hold, and **high risk** otherwise:
    - the agent finished, and its note doesn't start with `Needs review:`;
-   - every file the patch touches is `src/parse/*.ts`, `src/allowlists.ts`,
-     `src/fixtures.ts`, `specs/scraping.md`, `test/parse.test.ts`, or a new file under
-     `docs/decisions/`, and at least one is under `src/` (the smoke test runs only for a
-     change there). Not a snapshot: vitest loads one with `new Function`, so it is code;
-   - no line it adds under `src/` or `test/` imports or re-exports anything (`import`
-     anywhere but in `import.meta`, or `from '…'`), or names `process`, `globalThis`,
-     `global`, `require`, `eval`, `Function`, `constructor`, `prototype`, `__proto__`,
-     `Reflect`, `Proxy`, `fetch`, `WebAssembly`, `child_process` or a quoted `node:`. A
-     screen for the plain route out of the parser, not a sandbox;
-   - it adds and removes at most 150 lines;
-   - it adds at least one of the scrape's pages. When every page that shows the drift
-     already has a fixture under its name, there is none to add, and a person adds one.
+   - it changes something under `src/`: the scrape runs nothing else, and the smoke test
+     runs only for a change there.
+
+   Nothing else holds a fix back: what it does is CI's and the smoke test's to judge, and
+   where it reaches is the patch check's above.
 
    The App's token, scoped as in `publish`, opens the PR from `agent-fix/scrape-<run id>`
    to the branch the workflow ran on, a draft unless the risk is low, labelled `agent-fix`
@@ -637,21 +632,26 @@ Actions, and each part holds only what it needs. See
    `scrape.yml` on `main`, and comments on the failure issue that the fix merged without
    review, linking its checks (the smoke test's summary says what it changes in the data),
    and asking the code owners to read it. A failed or cancelled check, a smoke test that
-   didn't pass or never ran, the wait running out, or a merge GitHub refuses turns the PR
-   back into a draft, says why on the failure issue, and fails the job. A merge made with
+   didn't pass or never ran, or the wait running out closes the PR, starts `scrape.yml`
+   again, says why on the failure issue, and fails the job: if the scrape still fails,
+   the gate gives the outage its next run (or the next scheduled scrape's failure does,
+   if GitHub starts no `workflow_run` for a scrape this token started: not yet seen
+   either way), and reopening the PR is how a person takes it over. A merge GitHub refuses turns the PR back into a draft instead, says why, and
+   fails the job, since another run would meet the same refusal. A merge made with
    the workflow's token starts no push-triggered workflow on `main`: CI ran on the PR, a
    drift fix changes no `data/`, and the scrape is started here. No workflow grants
    `checks: write` or `statuses: write`, or leaves a job to the repository's default
    token, which can write, so code a PR runs can't post a passing `smoke` check of its own
    (`test/workflows.test.ts` holds every workflow to that); and a status or a check run
    made through the API carries no workflow's name, which the merge job also asks for.
-6. **A maintainer** reviews a high-risk fix, adds the refreshed page when the PR has
-   none, and merges; and reads a low-risk one after it merged. The next successful scrape
-   closes the failure issue, as always.
+6. **A maintainer** reviews a high-risk fix, whose open draft holds the outage's other
+   runs, and merges or closes it; takes over a closed fix or a refused merge when the
+   runs didn't end the outage; and reads a merged fix when there is time. The next
+   successful scrape closes the failure issue, as always.
 
 The model is the cheaper tier on purpose: Claude Sonnet 5.5 costs $2 per million input
 tokens and $10 per million output tokens. A run is expected to cost $1–2 of the key's $10
-spend limit. Claude Code stops at the turn that takes it past $2, so the worst case is $2
+spend limit, so an outage's three runs about $6, and the key's limit is the hard stop. Claude Code stops at the turn that takes it past $2, so the worst case is $2
 and that last turn: about $3 with the context cached, at most about $5 for a turn that
 re-read a near-million-token context uncached. The PR body and the run's summary say what
 each run cost.
@@ -802,7 +802,7 @@ failure report in the summary. It is not a required check, but Dependabot auto-m
 waits for it (below), and so does the drift fixer's `merge` job (see *The drift fixer*).
 The job has `contents: read` and no secrets, so a PR from a fork runs it the same way.
 See [0024](../docs/decisions/0024-a-live-smoke-test-reports-and-gates-only-auto-merge.md)
-and [0040](../docs/decisions/0040-a-low-risk-drift-fix-merges-itself.md).
+and [0040](../docs/decisions/0040-a-drift-fix-merges-itself.md).
 
 ### Dependabot auto-merge
 `dependabot-automerge.yml` runs on each PR whose author (not `github.actor`) is

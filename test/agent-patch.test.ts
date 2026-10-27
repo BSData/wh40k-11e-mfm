@@ -439,113 +439,41 @@ describe('assessRisk — which fixes merge themselves (0040)', () => {
     fix(dir);
     write(dir, path, text);
   };
-  const assess = (edit: (dir: string) => void, input: Partial<RiskInput> = {}) => {
-    const { files, lines } = readPatch(patchOf(edit));
-    return assessRisk({
-      files,
-      lines,
+  const assess = (edit: (dir: string) => void, input: Partial<RiskInput> = {}) =>
+    assessRisk({
+      files: readPatch(patchOf(edit)).files,
       meta: { finished: true },
       notes: 'The site moved the grant into its own row.',
-      pages: [PAGE],
-      freePages: [PAGE],
       ...input,
     });
-  };
 
   it('finds a parser fix with its page and its spec low risk', () => {
     expect(assess(fix)).toEqual({ low: true, reasons: [] });
   });
 
-  // The reasons go into the PR and the failure issue: nothing the model wrote does.
+  // CI and the live smoke test check what the code does; the patch check bounds where it
+  // goes. Nothing else holds a fix back (0040).
   it.each([
-    ["export { a, b as c } from './x.js'; // @someone", 'export … from'],
-    ["  import { a } from 'b';", 'import'],
-    ['const f = "node:fs"; // @x', 'node:'],
-    ['x = process;', 'process'],
-    ["} from 'fs';", 'from'],
-    ["const y = 1; import 'fs';", 'import'],
-    ["const m = await import \u00a0 ('x');", 'dynamic import'],
-  ])('names what reaches out in fixed words only: %s', (line, word) => {
-    expect(assess(also('src/parse/cards.ts', `${line}\n`)).reasons).toEqual([
-      `src/parse/cards.ts adds a line that reaches out: ${word}`,
-    ]);
+    ['src/ops/git.ts', 'const y = 2;\n'],
+    ['test/__snapshots__/parse.test.ts.snap', 'exports[`a 1`] = `x`;\n'],
+    ['docs/decisions/0001-x.md', '# 1\n'],
+    ['specs/change-tracking.md', '# Change tracking\n'],
+    ['src/parse/cards.ts', "import { load } from 'cheerio';\nconst p = process.env;\n"],
+    ['src/parse/rows.ts', Array.from({ length: 400 }, (_, i) => `const v${i} = ${i};\n`).join('')],
+  ])('takes any change the patch check allows: %s', (path, text) => {
+    expect(assess(also(path, text))).toEqual({ low: true, reasons: [] });
   });
 
-  it('finds a fix outside the parser, its tests and the scraping spec high risk', () => {
-    const risk = assess((dir) => {
-      fix(dir);
-      write(dir, 'src/ops/git.ts', 'const y = 2;\n');
-    });
-    expect(risk).toEqual({
-      low: false,
-      reasons: ['src/ops/git.ts is outside the parser, its tests and the scraping spec'],
-    });
+  it('takes a fix that adds no page from the scrape', () => {
+    const noPage = (dir: string) => write(dir, 'src/parse/cards.ts', 'const rows = 1;\n');
+    expect(assess(noPage)).toEqual({ low: true, reasons: [] });
   });
 
-  it('takes a new decision record, but not a change to an old one', () => {
-    expect(assess(also('docs/decisions/0041-x.md', '# 0041\n')).low).toBe(true);
-    expect(assess(also('docs/decisions/0001-x.md', '# 1\n')).reasons).toEqual([
-      'docs/decisions/0001-x.md is outside the parser, its tests and the scraping spec',
-    ]);
-  });
-
+  // The smoke test runs only for a change under src/, and the scrape runs nothing else.
   it('finds a fix that changes nothing under src/ high risk', () => {
     expect(
       assess((dir) => write(dir, 'test/parse.test.ts', `fixture('${PAGE}');\n`)).reasons,
     ).toEqual(['it changes nothing under src/']);
-  });
-
-  it.each([
-    "import { x } from 'y';",
-    "import 'y';",
-    "export * from './y.js';",
-    'const p = process.env;',
-    'globalThis.x = 1;',
-    "const m = await import('y');",
-    "const f = 'node:fs';",
-    'const c = x.constructor;',
-    "const g = Reflect.get(x, 'y');",
-    "fetch('https://example.com');",
-    // The last line of an export over several lines, and an import after other code.
-    "} from 'fs';",
-    "const y = 1; import 'fs';",
-  ])('finds an added line that reaches out high risk: %s', (line) => {
-    const risk = assess((dir) => {
-      fix(dir);
-      write(dir, 'src/parse/cards.ts', `${line}\n`);
-    });
-    expect(risk.low).toBe(false);
-    expect(risk.reasons).toEqual([
-      expect.stringMatching(/^src\/parse\/cards\.ts adds a line that reaches out: /),
-    ]);
-  });
-
-  it.each([
-    'function deref(node: unknown) {}',
-    '// the page as the scrape fetched it',
-    'const here = import.meta.url;',
-    '// the names it imported',
-  ])('lets an ordinary parser line through: %s', (line) => {
-    expect(assess(also('src/parse/cards.ts', `${line}\n`)).low).toBe(true);
-  });
-
-  it('finds a fix over 150 lines high risk', () => {
-    const many = (n: number) =>
-      Array.from({ length: n }, (_, i) => `const v${i} = ${i};\n`).join('');
-    // 147 + the fix's 3 lines is exactly the limit.
-    expect(assess(also('src/parse/cards.ts', many(147))).low).toBe(true);
-    expect(assess(also('src/parse/cards.ts', many(149))).reasons).toEqual([
-      'it changes 152 lines, over 150',
-    ]);
-  });
-
-  // vitest loads a snapshot file with `new Function`: it is code, which no word list vets.
-  it('finds a changed snapshot high risk', () => {
-    expect(
-      assess(also('test/__snapshots__/parse.test.ts.snap', 'exports[`a 1`] = `x`;\n')).reasons,
-    ).toEqual([
-      'test/__snapshots__/parse.test.ts.snap is outside the parser, its tests and the scraping spec',
-    ]);
   });
 
   it('finds an unfinished run, or one whose note asks for review, high risk', () => {
@@ -554,13 +482,6 @@ describe('assessRisk — which fixes merge themselves (0040)', () => {
     ]);
     expect(assess(fix, { notes: 'Needs review: unsure about Orks.\nThe rest.' }).reasons).toEqual([
       'the agent asked for review',
-    ]);
-  });
-
-  it('finds a fix with no page from the scrape high risk, and says why', () => {
-    expect(assess(fix, { pages: [] }).reasons).toEqual(['its tests read no page from the scrape']);
-    expect(assess(fix, { pages: [], freePages: [] }).reasons).toEqual([
-      'every page that shows the drift already has a fixture under its name',
     ]);
   });
 });
@@ -593,7 +514,7 @@ describe("the scrape's pages — the fixtures the PR adds, never the model's", (
     expect(freePages(join(scratch, 'no-such-dir'), repo())).toEqual([]);
   });
 
-  it('takes the pages an added test line reads by name, and no other', () => {
+  it('takes the pages an added line quotes by name, in any file, and no other', () => {
     const lines = new Map<string, PatchLines>([
       [
         'test/parse.test.ts',
@@ -606,10 +527,10 @@ describe("the scrape's pages — the fixtures the PR adds, never the model's", (
           removed: 0,
         },
       ],
-      ['src/parse/cards.ts', { added: ["const page = 'x.html';"], removed: 0 }],
+      ['src/fixtures.ts', { added: ["  { name: 'x.html', url: factionUrl('x') },"], removed: 0 }],
       ['test/other.test.ts', { added: ["fixture('big-orks-legends-cookie.html');"], removed: 0 }],
     ]);
-    expect(pagesNamed([PAGE, 'x.html', 'y.html'], lines)).toEqual([PAGE]);
+    expect(pagesNamed([PAGE, 'x.html', 'y.html'], lines)).toEqual([PAGE, 'x.html']);
   });
 
   it('copies a page byte for byte, and never over a fixture', () => {
@@ -664,20 +585,20 @@ describe("the scrape's pages — the fixtures the PR adds, never the model's", (
       expect(r.body).toContain(`- \`test/fixtures/${PAGE}\` (added from the scrape)`);
     });
 
-    it('finds a fix whose tests read no page high risk, and adds none', () => {
+    it('adds no page the patch does not name, and still finds the fix low risk', () => {
       const pages = drift({ [PAGE]: '<p>new</p>\n' });
       const r = runMain(fixPatch('const y = 1;'), ['--drift', pages]);
       expect(r.code).toBe(0);
-      expect(r.output).toContain('risk=high\nreasons=its tests read no page from the scrape\n');
-      expect(r.output).not.toContain('test/fixtures/');
-      expect(r.body).toContain('> - its tests read no page from the scrape');
-      expect(r.body).toContain('- [ ] Commit that page as the fixture');
+      expect(r.output).toBe(
+        'changed=true\npaths=src/parse/cards.ts,test/parse.test.ts\nrisk=low\nreasons=\n',
+      );
+      expect(r.body).not.toContain('test/fixtures/');
     });
 
-    it('without the drift pages, finds no free page', () => {
+    it('without the drift pages, adds none', () => {
       const r = runMain(fixPatch(`fixture('${PAGE}');`));
-      expect(r.output).toContain(
-        'risk=high\nreasons=every page that shows the drift already has a fixture under its name\n',
+      expect(r.output).toBe(
+        'changed=true\npaths=src/parse/cards.ts,test/parse.test.ts\nrisk=low\nreasons=\n',
       );
     });
   });
@@ -696,7 +617,7 @@ describe('the PR body', () => {
       agentRunUrl: 'https://github.com/o/r/actions/runs/2',
       issue: 96,
       pages: [],
-      risk: { low: false, reasons: ['its tests read no page from the scrape'] },
+      risk: { low: false, reasons: ['the agent asked for review'] },
     });
 
   it('names the runs, the files, the cost, and what is left to do', () => {
@@ -720,9 +641,9 @@ describe('the PR body', () => {
       scrapeRunUrl: 'https://github.com/o/r/actions/runs/1',
       agentRunUrl: 'https://github.com/o/r/actions/runs/2',
       pages: ['orks-legends-cookie.html'],
-      risk: { low: false, reasons: ['it changes 200 lines, over 150'] },
+      risk: { low: false, reasons: ['it changes nothing under src/'] },
     });
-    expect(text).toContain('> - it changes 200 lines, over 150');
+    expect(text).toContain('> - it changes nothing under src/');
     expect(text).toContain('- `test/fixtures/orks-legends-cookie.html` (added from the scrape)');
     expect(text).not.toContain('Commit that page');
   });
@@ -754,7 +675,7 @@ describe('the PR body', () => {
         scrapeRunUrl: 'https://github.com/o/r/actions/runs/1',
         agentRunUrl: 'https://github.com/o/r/actions/runs/2',
         pages: [],
-        risk: { low: false, reasons: ['its tests read no page from the scrape'] },
+        risk: { low: false, reasons: ['the agent asked for review'] },
       });
       expect(body.length).toBeLessThanOrEqual(BODY_LIMIT);
       expect(body).toContain('### Before it is ready');
@@ -798,9 +719,9 @@ describe('the command line', () => {
     const env = { GITHUB_REPOSITORY: 'o/r', GITHUB_RUN_ID: '2' };
     const args = [dir, patch, '--scrape-run', '1', '--issue', '96', '--notes', notes];
     expect(main([...args, '--body-file', bodyFile, '--output', output], env, quiet)).toBe(0);
-    // src/parse.ts re-exports, so it isn't among the files a low-risk fix may change.
-    expect(readFileSync(output, 'utf8')).toMatch(
-      /^changed=true\npaths=src\/parse\.ts\nrisk=high\nreasons=.*src\/parse\.ts is outside.*\n$/,
+    // No --meta: nothing says the agent finished.
+    expect(readFileSync(output, 'utf8')).toBe(
+      'changed=true\npaths=src/parse.ts\nrisk=high\nreasons=the agent did not finish\n',
     );
     expect(readFileSync(bodyFile, 'utf8')).toContain('Dropped the footer.');
   });

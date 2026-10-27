@@ -3,16 +3,22 @@ import { type GitHub, paginate, request } from './github.js';
 
 /**
  * Whether `drift-fix.yml` runs its agent for a failed scrape (`mfm drift-fix-gate`). The
- * model's key has a small spend limit, so the agent runs at most once per outage and only
- * on drift: a scrape run of this repository's `scrape.yml` that failed on parsing, which
- * is when it uploads the `drift` artifact; never while an `agent-fix` PR is open; and,
- * when a failed scrape started it, only if the open scrape-failure issue doesn't already
- * record a drift-fix run. A manual replay skips that last check. The gate records the
- * run it lets through on the issue, before the agent starts. See "The drift fixer" in
- * specs/change-tracking.md.
+ * model's key has a small spend limit, so the agent runs at most `MAX_RUNS_PER_OUTAGE`
+ * times per outage and only on drift: a scrape run of this repository's `scrape.yml` that
+ * failed on parsing, which is when it uploads the `drift` artifact; never while an
+ * `agent-fix` PR is open; and, when a failed scrape started it, only while the open
+ * scrape-failure issue records fewer drift-fix runs than that. A manual replay skips that
+ * last check. The gate records the run it lets through on the issue, before the agent
+ * starts. See "The drift fixer" in specs/change-tracking.md.
  */
 
 export const AGENT_FIX_LABEL = 'agent-fix';
+/**
+ * A fix that merged but left the scrape failing, or that the merge job closed when a check
+ * failed, gets another try, up to this many runs: about $6 of the key's $10 at the usual
+ * $1-2 a run (0040).
+ */
+export const MAX_RUNS_PER_OUTAGE = 3;
 /** The scrape's failure artifact: the report and the refreshed pages. */
 export const DRIFT_ARTIFACT = 'drift';
 /** The same from a dry run, which only a manual replay takes. */
@@ -124,10 +130,10 @@ export async function driftFixGate(gh: GitHub, input: GateInput): Promise<Gate> 
     const earlier = comments
       .filter((c) => c.user?.login === MARKER_AUTHOR)
       .map((c) => c.body?.match(MARKER)?.[1])
-      .find((id) => id !== undefined);
-    if (earlier) {
+      .filter((id) => id !== undefined);
+    if (earlier.length >= MAX_RUNS_PER_OUTAGE) {
       return skip(
-        `A drift-fix run (${earlier}) already ran for #${issue.number}: one per outage. Replay one by hand to try again.`,
+        `${earlier.length} drift-fix runs (${earlier.join(', ')}) already ran for #${issue.number}: at most ${MAX_RUNS_PER_OUTAGE} per outage. Replay one by hand to try again.`,
       );
     }
   }
@@ -138,7 +144,7 @@ export async function driftFixGate(gh: GitHub, input: GateInput): Promise<Gate> 
         runMarker(runId),
         `The drift-fix agent is drafting a fix for ${gh.server}/${gh.repo}/actions/runs/${runId}: ${thisRunUrl}`,
         '',
-        `It runs once per outage. To run it again for this failure: \`gh workflow run drift-fix.yml -f run-id=${runId}\``,
+        `It runs at most ${MAX_RUNS_PER_OUTAGE} times per outage. To run it again for this failure: \`gh workflow run drift-fix.yml -f run-id=${runId}\``,
       ].join('\n'),
     });
   }

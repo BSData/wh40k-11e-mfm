@@ -204,56 +204,14 @@ export function readPatch(text: string): { files: PatchFile[]; lines: Map<string
   return { files, lines: changes };
 }
 
-/**
- * What a low-risk fix may change (0040): the parser, the strings it accepts, the list of
- * saved pages, the parser's tests, and the scraping spec; a new decision record too. Not a
- * snapshot: vitest loads a snapshot file with `new Function`, so it is code no word list
- * vets.
- */
-export const LOW_RISK_FILES: readonly RegExp[] = [
-  /^src\/parse\/[A-Za-z0-9_-]+\.ts$/,
-  /^src\/allowlists\.ts$/,
-  /^src\/fixtures\.ts$/,
-  /^specs\/scraping\.md$/,
-  /^test\/parse\.test\.ts$/,
-];
-/** The most lines a low-risk fix adds and removes together. */
-export const MAX_LOW_RISK_LINES = 150;
 /** How the agent's note hands its fix to a person: its first line starts with this. */
 export const NEEDS_REVIEW = 'Needs review:';
-/**
- * An added line that imports, re-exports, or names a way out of the parser: to the
- * process, the globals, other modules, the network or Node's own modules. `import` counts
- * anywhere on a line but in `import.meta`, and so does `from '…'`, the last line of an
- * import or export over several. A screen for the plain route, not a sandbox: JavaScript
- * reaches `process` by routes no word list catches.
- */
-export const REACH =
-  /\b(?:process|globalThis|global|require|eval|Function|constructor|prototype|__proto__|Reflect|Proxy|fetch|WebAssembly|child_process)\b|^\s*export\b[^;]*\bfrom\b|\bimport\b(?:\s*\()?(?!\s*\.\s*meta\b)|\bfrom\s*['"]|['"`]node:/;
-
-/**
- * What a `REACH` match names, in fixed words: the reasons go into the PR and the failure
- * issue, and an `export … from` match holds whatever the model wrote between the two.
- */
-function word(match: string): string {
-  const text = match.trim();
-  if (text.startsWith('export')) return 'export … from';
-  if (text.startsWith('from')) return 'from';
-  if (text.startsWith('import')) return text.endsWith('(') ? 'dynamic import' : 'import';
-  if (text.endsWith('node:')) return 'node:';
-  return text;
-}
 
 export interface RiskInput {
   files: PatchFile[];
-  lines: Map<string, PatchLines>;
   meta: RunMeta;
   /** The agent's note. */
   notes: string;
-  /** The scrape's pages the PR adds as fixtures. */
-  pages: string[];
-  /** The scrape's pages whose names were free under `test/fixtures/`. */
-  freePages: string[];
 }
 
 export interface Risk {
@@ -262,36 +220,17 @@ export interface Risk {
   reasons: string[];
 }
 
-/** Whether a fix merges itself, by the rules of 0040 that code can check, never a model. */
-export function assessRisk({ files, lines, meta, notes, pages, freePages }: RiskInput): Risk {
+/**
+ * Whether a fix merges itself once CI and the live smoke test pass (0040). Where it may
+ * reach is the patch check's to bound, and what it does is the checks'; this only asks
+ * whether the agent finished, didn't hand the fix to a person, and changed something the
+ * scrape runs, which is also what starts the smoke test.
+ */
+export function assessRisk({ files, meta, notes }: RiskInput): Risk {
   const reasons: string[] = [];
   if (!meta.finished) reasons.push('the agent did not finish');
   if (cleanNotes(notes).startsWith(NEEDS_REVIEW)) reasons.push('the agent asked for review');
-  const lowRisk = (path: string, change: PatchFile['change']) =>
-    LOW_RISK_FILES.some((re) => re.test(path)) ||
-    (change === 'add' && /^docs\/decisions\/[A-Za-z0-9_-]+\.md$/.test(path));
-  for (const f of files) {
-    for (const path of f.from ? [f.from, f.path] : [f.path]) {
-      if (!lowRisk(path, f.change)) {
-        reasons.push(`${path} is outside the parser, its tests and the scraping spec`);
-      }
-    }
-  }
   if (!files.some((f) => f.path.startsWith('src/'))) reasons.push('it changes nothing under src/');
-  let changed = 0;
-  for (const f of files) {
-    const { added = [], removed = 0 } = lines.get(f.path) ?? {};
-    changed += added.length + removed;
-    if (!/^(?:src|test)\//.test(f.path)) continue;
-    const reach = added.map((line) => REACH.exec(line)?.[0]).find((m) => m !== undefined);
-    if (reach !== undefined) reasons.push(`${f.path} adds a line that reaches out: ${word(reach)}`);
-  }
-  if (changed > MAX_LOW_RISK_LINES) {
-    reasons.push(`it changes ${changed} lines, over ${MAX_LOW_RISK_LINES}`);
-  }
-  if (freePages.length === 0) {
-    reasons.push('every page that shows the drift already has a fixture under its name');
-  } else if (pages.length === 0) reasons.push('its tests read no page from the scrape');
   return { low: reasons.length === 0, reasons };
 }
 
@@ -359,17 +298,15 @@ export function freePages(driftDir: string, checkout: string): string[] {
 }
 
 /**
- * Of `names`, the pages the patch's tests read: a line it adds under `test/` holds the
- * name as a string, as `fixture('orks-legends-cookie.html')` does. A name in a comment
+ * Of `names`, the pages the patch uses: a line it adds holds the name as a string, as
+ * `fixture('orks-legends-cookie.html')` and an entry in `FIXTURES` do. A name in a comment
  * doesn't count: #114's test named the page it copied markup from, and read another.
  */
 export function pagesNamed(names: string[], lines: Map<string, PatchLines>): string[] {
-  const tests = [...lines]
-    .filter(([path]) => path.startsWith('test/'))
-    .flatMap(([, { added }]) => added);
+  const added = [...lines.values()].flatMap((change) => change.added);
   return names.filter((name) => {
-    const read = new RegExp(`(['"\`])${name.replaceAll('.', '\\.')}\\1`);
-    return tests.some((line) => read.test(line));
+    const quoted = new RegExp(`(['"\`])${name.replaceAll('.', '\\.')}\\1`);
+    return added.some((line) => quoted.test(line));
   });
 }
 
@@ -486,7 +423,7 @@ function renderBody(
     '> [!CAUTION]',
     ...(risk.low
       ? [
-          '> A model wrote this from pages of the live site, which are untrusted input. It passes the rules that code checks (docs/decisions/0040), so it merges itself once CI and the live smoke test pass, without review: read it afterwards.',
+          '> A model wrote this from pages of the live site, which are untrusted input. It merges itself once CI and the live smoke test pass, without review (docs/decisions/0040): read it afterwards.',
         ]
       : [
           '> A model wrote this from pages of the live site, which are untrusted input. It stays a draft until a maintainer has read every line, because:',
@@ -534,7 +471,7 @@ const USAGE = `usage: node --experimental-strip-types src/ops/agent-patch.ts <ch
          [--drift <dir>] --body-file <file> [--output <file>]
 
 Checks the drift fixer's patch, applies it to <checkout>, adds the pages of the scrape's
-drift artifact (--drift, its fixtures directory) that the patch's tests read, decides the
+drift artifact (--drift, its fixtures directory) that the patch names, decides the
 fix's risk (docs/decisions/0040), and writes the PR's body. Step outputs: changed=true or
 false; paths=<the files, comma-separated>, for create-pull-request's add-paths;
 risk=low or high; reasons=<the rules a high-risk fix fails, "; "-separated>. Exits 1, with
@@ -604,12 +541,11 @@ export function main(argv: string[], env: NodeJS.ProcessEnv = process.env, io: I
     files = applyPatch(dir, patch);
     const { lines } = readPatch(readFileSync(patch, 'utf8'));
     const meta = readMeta(read(values.meta));
-    const free = values.drift ? freePages(values.drift, dir) : [];
     if (values.drift && files.length > 0) {
-      pages = pagesNamed(free, lines);
+      pages = pagesNamed(freePages(values.drift, dir), lines);
       addPages(values.drift, dir, pages);
     }
-    risk = assessRisk({ files, lines, meta, notes, pages, freePages: free });
+    risk = assessRisk({ files, meta, notes });
     writeFileSync(
       bodyFile,
       prBody({

@@ -143,21 +143,19 @@ scrape has already done the refresh of step 2, and the rest differs:
 - **Evidence from the refreshed page.** Read the page that shows the drift in a test in
   `test/parse.test.ts`, through `fixture('<name>')`, with an assertion that covers the
   drift, and add its entry to `FIXTURES` in `src/fixtures.ts` (the `add-fixture` skill).
-  You can't add, replace or edit files in `test/fixtures/`: the workflow commits the page
-  your tests read, as the scrape saved it. Only when every failed faction's page already
+  You can't add, replace or edit files in `test/fixtures/`: the workflow commits each page
+  your patch names, as the scrape saved it. Only when every failed faction's page already
   has a fixture under its name is no page copied; then copy the exact markup that drifted
   into a test that injects it into an existing fixture, the way "throws, located, when
-  the page has content no selector captured" does, and a maintainer adds the page.
+  the page has content no selector captured" does.
 - **Where you may change files:** `src/`, `specs/`, `test/` (not `test/fixtures/`) and
   `docs/decisions/`. A change anywhere else rejects the whole patch.
-- **What merges itself.** A fix that keeps to `src/parse/`, `src/allowlists.ts`,
-  `src/fixtures.ts`, `test/parse.test.ts` and `specs/scraping.md` (and a new decision
-  record), adds no import, changes at most 150 lines and reads a refreshed page merges
-  without review once CI and the PR's live smoke test, which scrapes all 30 factions with
-  it, pass ([0040](../../../docs/decisions/0040-a-low-risk-drift-fix-merges-itself.md) has
-  the rules). Any other waits for a maintainer, which is right when the fix needs more; a
-  snapshot change always does. To hand a fix to a maintainer anyway, start your note with
-  `Needs review:` and why.
+- **What merges itself.** Any fix that changes something under `src/` merges without
+  review once CI and the PR's live smoke test, which scrapes all 30 factions with it, pass
+  ([0040](../../../docs/decisions/0040-a-drift-fix-merges-itself.md) has the rules). One
+  whose checks fail is closed, and the outage gets another run. To hand a fix to a
+  maintainer instead, start your note with `Needs review:` and why: do that when you
+  aren't sure the fix is right.
 - **Few turns.** Find the drift, make the smallest fix the evidence supports, with its
   spec change, run `pnpm verify` once it is done, fix what fails, and stop. Edit a
   snapshot by hand only for a change you can explain, to exactly what the test now gives.

@@ -47,7 +47,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0037](0037-a-new-cost-row-is-checked-per-model.md) | A new cost row is checked against its unit, per model | change tracking |
 | [0038](0038-a-rules-change-dates-the-update.md) | A rules change dates the update, beside the factions too (revises 0002, 0015) | change tracking |
 | [0039](0039-a-tier-is-read-only-from-a-tier-label.md) | A tier is read only from a tier label | scraping |
-| [0040](0040-a-low-risk-drift-fix-merges-itself.md) | A low-risk drift fix merges itself (revises 0024, 0029) | change tracking |
+| [0040](0040-a-drift-fix-merges-itself.md) | A drift fix merges itself once its checks pass (revises 0024, 0029) | change tracking |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and

@@ -1,6 +1,6 @@
 # 0029. A failed scrape drafts its own fix, with the model's key and the App's key in separate jobs
 
-- **Status:** accepted, for [#77](https://github.com/BSData/wh40k-11e-mfm/issues/77); revised by [0031](0031-the-drift-fixer-fails-loud-with-fewer-layers.md): no env scrub and no cache sweep, and a run that can't start fails; by [0032](0032-one-claude-code-pin.md): the action installs Claude Code itself; and by [0040](0040-a-low-risk-drift-fix-merges-itself.md): a low-risk fix merges itself, with the scrape's page
+- **Status:** accepted, for [#77](https://github.com/BSData/wh40k-11e-mfm/issues/77); revised by [0031](0031-the-drift-fixer-fails-loud-with-fewer-layers.md): no env scrub and no cache sweep, and a run that can't start fails; by [0032](0032-one-claude-code-pin.md): the action installs Claude Code itself; and by [0040](0040-a-drift-fix-merges-itself.md): a fix merges itself once its checks pass, with the scrape's page
 - **Spec:** [change tracking — The drift fixer](../../specs/change-tracking.md#the-drift-fixer)
 
 ## Context

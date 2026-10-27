@@ -300,11 +300,11 @@ describe.skipIf(!hasBash)('the merge step', () => {
   const smoke = green.filter((c) => c.name === 'smoke');
 
   // A commit status, or a check run made through the API, carries no workflow's name.
-  it('holds a smoke check that the smoke workflow did not run', () => {
+  it('merges no smoke check that the smoke workflow did not run', () => {
     const forged = green.map((c) => (c.name === 'smoke' ? { name: 'smoke', bucket: 'pass' } : c));
     const { status, log } = run([forged]);
     expect(status).toBe(1);
-    expect(log).toContain('pr ready 7 --undo');
+    expect(log).toContain('pr close 7');
     expect(log).not.toContain('pr merge');
   });
 
@@ -362,21 +362,26 @@ describe.skipIf(!hasBash)('the merge step', () => {
     ],
     ['no smoke test at all', [{ name: 'build', bucket: 'pass' }]],
     ['checks that never finish', [{ name: 'smoke', bucket: 'pending' }]],
-  ])('holds the fix for a person on %s', (_, checks) => {
+  ])('closes the fix and starts the scrape again, for another run, on %s', (_, checks) => {
     const { status, stdout, log } = run([checks]);
     expect(status).toBe(1);
     expect(stdout).toContain('::error title=Not merged::');
-    expect(log).toContain('pr ready 7 --undo');
-    expect(log).toContain('issue comment 113');
+    const closed = log.indexOf('pr close 7');
+    const scraped = log.indexOf('workflow run scrape.yml --ref main');
+    expect(closed).toBeGreaterThan(-1);
+    expect(scraped).toBeGreaterThan(closed);
+    expect(log.slice(log.indexOf('issue comment 113'))).toContain('Reopen #7');
     expect(log).not.toContain('pr merge');
-    expect(log).not.toContain('workflow run');
+    expect(log).not.toContain('pr ready');
   });
 
-  it('holds the fix when GitHub refuses the merge', () => {
+  // Another run would meet the same refusal: a person changes what GitHub asks for.
+  it('turns the fix back into a draft when GitHub refuses the merge', () => {
     const { status, stdout, log } = run([green], { MERGE_EXIT: '1' });
     expect(status).toBe(1);
     expect(stdout).toContain('GitHub refused the merge');
     expect(log).toContain('pr ready 7 --undo');
+    expect(log).not.toContain('pr close');
     expect(log).not.toContain('workflow run');
   });
 
