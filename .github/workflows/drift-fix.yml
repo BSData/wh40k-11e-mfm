@@ -1,15 +1,20 @@
 name: Drift fix
 
 # When the scheduled scrape fails because the MFM site changed its markup, a model drafts
-# the parser fix as a draft PR, and a maintainer reviews it. The judgment is the model's;
-# everything around it is plain Actions, split by what each part holds (see "The drift
-# fixer" in specs/change-tracking.md, and docs/decisions/0029, 0031 and 0032):
+# the parser fix as a PR. A fix that passes the rules code checks merges itself once CI
+# and the live smoke test pass; any other stays a draft for a maintainer. The judgment is
+# the model's; everything around it is plain Actions, split by what each part holds (see
+# "The drift fixer" in specs/change-tracking.md, and docs/decisions/0029, 0031, 0032 and
+# 0040):
 # - `gate` decides from GitHub's records whether to run, and records the run;
 # - `agent` holds the model's key and nothing else: a token that only reads, and an egress
 #   allowlist. It never reaches the site: the failed scrape already saved the pages. It
 #   fails unless the agent finished or stopped at its limits;
 # - `pr` holds the App's key and no model: it checks the agent's patch with one
-#   dependency-free script, then opens the draft PR.
+#   dependency-free script, which adds the scrape's page and decides the risk, then opens
+#   the PR, a draft unless the risk is low;
+# - `merge` holds the workflow's own token and no key, and runs no repository code: it
+#   merges a low-risk fix once every check passed, then starts the scrape.
 #
 # Replay a failure: gh workflow run drift-fix.yml -f run-id=<failed Scrape MFM run id>
 
@@ -155,6 +160,18 @@ jobs:
         run: |
           test -s "$RUNNER_TEMP/drift/failures.md"
           ls "$RUNNER_TEMP/drift/fixtures"/*.html
+      # The pages the fix's tests can read (0040): each refreshed page whose name no fixture
+      # has. Never over a fixture, which pins an older page on purpose. They stay out of the
+      # patch: `pr` adds the ones the tests read, from the artifact, byte for byte.
+      - name: Put the new pages where the tests read them
+        run: |
+          for page in "$RUNNER_TEMP/drift/fixtures"/*.html; do
+            name=$(basename "$page")
+            if [ -f "$page" ] && [ ! -L "$page" ] && [ ! -e "test/fixtures/$name" ] && [ ! -L "test/fixtures/$name" ]; then
+              cp "$page" "test/fixtures/$name"
+              echo "test/fixtures/$name"
+            fi
+          done
 
       # Sonnet, one try, at most 30 turns and $2 (Claude Code stops at the turn that
       # crosses it): a run is expected to cost $1-2 of the key's $10. A run cut short at
@@ -191,14 +208,19 @@ jobs:
             - ${{ runner.temp }}/drift/failures.md: the located error of each faction that failed.
             - ${{ runner.temp }}/drift/fixtures/: those factions' pages as the site serves them now.
 
-            Finish with a note for the maintainer, in plain text and under 250 words: what the site changed, what you changed, which refreshed page shows it, and anything you are unsure of. It is quoted in the draft PR.
+            Those of the pages whose names no fixture has are in test/fixtures/ for this run too. Read the one that shows the drift in a test in test/parse.test.ts, through `fixture('<name>')`, with an assertion that covers the drift, and add its entry to `FIXTURES` in src/fixtures.ts, as the `add-fixture` skill says. You can't change test/fixtures/: the workflow commits that page as the scrape saved it.
+
+            Your fix merges itself, without review, when it keeps to src/parse/, src/allowlists.ts, src/fixtures.ts, test/parse.test.ts and specs/scraping.md, adds no import, changes at most 150 lines, reads one of those pages, and CI and the PR's live smoke test pass: the smoke test scrapes all 30 factions with your fix. docs/decisions/0040 has the rules. Any other fix waits for a maintainer, which is right when the fix needs more. To hand a fix to a maintainer anyway, start your note with `Needs review:` and why.
+
+            Finish with a note for the maintainer, in plain text and under 250 words: what the site changed, what you changed, which refreshed page shows it, and anything you are unsure of. It is quoted in the PR.
 
       # New files under the allowed paths are marked intent-to-add, so `git diff` shows
-      # them; a change to a tracked file anywhere is in the patch, and `pr` rejects it.
+      # them; a change to a tracked file anywhere is in the patch, and `pr` rejects it. The
+      # pages copied into test/fixtures/ stay untracked, out of the patch.
       - name: Make the patch
         run: |
           mkdir -p "$RUNNER_TEMP/agent"
-          git add --intent-to-add --all -- src specs test docs/decisions
+          git add --intent-to-add --all -- src specs test docs/decisions ':(exclude)test/fixtures'
           git diff --no-ext-diff --no-textconv HEAD > "$RUNNER_TEMP/agent/fix.patch"
           git diff --stat HEAD
 
@@ -259,8 +281,10 @@ jobs:
   # test holds it to that), so no dependency code shares the job with the key. The
   # script rejects the whole patch unless every file it touches is a regular file under
   # src/, specs/, test/ (outside test/fixtures/) or docs/decisions/, applies it to a
-  # fresh checkout, and checks the tree changed exactly there. Then the App's token opens
-  # the draft PR, so CI runs on it, and the default token labels and links it.
+  # fresh checkout, and checks the tree changed exactly there. It adds the drift
+  # artifact's pages the patch's tests read, byte for byte, and decides the risk by the
+  # rules of 0040. Then the App's token opens the PR, a draft unless the risk is low, so
+  # CI runs on it, and the default token labels and links it.
   pr:
     needs: [gate, agent]
     if: needs.agent.result == 'success'
@@ -268,7 +292,14 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read # check out the code
+      actions: read # download the scrape run's drift artifact
       issues: write # create the agent-fix label, and link the PR from the failure issue
+    outputs:
+      risk: ${{ steps.patch.outputs.risk }}
+      reasons: ${{ steps.patch.outputs.reasons }}
+      number: ${{ steps.pr.outputs.pull-request-number }}
+      head: ${{ steps.pr.outputs.pull-request-head-sha }}
+      owners: ${{ steps.owners.outputs.owners }}
     steps:
       - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
@@ -277,6 +308,19 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Who reads a fix: the owners of every file, from CODEOWNERS (none named if it has none).
+      - name: Read the owners
+        id: owners
+        run: echo "owners=$(awk '$1 == "*" { $1 = ""; print }' .github/CODEOWNERS 2> /dev/null | xargs)" >> "$GITHUB_OUTPUT"
+      # The pages the failed scrape saved, from its own artifact: the source of every page
+      # the PR adds (0040), never the agent's job.
+      - name: Fetch the drift
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.gate.outputs.artifact }}
+          run-id: ${{ github.event.workflow_run.id || inputs.run-id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/drift
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .node-version
@@ -298,6 +342,7 @@ jobs:
           node --experimental-strip-types src/ops/agent-patch.ts . "$RUNNER_TEMP/agent/fix.patch" \
             --scrape-run "$SCRAPE_RUN" "${issue[@]}" \
             --notes "$RUNNER_TEMP/agent/notes.md" --meta "$RUNNER_TEMP/agent/meta.json" \
+            --drift "$RUNNER_TEMP/drift/fixtures" \
             --body-file "$RUNNER_TEMP/body.md" --output "$GITHUB_OUTPUT"
 
       # Scoped to this repository and to what create-pull-request needs, as in `publish`.
@@ -320,7 +365,10 @@ jobs:
           gh api "repos/$GH_REPO/labels/agent-fix" --silent 2>/dev/null ||
             gh label create agent-fix --color D93F0B --description "Drafted by the drift-fix agent: review every line"
 
-      - name: Open the draft PR
+      # A draft unless the risk is low (0040), so a high-risk fix waits for a maintainer and
+      # a low-risk one is ready for `merge`. The commit is made through the API with the
+      # App's token, so it is signed, verified and the App's.
+      - name: Open the PR
         id: pr
         if: steps.patch.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
@@ -331,10 +379,10 @@ jobs:
           title: Drift fix for scrape run ${{ github.event.workflow_run.id || inputs.run-id }}
           body-path: ${{ runner.temp }}/body.md
           commit-message: Drift fix for scrape run ${{ github.event.workflow_run.id || inputs.run-id }}
-          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          sign-commits: true
           add-paths: ${{ steps.patch.outputs.paths }}
           labels: agent-fix
-          draft: true
+          draft: ${{ steps.patch.outputs.risk != 'low' }}
           delete-branch: true
 
       - name: Link it from the failure issue
@@ -344,5 +392,80 @@ jobs:
           GH_REPO: ${{ github.repository }}
           ISSUE: ${{ needs.gate.outputs.issue }}
           PR: ${{ steps.pr.outputs.pull-request-number }}
+          RISK: ${{ steps.patch.outputs.risk }}
+          REASONS: ${{ steps.patch.outputs.reasons }}
+          OWNERS: ${{ steps.owners.outputs.owners }}
         run: |
-          gh issue comment "$ISSUE" --body "The drift-fix agent drafted #$PR. It stays a draft until a maintainer has reviewed it; the next successful scrape after it merges closes this issue."
+          if [ "$RISK" = low ]; then
+            body="The drift-fix agent drafted #$PR, and it passes the rules that code checks (docs/decisions/0040): it merges itself once CI and the live smoke test pass, and the scrape that follows closes this issue."
+          else
+            body="The drift-fix agent drafted #$PR. It stays a draft until a maintainer${OWNERS:+ ($OWNERS)} has reviewed it, because: $REASONS. The next successful scrape after it merges closes this issue."
+          fi
+          gh issue comment "$ISSUE" --body "$body"
+
+  # Merges a low-risk fix (0040) once every check on the head `pr` pushed has passed, the
+  # live smoke test among them, then starts the scrape and asks the code owners to read the
+  # fix. Like dependabot-automerge.yml it holds the workflow's own token and no key, checks
+  # out nothing, and runs bash, gh and jq only, so nothing the model wrote runs here. A
+  # merge made with this token starts no push-triggered workflow on main: CI ran on the PR,
+  # a drift fix changes no data/ so no release is due, and the scrape is started here. Only
+  # on main: a replay on any other branch never merges. A failed or unfinished check, or a
+  # merge GitHub refuses, turns the PR back into a draft for a maintainer, and fails red.
+  merge:
+    needs: [gate, pr]
+    if: needs.pr.outputs.risk == 'low' && github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60 # the wait for the checks gives up after 45
+    permissions:
+      contents: write # merge the PR into main
+      pull-requests: write # merge it, or turn it back into a draft
+      actions: write # start the scrape
+      issues: write # comment on the failure issue
+      checks: read # gh pr checks: the check runs
+      statuses: read # gh pr checks: the commit statuses
+    steps:
+      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
+      - name: Merge once the checks pass
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ needs.pr.outputs.number }}
+          SHA: ${{ needs.pr.outputs.head }}
+          ISSUE: ${{ needs.gate.outputs.issue }}
+          OWNERS: ${{ needs.pr.outputs.owners }}
+        run: |
+          set -euo pipefail
+          wait_seconds=${WAIT_SECONDS:-2700}
+          poll_seconds=${POLL_SECONDS:-30}
+          checks_url="${GITHUB_SERVER_URL:-https://github.com}/$GH_REPO/pull/$PR/checks"
+          hold() {
+            echo "::error title=Not merged::$1"
+            gh pr ready "$PR" --undo || true
+            if [ -n "$ISSUE" ]; then
+              gh issue comment "$ISSUE" --body "The drift fix #$PR didn't merge itself: $1. It is a draft again, for a maintainer${OWNERS:+ ($OWNERS)} to review."
+            fi
+            exit 1
+          }
+          # Until the smoke test is listed and nothing is pending. gh's own exit code says
+          # nothing here (it fails while no check is reported yet), so the JSON decides.
+          deadline=$((SECONDS + wait_seconds))
+          while :; do
+            checks=$(gh pr checks "$PR" --json name,bucket 2> /dev/null || true)
+            if jq -e 'any(.[]; .name == "smoke") and all(.[]; .bucket != "pending")' <<< "${checks:-[]}" > /dev/null 2>&1; then
+              break
+            fi
+            [ "$SECONDS" -lt "$deadline" ] || hold "its checks didn't all finish within $((wait_seconds / 60)) minutes"
+            sleep "$poll_seconds"
+          done
+          failed=$(jq -r '[.[] | select(.bucket == "fail" or .bucket == "cancel") | .name] | unique | join(", ")' <<< "$checks")
+          [ -z "$failed" ] || hold "a check failed: $failed"
+          [ "$(jq -r '[.[] | select(.name == "smoke") | .bucket] | unique | join(",")' <<< "$checks")" = pass ] ||
+            hold "its live smoke test didn't pass"
+          gh pr merge "$PR" --squash --match-head-commit "$SHA" || hold "GitHub refused the merge"
+          gh workflow run scrape.yml --ref main
+          if [ -n "$ISSUE" ]; then
+            gh issue comment "$ISSUE" --body "Merged #$PR without review: it passed the rules that code checks (docs/decisions/0040), CI and the live smoke test, whose job summary among its checks ($checks_url) lists what it changes in the data. ${OWNERS:-A maintainer}, please read it when there is time. The scrape runs again now, and closes this issue when it succeeds."
+          fi

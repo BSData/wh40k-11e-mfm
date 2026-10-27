@@ -135,20 +135,32 @@ scrape has already done the refresh of step 2, and the rest differs:
   `failures.md`, and `fixtures/` with the failed factions' pages as the site serves them
   now, fetched over HTTP as the scrape fetches them: refreshed copies of their fixtures,
   or `<slug>-legends-cookie.html` for a faction no fixture covers. The pages are large:
-  Grep them rather than reading them whole. `test/fixtures/` is as committed.
+  Grep them rather than reading them whole. The ones whose names no fixture has are also
+  in `test/fixtures/` for this run; the rest of `test/fixtures/` is as committed.
 - **No network, and no git but `git diff`.** The tools are Read, Edit, Glob, Grep, and
   Bash for exactly `pnpm verify`, `git diff` and `git diff --stat`: no probe script, no
   `pnpm test -u`, no scrape. Add tests to the existing test files.
-- **Evidence without a new fixture.** You can't add, replace or edit files in
-  `test/fixtures/`. Copy the exact markup that drifted from the refreshed page into a test
-  that injects it into an existing fixture, the way "throws, located, when the page has
-  content no selector captured" in `test/parse.test.ts` does, and name the page in a
-  comment. The maintainer commits the refreshed page before merging.
+- **Evidence from the refreshed page.** Read the page that shows the drift in a test in
+  `test/parse.test.ts`, through `fixture('<name>')`, with an assertion that covers the
+  drift, and add its entry to `FIXTURES` in `src/fixtures.ts` (the `add-fixture` skill).
+  You can't add, replace or edit files in `test/fixtures/`: the workflow commits the page
+  your tests read, as the scrape saved it. Only when every failed faction's page already
+  has a fixture under its name is no page copied; then copy the exact markup that drifted
+  into a test that injects it into an existing fixture, the way "throws, located, when
+  the page has content no selector captured" does, and a maintainer adds the page.
 - **Where you may change files:** `src/`, `specs/`, `test/` (not `test/fixtures/`) and
   `docs/decisions/`. A change anywhere else rejects the whole patch.
+- **What merges itself.** A fix that keeps to `src/parse/`, `src/allowlists.ts`,
+  `src/fixtures.ts`, `test/parse.test.ts` and `specs/scraping.md` (and a new decision
+  record), adds no import, changes at most 150 lines and reads a refreshed page merges
+  without review once CI and the PR's live smoke test, which scrapes all 30 factions with
+  it, pass ([0040](../../../docs/decisions/0040-a-low-risk-drift-fix-merges-itself.md) has
+  the rules). Any other waits for a maintainer, which is right when the fix needs more; a
+  snapshot change always does. To hand a fix to a maintainer anyway, start your note with
+  `Needs review:` and why.
 - **Few turns.** Find the drift, make the smallest fix the evidence supports, with its
   spec change, run `pnpm verify` once it is done, fix what fails, and stop. Edit a
   snapshot by hand only for a change you can explain, to exactly what the test now gives.
 - **When it isn't drift** (a page that didn't load, a change no refreshed page shows),
   change nothing and say why.
-- The workflow opens the draft PR from your changes and quotes your closing note in it.
+- The workflow opens the PR from your changes and quotes your closing note in it.
