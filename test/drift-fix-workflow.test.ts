@@ -131,7 +131,7 @@ describe("the scrape's page, in the agent's job and the PR job", () => {
   });
 
   it('downloads the same drift artifact in the PR job, and hands its pages to the check', () => {
-    expect(pr?.permissions?.actions).toBe('read');
+    expect(pr?.permissions).toMatchObject({ actions: 'read' });
     const download = prSteps.find((s) => s.uses?.startsWith('actions/download-artifact@'));
     expect(
       prSteps.filter((s) =>
@@ -238,6 +238,7 @@ describe.skipIf(!hasBash)('the merge step', () => {
   const scratch = mkdtempSync(join(tmpdir(), 'drift-fix-merge-'));
   afterAll(() => rmSync(scratch, { recursive: true, force: true }));
   const posix = (path: string) => path.replaceAll('\\', '/');
+  const { PATH = '' } = process.env;
   let runs = 0;
 
   /** The checks `gh pr checks` reports, one answer per call, the last one repeating. */
@@ -267,7 +268,7 @@ describe.skipIf(!hasBash)('the merge step', () => {
     const result = spawnSync('bash', ['-e', '-c', step?.run ?? 'exit 99'], {
       env: {
         ...process.env,
-        PATH: `${posix(join(dir, 'bin'))}:${process.env.PATH}`,
+        PATH: `${posix(join(dir, 'bin'))}:${PATH}`,
         STUB: posix(dir),
         PR: '7',
         SHA: 'abc123',

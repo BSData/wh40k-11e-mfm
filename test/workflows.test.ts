@@ -161,3 +161,28 @@ describe('publish admits what an update writes', () => {
     expect(allowed(entry)).toBe(false);
   });
 });
+
+// docs/decisions/0040: the drift fixer's merge job merges once a check named `smoke` passed,
+// so code a PR runs must not be able to post one. No workflow may write checks or statuses.
+describe("no workflow can forge a PR's checks", () => {
+  type Permissions = { checks?: string; statuses?: string } | string | undefined;
+  interface Workflow {
+    permissions?: Permissions;
+    jobs: Record<string, { permissions?: Permissions }>;
+  }
+  const workflows = readdirSync(root('.github/workflows'))
+    .filter((name) => /\.ya?ml$/.test(name))
+    .map((name): [string, Workflow] => [
+      name,
+      parse(readFileSync(root(`.github/workflows/${name}`), 'utf8')) as Workflow,
+    ]);
+  const writes = (permissions: Permissions) =>
+    permissions === 'write-all' ||
+    (typeof permissions === 'object' &&
+      (permissions.checks === 'write' || permissions.statuses === 'write'));
+
+  it.each(workflows)('%s grants no checks or statuses write', (_, workflow) => {
+    expect(writes(workflow.permissions)).toBe(false);
+    for (const job of Object.values(workflow.jobs)) expect(writes(job.permissions)).toBe(false);
+  });
+});

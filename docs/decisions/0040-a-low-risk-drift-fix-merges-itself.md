@@ -1,6 +1,6 @@
 # 0040. A low-risk drift fix merges itself
 
-- **Status:** proposed (a design, not built yet); revises [0029](0029-a-failed-scrape-drafts-its-fix.md): the maintainer no longer reviews, commits the fixture and merges every fix
+- **Status:** accepted, for [#113](https://github.com/BSData/wh40k-11e-mfm/issues/113); revises [0024](0024-a-live-smoke-test-reports-and-gates-only-auto-merge.md): the smoke test gates these merges too; and [0029](0029-a-failed-scrape-drafts-its-fix.md): the maintainer no longer reviews, commits the fixture and merges every fix
 - **Spec:** [change tracking — The drift fixer](../../specs/change-tracking.md#the-drift-fixer), [Live smoke test](../../specs/change-tracking.md#live-smoke-test)
 
 ## Context
@@ -36,9 +36,11 @@ as now, and asks for the maintainer.
   pages on purpose (0029, the `add-fixture` skill).
 - The agent's patch still may not touch `test/fixtures/`, and "Make the patch" leaves the
   copied pages out of it.
-- The PR job downloads the same `drift` artifact and adds each of those new pages that the
-  patch's tests name, byte for byte. So every fixture in the PR came from the scrape, and
-  none from the model. The agent adds the page's entry to `FIXTURES` in
+- The PR job downloads the same `drift` artifact and adds, byte for byte, each of those
+  new pages that a line the patch adds under `test/` holds as a string, as
+  `fixture('orks-legends-cookie.html')` does. A name in a comment doesn't count: #114's
+  test named the page it copied markup from, and read another. So every fixture in the PR
+  came from the scrape, and none from the model. The agent adds the page's entry to `FIXTURES` in
   `src/fixtures.ts`, as the `add-fixture` skill says.
 
 ### The agent knows what checks it
@@ -54,17 +56,18 @@ A fix is low risk when all of these hold. The PR job checks the first five, in
 1. **The agent finished.** A run stopped at its turn or budget limit, or one whose note
    asks for review, is high risk.
 2. **Only reading code changed.** Every file the patch touches is one of:
-   `src/parse/**`, `src/allowlists.ts`, `src/fixtures.ts`, `specs/scraping.md`,
-   `test/parse.test.ts`, its snapshot file `test/__snapshots__/parse.test.ts.snap`, or a
-   new file under `docs/decisions/`, and at least one is under `src/`: a fix that changes
-   nothing the scrape runs fixes nothing, and gets no smoke test. Anything else the patch
+   `src/parse/*.ts`, `src/allowlists.ts`, `src/fixtures.ts`, `specs/scraping.md`,
+   `test/parse.test.ts`, or a new file under `docs/decisions/`, and at least one is under
+   `src/`: a fix that changes nothing the scrape runs fixes nothing, and gets no smoke
+   test. Not a snapshot: vitest loads a snapshot file with `new Function`, so it is code
+   that no word list vets. Anything else the patch
    check allows today (`src/ops/`, `src/diff/`, other tests, other specs) is high risk.
 3. **No new reach.** No line the patch adds under `src/` or `test/` imports or
    re-exports anything, or names a way out of the parser: `process`, `globalThis`,
    `global`, `require`, `import(`, `eval`, `Function`, `constructor`, `prototype`,
-   `__proto__`, `Reflect`, `Proxy`, `fetch`, `WebAssembly`, `node:`, `child_process`.
-4. **It is small.** At most 150 lines added or removed, counting neither snapshots nor
-   fixtures.
+   `__proto__`, `Reflect`, `Proxy`, `fetch`, `WebAssembly`, a quoted `node:`,
+   `child_process`. The reason names the word, never the line, which the model wrote.
+4. **It is small.** At most 150 lines added or removed, not counting the pages.
 5. **The page came from the scrape.** The PR adds at least one fixture, its tests read
    it, and every fixture it adds is a `drift` page, byte for byte, under a name that was
    free. A fix that copies the markup into a test instead, as fixes do today, is high
@@ -84,10 +87,9 @@ A fix is low risk when all of these hold. The PR job checks the first five, in
   now. The commit is signed (`create-pull-request`'s `sign-commits`), so it is verified
   and attributed to the App.
 - **Low risk:** a new `merge` job takes over, with the workflow's own token and no App key.
-  Like the Dependabot job, it runs `gh` and `jq` and no repository code. It waits for the
-  smoke test on the head the PR job pushed, then turns on auto-merge, a squash pinned to
-  that head. The ruleset makes the merge wait for `build` and `data-guard`. After the
-  merge it starts the scrape on `main` (`workflow_dispatch`), whose success closes the
+  Like the Dependabot job, it runs `gh` and `jq` and no repository code. It waits until
+  every check on the head the PR job pushed has finished, the smoke test among them, then
+  squash-merges that head (`--match-head-commit`). After the merge it starts the scrape on `main` (`workflow_dispatch`), whose success closes the
   failure issue as it does now. It then comments on the failure issue, naming the
   maintainer: which PR merged, a link to its smoke test, and that it merged without
   review, to be read when there is time.
@@ -121,9 +123,10 @@ A fix is low risk when all of these hold. The PR job checks the first five, in
 - If the site is down while the smoke test runs, the smoke test fails and the fix is held
   for a person, like a Dependabot update.
 - The PR job also needs `actions: read`, to download the `drift` artifact. The `merge`
-  job holds `contents: write` and `pull-requests: write` (auto-merge, the draft toggle),
-  `actions: write` (start the scrape, find the smoke run) and `issues: write` (the
-  comment), with the workflow's own token, as `dependabot-automerge.yml` does. The App's
+  job holds `contents: write` and `pull-requests: write` (the merge, the draft toggle),
+  `actions: write` (start the scrape), `issues: write` (the comment), and `checks: read`
+  and `statuses: read` (`gh pr checks`), with the workflow's own token, as
+  `dependabot-automerge.yml` does. The App's
   token gains nothing, and isn't held through the wait, which can outlast its hour.
 - `main`'s ruleset has `require_extra_approval_for_unattributed_changes` on, a setting
   GitHub doesn't document. If it asks for an approval even on the App's signed commit, no
@@ -153,7 +156,7 @@ A fix is low risk when all of these hold. The PR job checks the first five, in
   model wrote, a new untrusted input next to the App's key. The smoke test's summary is
   one click away.
 
-## Calls made in writing this up
+## Calls made in the design
 The maintainer set the goal (no work for a low-risk fix), let a fix change the data, and
 put update PRs merging themselves off for later. These were the writer's calls, for the
 maintainer to check:
@@ -167,16 +170,26 @@ maintainer to check:
 - the agent can ask for review with a `Needs review:` note;
 - the rollout replays this outage's run.
 
-## Left to the builder
-- How the PR job tells which copied pages the patch's tests name (a file name in an added
-  line under `test/` is enough).
-- The exact word list in rule 3 and the 150-line limit, within the spirit above: a screen
-  that the parser's ordinary code never trips, checked against the history of
-  `src/parse/` and this outage's fix.
-- How the maintainer is named in the comments (a repository variable, so the workflow
-  doesn't hard-code a person).
-- The tests, the spec's text, and `AGENTS.md`'s line about the App's key, which stays true:
-  `agent-patch.ts` is still the one repository file the PR job runs.
+## Decided while building it
+- **No snapshot** among the low-risk files (rule 2), since vitest runs a snapshot file as
+  code. Rule 4 then has nothing to leave out but the pages.
+- **A page counts as read only by a quoted name.** On the real outage, #114's patch with
+  run 40398589206's `drift` artifact came out low risk under a plain-name match, through
+  the comment in its test; it comes out high risk now, "its tests read no page from the
+  scrape". The artifact offered 9 free names; the 4 taken ones were left out.
+- **The word list** (rule 3) trips, over the 2,479 lines ever added to the low-risk files,
+  only on import lines, one comment saying "fetch", and `rsc.ts`'s class `constructor`.
+  `node:` counts only quoted, since the parser writes `node: unknown`.
+- **The owners come from `.github/CODEOWNERS`**, its `*` line, not a repository
+  variable: the file already names them.
+- **The merge job merges once the checks pass**, rather than turning on auto-merge: it
+  waits for every check anyway, to turn a failed fix back into a draft. It doesn't ask to
+  delete the branch: the repository deletes a merged head branch itself.
+- **No workflow may write checks or statuses.** The merge trusts a check named `smoke`,
+  and code a PR runs could otherwise post one; none does today, and
+  `test/workflows.test.ts` now holds every workflow to that.
+- **The `diagnose-parse` skill** told the agent to copy markup into a test, which rule 5
+  now holds back; its drift-fix section says to read a refreshed page instead.
 
 ## Rollout
 Build, merge, then close #114 unmerged and replay the outage it was drafted for
