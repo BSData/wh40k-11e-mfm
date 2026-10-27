@@ -133,9 +133,11 @@ function enhancementGrant(
   keyword: 'LEADER:' | 'SUPPORT:',
   consumed: string[],
 ): string[] {
+  // Since v1.7 the block is its own `li.no-leaders` right after the enhancement's `li`;
+  // before, a `div` after it inside the same wrapper: the spans are descendants either way.
   const list = clean(
     li
-      .parent()
+      .nextUntil('li:not(.no-leaders)')
       .find('span')
       .filter((_j, s) => clean($(s).text()) === keyword)
       .first()
@@ -187,7 +189,7 @@ export function parseDetachment(
   const unique = nameCase(banner.replace(UNIQUE_RE, ''));
   if (unique) consumed.push(banner);
   const enhancements = card
-    .find('ul.leaders li')
+    .find('ul.leaders li:not(.no-leaders)')
     .map((_i, el) => {
       const li = $(el);
       const spans = li.find('div').last().find('span');
