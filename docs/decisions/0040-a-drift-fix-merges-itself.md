@@ -81,11 +81,12 @@ the dependencies and `data/`. Inside those paths anything goes, snapshots includ
   high risk, ready for review for low risk. It holds the App's key with the scope it has
   now. The commit is signed (`create-pull-request`'s `sign-commits`), so it is verified
   and attributed to the App.
-- **Low risk:** a new `merge` job takes over, with the workflow's own token and no App key.
-  Like the Dependabot job, it runs `gh` and `jq` and no repository code. It waits until
+- **Low risk:** a new `merge` job takes over, with the workflow's own token. Like the
+  Dependabot job, it runs `gh` and `jq` and no repository code. It waits until
   every check on the head the PR job pushed has finished, the smoke test among them, then
   squash-merges that head (`--match-head-commit`). After the merge it starts the scrape on
-  `main` (`workflow_dispatch`), whose success closes the failure issue as it does now. It
+  `main` (`workflow_dispatch`) with the App's token (see *After it shipped*), whose
+  success closes the failure issue as it does now. It
   then comments on the failure issue, naming the maintainer: which PR merged, a link to
   its smoke test, and that it merged without review, to be read when there is time.
 - **A check fails,** or the checks don't finish within 45 minutes: the `merge` job closes
@@ -123,16 +124,16 @@ the dependencies and `data/`. Inside those paths anything goes, snapshots includ
 - If the site is down while the smoke test runs, the smoke test fails and the PR is
   closed. The scrape started then fails as an outage, with no `drift` artifact, so no run
   starts; the next scheduled scrape that fails on drift gets the next run.
-- Nobody has yet seen whether a failed scrape that the `merge` job's token started
+- Nobody had yet seen whether a failed scrape that the `merge` job's token started
   starts this workflow. GitHub's docs say a `workflow_dispatch` from that token starts a
-  run, and say nothing about the `workflow_run` its end raises. If none starts, the next
-  scheduled scrape that fails starts the next run instead, at most a day later.
+  run, and say nothing about the `workflow_run` its end raises. It starts none, so the
+  `merge` job now starts the scrape with the App's token (*After it shipped*).
 - The PR job also needs `actions: read`, to download the `drift` artifact. The `merge`
   job holds `contents: write` and `pull-requests: write` (the merge, the close, the draft
-  toggle), `actions: write` (start the scrape), `issues: write` (the comment), and
-  `checks: read` and `statuses: read` (`gh pr checks`), with the workflow's own token, as
-  `dependabot-automerge.yml` does. The App's token gains nothing, and isn't held through
-  the wait, which can outlast its hour.
+  toggle), `issues: write` (the comment), and `checks: read` and `statuses: read` (`gh pr
+  checks`), with the workflow's own token, as `dependabot-automerge.yml` does. It starts
+  the scrape with an App token that holds `actions: write` alone, minted after the wait,
+  which can outlast a token's hour.
 - `main`'s ruleset has `require_extra_approval_for_unattributed_changes` on, a setting
   GitHub doesn't document. If it asks for an approval even on the App's signed commit, no
   fix merges itself, and the `merge` job says so (above). Whether to turn it off is then
@@ -166,7 +167,8 @@ the dependencies and `data/`. Inside those paths anything goes, snapshots includ
   and the PR job would then trust the agent's copy of it. The artifact is the source.
 - **Merging with the App's token.** Its merge would run CI and the release on `main`, but
   its scope would grow by `actions: write`, and it expires before the wait for the smoke
-  test may end.
+  test may end. The scrape is now started with an App token after all, one minted after
+  the wait with `actions: write` alone (*After it shipped*); the merge still isn't.
 - **Posting the data difference in the PR.** The PR job would post text made by code the
   model wrote, a new untrusted input next to the App's key. The smoke test's summary is
   one click away.
@@ -218,3 +220,32 @@ Build, merge, then close #114 unmerged and replay the outage it was drafted for
 (`gh workflow run drift-fix.yml -f run-id=40398589206`). The replay should merge itself,
 and the scrape that follows should close #113. If it doesn't, the outage is fixed by hand
 from #114.
+
+It went that way on 2026-10-27, after #115 merged. The maintainer had closed #113 and
+#114 already, so the replay recorded its run on no issue. It drafted
+[#116](https://github.com/BSData/wh40k-11e-mfm/pull/116) in 20 turns for $0.19, with the
+refreshed `orks-legends-cookie.html` from the artifact. CI and the smoke test (30 of 30
+factions) passed, and it merged itself five minutes after the replay started. The
+scrape it started then passed, with the data unchanged, so no update PR followed.
+
+## After it shipped
+That scrape also settled what *Consequences* had left open: GitHub raises no `workflow_run`
+for a run the workflow's own token started. A scheduled scrape's drift-fix run starts 2–3
+seconds after it ends; none started after this one. So the scrape the `merge` job starts,
+after a merge or after closing a fix, would never start the outage's next run if it
+failed: the next scheduled scrape would, up to a day later.
+
+The `merge` job now starts the scrape with the App's token instead. Events made with it
+start workflows, as the update PRs' CI shows, so the scrape's end should raise
+`workflow_run`, and the gate decide as it does for a scheduled scrape: the three-run limit
+and the failure issue apply unchanged. That part is not yet seen; the next scrape the
+`merge` job starts will show it. The token is minted with `actions: write` alone, in a
+step after the wait, so the wait can't outlast it, and only the step that starts the
+scrape uses it. The job's own token loses `actions: write`. The App's key now reaches a job
+that runs no repository code and installs no package, only pinned actions, `gh` and `jq`,
+as 0022 asks.
+
+Rejected: having the `merge` job wait for the scrape and start the drift fixer itself. A
+`workflow_dispatch` from the workflow's token does start a run, but the gate treats every
+dispatch as a maintainer's replay, which skips the run limit, so the gate would need a way
+to tell the bot's dispatch from a person's, and the job would wait minutes more.
