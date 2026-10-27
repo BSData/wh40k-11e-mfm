@@ -223,11 +223,13 @@ export const MAX_LOW_RISK_LINES = 150;
 export const NEEDS_REVIEW = 'Needs review:';
 /**
  * An added line that imports, re-exports, or names a way out of the parser: to the
- * process, the globals, other modules, the network or Node's own modules. A screen for the
- * plain route, not a sandbox: JavaScript reaches `process` by routes no word list catches.
+ * process, the globals, other modules, the network or Node's own modules. `import` counts
+ * anywhere on a line but in `import.meta`, and so does `from '…'`, the last line of an
+ * import or export over several. A screen for the plain route, not a sandbox: JavaScript
+ * reaches `process` by routes no word list catches.
  */
 export const REACH =
-  /\b(?:process|globalThis|global|require|eval|Function|constructor|prototype|__proto__|Reflect|Proxy|fetch|WebAssembly|child_process)\b|\bimport\s*\(|['"`]node:|^\s*import\b|^\s*export\b[^;]*\bfrom\b/;
+  /\b(?:process|globalThis|global|require|eval|Function|constructor|prototype|__proto__|Reflect|Proxy|fetch|WebAssembly|child_process)\b|^\s*export\b[^;]*\bfrom\b|\bimport\b(?:\s*\()?(?!\s*\.\s*meta\b)|\bfrom\s*['"]|['"`]node:/;
 
 /**
  * What a `REACH` match names, in fixed words: the reasons go into the PR and the failure
@@ -236,6 +238,8 @@ export const REACH =
 function word(match: string): string {
   const text = match.trim();
   if (text.startsWith('export')) return 'export … from';
+  if (text.startsWith('from')) return 'from';
+  if (text.startsWith('import')) return text.endsWith('(') ? 'dynamic import' : 'import';
   if (text.endsWith('node:')) return 'node:';
   return text;
 }

@@ -449,12 +449,20 @@ jobs:
             fi
             exit 1
           }
-          # Until the smoke test is listed and nothing is pending. gh's own exit code says
-          # nothing here (it fails while no check is reported yet), so the JSON decides.
+          # An empty --match-head-commit pins nothing, and gh would merge whatever the head is.
+          [ -n "$PR" ] && [ -n "$SHA" ] || hold "the PR job handed on no PR or no head to merge"
+          # The smoke test as the smoke workflow ran it: a commit status, or a check run made
+          # through the API, carries no workflow's name. Not a forgery any workflow here could
+          # make (none may write checks or statuses), and this doesn't depend on that.
+          smoke='.name == "smoke" and .workflow == "Live smoke test"'
+          # Until main's required checks and the smoke test are listed, and nothing is
+          # pending. gh's own exit code says nothing here (it fails while no check is
+          # reported yet), so the JSON decides.
+          listed="([\"build\", \"data-guard\"] - map(.name) | length == 0) and any(.[]; $smoke) and all(.[]; .bucket != \"pending\")"
           deadline=$((SECONDS + wait_seconds))
           while :; do
-            checks=$(gh pr checks "$PR" --json name,bucket 2> /dev/null || true)
-            if jq -e 'any(.[]; .name == "smoke") and all(.[]; .bucket != "pending")' <<< "${checks:-[]}" > /dev/null 2>&1; then
+            checks=$(gh pr checks "$PR" --json name,bucket,workflow 2> /dev/null || true)
+            if jq -e "$listed" <<< "${checks:-[]}" > /dev/null 2>&1; then
               break
             fi
             [ "$SECONDS" -lt "$deadline" ] || hold "its checks didn't all finish within $((wait_seconds / 60)) minutes"
@@ -462,7 +470,7 @@ jobs:
           done
           failed=$(jq -r '[.[] | select(.bucket == "fail" or .bucket == "cancel") | .name] | unique | join(", ")' <<< "$checks")
           [ -z "$failed" ] || hold "a check failed: $failed"
-          [ "$(jq -r '[.[] | select(.name == "smoke") | .bucket] | unique | join(",")' <<< "$checks")" = pass ] ||
+          [ "$(jq -r "[.[] | select($smoke) | .bucket] | unique | join(\",\")" <<< "$checks")" = pass ] ||
             hold "its live smoke test didn't pass"
           gh pr merge "$PR" --squash --match-head-commit "$SHA" || hold "GitHub refused the merge"
           gh workflow run scrape.yml --ref main

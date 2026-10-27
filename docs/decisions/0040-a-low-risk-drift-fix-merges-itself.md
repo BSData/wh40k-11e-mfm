@@ -63,10 +63,11 @@ A fix is low risk when all of these hold. The PR job checks the first five, in
    that no word list vets. Anything else the patch
    check allows today (`src/ops/`, `src/diff/`, other tests, other specs) is high risk.
 3. **No new reach.** No line the patch adds under `src/` or `test/` imports or
-   re-exports anything, or names a way out of the parser: `process`, `globalThis`,
-   `global`, `require`, `import(`, `eval`, `Function`, `constructor`, `prototype`,
-   `__proto__`, `Reflect`, `Proxy`, `fetch`, `WebAssembly`, a quoted `node:`,
-   `child_process`. The reason names the word, never the line, which the model wrote.
+   re-exports anything (`import` anywhere but in `import.meta`, or `from '…'`), or names a
+   way out of the parser: `process`, `globalThis`, `global`, `require`, `eval`,
+   `Function`, `constructor`, `prototype`, `__proto__`, `Reflect`, `Proxy`, `fetch`,
+   `WebAssembly`, a quoted `node:`, `child_process`. The reason names the word, never the
+   line, which the model wrote.
 4. **It is small.** At most 150 lines added or removed, not counting the pages.
 5. **The page came from the scrape.** The PR adds at least one fixture, its tests read
    it, and every fixture it adds is a `drift` page, byte for byte, under a name that was
@@ -179,7 +180,11 @@ maintainer to check:
   scrape". The artifact offered 9 free names; the 4 taken ones were left out.
 - **The word list** (rule 3) trips, over the 2,479 lines ever added to the low-risk files,
   only on import lines, one comment saying "fetch", and `rsc.ts`'s class `constructor`.
-  `node:` counts only quoted, since the parser writes `node: unknown`.
+  `node:` counts only quoted, since the parser writes `node: unknown`. The final review
+  found `import` was caught only at the start of a line, and a re-export over several
+  lines not at all; `import` now counts anywhere but in `import.meta`, and so does
+  `from '…'`. Not ``from ` ``: the comments write ``missing from `full` ``, and a module
+  is never named in a template.
 - **The owners come from `.github/CODEOWNERS`**, its `*` line, not a repository
   variable: the file already names them.
 - **The merge job merges once the checks pass**, rather than turning on auto-merge: it
@@ -187,7 +192,14 @@ maintainer to check:
   delete the branch: the repository deletes a merged head branch itself.
 - **No workflow may write checks or statuses.** The merge trusts a check named `smoke`,
   and code a PR runs could otherwise post one; none does today, and
-  `test/workflows.test.ts` now holds every workflow to that.
+  `test/workflows.test.ts` now holds every workflow to that, a job left to the
+  repository's default token, which can write, included. The merge also asks for the
+  smoke check of the `Live smoke test` workflow, which a status or a check run made
+  through the API doesn't carry.
+- **The merge job merges nothing without a head**, since an empty
+  `--match-head-commit` pins nothing, and the head comes from an action Dependabot bumps.
+  It waits for `build` and `data-guard` to be listed as well as the smoke test, so a
+  merge never runs ahead of the required checks and fails for it.
 - **The `diagnose-parse` skill** told the agent to copy markup into a test, which rule 5
   now holds back; its drift-fix section says to read a refreshed page instead.
 

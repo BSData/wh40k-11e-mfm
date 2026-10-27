@@ -462,6 +462,9 @@ describe('assessRisk — which fixes merge themselves (0040)', () => {
     ["  import { a } from 'b';", 'import'],
     ['const f = "node:fs"; // @x', 'node:'],
     ['x = process;', 'process'],
+    ["} from 'fs';", 'from'],
+    ["const y = 1; import 'fs';", 'import'],
+    ["const m = await import \u00a0 ('x');", 'dynamic import'],
   ])('names what reaches out in fixed words only: %s', (line, word) => {
     expect(assess(also('src/parse/cards.ts', `${line}\n`)).reasons).toEqual([
       `src/parse/cards.ts adds a line that reaches out: ${word}`,
@@ -503,6 +506,9 @@ describe('assessRisk — which fixes merge themselves (0040)', () => {
     'const c = x.constructor;',
     "const g = Reflect.get(x, 'y');",
     "fetch('https://example.com');",
+    // The last line of an export over several lines, and an import after other code.
+    "} from 'fs';",
+    "const y = 1; import 'fs';",
   ])('finds an added line that reaches out high risk: %s', (line) => {
     const risk = assess((dir) => {
       fix(dir);
@@ -514,12 +520,14 @@ describe('assessRisk — which fixes merge themselves (0040)', () => {
     ]);
   });
 
-  it.each(['function deref(node: unknown) {}', '// the page as the scrape fetched it'])(
-    'lets an ordinary parser line through: %s',
-    (line) => {
-      expect(assess(also('src/parse/cards.ts', `${line}\n`)).low).toBe(true);
-    },
-  );
+  it.each([
+    'function deref(node: unknown) {}',
+    '// the page as the scrape fetched it',
+    'const here = import.meta.url;',
+    '// the names it imported',
+  ])('lets an ordinary parser line through: %s', (line) => {
+    expect(assess(also('src/parse/cards.ts', `${line}\n`)).low).toBe(true);
+  });
 
   it('finds a fix over 150 lines high risk', () => {
     const many = (n: number) =>

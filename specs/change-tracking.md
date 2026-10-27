@@ -606,11 +606,11 @@ Actions, and each part holds only what it needs. See
      `src/fixtures.ts`, `specs/scraping.md`, `test/parse.test.ts`, or a new file under
      `docs/decisions/`, and at least one is under `src/` (the smoke test runs only for a
      change there). Not a snapshot: vitest loads one with `new Function`, so it is code;
-   - no line it adds under `src/` or `test/` imports or re-exports anything, or names
-     `process`, `globalThis`, `global`, `require`, `eval`, `Function`, `constructor`,
-     `prototype`, `__proto__`, `Reflect`, `Proxy`, `fetch`, `WebAssembly`,
-     `child_process`, `import(` or a quoted `node:`. A screen for the plain route out of
-     the parser, not a sandbox;
+   - no line it adds under `src/` or `test/` imports or re-exports anything (`import`
+     anywhere but in `import.meta`, or `from '…'`), or names `process`, `globalThis`,
+     `global`, `require`, `eval`, `Function`, `constructor`, `prototype`, `__proto__`,
+     `Reflect`, `Proxy`, `fetch`, `WebAssembly`, `child_process` or a quoted `node:`. A
+     screen for the plain route out of the parser, not a sandbox;
    - it adds and removes at most 150 lines;
    - it adds at least one of the scrape's pages. When every page that shows the drift
      already has a fixture under its name, there is none to add, and a person adds one.
@@ -630,8 +630,10 @@ Actions, and each part holds only what it needs. See
    token (`contents: write`, `pull-requests: write`, `actions: write`, `issues: write`,
    and `checks: read` and `statuses: read` for the checks) and no key, checks out nothing,
    and runs bash, `gh` and `jq` only, as the Dependabot job does. It waits, for at most 45
-   minutes, until the PR's live smoke test is listed and no check is pending. If every
-   check passed, it squash-merges the PR, pinned to the head the PR job pushed, starts
+   minutes, until `build`, `data-guard` and the PR's live smoke test are listed, the smoke
+   test as the `Live smoke test` workflow ran it, and no check is pending. If every check
+   passed, it squash-merges the PR, pinned to the head the PR job pushed (with no head or
+   no PR handed on, it merges nothing), starts
    `scrape.yml` on `main`, and comments on the failure issue that the fix merged without
    review, linking its checks (the smoke test's summary says what it changes in the data),
    and asking the code owners to read it. A failed or cancelled check, a smoke test that
@@ -639,8 +641,10 @@ Actions, and each part holds only what it needs. See
    back into a draft, says why on the failure issue, and fails the job. A merge made with
    the workflow's token starts no push-triggered workflow on `main`: CI ran on the PR, a
    drift fix changes no `data/`, and the scrape is started here. No workflow grants
-   `checks: write` or `statuses: write`, so code a PR runs can't post a passing `smoke`
-   check of its own (`test/workflows.test.ts` holds every workflow to that).
+   `checks: write` or `statuses: write`, or leaves a job to the repository's default
+   token, which can write, so code a PR runs can't post a passing `smoke` check of its own
+   (`test/workflows.test.ts` holds every workflow to that); and a status or a check run
+   made through the API carries no workflow's name, which the merge job also asks for.
 6. **A maintainer** reviews a high-risk fix, adds the refreshed page when the PR has
    none, and merges; and reads a low-risk one after it merged. The next successful scrape
    closes the failure issue, as always.

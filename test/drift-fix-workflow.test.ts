@@ -242,7 +242,7 @@ describe.skipIf(!hasBash)('the merge step', () => {
   let runs = 0;
 
   /** The checks `gh pr checks` reports, one answer per call, the last one repeating. */
-  type Checks = { name: string; bucket: string }[];
+  type Checks = { name: string; bucket: string; workflow?: string }[];
   const run = (answers: Checks[], env: Record<string, string> = {}) => {
     const dir = join(scratch, `run-${runs++}`);
     mkdirSync(join(dir, 'bin'), { recursive: true });
@@ -292,11 +292,38 @@ describe.skipIf(!hasBash)('the merge step', () => {
     return { ...result, log };
   };
   const green: Checks = [
-    { name: 'build', bucket: 'pass' },
-    { name: 'data-guard', bucket: 'pass' },
-    { name: 'smoke', bucket: 'pass' },
-    { name: 'automerge', bucket: 'skipping' },
+    { name: 'build', bucket: 'pass', workflow: 'CI' },
+    { name: 'data-guard', bucket: 'pass', workflow: 'CI' },
+    { name: 'smoke', bucket: 'pass', workflow: 'Live smoke test' },
+    { name: 'automerge', bucket: 'skipping', workflow: 'Dependabot auto-merge' },
   ];
+  const smoke = green.filter((c) => c.name === 'smoke');
+
+  // A commit status, or a check run made through the API, carries no workflow's name.
+  it('holds a smoke check that the smoke workflow did not run', () => {
+    const forged = green.map((c) => (c.name === 'smoke' ? { name: 'smoke', bucket: 'pass' } : c));
+    const { status, log } = run([forged]);
+    expect(status).toBe(1);
+    expect(log).toContain('pr ready 7 --undo');
+    expect(log).not.toContain('pr merge');
+  });
+
+  it('waits for the required checks to be listed, not only the smoke test', () => {
+    const { status, log } = run([smoke, green]);
+    expect(status).toBe(0);
+    expect(log.match(/^pr checks /gm)).toHaveLength(2);
+    expect(log).toContain('pr merge 7');
+  });
+
+  // An empty --match-head-commit pins nothing: gh merges whatever the head is.
+  it.each([
+    ['head', { SHA: '' }],
+    ['PR', { PR: '' }],
+  ])('merges nothing without a %s to pin it to', (_, env) => {
+    const { status, log } = run([green], env);
+    expect(status).toBe(1);
+    expect(log).not.toContain('pr merge');
+  });
 
   it('merges the head the PR job pushed, starts the scrape, and asks the owners to read it', () => {
     const { status, log } = run([green]);

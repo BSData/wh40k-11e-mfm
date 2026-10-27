@@ -180,9 +180,28 @@ describe("no workflow can forge a PR's checks", () => {
     permissions === 'write-all' ||
     (typeof permissions === 'object' &&
       (permissions.checks === 'write' || permissions.statuses === 'write'));
+  /** Whether any job of `workflow` gets a token that can write checks or statuses. */
+  const mayWriteChecks = (workflow: Workflow) =>
+    writes(workflow.permissions) ||
+    Object.values(workflow.jobs).some(
+      (job) =>
+        writes(job.permissions) ||
+        (job.permissions === undefined && workflow.permissions === undefined),
+    );
 
   it.each(workflows)('%s grants no checks or statuses write', (_, workflow) => {
-    expect(writes(workflow.permissions)).toBe(false);
-    for (const job of Object.values(workflow.jobs)) expect(writes(job.permissions)).toBe(false);
+    expect(mayWriteChecks(workflow)).toBe(false);
+  });
+
+  // The repository's default token can write, so a job with no permissions of its own, in a
+  // workflow with none either, gets checks: write and statuses: write.
+  it('counts a job left to the default token as one that can write', () => {
+    expect(mayWriteChecks({ jobs: { a: {} } })).toBe(true);
+    expect(mayWriteChecks({ permissions: {}, jobs: { a: {} } })).toBe(false);
+    expect(mayWriteChecks({ jobs: { a: { permissions: {} } } })).toBe(false);
+    expect(mayWriteChecks({ permissions: {}, jobs: { a: { permissions: 'write-all' } } })).toBe(
+      true,
+    );
+    expect(mayWriteChecks({ permissions: { statuses: 'write' }, jobs: {} })).toBe(true);
   });
 });
