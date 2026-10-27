@@ -622,9 +622,15 @@ needs. See
    fit). An empty patch opens nothing.
 5. **The merge** (job `merge`) runs only for a low-risk fix, and only when the workflow
    runs on `main`: a replay on any other branch never merges. It holds the workflow's own
-   token (`contents: write`, `pull-requests: write`, `actions: write`, `issues: write`,
-   and `checks: read` and `statuses: read` for the checks) and no key, checks out nothing,
-   and runs bash, `gh` and `jq` only, as the Dependabot job does. It waits, for at most 45
+   token (`contents: write`, `pull-requests: write`, `issues: write`, and `checks: read`
+   and `statuses: read` for the checks), checks out nothing, and runs bash, `gh` and `jq`
+   only, as the Dependabot job does. It starts the scrape with the App's token, minted with
+   `actions: write` alone once the wait is over, so the wait can't outlast it: GitHub
+   starts no workflow, `workflow_run` included, for a run the workflow's own token started.
+   Seen on 2026-10-27: after merging #116, the job started the scrape with its own token,
+   and no drift-fix run followed the scrape's end, where a scheduled scrape's follows
+   within seconds. A failed scrape started that way would leave its drift-fix run to the
+   next scheduled scrape, a day later. It waits, for at most 45
    minutes, until `build`, `data-guard` and the PR's live smoke test are listed, the smoke
    test as the `Live smoke test` workflow ran it, and no check is pending. If every check
    passed, it squash-merges the PR, pinned to the head the PR job pushed (with no head or
@@ -634,9 +640,8 @@ needs. See
    and asking the code owners to read it. A failed or cancelled check, a smoke test that
    didn't pass or never ran, or the wait running out closes the PR, starts `scrape.yml`
    again, says why on the failure issue, and fails the job: if the scrape still fails,
-   the gate gives the outage its next run (or the next scheduled scrape's failure does,
-   if GitHub starts no `workflow_run` for a scrape this token started: not yet seen
-   either way), and reopening the PR is how a person takes it over. A merge GitHub refuses turns the PR back into a draft instead, says why, and
+   the gate gives the outage its next run, and reopening the PR is how a person takes it
+   over. A merge GitHub refuses turns the PR back into a draft instead, says why, and
    fails the job, since another run would meet the same refusal. A merge made with
    the workflow's token starts no push-triggered workflow on `main`: CI ran on the PR, a
    drift fix changes no `data/`, and the scrape is started here. No workflow grants
@@ -773,7 +778,10 @@ copy and the checks above, nothing else. It takes no `.git` from the artifact, b
 config can run commands and `create-pull-request` runs git there. See
 [0022](../docs/decisions/0022-the-app-key-never-meets-dependency-code.md). The drift
 fixer's `pr` job mints the same token the same way, for its PR, and holds to the same rule
-(see *The drift fixer*); its `merge` job holds no App key at all. The model's key in `brief` is kept from dependency code the
+(see *The drift fixer*). Its `merge` job mints one with `actions: write` alone, used only
+to start the scrape, so that the scrape's failure starts the drift fixer: a run the
+workflow's own token started raises no `workflow_run`. That job runs no repository code at
+all. The model's key in `brief` is kept from dependency code the
 same way (see *In brief, by a model*).
 
 ### Dry run

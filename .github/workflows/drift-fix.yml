@@ -14,17 +14,18 @@ name: Drift fix
 # - `pr` holds the App's key and no model: it checks the agent's patch with one
 #   dependency-free script, which adds the scrape's page and decides the risk, then opens
 #   the PR, a draft unless the risk is low;
-# - `merge` holds the workflow's own token and no key, and runs no repository code: it
-#   merges a low-risk fix once every check passed, or closes it when one didn't, and
-#   starts the scrape either way.
+# - `merge` holds the workflow's own token, and runs no repository code: it merges a
+#   low-risk fix once every check passed, or closes it when one didn't, and starts the
+#   scrape either way, with an App token that can only do that.
 #
 # Replay a failure: gh workflow run drift-fix.yml -f run-id=<failed Scrape MFM run id>
 
 on:
   # workflow_run runs with this repository's secrets whatever started the upstream run,
   # which is why it is dangerous: here that run is only ever "Scrape MFM" on main (a
-  # schedule or a maintainer's dispatch, never a pull request), this workflow checks out
-  # no code but its own, and the gate re-checks the run before anything else happens.
+  # schedule, or a dispatch by a maintainer or by the `merge` job below, never a pull
+  # request), this workflow checks out no code but its own, and the gate re-checks the run
+  # before anything else happens.
   workflow_run: # zizmor: ignore[dangerous-triggers]
     workflows: [Scrape MFM]
     types: [completed]
@@ -409,10 +410,10 @@ jobs:
 
   # Merges a low-risk fix (0040) once every check on the head `pr` pushed has passed, the
   # live smoke test among them, then starts the scrape and asks the code owners to read the
-  # fix. Like dependabot-automerge.yml it holds the workflow's own token and no key, checks
-  # out nothing, and runs bash, gh and jq only, so nothing the model wrote runs here. A
-  # merge made with this token starts no push-triggered workflow on main: CI ran on the PR,
-  # a drift fix changes no data/ so no release is due, and the scrape is started here. Only
+  # fix. Like dependabot-automerge.yml it holds the workflow's own token, checks out
+  # nothing, and runs bash, gh and jq only, so nothing the model wrote runs here. A merge
+  # made with this token starts no push-triggered workflow on main: CI ran on the PR, a
+  # drift fix changes no data/ so no release is due, and the scrape is started here. Only
   # on main: a replay on any other branch never merges. A failed or unfinished check closes
   # the PR and starts the scrape, for another run; a merge GitHub refuses turns the PR back
   # into a draft for a maintainer. Either fails red.
@@ -424,7 +425,6 @@ jobs:
     permissions:
       contents: write # merge the PR into main
       pull-requests: write # merge it, or turn it back into a draft
-      actions: write # start the scrape
       issues: write # comment on the failure issue
       checks: read # gh pr checks: the check runs
       statuses: read # gh pr checks: the commit statuses
@@ -434,6 +434,7 @@ jobs:
           egress-policy: audit
 
       - name: Merge once the checks pass
+        id: merge
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -459,7 +460,7 @@ jobs:
           retry() {
             echo "::error title=Not merged::$1"
             gh pr close "$PR" --comment "Closed by the drift fixer: $1. The scrape runs again, and the drift fixer tries again while the outage has runs left." || true
-            gh workflow run scrape.yml --ref main
+            echo "scrape=true" >> "$GITHUB_OUTPUT"
             if [ -n "$ISSUE" ]; then
               gh issue comment "$ISSUE" --body "The drift fix #$PR didn't merge itself: $1. It is closed, and the scrape runs again now; if it still fails, the drift fixer tries again while this outage has runs left. Reopen #$PR to take it from there by hand${OWNERS:+ ($OWNERS)}."
             fi
@@ -492,7 +493,28 @@ jobs:
             retry "its live smoke test didn't pass"
           # Another run would meet the same refusal, so this one waits for a person.
           gh pr merge "$PR" --squash --match-head-commit "$SHA" || hold "GitHub refused the merge"
-          gh workflow run scrape.yml --ref main
+          echo "scrape=true" >> "$GITHUB_OUTPUT"
           if [ -n "$ISSUE" ]; then
             gh issue comment "$ISSUE" --body "Merged #$PR without review (docs/decisions/0040): it passed CI and the live smoke test, whose job summary among its checks ($checks_url) lists what it changes in the data. ${OWNERS:-A maintainer}, please read it when there is time. The scrape runs again now, and closes this issue when it succeeds."
           fi
+
+      # GitHub starts no workflow, workflow_run included, for a run this job's own token
+      # started, so a scrape started with it would never hand its failure to the drift
+      # fixer (0040, After it shipped). The App's token starts it instead: minted here, after
+      # the wait, which can outlast its hour, able only to start workflows, and used by the
+      # next step alone. After a merge and after a closed fix alike; not after a refusal.
+      - name: Mint the App's token to start the scrape
+        id: dispatch-token
+        if: ${{ !cancelled() && steps.merge.outputs.scrape == 'true' }}
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.BSDATA_AUTOMATON_APP_CLIENT_ID }}
+          private-key: ${{ secrets.BSDATA_AUTOMATON_APP_PRIVATE_KEY }}
+          permission-actions: write # start the scrape
+
+      - name: Start the scrape
+        if: ${{ !cancelled() && steps.merge.outputs.scrape == 'true' }}
+        env:
+          GH_TOKEN: ${{ steps.dispatch-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run scrape.yml --ref main
