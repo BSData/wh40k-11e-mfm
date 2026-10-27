@@ -1,8 +1,11 @@
 import { spawnSync } from 'node:child_process';
 import {
   appendFileSync,
+  constants,
+  copyFileSync,
   existsSync,
   lstatSync,
+  readdirSync,
   readFileSync,
   realpathSync,
   writeFileSync,
@@ -75,6 +78,12 @@ const DIFF_HEADER = /^diff --git a\/(\S+) b\/(\S+)$/;
 const HUNK_HEADER = /^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@(?: .*)?$/;
 const INDEX = /^index [0-9a-f]{7,64}\.\.[0-9a-f]{7,64}(?: 100644)?$/;
 
+/** What a patch does to one file's text: the lines it adds, and how many it removes. */
+export interface PatchLines {
+  added: string[];
+  removed: number;
+}
+
 /**
  * Read a patch as `git diff` writes it and list the files it changes, or throw
  * `PatchRejected`. Only regular files (mode 100644), changed in place, added, deleted or
@@ -82,12 +91,18 @@ const INDEX = /^index [0-9a-f]{7,64}\.\.[0-9a-f]{7,64}(?: 100644)?$/;
  * copies, and nothing that looks like a credential.
  */
 export function checkPatch(text: string): PatchFile[] {
+  return readPatch(text).files;
+}
+
+/** `checkPatch`, with each file's added lines and removed-line count, by its path. */
+export function readPatch(text: string): { files: PatchFile[]; lines: Map<string, PatchLines> } {
   const reject = (why: string): never => {
     throw new PatchRejected(why);
   };
   if (Buffer.byteLength(text) > MAX_PATCH_BYTES)
     reject(`the patch is over ${MAX_PATCH_BYTES} bytes`);
-  if (text === '') return [];
+  const changes = new Map<string, PatchLines>();
+  if (text === '') return { files: [], lines: changes };
   if (!text.endsWith('\n')) reject('the patch does not end with a line break');
   const lines = text.slice(0, -1).split('\n');
   const at = (i: number) => `line ${i + 1}`;
@@ -132,6 +147,8 @@ export function checkPatch(text: string): PatchFile[] {
     if (renamed) claim(a, start);
     claim(b, start);
 
+    const change: PatchLines = { added: [], removed: 0 };
+    changes.set(b, change);
     const line = lines[i];
     if (line?.startsWith('--- ')) {
       const old = added ? '/dev/null' : `a/${a}`;
@@ -155,12 +172,15 @@ export function checkPatch(text: string): PatchFile[] {
           if (kind === ' ') {
             oldLeft--;
             newLeft--;
-          } else if (kind === '-') oldLeft--;
-          else if (kind === '+') {
+          } else if (kind === '-') {
+            oldLeft--;
+            change.removed++;
+          } else if (kind === '+') {
             newLeft--;
             if (looksLikeCredential(content ?? '')) {
               reject(`${at(i)}: it adds something that looks like a credential`);
             }
+            change.added.push((content ?? '').slice(1));
           } else if (!content?.startsWith('\\ ')) {
             reject(`${at(i)}: not a line of the hunk`);
           }
@@ -181,7 +201,37 @@ export function checkPatch(text: string): PatchFile[] {
     });
     if (files.length > MAX_FILES) reject(`more than ${MAX_FILES} files`);
   }
-  return files;
+  return { files, lines: changes };
+}
+
+/** How the agent's note hands its fix to a person: its first line starts with this. */
+export const NEEDS_REVIEW = 'Needs review:';
+
+export interface RiskInput {
+  files: PatchFile[];
+  meta: RunMeta;
+  /** The agent's note. */
+  notes: string;
+}
+
+export interface Risk {
+  low: boolean;
+  /** Each rule the fix fails, for the PR and the failure issue; empty when it is low. */
+  reasons: string[];
+}
+
+/**
+ * Whether a fix merges itself once CI and the live smoke test pass (0040). Where it may
+ * reach is the patch check's to bound, and what it does is the checks'; this only asks
+ * whether the agent finished, didn't hand the fix to a person, and changed something the
+ * scrape runs, which is also what starts the smoke test.
+ */
+export function assessRisk({ files, meta, notes }: RiskInput): Risk {
+  const reasons: string[] = [];
+  if (!meta.finished) reasons.push('the agent did not finish');
+  if (cleanNotes(notes).startsWith(NEEDS_REVIEW)) reasons.push('the agent asked for review');
+  if (!files.some((f) => f.path.startsWith('src/'))) reasons.push('it changes nothing under src/');
+  return { low: reasons.length === 0, reasons };
 }
 
 /** The paths `git status --porcelain=v1 -z --no-renames` lists. */
@@ -226,6 +276,52 @@ export function applyPatch(dir: string, patchPath: string): PatchFile[] {
     }
   }
   return files;
+}
+
+/** A saved page's name, as `src/fixtures.ts` names one: a faction slug and `.html`. */
+const PAGE_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*\.html$/;
+const fixturePath = (checkout: string, name: string) => join(checkout, 'test', 'fixtures', name);
+const exists = (path: string) => lstatSync(path, { throwIfNoEntry: false }) !== undefined;
+
+/**
+ * The pages of the scrape's `drift` artifact (`driftDir`) a fix may add: regular files
+ * with a page's name, not links, whose name no fixture in `checkout` has. The fixtures
+ * there pin older pages on purpose, so a refreshed one never takes their place (0029).
+ */
+export function freePages(driftDir: string, checkout: string): string[] {
+  if (!existsSync(driftDir)) return [];
+  return readdirSync(driftDir)
+    .filter((name) => PAGE_NAME.test(name))
+    .filter((name) => lstatSync(join(driftDir, name)).isFile())
+    .filter((name) => !exists(fixturePath(checkout, name)))
+    .sort();
+}
+
+/**
+ * Of `names`, the pages the patch uses: a line it adds holds the name as a string, as
+ * `fixture('orks-legends-cookie.html')` and an entry in `FIXTURES` do. A name in a comment
+ * doesn't count: #114's test named the page it copied markup from, and read another.
+ */
+export function pagesNamed(names: string[], lines: Map<string, PatchLines>): string[] {
+  const added = [...lines.values()].flatMap((change) => change.added);
+  return names.filter((name) => {
+    const quoted = new RegExp(`(['"\`])${name.replaceAll('.', '\\.')}\\1`);
+    return added.some((line) => quoted.test(line));
+  });
+}
+
+/**
+ * Copy `names` from the drift artifact into `checkout`'s `test/fixtures/`, byte for byte:
+ * the scrape saved them, so no fixture in the PR comes from the model. Never over a fixture.
+ */
+export function addPages(driftDir: string, checkout: string, names: string[]): void {
+  for (const name of names) {
+    if (!PAGE_NAME.test(name))
+      throw new PatchRejected(`not a page's name: ${JSON.stringify(name)}`);
+    const to = fixturePath(checkout, name);
+    if (exists(to)) throw new PatchRejected(`test/fixtures/${name} is already a fixture`);
+    copyFileSync(join(driftDir, name), to, constants.COPYFILE_EXCL);
+  }
 }
 
 /** What the agent's job reports about its run. */
@@ -282,6 +378,9 @@ export interface BodyInput {
   scrapeRunUrl: string;
   agentRunUrl: string;
   issue?: number;
+  /** The scrape's pages the PR adds as fixtures. */
+  pages: string[];
+  risk: Risk;
 }
 
 /** GitHub's limit on a PR body, in characters. */
@@ -305,7 +404,7 @@ export function prBody(input: BodyInput): string {
 }
 
 function renderBody(
-  { files, meta, scrapeRunUrl, agentRunUrl, issue }: BodyInput,
+  { files, meta, scrapeRunUrl, agentRunUrl, issue, pages, risk }: BodyInput,
   text: string,
 ): string {
   const describe = (f: PatchFile) =>
@@ -322,7 +421,14 @@ function renderBody(
     `Drafted by the drift-fix agent after a scrape failed: ${scrapeRunUrl}.${issue === undefined ? '' : ` Refs #${issue}.`}`,
     '',
     '> [!CAUTION]',
-    '> A model wrote this from pages of the live site, which are untrusted input. It stays a draft until a maintainer has read every line.',
+    ...(risk.low
+      ? [
+          '> A model wrote this from pages of the live site, which are untrusted input. It merges itself once CI and the live smoke test pass, without review (docs/decisions/0040): read it afterwards.',
+        ]
+      : [
+          '> A model wrote this from pages of the live site, which are untrusted input. It stays a draft until a maintainer has read every line, because:',
+          ...risk.reasons.map((reason) => `> - ${reason}`),
+        ]),
     ...(meta.finished
       ? []
       : [
@@ -332,16 +438,28 @@ function renderBody(
     '',
     '### Files',
     ...files.map((f) => `- ${describe(f)}`),
+    ...pages.map((page) => `- \`test/fixtures/${page}\` (added from the scrape)`),
     '',
     "### The agent's note",
     `${tick}text`,
     text,
     tick,
     '',
-    '### Before it is ready',
-    '- [ ] Read every changed line, snapshots included, against the refreshed page the note names.',
-    "- [ ] Commit that page as the fixture, with an assertion that covers the drift: the agent can't download pages or change `test/fixtures/`. The refreshed pages are in the scrape run's `drift` artifact, or run `pnpm refresh-fixtures --only <name>`.",
-    '- [ ] `pnpm verify`.',
+    ...(risk.low
+      ? [
+          '### After it merges',
+          "- [ ] Read it. What it changes in the data is in the live smoke test's job summary, among this PR's checks, and reaches `data/` only through the next update PR.",
+        ]
+      : [
+          '### Before it is ready',
+          '- [ ] Read every changed line, snapshots included, against the refreshed page the note names.',
+          ...(pages.length > 0
+            ? []
+            : [
+                "- [ ] Commit that page as the fixture, with an assertion that covers the drift: the agent can't download pages or change `test/fixtures/`. The refreshed pages are in the scrape run's `drift` artifact, or run `pnpm refresh-fixtures --only <name>`.",
+              ]),
+          '- [ ] `pnpm verify`.',
+        ]),
     '',
     `<sub>${run.join(' · ')}</sub>`,
     '',
@@ -350,12 +468,15 @@ function renderBody(
 
 const USAGE = `usage: node --experimental-strip-types src/ops/agent-patch.ts <checkout> <patch>
          --scrape-run <id> [--issue <n>] [--notes <file>] [--meta <file>]
-         --body-file <file> [--output <file>]
+         [--drift <dir>] --body-file <file> [--output <file>]
 
-Checks the drift fixer's patch, applies it to <checkout>, and writes the draft PR's body.
-Step outputs: changed=true or false, and paths=<the files, comma-separated>, for
-create-pull-request's add-paths. Exits 1, with the reason, on a patch it rejects.
-Reads GITHUB_SERVER_URL, GITHUB_REPOSITORY and GITHUB_RUN_ID for the links.
+Checks the drift fixer's patch, applies it to <checkout>, adds the pages of the scrape's
+drift artifact (--drift, its fixtures directory) that the patch names, decides the
+fix's risk (docs/decisions/0040), and writes the PR's body. Step outputs: changed=true or
+false; paths=<the files, comma-separated>, for create-pull-request's add-paths;
+risk=low or high; reasons=<the rules a high-risk fix fails, "; "-separated>. Exits 1, with
+the reason, on a patch it rejects. Reads GITHUB_SERVER_URL, GITHUB_REPOSITORY and
+GITHUB_RUN_ID for the links.
 `;
 
 /** Where the command line writes: its result to `out`, notes and errors to `err`. */
@@ -379,6 +500,7 @@ export function main(argv: string[], env: NodeJS.ProcessEnv = process.env, io: I
       issue: { type: 'string' },
       notes: { type: 'string' },
       meta: { type: 'string' },
+      drift: { type: 'string' },
       'body-file': { type: 'string' },
       output: { type: 'string' },
       help: { type: 'boolean' },
@@ -410,20 +532,31 @@ export function main(argv: string[], env: NodeJS.ProcessEnv = process.env, io: I
     file && existsSync(file) ? readFileSync(file, 'utf8') : '';
 
   let files: PatchFile[];
+  let pages: string[] = [];
+  let risk: Risk;
   try {
     const notes = read(values.notes);
     if (looksLikeCredential(notes))
       throw new PatchRejected("the agent's note looks like it holds a credential");
     files = applyPatch(dir, patch);
+    const { lines } = readPatch(readFileSync(patch, 'utf8'));
+    const meta = readMeta(read(values.meta));
+    if (values.drift && files.length > 0) {
+      pages = pagesNamed(freePages(values.drift, dir), lines);
+      addPages(values.drift, dir, pages);
+    }
+    risk = assessRisk({ files, meta, notes });
     writeFileSync(
       bodyFile,
       prBody({
         files,
         notes,
-        meta: readMeta(read(values.meta)),
+        meta,
         scrapeRunUrl: `${repoUrl}/actions/runs/${scrapeRun}`,
         agentRunUrl: `${repoUrl}/actions/runs/${GITHUB_RUN_ID}`,
         ...(issue === '' ? {} : { issue: Number(issue) }),
+        pages,
+        risk,
       }),
     );
   } catch (err) {
@@ -431,7 +564,11 @@ export function main(argv: string[], env: NodeJS.ProcessEnv = process.env, io: I
     io.err(`::error title=Patch rejected::${err.message}\n`);
     return 1;
   }
-  const outputs = `changed=${files.length > 0}\npaths=${files.flatMap((f) => (f.from ? [f.from, f.path] : [f.path])).join(',')}\n`;
+  const paths = [
+    ...files.flatMap((f) => (f.from ? [f.from, f.path] : [f.path])),
+    ...pages.map((page) => `test/fixtures/${page}`),
+  ];
+  const outputs = `changed=${files.length > 0}\npaths=${paths.join(',')}\nrisk=${risk.low ? 'low' : 'high'}\nreasons=${risk.reasons.join('; ')}\n`;
   if (values.output) appendFileSync(values.output, outputs);
   else io.out(outputs);
   io.err(

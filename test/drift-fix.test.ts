@@ -8,7 +8,12 @@ import { main } from '../src/bin/mfm.js';
 import { failuresReport, readFailuresReport } from '../src/diff.js';
 import { factionUrl, fetchText, isFetchFailure, LEGENDS_COOKIE } from '../src/fetch.js';
 import { downloadFixtures, FIXTURES, fixturesForFailures } from '../src/fixtures.js';
-import { driftFixGate, type GateInput, runMarker } from '../src/ops/drift-fix.js';
+import {
+  driftFixGate,
+  type GateInput,
+  MAX_RUNS_PER_OUTAGE,
+  runMarker,
+} from '../src/ops/drift-fix.js';
 import type { GitHub } from '../src/ops/github.js';
 
 /**
@@ -285,38 +290,43 @@ describe('driftFixGate', () => {
     expect(comment?.body).toContain(`gh workflow run drift-fix.yml -f run-id=${RUN_ID}`);
   });
 
-  it('runs once per outage: an earlier run recorded on the issue stops the next', async () => {
-    const recorded = [
-      {
-        body: `${runMarker('111')}\nThe drift-fix agent is drafting…`,
-        user: { login: 'github-actions[bot]' },
-      },
-    ];
-    const { gh, comments } = await github({ comments: recorded });
+  const recorded = (...ids: string[]) =>
+    ids.map((id) => ({
+      body: `${runMarker(id)}\nThe drift-fix agent is drafting…`,
+      user: { login: 'github-actions[bot]' },
+    }));
+
+  it(`runs up to ${MAX_RUNS_PER_OUTAGE} times per outage: earlier runs on the issue don't stop the next`, async () => {
+    const { gh, comments } = await github({ comments: recorded('111', '112') });
+    expect(await driftFixGate(gh, input())).toMatchObject({ run: true, issue: 96 });
+    expect(comments()).toHaveLength(1);
+  });
+
+  it(`stops after ${MAX_RUNS_PER_OUTAGE} runs recorded on the issue`, async () => {
+    const { gh, comments } = await github({ comments: recorded('111', '112', '112') });
     const gate = await driftFixGate(gh, input());
     expect(gate).toMatchObject({
       run: false,
-      reason: expect.stringMatching(/\(111\) already ran for #96/),
+      reason: expect.stringMatching(/3 drift-fix runs \(111, 112, 112\) already ran for #96/),
     });
     expect(comments()).toEqual([]);
   });
 
   it("counts only the workflow's own markers, at the start of its comments", async () => {
     const { gh } = await github({
-      comments: [
-        { body: runMarker('111'), user: { login: 'someone' } },
+      comments: ['111', '112', '113'].flatMap((id) => [
+        { body: runMarker(id), user: { login: 'someone' } },
         {
-          body: `The scheduled MFM scrape failed again.\n\n\`\`\`\n${runMarker('112')}\n\`\`\``,
+          body: `The scheduled MFM scrape failed again.\n\n\`\`\`\n${runMarker(id)}\n\`\`\``,
           user: { login: 'github-actions[bot]' },
         },
-      ],
+      ]),
     });
     expect((await driftFixGate(gh, input())).run).toBe(true);
   });
 
   it('lets a manual replay run again for the same outage, and records it', async () => {
-    const recorded = [{ body: runMarker('111'), user: { login: 'github-actions[bot]' } }];
-    const { gh, comments } = await github({ comments: recorded });
+    const { gh, comments } = await github({ comments: recorded('111', '112', '113') });
     expect(await driftFixGate(gh, input({ manual: true }))).toMatchObject({ run: true, issue: 96 });
     expect(comments()).toHaveLength(1);
   });

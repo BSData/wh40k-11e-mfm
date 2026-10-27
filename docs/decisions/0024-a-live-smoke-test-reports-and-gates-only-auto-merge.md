@@ -1,6 +1,6 @@
 # 0024. A live smoke test reports, and gates only Dependabot's merges
 
-- **Status:** accepted, [#91](https://github.com/BSData/wh40k-11e-mfm/pull/91)
+- **Status:** accepted, [#91](https://github.com/BSData/wh40k-11e-mfm/pull/91); revised by [0040](0040-a-drift-fix-merges-itself.md): it gates a drift fix's merge too
 - **Spec:** [change tracking — Live smoke test](../../specs/change-tracking.md#live-smoke-test)
 
 ## Context

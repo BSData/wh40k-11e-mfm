@@ -31,12 +31,12 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0021](0021-names-match-the-official-ones.md) | Names match the official ones | data model |
 | [0022](0022-the-app-key-never-meets-dependency-code.md) | Update PRs are opened with the App's token, in a job that runs no dependency code | change tracking |
 | [0023](0023-a-dry-run-publishes-nothing.md) | A dry run publishes nothing | change tracking |
-| [0024](0024-a-live-smoke-test-reports-and-gates-only-auto-merge.md) | A live smoke test reports, and gates only Dependabot's merges | change tracking |
+| [0024](0024-a-live-smoke-test-reports-and-gates-only-auto-merge.md) | A live smoke test reports, and gates only Dependabot's merges (revised by 0040) | change tracking |
 | [0025](0025-dependabot-minor-and-patch-updates-merge-themselves.md) | Dependabot's minor and patch updates merge themselves | change tracking |
 | [0026](0026-http-only-a-browser-for-tests-and-troubleshooting.md) | Scrape over HTTP only; a browser for tests and troubleshooting | scraping |
 | [0027](0027-flag-what-looks-like-a-misread.md) | Flag what looks like a misread, not just what changed | change tracking |
 | [0028](0028-a-schema-version-and-releases-for-consumers.md) | A schema version, and a release for every data change | data model |
-| [0029](0029-a-failed-scrape-drafts-its-fix.md) | A failed scrape drafts its own fix, with the model's key and the App's key in separate jobs (revised by 0031, 0032) | change tracking |
+| [0029](0029-a-failed-scrape-drafts-its-fix.md) | A failed scrape drafts its own fix, with the model's key and the App's key in separate jobs (revised by 0031, 0032, 0040) | change tracking |
 | [0030](0030-one-short-instruction-file.md) | One short instruction file, for every harness | (AGENTS.md) |
 | [0031](0031-the-drift-fixer-fails-loud-with-fewer-layers.md) | The drift fixer fails loud, with fewer layers (revises 0029) | change tracking |
 | [0032](0032-one-claude-code-pin.md) | One Claude Code pin: the action installs it (revises 0029) | change tracking |
@@ -47,6 +47,7 @@ One file per decision, numbered in the order they were written up: change tracki
 | [0037](0037-a-new-cost-row-is-checked-per-model.md) | A new cost row is checked against its unit, per model | change tracking |
 | [0038](0038-a-rules-change-dates-the-update.md) | A rules change dates the update, beside the factions too (revises 0002, 0015) | change tracking |
 | [0039](0039-a-tier-is-read-only-from-a-tier-label.md) | A tier is read only from a tier label | scraping |
+| [0040](0040-a-drift-fix-merges-itself.md) | A drift fix merges itself once its checks pass (revises 0024, 0029) | change tracking |
 
 ## Writing one
 Copy the shape of an existing record: a title that states the decision, its status and
