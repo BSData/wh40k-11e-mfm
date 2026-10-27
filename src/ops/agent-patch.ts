@@ -1,8 +1,11 @@
 import { spawnSync } from 'node:child_process';
 import {
   appendFileSync,
+  constants,
+  copyFileSync,
   existsSync,
   lstatSync,
+  readdirSync,
   readFileSync,
   realpathSync,
   writeFileSync,
@@ -226,6 +229,17 @@ export const NEEDS_REVIEW = 'Needs review:';
 export const REACH =
   /\b(?:process|globalThis|global|require|eval|Function|constructor|prototype|__proto__|Reflect|Proxy|fetch|WebAssembly|child_process)\b|\bimport\s*\(|['"`]node:|^\s*import\b|^\s*export\b[^;]*\bfrom\b/;
 
+/**
+ * What a `REACH` match names, in fixed words: the reasons go into the PR and the failure
+ * issue, and an `export … from` match holds whatever the model wrote between the two.
+ */
+function word(match: string): string {
+  const text = match.trim();
+  if (text.startsWith('export')) return 'export … from';
+  if (text.endsWith('node:')) return 'node:';
+  return text;
+}
+
 export interface RiskInput {
   files: PatchFile[];
   lines: Map<string, PatchLines>;
@@ -266,7 +280,7 @@ export function assessRisk({ files, lines, meta, notes, pages, freePages }: Risk
     changed += added.length + removed;
     if (!/^(?:src|test)\//.test(f.path)) continue;
     const reach = added.map((line) => REACH.exec(line)?.[0]).find((m) => m !== undefined);
-    if (reach !== undefined) reasons.push(`${f.path} adds a line that reaches out: ${reach}`);
+    if (reach !== undefined) reasons.push(`${f.path} adds a line that reaches out: ${word(reach)}`);
   }
   if (changed > MAX_LOW_RISK_LINES) {
     reasons.push(`it changes ${changed} lines, over ${MAX_LOW_RISK_LINES}`);
@@ -319,6 +333,54 @@ export function applyPatch(dir: string, patchPath: string): PatchFile[] {
     }
   }
   return files;
+}
+
+/** A saved page's name, as `src/fixtures.ts` names one: a faction slug and `.html`. */
+const PAGE_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*\.html$/;
+const fixturePath = (checkout: string, name: string) => join(checkout, 'test', 'fixtures', name);
+const exists = (path: string) => lstatSync(path, { throwIfNoEntry: false }) !== undefined;
+
+/**
+ * The pages of the scrape's `drift` artifact (`driftDir`) a fix may add: regular files
+ * with a page's name, not links, whose name no fixture in `checkout` has. The fixtures
+ * there pin older pages on purpose, so a refreshed one never takes their place (0029).
+ */
+export function freePages(driftDir: string, checkout: string): string[] {
+  if (!existsSync(driftDir)) return [];
+  return readdirSync(driftDir)
+    .filter((name) => PAGE_NAME.test(name))
+    .filter((name) => lstatSync(join(driftDir, name)).isFile())
+    .filter((name) => !exists(fixturePath(checkout, name)))
+    .sort();
+}
+
+/**
+ * Of `names`, the pages the patch's tests read: a line it adds under `test/` holds the
+ * name as a string, as `fixture('orks-legends-cookie.html')` does. A name in a comment
+ * doesn't count: #114's test named the page it copied markup from, and read another.
+ */
+export function pagesNamed(names: string[], lines: Map<string, PatchLines>): string[] {
+  const tests = [...lines]
+    .filter(([path]) => path.startsWith('test/'))
+    .flatMap(([, { added }]) => added);
+  return names.filter((name) => {
+    const read = new RegExp(`(['"\`])${name.replaceAll('.', '\\.')}\\1`);
+    return tests.some((line) => read.test(line));
+  });
+}
+
+/**
+ * Copy `names` from the drift artifact into `checkout`'s `test/fixtures/`, byte for byte:
+ * the scrape saved them, so no fixture in the PR comes from the model. Never over a fixture.
+ */
+export function addPages(driftDir: string, checkout: string, names: string[]): void {
+  for (const name of names) {
+    if (!PAGE_NAME.test(name))
+      throw new PatchRejected(`not a page's name: ${JSON.stringify(name)}`);
+    const to = fixturePath(checkout, name);
+    if (exists(to)) throw new PatchRejected(`test/fixtures/${name} is already a fixture`);
+    copyFileSync(join(driftDir, name), to, constants.COPYFILE_EXCL);
+  }
 }
 
 /** What the agent's job reports about its run. */
@@ -375,6 +437,9 @@ export interface BodyInput {
   scrapeRunUrl: string;
   agentRunUrl: string;
   issue?: number;
+  /** The scrape's pages the PR adds as fixtures. */
+  pages: string[];
+  risk: Risk;
 }
 
 /** GitHub's limit on a PR body, in characters. */
@@ -398,7 +463,7 @@ export function prBody(input: BodyInput): string {
 }
 
 function renderBody(
-  { files, meta, scrapeRunUrl, agentRunUrl, issue }: BodyInput,
+  { files, meta, scrapeRunUrl, agentRunUrl, issue, pages, risk }: BodyInput,
   text: string,
 ): string {
   const describe = (f: PatchFile) =>
@@ -415,7 +480,14 @@ function renderBody(
     `Drafted by the drift-fix agent after a scrape failed: ${scrapeRunUrl}.${issue === undefined ? '' : ` Refs #${issue}.`}`,
     '',
     '> [!CAUTION]',
-    '> A model wrote this from pages of the live site, which are untrusted input. It stays a draft until a maintainer has read every line.',
+    ...(risk.low
+      ? [
+          '> A model wrote this from pages of the live site, which are untrusted input. It passes the rules that code checks (docs/decisions/0040), so it merges itself once CI and the live smoke test pass, without review: read it afterwards.',
+        ]
+      : [
+          '> A model wrote this from pages of the live site, which are untrusted input. It stays a draft until a maintainer has read every line, because:',
+          ...risk.reasons.map((reason) => `> - ${reason}`),
+        ]),
     ...(meta.finished
       ? []
       : [
@@ -425,16 +497,28 @@ function renderBody(
     '',
     '### Files',
     ...files.map((f) => `- ${describe(f)}`),
+    ...pages.map((page) => `- \`test/fixtures/${page}\` (added from the scrape)`),
     '',
     "### The agent's note",
     `${tick}text`,
     text,
     tick,
     '',
-    '### Before it is ready',
-    '- [ ] Read every changed line, snapshots included, against the refreshed page the note names.',
-    "- [ ] Commit that page as the fixture, with an assertion that covers the drift: the agent can't download pages or change `test/fixtures/`. The refreshed pages are in the scrape run's `drift` artifact, or run `pnpm refresh-fixtures --only <name>`.",
-    '- [ ] `pnpm verify`.',
+    ...(risk.low
+      ? [
+          '### After it merges',
+          "- [ ] Read it. What it changes in the data is in the live smoke test's job summary, among this PR's checks, and reaches `data/` only through the next update PR.",
+        ]
+      : [
+          '### Before it is ready',
+          '- [ ] Read every changed line, snapshots included, against the refreshed page the note names.',
+          ...(pages.length > 0
+            ? []
+            : [
+                "- [ ] Commit that page as the fixture, with an assertion that covers the drift: the agent can't download pages or change `test/fixtures/`. The refreshed pages are in the scrape run's `drift` artifact, or run `pnpm refresh-fixtures --only <name>`.",
+              ]),
+          '- [ ] `pnpm verify`.',
+        ]),
     '',
     `<sub>${run.join(' · ')}</sub>`,
     '',
@@ -443,12 +527,15 @@ function renderBody(
 
 const USAGE = `usage: node --experimental-strip-types src/ops/agent-patch.ts <checkout> <patch>
          --scrape-run <id> [--issue <n>] [--notes <file>] [--meta <file>]
-         --body-file <file> [--output <file>]
+         [--drift <dir>] --body-file <file> [--output <file>]
 
-Checks the drift fixer's patch, applies it to <checkout>, and writes the draft PR's body.
-Step outputs: changed=true or false, and paths=<the files, comma-separated>, for
-create-pull-request's add-paths. Exits 1, with the reason, on a patch it rejects.
-Reads GITHUB_SERVER_URL, GITHUB_REPOSITORY and GITHUB_RUN_ID for the links.
+Checks the drift fixer's patch, applies it to <checkout>, adds the pages of the scrape's
+drift artifact (--drift, its fixtures directory) that the patch's tests read, decides the
+fix's risk (docs/decisions/0040), and writes the PR's body. Step outputs: changed=true or
+false; paths=<the files, comma-separated>, for create-pull-request's add-paths;
+risk=low or high; reasons=<the rules a high-risk fix fails, "; "-separated>. Exits 1, with
+the reason, on a patch it rejects. Reads GITHUB_SERVER_URL, GITHUB_REPOSITORY and
+GITHUB_RUN_ID for the links.
 `;
 
 /** Where the command line writes: its result to `out`, notes and errors to `err`. */
@@ -472,6 +559,7 @@ export function main(argv: string[], env: NodeJS.ProcessEnv = process.env, io: I
       issue: { type: 'string' },
       notes: { type: 'string' },
       meta: { type: 'string' },
+      drift: { type: 'string' },
       'body-file': { type: 'string' },
       output: { type: 'string' },
       help: { type: 'boolean' },
@@ -503,20 +591,32 @@ export function main(argv: string[], env: NodeJS.ProcessEnv = process.env, io: I
     file && existsSync(file) ? readFileSync(file, 'utf8') : '';
 
   let files: PatchFile[];
+  let pages: string[] = [];
+  let risk: Risk;
   try {
     const notes = read(values.notes);
     if (looksLikeCredential(notes))
       throw new PatchRejected("the agent's note looks like it holds a credential");
     files = applyPatch(dir, patch);
+    const { lines } = readPatch(readFileSync(patch, 'utf8'));
+    const meta = readMeta(read(values.meta));
+    const free = values.drift ? freePages(values.drift, dir) : [];
+    if (values.drift && files.length > 0) {
+      pages = pagesNamed(free, lines);
+      addPages(values.drift, dir, pages);
+    }
+    risk = assessRisk({ files, lines, meta, notes, pages, freePages: free });
     writeFileSync(
       bodyFile,
       prBody({
         files,
         notes,
-        meta: readMeta(read(values.meta)),
+        meta,
         scrapeRunUrl: `${repoUrl}/actions/runs/${scrapeRun}`,
         agentRunUrl: `${repoUrl}/actions/runs/${GITHUB_RUN_ID}`,
         ...(issue === '' ? {} : { issue: Number(issue) }),
+        pages,
+        risk,
       }),
     );
   } catch (err) {
@@ -524,7 +624,11 @@ export function main(argv: string[], env: NodeJS.ProcessEnv = process.env, io: I
     io.err(`::error title=Patch rejected::${err.message}\n`);
     return 1;
   }
-  const outputs = `changed=${files.length > 0}\npaths=${files.flatMap((f) => (f.from ? [f.from, f.path] : [f.path])).join(',')}\n`;
+  const paths = [
+    ...files.flatMap((f) => (f.from ? [f.from, f.path] : [f.path])),
+    ...pages.map((page) => `test/fixtures/${page}`),
+  ];
+  const outputs = `changed=${files.length > 0}\npaths=${paths.join(',')}\nrisk=${risk.low ? 'low' : 'high'}\nreasons=${risk.reasons.join('; ')}\n`;
   if (values.output) appendFileSync(values.output, outputs);
   else io.out(outputs);
   io.err(

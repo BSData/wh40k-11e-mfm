@@ -5,6 +5,7 @@ import {
   readFileSync,
   renameSync,
   rmSync,
+  symlinkSync,
   unlinkSync,
   writeFileSync,
 } from 'node:fs';
@@ -13,6 +14,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
+  addPages,
   applyPatch,
   assessRisk,
   BODY_LIMIT,
@@ -20,10 +22,13 @@ import {
   cleanNotes,
   disallowed,
   fence,
+  freePages,
   MAX_FILES,
   MAX_PATCH_BYTES,
   main,
+  type PatchLines,
   PatchRejected,
+  pagesNamed,
   prBody,
   type RiskInput,
   readMeta,
@@ -451,6 +456,18 @@ describe('assessRisk — which fixes merge themselves (0040)', () => {
     expect(assess(fix)).toEqual({ low: true, reasons: [] });
   });
 
+  // The reasons go into the PR and the failure issue: nothing the model wrote does.
+  it.each([
+    ["export { a, b as c } from './x.js'; // @someone", 'export … from'],
+    ["  import { a } from 'b';", 'import'],
+    ['const f = "node:fs"; // @x', 'node:'],
+    ['x = process;', 'process'],
+  ])('names what reaches out in fixed words only: %s', (line, word) => {
+    expect(assess(also('src/parse/cards.ts', `${line}\n`)).reasons).toEqual([
+      `src/parse/cards.ts adds a line that reaches out: ${word}`,
+    ]);
+  });
+
   it('finds a fix outside the parser, its tests and the scraping spec high risk', () => {
     const risk = assess((dir) => {
       fix(dir);
@@ -540,6 +557,124 @@ describe('assessRisk — which fixes merge themselves (0040)', () => {
   });
 });
 
+describe("the scrape's pages — the fixtures the PR adds, never the model's", () => {
+  const PAGE = 'orks-legends-cookie.html';
+  /** A drift artifact's fixtures directory holding `pages`. */
+  const drift = (pages: Record<string, string | Buffer>) => {
+    const dir = join(scratch, `drift-${repos++}`);
+    mkdirSync(dir);
+    for (const [name, html] of Object.entries(pages)) writeFileSync(join(dir, name), html);
+    return dir;
+  };
+
+  it('offers only plain pages whose name is free in the checkout', () => {
+    const dir = drift({
+      [PAGE]: '<p>new</p>\n',
+      'necrons.html': '<p>refreshed</p>\n', // repo() has test/fixtures/necrons.html
+      'notes.txt': 'x\n',
+      'Bad Name.html': 'x\n',
+      'a.HTML': 'x\n',
+    });
+    mkdirSync(join(dir, 'folder.html'));
+    try {
+      symlinkSync(join(dir, PAGE), join(dir, 'link.html'));
+    } catch {
+      // Windows without the privilege: the link case just isn't exercised.
+    }
+    expect(freePages(dir, repo())).toEqual([PAGE]);
+    expect(freePages(join(scratch, 'no-such-dir'), repo())).toEqual([]);
+  });
+
+  it('takes the pages an added test line reads by name, and no other', () => {
+    const lines = new Map<string, PatchLines>([
+      [
+        'test/parse.test.ts',
+        {
+          added: [
+            `const html = fixture('${PAGE}');`,
+            // #114's test: it names the page it copied the markup from, and reads another.
+            '// Markup from the refreshed y.html (TAKTIKAL BRIGADE)',
+          ],
+          removed: 0,
+        },
+      ],
+      ['src/parse/cards.ts', { added: ["const page = 'x.html';"], removed: 0 }],
+      ['test/other.test.ts', { added: ["fixture('big-orks-legends-cookie.html');"], removed: 0 }],
+    ]);
+    expect(pagesNamed([PAGE, 'x.html', 'y.html'], lines)).toEqual([PAGE]);
+  });
+
+  it('copies a page byte for byte, and never over a fixture', () => {
+    const bytes = Buffer.from('<p>Kill Kommanda\r\n“Waaagh!”</p>\n', 'utf8');
+    const from = drift({ [PAGE]: bytes, 'necrons.html': '<p>refreshed</p>\n' });
+    const dir = repo();
+    addPages(from, dir, [PAGE]);
+    expect(readFileSync(join(dir, 'test', 'fixtures', PAGE)).equals(bytes)).toBe(true);
+    expect(() => addPages(from, dir, ['necrons.html'])).toThrow(PatchRejected);
+    expect(readFileSync(join(dir, 'test', 'fixtures', 'necrons.html'), 'utf8')).toBe(
+      BASE['test/fixtures/necrons.html'],
+    );
+  });
+
+  describe('on the command line', () => {
+    const fixPatch = (testLine: string) => {
+      const patch = join(scratch, `fix-${repos++}.patch`);
+      writeFileSync(
+        patch,
+        patchOf((dir) => {
+          write(dir, 'src/parse/cards.ts', "const rows = 'li:not(.no-leaders)';\n");
+          write(dir, 'test/parse.test.ts', `it('parses', () => {});\n${testLine}\n`);
+        }),
+      );
+      return patch;
+    };
+    const runMain = (patch: string, extra: string[] = []) => {
+      const dir = repo();
+      const meta = join(scratch, 'meta.json');
+      writeFileSync(meta, '{"finished": true}');
+      const bodyFile = join(scratch, `body-${repos++}.md`);
+      const output = join(scratch, `output-${repos++}`);
+      const args = [dir, patch, '--scrape-run', '1', '--meta', meta, ...extra];
+      const code = main([...args, '--body-file', bodyFile, '--output', output], {}, quiet);
+      return {
+        code,
+        dir,
+        output: readFileSync(output, 'utf8'),
+        body: readFileSync(bodyFile, 'utf8'),
+      };
+    };
+
+    it('adds the page the tests read and finds the fix low risk', () => {
+      const pages = drift({ [PAGE]: '<p>new</p>\n' });
+      const r = runMain(fixPatch(`fixture('${PAGE}');`), ['--drift', pages]);
+      expect(r.code).toBe(0);
+      expect(r.output).toBe(
+        `changed=true\npaths=src/parse/cards.ts,test/parse.test.ts,test/fixtures/${PAGE}\nrisk=low\nreasons=\n`,
+      );
+      expect(readFileSync(join(r.dir, 'test', 'fixtures', PAGE), 'utf8')).toBe('<p>new</p>\n');
+      expect(r.body).toContain('merges itself once CI and the live smoke test pass');
+      expect(r.body).toContain(`- \`test/fixtures/${PAGE}\` (added from the scrape)`);
+    });
+
+    it('finds a fix whose tests read no page high risk, and adds none', () => {
+      const pages = drift({ [PAGE]: '<p>new</p>\n' });
+      const r = runMain(fixPatch('const y = 1;'), ['--drift', pages]);
+      expect(r.code).toBe(0);
+      expect(r.output).toContain('risk=high\nreasons=its tests read no page from the scrape\n');
+      expect(r.output).not.toContain('test/fixtures/');
+      expect(r.body).toContain('> - its tests read no page from the scrape');
+      expect(r.body).toContain('- [ ] Commit that page as the fixture');
+    });
+
+    it('without the drift pages, finds no free page', () => {
+      const r = runMain(fixPatch(`fixture('${PAGE}');`));
+      expect(r.output).toContain(
+        'risk=high\nreasons=every page that shows the drift already has a fixture under its name\n',
+      );
+    });
+  });
+});
+
 describe('the PR body', () => {
   const body = (notes: string, finished = true) =>
     prBody({
@@ -552,6 +687,8 @@ describe('the PR body', () => {
       scrapeRunUrl: 'https://github.com/o/r/actions/runs/1',
       agentRunUrl: 'https://github.com/o/r/actions/runs/2',
       issue: 96,
+      pages: [],
+      risk: { low: false, reasons: ['its tests read no page from the scrape'] },
     });
 
   it('names the runs, the files, the cost, and what is left to do', () => {
@@ -565,6 +702,21 @@ describe('the PR body', () => {
     expect(text).toContain('Agent run: https://github.com/o/r/actions/runs/2 · 17 turns · $1.23');
     expect(text).toContain('- [ ] Commit that page as the fixture');
     expect(text).not.toContain('did not finish');
+  });
+
+  it('asks for no page when one was added from the scrape', () => {
+    const text = prBody({
+      files: [{ path: 'src/parse/cards.ts', change: 'modify' }],
+      notes: 'Fixed.',
+      meta: { finished: true },
+      scrapeRunUrl: 'https://github.com/o/r/actions/runs/1',
+      agentRunUrl: 'https://github.com/o/r/actions/runs/2',
+      pages: ['orks-legends-cookie.html'],
+      risk: { low: false, reasons: ['it changes 200 lines, over 150'] },
+    });
+    expect(text).toContain('> - it changes 200 lines, over 150');
+    expect(text).toContain('- `test/fixtures/orks-legends-cookie.html` (added from the scrape)');
+    expect(text).not.toContain('Commit that page');
   });
 
   it('says so when the agent stopped short', () => {
@@ -593,6 +745,8 @@ describe('the PR body', () => {
         meta: { finished: true },
         scrapeRunUrl: 'https://github.com/o/r/actions/runs/1',
         agentRunUrl: 'https://github.com/o/r/actions/runs/2',
+        pages: [],
+        risk: { low: false, reasons: ['its tests read no page from the scrape'] },
       });
       expect(body.length).toBeLessThanOrEqual(BODY_LIMIT);
       expect(body).toContain('### Before it is ready');
@@ -636,7 +790,10 @@ describe('the command line', () => {
     const env = { GITHUB_REPOSITORY: 'o/r', GITHUB_RUN_ID: '2' };
     const args = [dir, patch, '--scrape-run', '1', '--issue', '96', '--notes', notes];
     expect(main([...args, '--body-file', bodyFile, '--output', output], env, quiet)).toBe(0);
-    expect(readFileSync(output, 'utf8')).toBe('changed=true\npaths=src/parse.ts\n');
+    // src/parse.ts re-exports, so it isn't among the files a low-risk fix may change.
+    expect(readFileSync(output, 'utf8')).toMatch(
+      /^changed=true\npaths=src\/parse\.ts\nrisk=high\nreasons=.*src\/parse\.ts is outside.*\n$/,
+    );
     expect(readFileSync(bodyFile, 'utf8')).toContain('Dropped the footer.');
   });
 
