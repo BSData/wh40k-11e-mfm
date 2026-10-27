@@ -466,7 +466,9 @@ jobs:
             exit 1
           }
           # An empty --match-head-commit pins nothing, and gh would merge whatever the head is.
-          [ -n "$PR" ] && [ -n "$SHA" ] || hold "the PR job handed on no PR or no head to merge"
+          if [ -z "$PR" ] || [ -z "$SHA" ]; then
+            hold "the PR job handed on no PR or no head to merge"
+          fi
           # The smoke test as the smoke workflow ran it: a commit status, or a check run made
           # through the API, carries no workflow's name. Not a forgery any workflow here could
           # make (none may write checks or statuses), and this doesn't depend on that.
