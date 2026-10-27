@@ -75,6 +75,12 @@ const DIFF_HEADER = /^diff --git a\/(\S+) b\/(\S+)$/;
 const HUNK_HEADER = /^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@(?: .*)?$/;
 const INDEX = /^index [0-9a-f]{7,64}\.\.[0-9a-f]{7,64}(?: 100644)?$/;
 
+/** What a patch does to one file's text: the lines it adds, and how many it removes. */
+export interface PatchLines {
+  added: string[];
+  removed: number;
+}
+
 /**
  * Read a patch as `git diff` writes it and list the files it changes, or throw
  * `PatchRejected`. Only regular files (mode 100644), changed in place, added, deleted or
@@ -82,12 +88,18 @@ const INDEX = /^index [0-9a-f]{7,64}\.\.[0-9a-f]{7,64}(?: 100644)?$/;
  * copies, and nothing that looks like a credential.
  */
 export function checkPatch(text: string): PatchFile[] {
+  return readPatch(text).files;
+}
+
+/** `checkPatch`, with each file's added lines and removed-line count, by its path. */
+export function readPatch(text: string): { files: PatchFile[]; lines: Map<string, PatchLines> } {
   const reject = (why: string): never => {
     throw new PatchRejected(why);
   };
   if (Buffer.byteLength(text) > MAX_PATCH_BYTES)
     reject(`the patch is over ${MAX_PATCH_BYTES} bytes`);
-  if (text === '') return [];
+  const changes = new Map<string, PatchLines>();
+  if (text === '') return { files: [], lines: changes };
   if (!text.endsWith('\n')) reject('the patch does not end with a line break');
   const lines = text.slice(0, -1).split('\n');
   const at = (i: number) => `line ${i + 1}`;
@@ -132,6 +144,8 @@ export function checkPatch(text: string): PatchFile[] {
     if (renamed) claim(a, start);
     claim(b, start);
 
+    const change: PatchLines = { added: [], removed: 0 };
+    changes.set(b, change);
     const line = lines[i];
     if (line?.startsWith('--- ')) {
       const old = added ? '/dev/null' : `a/${a}`;
@@ -155,12 +169,15 @@ export function checkPatch(text: string): PatchFile[] {
           if (kind === ' ') {
             oldLeft--;
             newLeft--;
-          } else if (kind === '-') oldLeft--;
-          else if (kind === '+') {
+          } else if (kind === '-') {
+            oldLeft--;
+            change.removed++;
+          } else if (kind === '+') {
             newLeft--;
             if (looksLikeCredential(content ?? '')) {
               reject(`${at(i)}: it adds something that looks like a credential`);
             }
+            change.added.push((content ?? '').slice(1));
           } else if (!content?.startsWith('\\ ')) {
             reject(`${at(i)}: not a line of the hunk`);
           }
@@ -181,7 +198,83 @@ export function checkPatch(text: string): PatchFile[] {
     });
     if (files.length > MAX_FILES) reject(`more than ${MAX_FILES} files`);
   }
-  return files;
+  return { files, lines: changes };
+}
+
+/**
+ * What a low-risk fix may change (0040): the parser, the strings it accepts, the list of
+ * saved pages, the parser's tests, and the scraping spec; a new decision record too. Not a
+ * snapshot: vitest loads a snapshot file with `new Function`, so it is code no word list
+ * vets.
+ */
+export const LOW_RISK_FILES: readonly RegExp[] = [
+  /^src\/parse\/[A-Za-z0-9_-]+\.ts$/,
+  /^src\/allowlists\.ts$/,
+  /^src\/fixtures\.ts$/,
+  /^specs\/scraping\.md$/,
+  /^test\/parse\.test\.ts$/,
+];
+/** The most lines a low-risk fix adds and removes together. */
+export const MAX_LOW_RISK_LINES = 150;
+/** How the agent's note hands its fix to a person: its first line starts with this. */
+export const NEEDS_REVIEW = 'Needs review:';
+/**
+ * An added line that imports, re-exports, or names a way out of the parser: to the
+ * process, the globals, other modules, the network or Node's own modules. A screen for the
+ * plain route, not a sandbox: JavaScript reaches `process` by routes no word list catches.
+ */
+export const REACH =
+  /\b(?:process|globalThis|global|require|eval|Function|constructor|prototype|__proto__|Reflect|Proxy|fetch|WebAssembly|child_process)\b|\bimport\s*\(|['"`]node:|^\s*import\b|^\s*export\b[^;]*\bfrom\b/;
+
+export interface RiskInput {
+  files: PatchFile[];
+  lines: Map<string, PatchLines>;
+  meta: RunMeta;
+  /** The agent's note. */
+  notes: string;
+  /** The scrape's pages the PR adds as fixtures. */
+  pages: string[];
+  /** The scrape's pages whose names were free under `test/fixtures/`. */
+  freePages: string[];
+}
+
+export interface Risk {
+  low: boolean;
+  /** Each rule the fix fails, for the PR and the failure issue; empty when it is low. */
+  reasons: string[];
+}
+
+/** Whether a fix merges itself, by the rules of 0040 that code can check, never a model. */
+export function assessRisk({ files, lines, meta, notes, pages, freePages }: RiskInput): Risk {
+  const reasons: string[] = [];
+  if (!meta.finished) reasons.push('the agent did not finish');
+  if (cleanNotes(notes).startsWith(NEEDS_REVIEW)) reasons.push('the agent asked for review');
+  const lowRisk = (path: string, change: PatchFile['change']) =>
+    LOW_RISK_FILES.some((re) => re.test(path)) ||
+    (change === 'add' && /^docs\/decisions\/[A-Za-z0-9_-]+\.md$/.test(path));
+  for (const f of files) {
+    for (const path of f.from ? [f.from, f.path] : [f.path]) {
+      if (!lowRisk(path, f.change)) {
+        reasons.push(`${path} is outside the parser, its tests and the scraping spec`);
+      }
+    }
+  }
+  if (!files.some((f) => f.path.startsWith('src/'))) reasons.push('it changes nothing under src/');
+  let changed = 0;
+  for (const f of files) {
+    const { added = [], removed = 0 } = lines.get(f.path) ?? {};
+    changed += added.length + removed;
+    if (!/^(?:src|test)\//.test(f.path)) continue;
+    const reach = added.map((line) => REACH.exec(line)?.[0]).find((m) => m !== undefined);
+    if (reach !== undefined) reasons.push(`${f.path} adds a line that reaches out: ${reach}`);
+  }
+  if (changed > MAX_LOW_RISK_LINES) {
+    reasons.push(`it changes ${changed} lines, over ${MAX_LOW_RISK_LINES}`);
+  }
+  if (freePages.length === 0) {
+    reasons.push('every page that shows the drift already has a fixture under its name');
+  } else if (pages.length === 0) reasons.push('its tests read no page from the scrape');
+  return { low: reasons.length === 0, reasons };
 }
 
 /** The paths `git status --porcelain=v1 -z --no-renames` lists. */

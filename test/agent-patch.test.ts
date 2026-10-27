@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
   applyPatch,
+  assessRisk,
   BODY_LIMIT,
   checkPatch,
   cleanNotes,
@@ -24,7 +25,9 @@ import {
   main,
   PatchRejected,
   prBody,
+  type RiskInput,
   readMeta,
+  readPatch,
 } from '../src/ops/agent-patch.js';
 import { expectNodeOnly } from './node-only.js';
 
@@ -389,6 +392,151 @@ describe('applyPatch — the tree changes exactly where the patch says', () => {
     const dir = repo();
     expect(() => applyPatch(dir, patch)).toThrow(PatchRejected);
     expect(run(dir, 'status', '--porcelain')).toBe('');
+  });
+});
+
+describe('readPatch — the lines each file gains and loses', () => {
+  it('collects each file’s added lines and counts its removed ones', () => {
+    const { files, lines } = readPatch(
+      patchOf((dir) => {
+        write(
+          dir,
+          'src/parse.ts',
+          'export const a = 1;\nexport const b = 3;\nexport const c = 4;\n',
+        );
+        write(dir, 'src/parse/cards.ts', 'const x = 1;\n');
+      }),
+    );
+    expect(files.map((f) => f.path)).toEqual(['src/parse.ts', 'src/parse/cards.ts']);
+    expect(lines.get('src/parse.ts')).toEqual({
+      added: ['export const b = 3;', 'export const c = 4;'],
+      removed: 1,
+    });
+    expect(lines.get('src/parse/cards.ts')).toEqual({ added: ['const x = 1;'], removed: 0 });
+  });
+
+  it('lists the same files as checkPatch', () => {
+    const patch = patchOf((dir) => write(dir, 'specs/scraping.md', '# Scraping\n'));
+    expect(readPatch(patch).files).toEqual(checkPatch(patch));
+  });
+});
+
+describe('assessRisk — which fixes merge themselves (0040)', () => {
+  const PAGE = 'orks-legends-cookie.html';
+  /** A fix like #114's: the parser, its test reading the scrape's page, and the spec. */
+  const fix = (dir: string) => {
+    write(dir, 'src/parse/cards.ts', "const rows = 'li:not(.no-leaders)';\n");
+    write(dir, 'test/parse.test.ts', `it('parses', () => {});\nfixture('${PAGE}');\n`);
+    write(dir, 'specs/scraping.md', '# Scraping\n\nA grant is its own row.\n');
+  };
+  /** The fix, and one more file. */
+  const also = (path: string, text: string) => (dir: string) => {
+    fix(dir);
+    write(dir, path, text);
+  };
+  const assess = (edit: (dir: string) => void, input: Partial<RiskInput> = {}) => {
+    const { files, lines } = readPatch(patchOf(edit));
+    return assessRisk({
+      files,
+      lines,
+      meta: { finished: true },
+      notes: 'The site moved the grant into its own row.',
+      pages: [PAGE],
+      freePages: [PAGE],
+      ...input,
+    });
+  };
+
+  it('finds a parser fix with its page and its spec low risk', () => {
+    expect(assess(fix)).toEqual({ low: true, reasons: [] });
+  });
+
+  it('finds a fix outside the parser, its tests and the scraping spec high risk', () => {
+    const risk = assess((dir) => {
+      fix(dir);
+      write(dir, 'src/ops/git.ts', 'const y = 2;\n');
+    });
+    expect(risk).toEqual({
+      low: false,
+      reasons: ['src/ops/git.ts is outside the parser, its tests and the scraping spec'],
+    });
+  });
+
+  it('takes a new decision record, but not a change to an old one', () => {
+    expect(assess(also('docs/decisions/0041-x.md', '# 0041\n')).low).toBe(true);
+    expect(assess(also('docs/decisions/0001-x.md', '# 1\n')).reasons).toEqual([
+      'docs/decisions/0001-x.md is outside the parser, its tests and the scraping spec',
+    ]);
+  });
+
+  it('finds a fix that changes nothing under src/ high risk', () => {
+    expect(
+      assess((dir) => write(dir, 'test/parse.test.ts', `fixture('${PAGE}');\n`)).reasons,
+    ).toEqual(['it changes nothing under src/']);
+  });
+
+  it.each([
+    "import { x } from 'y';",
+    "import 'y';",
+    "export * from './y.js';",
+    'const p = process.env;',
+    'globalThis.x = 1;',
+    "const m = await import('y');",
+    "const f = 'node:fs';",
+    'const c = x.constructor;',
+    "const g = Reflect.get(x, 'y');",
+    "fetch('https://example.com');",
+  ])('finds an added line that reaches out high risk: %s', (line) => {
+    const risk = assess((dir) => {
+      fix(dir);
+      write(dir, 'src/parse/cards.ts', `${line}\n`);
+    });
+    expect(risk.low).toBe(false);
+    expect(risk.reasons).toEqual([
+      expect.stringMatching(/^src\/parse\/cards\.ts adds a line that reaches out: /),
+    ]);
+  });
+
+  it.each(['function deref(node: unknown) {}', '// the page as the scrape fetched it'])(
+    'lets an ordinary parser line through: %s',
+    (line) => {
+      expect(assess(also('src/parse/cards.ts', `${line}\n`)).low).toBe(true);
+    },
+  );
+
+  it('finds a fix over 150 lines high risk', () => {
+    const many = (n: number) =>
+      Array.from({ length: n }, (_, i) => `const v${i} = ${i};\n`).join('');
+    // 147 + the fix's 3 lines is exactly the limit.
+    expect(assess(also('src/parse/cards.ts', many(147))).low).toBe(true);
+    expect(assess(also('src/parse/cards.ts', many(149))).reasons).toEqual([
+      'it changes 152 lines, over 150',
+    ]);
+  });
+
+  // vitest loads a snapshot file with `new Function`: it is code, which no word list vets.
+  it('finds a changed snapshot high risk', () => {
+    expect(
+      assess(also('test/__snapshots__/parse.test.ts.snap', 'exports[`a 1`] = `x`;\n')).reasons,
+    ).toEqual([
+      'test/__snapshots__/parse.test.ts.snap is outside the parser, its tests and the scraping spec',
+    ]);
+  });
+
+  it('finds an unfinished run, or one whose note asks for review, high risk', () => {
+    expect(assess(fix, { meta: { finished: false } }).reasons).toEqual([
+      'the agent did not finish',
+    ]);
+    expect(assess(fix, { notes: 'Needs review: unsure about Orks.\nThe rest.' }).reasons).toEqual([
+      'the agent asked for review',
+    ]);
+  });
+
+  it('finds a fix with no page from the scrape high risk, and says why', () => {
+    expect(assess(fix, { pages: [] }).reasons).toEqual(['its tests read no page from the scrape']);
+    expect(assess(fix, { pages: [], freePages: [] }).reasons).toEqual([
+      'every page that shows the drift already has a fixture under its name',
+    ]);
   });
 });
 
