@@ -689,6 +689,19 @@ describe('change annotations — the "changed since the last MFM" layer', () => 
   });
 });
 
+describe('an enhancement grant as its own list item', () => {
+  it('reads a LEADER: li.no-leaders after its enhancement, not as an enhancement', () => {
+    const faction = parseFaction(fixture('orks-legends-cookie.html'), 'orks', 'Orks');
+    const brigade = faction.detachments.find((d) => d.name === 'Taktikal Brigade');
+    expect(brigade?.enhancements).toContainEqual({
+      name: 'Kill Kommanda',
+      points: 20,
+      leaderTo: ['Kommandos'],
+    });
+    expect(brigade?.enhancements.length).toBeGreaterThan(1);
+  });
+});
+
 describe('loud failures — content the parser cannot read fails, located', () => {
   it.each([
     ['an en dash', '▼ (–10) 65 pts'],

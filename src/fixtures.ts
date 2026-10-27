@@ -46,6 +46,9 @@ export const FIXTURES: Fixture[] = [
   // necrons-legends-cookie (v1.6): fetched with the Legends cookie, as the scrape fetches
   // every page — the Legends server-rendered under a LEGENDS section heading.
   { name: 'necrons-legends-cookie.html', url: factionUrl('necrons'), cookie: LEGENDS_COOKIE },
+  // orks-legends-cookie: an enhancement's LEADER: block as its own `li.no-leaders` in the
+  // list, after the enhancement's `li` (Taktikal Brigade).
+  { name: 'orks-legends-cookie.html', url: factionUrl('orks'), cookie: LEGENDS_COOKIE },
   // necrons-panels-rsc (v1.6): a plain GET, whose RSC payload carries the rules panels
   // that necrons-panels.html shows opened in a browser.
   { name: 'necrons-panels-rsc.html', url: factionUrl('necrons') },
