@@ -63,7 +63,7 @@ jobs:
       reason: ${{ steps.release.outputs.reason }}
     steps:
       # Audit only: records outbound connections and processes, blocks nothing.
-      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
@@ -137,7 +137,7 @@ jobs:
       contents: read
     steps:
       # Audit only, as in every job (see "Workflow integration" in specs/change-tracking.md).
-      - uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
